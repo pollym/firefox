@@ -58,6 +58,8 @@ project(':android-components').projectDir = new File("${gradle.mozconfig.topsrcd
 if (!gradle.mozconfig.substs.MOZ_ANDROID_SUBPROJECT || gradle.mozconfig.substs.MOZ_ANDROID_SUBPROJECT == "fenix") {
     include ':fenix'
     project(':fenix').projectDir = new File("${gradle.mozconfig.topsrcdir}/mobile/android/fenix/app")
+    include ':fenix:sunsetmode'
+    project(':fenix:sunsetmode').projectDir = new File("${gradle.mozconfig.topsrcdir}/mobile/android/fenix/app/sunsetmode")
 }
 if (!gradle.mozconfig.substs.MOZ_ANDROID_SUBPROJECT || gradle.mozconfig.substs.MOZ_ANDROID_SUBPROJECT == "focus") {
     include ':focus-android'

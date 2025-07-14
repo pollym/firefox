@@ -554,7 +554,7 @@ dependencies {
     constraints {
         implementation(libs.jna)
     }
-
+    implementation project(':fenix:sunsetmode')
     implementation project(':components:browser-engine-gecko')
     implementation project(':components:compose-awesomebar')
     implementation project(':components:compose-base')

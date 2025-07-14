@@ -234,6 +234,7 @@ import org.mozilla.fenix.settings.biometric.BiometricPromptFeature
 import org.mozilla.fenix.settings.deletebrowsingdata.deleteAndQuit
 import org.mozilla.fenix.snackbar.FenixSnackbarDelegate
 import org.mozilla.fenix.snackbar.SnackbarBinding
+import org.mozilla.fenix.sunsetmode.SunsetWarningFeature
 import org.mozilla.fenix.tabstray.Page
 import org.mozilla.fenix.tabstray.ext.toDisplayTitle
 import org.mozilla.fenix.telemetry.ACTION_SECURITY_INDICATOR_CLICKED
@@ -508,6 +509,7 @@ abstract class BaseBrowserFragment :
         )
 
         SunsetWarningChecker().checkWarnings()
+        SunsetWarningFeature()
 
         // DO NOT MOVE ANYTHING BELOW THIS addMarker CALL!
         requireComponents.core.engine.profiler?.addMarker(
