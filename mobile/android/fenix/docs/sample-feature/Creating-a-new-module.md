@@ -7,7 +7,8 @@ This doc describes the process for creating a new module.
 
 ## Create a new folder for the module
 This should go under [fenix/app](../../app).
-- If the new module name has spaces, replace them with dashes in the folder name: eg `sample feature` -> `fenix/app/sample-feature`
+
+If the new module name has spaces, replace them with dashes in the folder name: eg `sample feature` -> `fenix/app/sample-feature`
 
 ### Create module subfolders
 The folder structure should look like this:
