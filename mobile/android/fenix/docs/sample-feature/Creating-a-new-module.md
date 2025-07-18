@@ -1,10 +1,12 @@
 # How to create a new empty module in Fenix
 If you are starting work on a new feature in Fenix, it's a good idea to make a new module for it.
+
 Modularisation has many benefits which are [explained here](https://developer.android.com/topic/modularization).
+
 This doc describes the process for creating a new module.
 
 ## Create a new folder for the module
-This should go under `fenix/app`.
+This should go under [fenix/app](../../app).
 - If the new module name has spaces, replace them with dashes in the folder name: eg `sample feature` -> `fenix/app/sample-feature`
 
 ### Create module subfolders
@@ -14,23 +16,27 @@ The folder structure should look like this:
     - [androidTest](empty-module-template/src/androidTest)
     - [main](empty-module-template/src/main)
     - [test](empty-module-template/src/test)
+
 You can copy these folders from the [empty-module-template](empty-module-template) folder.
+
 An empty `AndroidManifest.xml` file is provided, as well as a `build.gradle` file.
 
 ## Add namespace to gradle build file for the new module
-Open the [template empty build file](empty-module-template/build.gradle).
-Change the `samplefeature` namespace to match your new module name. 
+- Open the [template empty build file](empty-module-template/build.gradle).
+- Change the `samplefeature` namespace to match your new module name. 
+
 This is the package name so can't contain dashes or spaces:
-```
+
+```groovy
 android {
     namespace 'org.mozilla.fenix.samplefeature' // <-- Replace with your new module's package name    
-    ...
+    //...
 }
 ```
 
 ## Add the new module into fenix gradle settings
-In fenix's [settings.gradle](../../settings.gradle):
-```
+In fenix's [settings.gradle](../../settings.gradle), find the bit where is says `include ':app'`:
+```groovy
 include ':app'
 include ':app:sample-feature' // <-- Add this line, replacing samplefeature with your new module name 
 include ':mozilla-detekt-rules'
@@ -41,7 +47,8 @@ If you open Android Studio at the root dir of `fenix', you should now be able to
 ## Add the new module into top level gradle settings
 This will allow Android Studio to pick up the new module if you open it at the top level of the monorepo.
 
-In the firefox monorepo top level [settings.gradle](../../../../../settings.gradle), locate the bit where it says `include ":fenix"`.
+In the firefox monorepo top level [settings.gradle](../../../../../settings.gradle), find the bit where it says `include ":fenix"`.
+
 You will need to add in your new module and its `projectDir` here:
 
 ```groovy
