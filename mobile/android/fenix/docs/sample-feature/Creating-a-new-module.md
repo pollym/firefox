@@ -36,7 +36,7 @@ android {
 ```
 
 ## Add the new module into fenix gradle settings
-In fenix's [settings.gradle](../../settings.gradle), find the bit where is says `include ':app'`:
+In fenix's [settings.gradle](../../settings.gradle), find the bit where it says `include ':app'`:
 ```groovy
 include ':app'
 include ':app:sample-feature' // <-- Add this line, replacing samplefeature with your new module name 
