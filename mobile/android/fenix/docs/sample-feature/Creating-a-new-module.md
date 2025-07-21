@@ -5,9 +5,10 @@ Modularisation has many benefits which are [explained here](https://developer.an
 
 This doc describes the process for creating a new module.
 
+![sample module](sample-module.png)
+
 The main app module will depend on the feature module. 
 The feature module exposes some code in a public interface, and the rest is encapsulated privately within it.
-![sample module](sample-module.png)
 
 ## Create a new folder for the module
 This should go under [fenix/app](../../app).
