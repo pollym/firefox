@@ -16,7 +16,7 @@ class ShareActionReducerTest {
 
         appStore.dispatch(
             AppAction.ShareAction.ShareToAppFailed,
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.ShareToAppFailed,
@@ -32,7 +32,7 @@ class ShareActionReducerTest {
 
         appStore.dispatch(
             AppAction.ShareAction.SharedTabsSuccessfully(destination, tabs),
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.SharedTabsSuccessfully(destination, tabs),
@@ -48,7 +48,7 @@ class ShareActionReducerTest {
 
         appStore.dispatch(
             AppAction.ShareAction.ShareTabsFailed(destination, tabs),
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.ShareTabsFailed(destination, tabs),
@@ -62,7 +62,7 @@ class ShareActionReducerTest {
 
         appStore.dispatch(
             AppAction.ShareAction.CopyLinkToClipboard,
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.CopyLinkToClipboard,

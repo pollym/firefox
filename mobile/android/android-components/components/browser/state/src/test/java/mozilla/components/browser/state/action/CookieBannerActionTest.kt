@@ -39,11 +39,11 @@ class CookieBannerActionTest {
         assertEquals(NO_DETECTED, tabState().cookieBanner)
 
         store.dispatch(CookieBannerAction.UpdateStatusAction(tabId = tab.id, status = HANDLED))
-            .joinBlocking()
+            
 
         assertEquals(HANDLED, tabState().cookieBanner)
 
         store.dispatch(CookieBannerAction.UpdateStatusAction(tabId = tab.id, status = DETECTED))
-            .joinBlocking()
+            
     }
 }

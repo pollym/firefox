@@ -29,21 +29,21 @@ class SelectorsKtTest {
 
         store.dispatch(
             CustomTabListAction.AddCustomTabAction(createCustomTab("https://www.mozilla.org")),
-        ).joinBlocking()
+        )
 
         assertNull(store.state.selectedTab)
 
         val tab = createTab("https://www.firefox.com")
-        store.dispatch(TabListAction.AddTabAction(tab, select = true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab, select = true))
 
         assertEquals(tab, store.state.selectedTab)
 
         val otherTab = createTab("https://getpocket.com", lastAccess = tabLastAccessTimeStamp)
-        store.dispatch(TabListAction.AddTabAction(otherTab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(otherTab))
 
         assertEquals(tab, store.state.selectedTab)
 
-        store.dispatch(TabListAction.SelectTabAction(otherTab.id)).joinBlocking()
+        store.dispatch(TabListAction.SelectTabAction(otherTab.id))
 
         assertEquals(otherTab, store.state.selectedTab)
     }
@@ -56,19 +56,19 @@ class SelectorsKtTest {
 
         store.dispatch(
             CustomTabListAction.AddCustomTabAction(createCustomTab("https://www.mozilla.org")),
-        ).joinBlocking()
+        )
 
         assertNull(store.state.selectedNormalTab)
 
         val privateTab = createTab("https://www.firefox.com", private = true)
-        store.dispatch(TabListAction.AddTabAction(privateTab, select = true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(privateTab, select = true))
         assertNull(store.state.selectedNormalTab)
 
         val normalTab = createTab("https://getpocket.com", lastAccess = tabLastAccessTimeStamp)
-        store.dispatch(TabListAction.AddTabAction(normalTab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(normalTab))
         assertNull(store.state.selectedNormalTab)
 
-        store.dispatch(TabListAction.SelectTabAction(normalTab.id)).joinBlocking()
+        store.dispatch(TabListAction.SelectTabAction(normalTab.id))
         assertEquals(normalTab, store.state.selectedNormalTab)
     }
 

@@ -157,7 +157,7 @@ class TabsTrayStoreTest {
 
         assertFalse(tabsTrayStore.state.inactiveTabsExpanded)
 
-        tabsTrayStore.dispatch(TabsTrayAction.UpdateInactiveExpanded(true)).joinBlocking()
+        tabsTrayStore.dispatch(TabsTrayAction.UpdateInactiveExpanded(true))
 
         assertTrue(tabsTrayStore.state.inactiveTabsExpanded)
     }

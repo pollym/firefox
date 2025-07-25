@@ -19,7 +19,7 @@ class DebugDrawerStoreTest {
         val expected = DrawerStatus.Open
         val store = createStore()
 
-        store.dispatch(DebugDrawerAction.DrawerOpened).joinBlocking()
+        store.dispatch(DebugDrawerAction.DrawerOpened)
 
         assertEquals(expected, store.state.drawerStatus)
     }
@@ -31,7 +31,7 @@ class DebugDrawerStoreTest {
             drawerStatus = DrawerStatus.Open,
         )
 
-        store.dispatch(DebugDrawerAction.DrawerClosed).joinBlocking()
+        store.dispatch(DebugDrawerAction.DrawerClosed)
 
         assertEquals(expected, store.state.drawerStatus)
     }

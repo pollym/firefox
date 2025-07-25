@@ -20,7 +20,7 @@ class AppActionTest {
     fun `WHEN UpdateInactiveExpanded is dispatched THEN update inactiveTabsExpanded`() {
         assertFalse(appStore.state.inactiveTabsExpanded)
 
-        appStore.dispatch(AppAction.UpdateInactiveExpanded(true)).joinBlocking()
+        appStore.dispatch(AppAction.UpdateInactiveExpanded(true))
 
         assertTrue(appStore.state.inactiveTabsExpanded)
     }

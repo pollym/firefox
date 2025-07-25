@@ -132,7 +132,7 @@ class TrimMemoryMiddlewareTest {
             SystemAction.LowMemoryAction(
                 level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN,
             ),
-        ).joinBlocking()
+        )
 
         store.waitUntilIdle()
         dispatcher.scheduler.advanceUntilIdle()
@@ -198,7 +198,7 @@ class TrimMemoryMiddlewareTest {
             SystemAction.LowMemoryAction(
                 level = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL,
             ),
-        ).joinBlocking()
+        )
 
         store.waitUntilIdle()
         dispatcher.scheduler.advanceUntilIdle()

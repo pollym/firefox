@@ -74,7 +74,7 @@ class FragmentKtTest {
         assertEquals(0, receivedValue)
 
         // Updating state: Nothing received yet.
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(0, receivedValue)
 
@@ -84,12 +84,12 @@ class FragmentKtTest {
         assertEquals(24, receivedValue)
         latch = CountDownLatch(1)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(25, receivedValue)
         latch = CountDownLatch(1)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
         latch = CountDownLatch(1)
@@ -97,7 +97,7 @@ class FragmentKtTest {
         // View gets detached
         onAttachListener.value.onViewDetachedFromWindow(view)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
     }
@@ -130,31 +130,31 @@ class FragmentKtTest {
         assertEquals(23, receivedValue)
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(24, receivedValue)
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(25, receivedValue)
 
         doReturn(null).`when`(fragment).activity
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(25, receivedValue)
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(25, receivedValue)
 
         doReturn(mock<FragmentActivity>()).`when`(fragment).activity
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(28, receivedValue)
     }
@@ -194,7 +194,7 @@ class FragmentKtTest {
         assertEquals(0, receivedValue)
 
         // Updating state: Nothing received yet.
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(0, receivedValue)
 
@@ -204,12 +204,12 @@ class FragmentKtTest {
         assertEquals(24, receivedValue)
         latch = CountDownLatch(1)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(25, receivedValue)
         latch = CountDownLatch(1)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
         latch = CountDownLatch(1)
@@ -217,7 +217,7 @@ class FragmentKtTest {
         // View gets detached
         onAttachListener.value.onViewDetachedFromWindow(view)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
     }
@@ -255,7 +255,7 @@ class FragmentKtTest {
         assertEquals(0, receivedValue)
 
         // Updating state: Nothing received yet.
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(0, receivedValue)
 
@@ -265,7 +265,7 @@ class FragmentKtTest {
         assertEquals(24, receivedValue)
         latch = CountDownLatch(1)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(25, receivedValue)
         latch = CountDownLatch(1)

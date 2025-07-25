@@ -44,7 +44,7 @@ class LinkingMiddlewareTest {
         )
 
         val engineSession: EngineSession = mock()
-        store.dispatch(EngineAction.LinkEngineSessionAction(tab.id, engineSession)).joinBlocking()
+        store.dispatch(EngineAction.LinkEngineSessionAction(tab.id, engineSession))
 
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -70,7 +70,7 @@ class LinkingMiddlewareTest {
         )
 
         val engineSession: EngineSession = mock()
-        store.dispatch(EngineAction.LinkEngineSessionAction(tab.id, engineSession)).joinBlocking()
+        store.dispatch(EngineAction.LinkEngineSessionAction(tab.id, engineSession))
 
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -96,12 +96,12 @@ class LinkingMiddlewareTest {
         )
 
         val parentEngineSession: EngineSession = mock()
-        store.dispatch(EngineAction.LinkEngineSessionAction(parent.id, parentEngineSession)).joinBlocking()
+        store.dispatch(EngineAction.LinkEngineSessionAction(parent.id, parentEngineSession))
 
         val childEngineSession: EngineSession = mock()
         store.dispatch(
             EngineAction.LinkEngineSessionAction(child.id, childEngineSession, includeParent = true),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -122,10 +122,10 @@ class LinkingMiddlewareTest {
         )
 
         val parentEngineSession: EngineSession = mock()
-        store.dispatch(EngineAction.LinkEngineSessionAction(parent.id, parentEngineSession)).joinBlocking()
+        store.dispatch(EngineAction.LinkEngineSessionAction(parent.id, parentEngineSession))
 
         val childEngineSession: EngineSession = mock()
-        store.dispatch(EngineAction.LinkEngineSessionAction(child.id, childEngineSession)).joinBlocking()
+        store.dispatch(EngineAction.LinkEngineSessionAction(child.id, childEngineSession))
 
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -143,7 +143,7 @@ class LinkingMiddlewareTest {
         )
 
         val engineSession: EngineSession = mock()
-        store.dispatch(EngineAction.LinkEngineSessionAction(tab.id, engineSession, skipLoading = true)).joinBlocking()
+        store.dispatch(EngineAction.LinkEngineSessionAction(tab.id, engineSession, skipLoading = true))
 
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -160,7 +160,7 @@ class LinkingMiddlewareTest {
         )
 
         val engineSession: EngineSession = mock()
-        store.dispatch(EngineAction.LinkEngineSessionAction("invalid", engineSession)).joinBlocking()
+        store.dispatch(EngineAction.LinkEngineSessionAction("invalid", engineSession))
 
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -181,8 +181,8 @@ class LinkingMiddlewareTest {
 
         val engineSession1: EngineSession = mock()
         val engineSession2: EngineSession = mock()
-        store.dispatch(EngineAction.LinkEngineSessionAction(tab1.id, engineSession1)).joinBlocking()
-        store.dispatch(EngineAction.LinkEngineSessionAction(tab2.id, engineSession2)).joinBlocking()
+        store.dispatch(EngineAction.LinkEngineSessionAction(tab1.id, engineSession1))
+        store.dispatch(EngineAction.LinkEngineSessionAction(tab2.id, engineSession2))
         store.waitUntilIdle()
 
         // We only have a session for tab2 so we should only register an observer for tab2
@@ -210,13 +210,13 @@ class LinkingMiddlewareTest {
         )
 
         val engineSession: EngineSession = mock()
-        store.dispatch(EngineAction.LinkEngineSessionAction(tab1.id, engineSession)).joinBlocking()
+        store.dispatch(EngineAction.LinkEngineSessionAction(tab1.id, engineSession))
         store.waitUntilIdle()
         assertNotNull(store.state.findTab(tab1.id)?.engineState?.engineObserver)
         assertNull(store.state.findTab(tab2.id)?.engineState?.engineObserver)
 
-        store.dispatch(EngineAction.UnlinkEngineSessionAction(tab1.id)).joinBlocking()
-        store.dispatch(EngineAction.UnlinkEngineSessionAction(tab2.id)).joinBlocking()
+        store.dispatch(EngineAction.UnlinkEngineSessionAction(tab1.id))
+        store.dispatch(EngineAction.UnlinkEngineSessionAction(tab2.id))
         store.waitUntilIdle()
         assertNull(store.state.findTab(tab1.id)?.engineState?.engineObserver)
         assertNull(store.state.findTab(tab2.id)?.engineState?.engineObserver)
@@ -235,8 +235,8 @@ class LinkingMiddlewareTest {
             middleware = listOf(middleware),
         )
 
-        store.dispatch(TabListAction.AddTabAction(tab1)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(tab2)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab1))
+        store.dispatch(TabListAction.AddTabAction(tab2))
         store.waitUntilIdle()
 
         // We only have a session for tab2 so we should only register an observer for tab2

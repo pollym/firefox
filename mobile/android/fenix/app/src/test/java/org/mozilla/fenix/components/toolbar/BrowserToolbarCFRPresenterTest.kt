@@ -66,7 +66,7 @@ class BrowserToolbarCFRPresenterTest {
                 privateTab.id,
                 EngineSession.CookieBannerHandlingStatus.HANDLED,
             ),
-        ).joinBlocking()
+        )
 
         verify { presenter.showCookieBannersCFR() }
         verify { settings.shouldShowCookieBannersCFR = false }

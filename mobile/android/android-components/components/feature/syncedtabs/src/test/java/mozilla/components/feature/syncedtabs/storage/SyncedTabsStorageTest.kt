@@ -78,7 +78,7 @@ class SyncedTabsStorageTest {
         feature.start()
 
         // This action will change the state due to lastUsed timestamp, but will run the flow.
-        store.dispatch(TabListAction.RemoveAllPrivateTabsAction).joinBlocking()
+        store.dispatch(TabListAction.RemoveAllPrivateTabsAction)
 
         verify(tabsStorage, times(2)).store(
             listOf(
@@ -105,7 +105,7 @@ class SyncedTabsStorageTest {
         )
         feature.start()
         // Run the flow.
-        store.dispatch(TabListAction.RemoveAllPrivateTabsAction).joinBlocking()
+        store.dispatch(TabListAction.RemoveAllPrivateTabsAction)
 
         verify(tabsStorage, times(2)).store(
             listOf(
@@ -116,7 +116,7 @@ class SyncedTabsStorageTest {
 
         feature.stop()
         // Run the flow.
-        store.dispatch(TabListAction.RemoveAllPrivateTabsAction).joinBlocking()
+        store.dispatch(TabListAction.RemoveAllPrivateTabsAction)
 
         verify(tabsStorage, never()).store(listOf()) // any() is not working so we send garbage
     }
@@ -278,7 +278,7 @@ class SyncedTabsStorageTest {
         )
 
         // Change a tab besides loading it
-        store.dispatch(ContentAction.UpdateProgressAction("tab1", 50)).joinBlocking()
+        store.dispatch(ContentAction.UpdateProgressAction("tab1", 50))
 
         reset(tabsStorage)
 
@@ -307,7 +307,7 @@ class SyncedTabsStorageTest {
         )
         feature.start()
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction("tab1", false)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction("tab1", false))
 
         verify(tabsStorage).store(
             listOf(
@@ -338,7 +338,7 @@ class SyncedTabsStorageTest {
         )
         feature.start()
 
-        store.dispatch(TabListAction.SelectTabAction("tab2")).joinBlocking()
+        store.dispatch(TabListAction.SelectTabAction("tab2"))
 
         verify(tabsStorage, times(2)).store(
             listOf(
@@ -370,7 +370,7 @@ class SyncedTabsStorageTest {
         )
         feature.start()
 
-        store.dispatch(LastAccessAction.UpdateLastAccessAction("tab1", 300L)).joinBlocking()
+        store.dispatch(LastAccessAction.UpdateLastAccessAction("tab1", 300L))
 
         verify(tabsStorage, times(1)).store(
             listOf(

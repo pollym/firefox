@@ -52,7 +52,7 @@ class InactiveTabsBindingTest {
             tabsTrayStore = tabsTrayStore,
         )
         binding.start()
-        appStore.dispatch(AppAction.UpdateInactiveExpanded(true)).joinBlocking()
+        appStore.dispatch(AppAction.UpdateInactiveExpanded(true))
 
         verify(tabsTrayStore).dispatch(TabsTrayAction.UpdateInactiveExpanded(true))
     }

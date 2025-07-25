@@ -82,7 +82,7 @@ class PwaOnboardingObserverTest {
         every { settings.lastKnownMode } returns BrowsingMode.Private
         pwaOnboardingObserver.start()
 
-        store.dispatch(ContentAction.UpdateWebAppManifestAction("1", mockk())).joinBlocking()
+        store.dispatch(ContentAction.UpdateWebAppManifestAction("1", mockk()))
         verify(exactly = 0) { settings.incrementVisitedInstallableCount() }
         verify(exactly = 0) { pwaOnboardingObserver.navigateToPwaOnboarding() }
     }
@@ -95,7 +95,7 @@ class PwaOnboardingObserverTest {
         every { settings.lastKnownMode } returns BrowsingMode.Normal
         pwaOnboardingObserver.start()
 
-        store.dispatch(ContentAction.UpdateWebAppManifestAction("1", mockk())).joinBlocking()
+        store.dispatch(ContentAction.UpdateWebAppManifestAction("1", mockk()))
         verify { settings.incrementVisitedInstallableCount() }
         verify(exactly = 0) { pwaOnboardingObserver.navigateToPwaOnboarding() }
     }
@@ -108,7 +108,7 @@ class PwaOnboardingObserverTest {
         every { settings.lastKnownMode } returns BrowsingMode.Normal
         pwaOnboardingObserver.start()
 
-        store.dispatch(ContentAction.UpdateWebAppManifestAction("1", mockk())).joinBlocking()
+        store.dispatch(ContentAction.UpdateWebAppManifestAction("1", mockk()))
         verify { settings.incrementVisitedInstallableCount() }
         verify { pwaOnboardingObserver.navigateToPwaOnboarding() }
     }
@@ -120,7 +120,7 @@ class PwaOnboardingObserverTest {
         every { settings.shouldShowPwaCfr } returns true
         pwaOnboardingObserver.start()
 
-        store.dispatch(ContentAction.UpdateWebAppManifestAction("1", mockk())).joinBlocking()
+        store.dispatch(ContentAction.UpdateWebAppManifestAction("1", mockk()))
         verify(exactly = 0) { settings.incrementVisitedInstallableCount() }
         verify(exactly = 0) { pwaOnboardingObserver.navigateToPwaOnboarding() }
     }

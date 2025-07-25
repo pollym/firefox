@@ -35,12 +35,12 @@ class ChangeDetectionMiddlewareTest {
             listOf(middleware),
         )
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(capturedAction is TestAction.IncrementAction)
         assertEquals(0, preCount)
         assertEquals(1, postCount)
 
-        store.dispatch(TestAction.DecrementAction).joinBlocking()
+        store.dispatch(TestAction.DecrementAction)
         assertTrue(capturedAction is TestAction.DecrementAction)
         assertEquals(1, preCount)
         assertEquals(0, postCount)
@@ -66,12 +66,12 @@ class ChangeDetectionMiddlewareTest {
             listOf(middleware),
         )
 
-        store.dispatch(TestAction.SetEnabled(true)).joinBlocking()
+        store.dispatch(TestAction.SetEnabled(true))
         assertTrue(capturedAction is TestAction.SetEnabled)
         assertEquals(false, preState[1])
         assertEquals(true, postState[1])
 
-        store.dispatch(TestAction.SetEnabled(false)).joinBlocking()
+        store.dispatch(TestAction.SetEnabled(false))
         assertTrue(capturedAction is TestAction.SetEnabled)
         assertEquals(true, preState[1])
         assertEquals(false, postState[1])

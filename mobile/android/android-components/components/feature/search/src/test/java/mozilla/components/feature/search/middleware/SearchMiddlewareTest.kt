@@ -77,7 +77,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("US", "US"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -108,7 +108,7 @@ class SearchMiddlewareTest {
                 RegionState("US", "US"),
                 "test",
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -138,7 +138,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("AN", "AN"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -176,7 +176,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("CA", "CA"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -214,7 +214,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("CY", "CY"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -252,7 +252,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("FY", "NL"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -290,7 +290,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("EN", "AU"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -328,7 +328,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("EN", "GB"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -367,7 +367,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("EN", "IE"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -406,7 +406,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("FR", "BE"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -445,7 +445,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("FR", "CA"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -483,7 +483,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("FR", "FR"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -522,7 +522,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("DE", "AT"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -562,7 +562,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("DE", "DE"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -602,7 +602,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("DSB", "DE"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -640,7 +640,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("HSB", "DE"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -678,7 +678,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("ES", "ES"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -716,7 +716,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("it", "IT"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -754,7 +754,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("lij", "ZE"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -792,7 +792,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("sv", "SE"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -831,7 +831,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("pl", "PL"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -868,7 +868,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("RU", "RU"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -900,7 +900,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("US", "US"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -948,7 +948,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("US", "US"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -1000,7 +1000,7 @@ class SearchMiddlewareTest {
 
         store.dispatch(
             SearchAction.SetRegionAction(RegionState.Default),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -1026,7 +1026,7 @@ class SearchMiddlewareTest {
 
         store.dispatch(
             SearchAction.SetRegionAction(RegionState.Default),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -1052,13 +1052,13 @@ class SearchMiddlewareTest {
 
             store.dispatch(
                 SearchAction.SetRegionAction(RegionState.Default),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
             assertNull(store.state.search.userSelectedSearchEngineId)
 
-            store.dispatch(SearchAction.SelectSearchEngineAction(id, null)).joinBlocking()
+            store.dispatch(SearchAction.SelectSearchEngineAction(id, null))
 
             wait(store, dispatcher)
 
@@ -1079,7 +1079,7 @@ class SearchMiddlewareTest {
 
             store.dispatch(
                 SearchAction.SetRegionAction(RegionState.Default),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1107,7 +1107,7 @@ class SearchMiddlewareTest {
 
             store.dispatch(
                 SearchAction.SetRegionAction(RegionState.Default),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1133,7 +1133,7 @@ class SearchMiddlewareTest {
 
             store.dispatch(
                 SearchAction.AddAdditionalSearchEngineAction("youtube"),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1162,7 +1162,7 @@ class SearchMiddlewareTest {
 
             store.dispatch(
                 SearchAction.SetRegionAction(RegionState.Default),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1188,7 +1188,7 @@ class SearchMiddlewareTest {
                 SearchAction.RemoveAdditionalSearchEngineAction(
                     "youtube",
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1219,7 +1219,7 @@ class SearchMiddlewareTest {
 
             store.dispatch(
                 SearchAction.SetRegionAction(RegionState.Default),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1263,7 +1263,7 @@ class SearchMiddlewareTest {
 
             store.dispatch(
                 SearchAction.SetRegionAction(RegionState.Default),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1274,7 +1274,7 @@ class SearchMiddlewareTest {
             // Add a custom search engine
 
             val engine1 = SearchEngine("test-id-1", "test engine one", mock(), type = SearchEngine.Type.CUSTOM)
-            store.dispatch(SearchAction.UpdateCustomSearchEngineAction(engine1)).joinBlocking()
+            store.dispatch(SearchAction.UpdateCustomSearchEngineAction(engine1))
 
             wait(store, dispatcher)
 
@@ -1286,7 +1286,7 @@ class SearchMiddlewareTest {
             // Add another custom search engine
 
             val engine2 = SearchEngine("test-id-2", "test engine two", mock(), type = SearchEngine.Type.CUSTOM)
-            store.dispatch(SearchAction.UpdateCustomSearchEngineAction(engine2)).joinBlocking()
+            store.dispatch(SearchAction.UpdateCustomSearchEngineAction(engine2))
 
             wait(store, dispatcher)
 
@@ -1303,7 +1303,7 @@ class SearchMiddlewareTest {
             val updated = engine1.copy(
                 name = "updated engine",
             )
-            store.dispatch(SearchAction.UpdateCustomSearchEngineAction(updated)).joinBlocking()
+            store.dispatch(SearchAction.UpdateCustomSearchEngineAction(updated))
 
             wait(store, dispatcher)
 
@@ -1317,7 +1317,7 @@ class SearchMiddlewareTest {
 
             // Remove second engine
 
-            store.dispatch(SearchAction.RemoveCustomSearchEngineAction(engine2.id)).joinBlocking()
+            store.dispatch(SearchAction.RemoveCustomSearchEngineAction(engine2.id))
 
             wait(store, dispatcher)
 
@@ -1368,7 +1368,7 @@ class SearchMiddlewareTest {
                 "bing",
                 false,
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -1380,7 +1380,7 @@ class SearchMiddlewareTest {
                 "bing",
                 true,
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -1403,7 +1403,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("US", "US"),
             ),
-        ).joinBlocking()
+        )
         wait(store, dispatcher)
 
         val google = store.state.search.regionSearchEngines.find { searchEngine -> searchEngine.name == "Google" }
@@ -1411,7 +1411,7 @@ class SearchMiddlewareTest {
         assertEquals(0, store.state.search.hiddenSearchEngines.size)
         assertEquals(0, metadataStorage.getHiddenSearchEngines().size)
 
-        store.dispatch(SearchAction.HideSearchEngineAction(google.id)).joinBlocking()
+        store.dispatch(SearchAction.HideSearchEngineAction(google.id))
         wait(store, dispatcher)
 
         assertNull(store.state.search.regionSearchEngines.find { it.id == google.id })
@@ -1421,7 +1421,7 @@ class SearchMiddlewareTest {
         assertNotNull(store.state.search.hiddenSearchEngines.find { it.id == google.id })
         assertNotNull(metadataStorage.getHiddenSearchEngines().find { it == google.id })
 
-        store.dispatch(SearchAction.RestoreHiddenSearchEnginesAction).joinBlocking()
+        store.dispatch(SearchAction.RestoreHiddenSearchEnginesAction)
         wait(store, dispatcher)
 
         assertNotNull(store.state.search.regionSearchEngines.find { it.id == google.id })
@@ -1446,7 +1446,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(
                     RegionState("US", "US"),
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1461,7 +1461,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(
                     RegionState("US", "US"),
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1470,7 +1470,7 @@ class SearchMiddlewareTest {
 
             store.dispatch(
                 SearchAction.HideSearchEngineAction(google.id),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1486,7 +1486,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(
                     RegionState("US", "US"),
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1496,7 +1496,7 @@ class SearchMiddlewareTest {
 
             store.dispatch(
                 SearchAction.ShowSearchEngineAction(google.id),
-            ).joinBlocking()
+            )
 
             assertNotNull(store.state.search.regionSearchEngines.find { it.id == google.id })
             assertEquals(0, store.state.search.hiddenSearchEngines.size)
@@ -1509,7 +1509,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(
                     RegionState("US", "US"),
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1534,7 +1534,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(
                     RegionState("US", "US"),
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1547,7 +1547,7 @@ class SearchMiddlewareTest {
                     searchEngineId = "google-b-1-m",
                     searchEngineName = "Google",
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1567,7 +1567,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(
                     RegionState("DE", "DE"),
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1597,7 +1597,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(
                     RegionState("US", "US"),
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1615,7 +1615,7 @@ class SearchMiddlewareTest {
                         ),
                     ),
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1629,7 +1629,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(
                     RegionState("US", "US"),
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1668,7 +1668,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(
                     RegionState("US", "US"),
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1695,7 +1695,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(
                     RegionState("US", "US"),
                 ),
-            ).joinBlocking()
+            )
 
             wait(store, dispatcher)
 
@@ -1727,7 +1727,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("US", "US"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 
@@ -1749,13 +1749,13 @@ class SearchMiddlewareTest {
             SearchAction.HideSearchEngineAction(
                 "google-b-1-m",
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             SearchAction.HideSearchEngineAction(
                 "ddg",
             ),
-        ).joinBlocking()
+        )
 
         // ///////////////////////////////////////////////////////////////////////////////////////////
         // Verify after hiding search engines
@@ -1773,11 +1773,11 @@ class SearchMiddlewareTest {
 
         store.dispatch(
             SearchAction.ShowSearchEngineAction("google-b-1-m"),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             SearchAction.ShowSearchEngineAction("ddg"),
-        ).joinBlocking()
+        )
 
         // ///////////////////////////////////////////////////////////////////////////////////////////
         // Verify state after adding search engines back
@@ -1813,7 +1813,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(
                 RegionState("JA", "JA"),
             ),
-        ).joinBlocking()
+        )
 
         wait(store, dispatcher)
 

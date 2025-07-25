@@ -73,15 +73,15 @@ class AbstractBindingTest {
             }
         }
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
 
         binding.start()
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
 
         binding.stop()
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
     }
 }
 

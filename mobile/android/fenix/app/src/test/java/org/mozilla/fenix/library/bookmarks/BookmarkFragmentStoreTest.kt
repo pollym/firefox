@@ -22,7 +22,7 @@ class BookmarkFragmentStoreTest {
 
         assertEquals(store.state, BookmarkFragmentState(null, BookmarkFragmentState.Mode.Normal()))
 
-        store.dispatch(BookmarkFragmentAction.Change(tree)).join()
+        store.dispatch(BookmarkFragmentAction.Change(tree))
 
         assertEquals(store.state.tree, tree)
         assertEquals(store.state.mode, initialState.mode)
@@ -35,7 +35,7 @@ class BookmarkFragmentStoreTest {
 
         assertEquals(store.state, BookmarkFragmentState(tree, BookmarkFragmentState.Mode.Normal()))
 
-        store.dispatch(BookmarkFragmentAction.Change(newTree)).join()
+        store.dispatch(BookmarkFragmentAction.Change(newTree))
 
         assertEquals(store.state.tree, newTree)
         assertEquals(store.state.mode, initialState.mode)
@@ -46,8 +46,8 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(null)
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.Change(tree)).join()
-        store.dispatch(BookmarkFragmentAction.Change(subfolder)).join()
+        store.dispatch(BookmarkFragmentAction.Change(tree))
+        store.dispatch(BookmarkFragmentAction.Change(subfolder))
 
         assertEquals(listOf(tree.guid, subfolder.guid), store.state.guidBackstack)
     }
@@ -60,7 +60,7 @@ class BookmarkFragmentStoreTest {
         )
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.Change(tree)).join()
+        store.dispatch(BookmarkFragmentAction.Change(tree))
 
         assertEquals(listOf(tree.guid), store.state.guidBackstack)
     }
@@ -72,7 +72,7 @@ class BookmarkFragmentStoreTest {
 
         assertEquals(store.state, BookmarkFragmentState(tree, BookmarkFragmentState.Mode.Normal()))
 
-        store.dispatch(BookmarkFragmentAction.Change(tree)).join()
+        store.dispatch(BookmarkFragmentAction.Change(tree))
 
         assertEquals(store.state.tree, initialState.tree)
         assertEquals(store.state.mode, initialState.mode)
@@ -83,7 +83,7 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(tree, BookmarkFragmentState.Mode.Selecting(setOf(item, subfolder)))
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.Change(newTree)).join()
+        store.dispatch(BookmarkFragmentAction.Change(newTree))
 
         assertEquals(store.state.tree, newTree)
         assertEquals(store.state.mode, BookmarkFragmentState.Mode.Selecting(setOf(subfolder)))
@@ -94,11 +94,11 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(tree)
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.Select(childItem)).join()
+        store.dispatch(BookmarkFragmentAction.Select(childItem))
 
         assertEquals(store.state, BookmarkFragmentState(tree, BookmarkFragmentState.Mode.Selecting(setOf(childItem))))
 
-        store.dispatch(BookmarkFragmentAction.Deselect(childItem)).join()
+        store.dispatch(BookmarkFragmentAction.Deselect(childItem))
 
         assertEquals(store.state, BookmarkFragmentState(tree, BookmarkFragmentState.Mode.Normal()))
     }
@@ -108,7 +108,7 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(tree, BookmarkFragmentState.Mode.Selecting(setOf(item, subfolder)))
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.Select(item)).join()
+        store.dispatch(BookmarkFragmentAction.Select(item))
 
         assertSame(initialState, store.state)
     }
@@ -118,7 +118,7 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(tree, BookmarkFragmentState.Mode.Selecting(setOf(childItem)))
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.Deselect(item)).join()
+        store.dispatch(BookmarkFragmentAction.Deselect(item))
 
         assertSame(initialState, store.state)
     }
@@ -128,7 +128,7 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(tree, BookmarkFragmentState.Mode.Normal())
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.Deselect(item)).join()
+        store.dispatch(BookmarkFragmentAction.Deselect(item))
 
         assertSame(initialState, store.state)
     }
@@ -138,7 +138,7 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(tree, BookmarkFragmentState.Mode.Selecting(setOf(item, childItem)))
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.DeselectAll).join()
+        store.dispatch(BookmarkFragmentAction.DeselectAll)
 
         assertEquals(store.state, initialState.copy(mode = BookmarkFragmentState.Mode.Normal()))
     }
@@ -158,7 +158,7 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(tree, BookmarkFragmentState.Mode.Selecting(setOf(item, childItem)))
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.Change(newTree)).join()
+        store.dispatch(BookmarkFragmentAction.Change(newTree))
 
         store.state.run {
             assertEquals(tree, newTree)
@@ -171,13 +171,13 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(tree, isLoading = true)
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.Select(newTree)).join()
+        store.dispatch(BookmarkFragmentAction.Select(newTree))
         assertTrue(store.state.isLoading)
 
-        store.dispatch(BookmarkFragmentAction.Deselect(newTree)).join()
+        store.dispatch(BookmarkFragmentAction.Deselect(newTree))
         assertTrue(store.state.isLoading)
 
-        store.dispatch(BookmarkFragmentAction.DeselectAll).join()
+        store.dispatch(BookmarkFragmentAction.DeselectAll)
         assertTrue(store.state.isLoading)
     }
 
@@ -186,7 +186,7 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(tree, isLoading = true)
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.Change(newTree)).join()
+        store.dispatch(BookmarkFragmentAction.Change(newTree))
         assertFalse(store.state.isLoading)
     }
 
@@ -195,7 +195,7 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(tree)
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.Change(rootFolder)).join()
+        store.dispatch(BookmarkFragmentAction.Change(rootFolder))
 
         assertEquals(store.state.tree, rootFolder)
         assertEquals(store.state.mode, BookmarkFragmentState.Mode.Normal(false))
@@ -206,11 +206,11 @@ class BookmarkFragmentStoreTest {
         val initialState = BookmarkFragmentState(tree)
         val store = BookmarkFragmentStore(initialState)
 
-        store.dispatch(BookmarkFragmentAction.StartSync).join()
+        store.dispatch(BookmarkFragmentAction.StartSync)
         store.dispatch(BookmarkFragmentAction.Change(childItem))
         assertEquals(BookmarkFragmentState.Mode.Syncing, store.state.mode)
 
-        store.dispatch(BookmarkFragmentAction.DeselectAll).join()
+        store.dispatch(BookmarkFragmentAction.DeselectAll)
         assertEquals(BookmarkFragmentState.Mode.Syncing, store.state.mode)
     }
 

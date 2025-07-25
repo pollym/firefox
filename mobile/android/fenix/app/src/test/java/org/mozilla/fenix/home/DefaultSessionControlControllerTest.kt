@@ -229,9 +229,9 @@ class DefaultSessionControlControllerTest {
 
         val restoredTab = createTab(id = recoverableTab.state.id, url = recoverableTab.state.url)
         val otherTab = createTab(id = "otherTab", url = "https://mozilla.org")
-        store.dispatch(TabListAction.AddTabAction(otherTab)).joinBlocking()
-        store.dispatch(TabListAction.SelectTabAction(otherTab.id)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(restoredTab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(otherTab))
+        store.dispatch(TabListAction.SelectTabAction(otherTab.id))
+        store.dispatch(TabListAction.AddTabAction(restoredTab))
 
         createController().handleCollectionOpenTabClicked(tab)
 
@@ -266,7 +266,7 @@ class DefaultSessionControlControllerTest {
         }
 
         val restoredTab = createTab(id = recoverableTab.state.id, url = recoverableTab.state.url)
-        store.dispatch(TabListAction.AddTabAction(restoredTab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(restoredTab))
 
         createController().handleCollectionOpenTabClicked(tab)
 
@@ -661,7 +661,7 @@ class DefaultSessionControlControllerTest {
 
         every { controller.getAvailableSearchEngines() } returns listOf(searchEngine)
 
-        store.dispatch(SearchAction.SetRegionAction(RegionState("US", "US"))).joinBlocking()
+        store.dispatch(SearchAction.SetRegionAction(RegionState("US", "US")))
 
         controller.handleSelectTopSite(topSite, position = 0)
 
@@ -699,7 +699,7 @@ class DefaultSessionControlControllerTest {
 
         every { controller.getAvailableSearchEngines() } returns listOf(searchEngine)
 
-        store.dispatch(SearchAction.SetRegionAction(RegionState("DE", "FR"))).joinBlocking()
+        store.dispatch(SearchAction.SetRegionAction(RegionState("DE", "FR")))
 
         controller.handleSelectTopSite(topSite, position = 0)
 
@@ -786,7 +786,7 @@ class DefaultSessionControlControllerTest {
 
         every { controller.getAvailableSearchEngines() } returns listOf(searchEngine)
 
-        store.dispatch(SearchAction.SetRegionAction(RegionState("US", "US"))).joinBlocking()
+        store.dispatch(SearchAction.SetRegionAction(RegionState("US", "US")))
 
         controller.handleSelectTopSite(topSite, position = 0)
 
@@ -824,7 +824,7 @@ class DefaultSessionControlControllerTest {
 
         every { controller.getAvailableSearchEngines() } returns listOf(searchEngine)
 
-        store.dispatch(SearchAction.SetRegionAction(RegionState("DE", "FR"))).joinBlocking()
+        store.dispatch(SearchAction.SetRegionAction(RegionState("DE", "FR")))
 
         controller.handleSelectTopSite(topSite, position = 0)
 
@@ -862,7 +862,7 @@ class DefaultSessionControlControllerTest {
 
         every { controller.getAvailableSearchEngines() } returns listOf(searchEngine)
 
-        store.dispatch(SearchAction.SetRegionAction(RegionState("US", "US"))).joinBlocking()
+        store.dispatch(SearchAction.SetRegionAction(RegionState("US", "US")))
 
         controller.handleSelectTopSite(topSite, position = 0)
 
@@ -900,7 +900,7 @@ class DefaultSessionControlControllerTest {
 
         every { controller.getAvailableSearchEngines() } returns listOf(searchEngine)
 
-        store.dispatch(SearchAction.SetRegionAction(RegionState("DE", "FR"))).joinBlocking()
+        store.dispatch(SearchAction.SetRegionAction(RegionState("DE", "FR")))
 
         controller.handleSelectTopSite(topSite, position = 0)
 

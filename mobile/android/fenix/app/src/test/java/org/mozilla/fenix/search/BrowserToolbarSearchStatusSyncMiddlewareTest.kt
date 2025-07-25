@@ -61,12 +61,12 @@ class BrowserToolbarSearchStatusSyncMiddlewareTest {
         assertFalse(appStore.state.searchState.isSearchActive)
         assertFalse(toolbarStore.state.isEditMode())
 
-        appStore.dispatch(SearchStarted()).joinBlocking()
+        appStore.dispatch(SearchStarted())
         shadowOf(getMainLooper()).idle()
         assertTrue(appStore.state.searchState.isSearchActive)
         assertTrue(toolbarStore.state.isEditMode())
 
-        toolbarStore.dispatch(ToggleEditMode(false)).joinBlocking()
+        toolbarStore.dispatch(ToggleEditMode(false))
         appStore.waitUntilIdle()
         shadowOf(getMainLooper()).idle()
         assertFalse(appStore.state.searchState.isSearchActive)
@@ -80,7 +80,7 @@ class BrowserToolbarSearchStatusSyncMiddlewareTest {
         assertFalse(toolbarStore.state.isEditMode())
         assertFalse(appStore.state.searchState.isSearchActive)
 
-        toolbarStore.dispatch(ToggleEditMode(true)).joinBlocking()
+        toolbarStore.dispatch(ToggleEditMode(true))
         shadowOf(getMainLooper()).idle()
 
         assertFalse(appStore.state.searchState.isSearchActive)
@@ -91,7 +91,7 @@ class BrowserToolbarSearchStatusSyncMiddlewareTest {
         Dispatchers.setMain(Handler(Looper.getMainLooper()).asCoroutineDispatcher())
         val (_, toolbarStore) = buildMiddlewareAndAddToSearchStore()
 
-        appStore.dispatch(SearchStarted()).joinBlocking()
+        appStore.dispatch(SearchStarted())
         shadowOf(getMainLooper()).idle()
 
         assertTrue(toolbarStore.state.isEditMode())
@@ -103,12 +103,12 @@ class BrowserToolbarSearchStatusSyncMiddlewareTest {
         Dispatchers.setMain(Handler(Looper.getMainLooper()).asCoroutineDispatcher())
 
         val (_, toolbarStore) = buildMiddlewareAndAddToSearchStore()
-        appStore.dispatch(SearchStarted()).joinBlocking()
+        appStore.dispatch(SearchStarted())
         shadowOf(getMainLooper()).idle()
         assertTrue(toolbarStore.state.isEditMode())
         assertTrue(appStore.state.searchState.isSearchActive)
 
-        appStore.dispatch(SearchEnded).joinBlocking()
+        appStore.dispatch(SearchEnded)
         shadowOf(getMainLooper()).idle()
         assertFalse(appStore.state.searchState.isSearchActive)
         assertFalse(toolbarStore.state.isEditMode())

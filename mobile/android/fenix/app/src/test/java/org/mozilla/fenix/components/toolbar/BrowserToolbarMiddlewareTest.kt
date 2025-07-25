@@ -337,7 +337,7 @@ class BrowserToolbarMiddlewareTest {
         )
         assertEqualsOrigin(pageOrigin, toolbarStore.state.displayState.pageOrigin)
 
-        browserStore.dispatch(UpdateUrlAction(sessionId = tab.id, url = ABOUT_HOME)).joinBlocking()
+        browserStore.dispatch(UpdateUrlAction(sessionId = tab.id, url = ABOUT_HOME))
         testScheduler.advanceUntilIdle()
 
         assertEqualsOrigin(
@@ -363,7 +363,7 @@ class BrowserToolbarMiddlewareTest {
         var toolbarBrowserActions = toolbarStore.state.displayState.browserActionsEnd
         assertEquals(3, toolbarBrowserActions.size)
 
-        appStore.dispatch(AppAction.OrientationChange(Landscape)).joinBlocking()
+        appStore.dispatch(AppAction.OrientationChange(Landscape))
         testScheduler.advanceUntilIdle()
 
         toolbarBrowserActions = toolbarStore.state.displayState.browserActionsEnd
@@ -399,7 +399,7 @@ class BrowserToolbarMiddlewareTest {
         assertEquals(expectedMenuButton, menuButton)
 
         // In portrait the navigation bar is displayed
-        appStore.dispatch(AppAction.OrientationChange(Portrait)).joinBlocking()
+        appStore.dispatch(AppAction.OrientationChange(Portrait))
         testScheduler.advanceUntilIdle()
 
         toolbarBrowserActions = toolbarStore.state.displayState.browserActionsEnd
@@ -425,8 +425,8 @@ class BrowserToolbarMiddlewareTest {
 
         val newNormalTab = createTab("test.com", private = false)
         val newPrivateTab = createTab("test.com", private = true)
-        browserStore.dispatch(AddTabAction(newNormalTab)).joinBlocking()
-        browserStore.dispatch(AddTabAction(newPrivateTab)).joinBlocking()
+        browserStore.dispatch(AddTabAction(newNormalTab))
+        browserStore.dispatch(AddTabAction(newPrivateTab))
         shadowOf(Looper.getMainLooper()).idle() // wait for observing and processing the search engine update
         testScheduler.advanceUntilIdle()
 
@@ -458,7 +458,7 @@ class BrowserToolbarMiddlewareTest {
         var tabCounterButton = toolbarBrowserActions[1] as TabCounterAction
         assertEqualsTabCounterButton(expectedTabCounterButton(1, true), tabCounterButton)
 
-        browserStore.dispatch(RemoveTabAction(initialPrivateTab.id)).joinBlocking()
+        browserStore.dispatch(RemoveTabAction(initialPrivateTab.id))
         testScheduler.advanceUntilIdle()
 
         toolbarBrowserActions = toolbarStore.state.displayState.browserActionsEnd
@@ -1103,7 +1103,7 @@ class BrowserToolbarMiddlewareTest {
         }
         testScheduler.advanceUntilIdle()
 
-        browserStore.dispatch(UpdateProgressAction(currentTab.id, 50)).joinBlocking()
+        browserStore.dispatch(UpdateProgressAction(currentTab.id, 50))
         testScheduler.advanceUntilIdle()
 
         assertEquals(
@@ -1136,7 +1136,7 @@ class BrowserToolbarMiddlewareTest {
         }
         testScheduler.advanceUntilIdle()
 
-        browserStore.dispatch(UpdateProgressAction(currentTab.id, 71)).joinBlocking()
+        browserStore.dispatch(UpdateProgressAction(currentTab.id, 71))
         testScheduler.advanceUntilIdle()
 
         assertEquals(
@@ -1342,7 +1342,7 @@ class BrowserToolbarMiddlewareTest {
             var displayGoForwardButton = toolbarStore.state.displayState.browserActionsStart[1]
             assertEquals(displayGoForwardButton, expectedGoForwardButton.copy(state = ActionButton.State.DISABLED))
 
-            appStore.dispatch(AppAction.OrientationChange(Landscape)).joinBlocking()
+            appStore.dispatch(AppAction.OrientationChange(Landscape))
             testScheduler.advanceUntilIdle()
 
             displayGoBackButton = toolbarStore.state.displayState.browserActionsStart[0]
@@ -1530,7 +1530,7 @@ class BrowserToolbarMiddlewareTest {
             verify { reloadUseCases(currentTab.id, capture(loadUrlFlagsUsed)) }
             assertEquals(LoadUrlFlags.BYPASS_CACHE, loadUrlFlagsUsed.last().value)
 
-            browserStore.dispatch(UpdateLoadingStateAction(currentTab.id, true)).joinBlocking()
+            browserStore.dispatch(UpdateLoadingStateAction(currentTab.id, true))
             testScheduler.advanceUntilIdle()
             pageLoadButton = toolbarStore.state.displayState.browserActionsStart.last() as ActionButtonRes
             assertEquals(expectedStopButton, pageLoadButton)
@@ -1538,7 +1538,7 @@ class BrowserToolbarMiddlewareTest {
             testScheduler.advanceUntilIdle()
             verify { stopUseCases(currentTab.id) }
 
-            browserStore.dispatch(UpdateLoadingStateAction(currentTab.id, false)).joinBlocking()
+            browserStore.dispatch(UpdateLoadingStateAction(currentTab.id, false))
             testScheduler.advanceUntilIdle()
             pageLoadButton = toolbarStore.state.displayState.browserActionsStart.last() as ActionButtonRes
             assertEquals(expectedRefreshButton, pageLoadButton)
@@ -1657,7 +1657,7 @@ class BrowserToolbarMiddlewareTest {
             assertEquals(expectedInsecureIndicator, securityIndicator)
 
             browserStore.dispatch(UpdateSecurityInfoAction(tab.id, SecurityInfoState(true)))
-                .joinBlocking()
+
             testScheduler.advanceUntilIdle()
             toolbarPageActions = toolbarStore.state.displayState.pageActionsStart
             assertEquals(1, toolbarPageActions.size)
@@ -1989,7 +1989,7 @@ class BrowserToolbarMiddlewareTest {
         val toolbarStore = buildStore(middleware)
         testScheduler.advanceUntilIdle()
 
-        appStore.dispatch(AppAction.OrientationChange(Portrait)).joinBlocking()
+        appStore.dispatch(AppAction.OrientationChange(Portrait))
         testScheduler.advanceUntilIdle()
 
         val navigationActions = toolbarStore.state.displayState.navigationActions
@@ -2015,7 +2015,7 @@ class BrowserToolbarMiddlewareTest {
         val toolbarStore = buildStore(middleware)
         testScheduler.advanceUntilIdle()
 
-        appStore.dispatch(AppAction.OrientationChange(Landscape)).joinBlocking()
+        appStore.dispatch(AppAction.OrientationChange(Landscape))
         testScheduler.advanceUntilIdle()
 
         val navigationActions = toolbarStore.state.displayState.navigationActions

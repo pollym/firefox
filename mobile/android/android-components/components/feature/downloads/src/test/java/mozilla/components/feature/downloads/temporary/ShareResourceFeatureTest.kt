@@ -104,7 +104,7 @@ class ShareResourceFeatureTest {
         val action = ShareResourceAction.AddShareAction("123", download)
         shareFeature.start()
 
-        store.dispatch(action).joinBlocking()
+        store.dispatch(action)
         dispatcher.scheduler.advanceUntilIdle()
 
         verify(shareFeature).startSharing(download)

@@ -60,7 +60,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 "https://www.firefox.com",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -92,7 +92,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 "https://www.firefox.com",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -124,7 +124,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 "https://www.firefox.com",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -158,7 +158,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 "https://www.firefox.com",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -192,7 +192,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 "https://www.firefox.com",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -226,7 +226,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 "https://www.firefox.com",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -265,7 +265,7 @@ class EngineDelegateMiddlewareTest {
                 "https://www.firefox.com",
                 includeParent = false,
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -305,7 +305,7 @@ class EngineDelegateMiddlewareTest {
                 "https://www.firefox.com",
                 includeParent = true,
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -340,7 +340,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 "https://www.firefox.com",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -378,7 +378,7 @@ class EngineDelegateMiddlewareTest {
                     "X-Sugar" to "None",
                 ),
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -417,7 +417,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 "https://www.mozilla.org",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -449,7 +449,7 @@ class EngineDelegateMiddlewareTest {
                 "unknown-tab",
                 "https://www.mozilla.org",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -482,7 +482,7 @@ class EngineDelegateMiddlewareTest {
                 mimeType = "something/important",
                 encoding = "UTF-16",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -518,7 +518,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 flags = EngineSession.LoadUrlFlags.select(EngineSession.LoadUrlFlags.BYPASS_CACHE),
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -551,7 +551,7 @@ class EngineDelegateMiddlewareTest {
             EngineAction.GoForwardAction(
                 "test-tab",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -582,7 +582,7 @@ class EngineDelegateMiddlewareTest {
             EngineAction.GoBackAction(
                 "test-tab",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -614,7 +614,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 index = 42,
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -646,7 +646,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 enable = true,
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -678,7 +678,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 enable = false,
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -709,7 +709,7 @@ class EngineDelegateMiddlewareTest {
             EngineAction.ExitFullScreenModeAction(
                 "test-tab",
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -741,7 +741,7 @@ class EngineDelegateMiddlewareTest {
                 "test-tab",
                 data = Engine.BrowsingData.allCaches(),
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -781,7 +781,7 @@ class EngineDelegateMiddlewareTest {
             ),
         )
 
-        store.dispatch(EngineAction.PurgeHistoryAction).joinBlocking()
+        store.dispatch(EngineAction.PurgeHistoryAction)
 
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -814,7 +814,7 @@ class EngineDelegateMiddlewareTest {
                 toLanguage = "en",
                 options = null,
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -843,7 +843,7 @@ class EngineDelegateMiddlewareTest {
 
         store.dispatch(
             TranslationsAction.TranslateRestoreAction(tabId = tab.id),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()

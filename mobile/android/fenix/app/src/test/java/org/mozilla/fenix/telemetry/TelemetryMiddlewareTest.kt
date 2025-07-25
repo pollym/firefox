@@ -113,7 +113,7 @@ class TelemetryMiddlewareTest {
 
         val sessionId = "1235"
         store.dispatch(ContentAction.UpdateIsSearchAction(sessionId, true, SEARCH_ENGINE_NAME))
-            .joinBlocking()
+            
 
         assertEquals(1, searchState.size)
         assertEquals(mutableMapOf(sessionId to timerId), searchState)
@@ -125,7 +125,7 @@ class TelemetryMiddlewareTest {
 
         val sessionId = "1235"
         store.dispatch(ContentAction.UpdateIsSearchAction(sessionId, false, SEARCH_ENGINE_NAME))
-            .joinBlocking()
+            
 
         assertTrue(searchState.isEmpty())
     }
@@ -136,7 +136,7 @@ class TelemetryMiddlewareTest {
 
         val sessionId = "1235"
         store.dispatch(ContentAction.UpdateIsSearchAction(sessionId, true, ""))
-            .joinBlocking()
+            
 
         assertTrue(searchState.isEmpty())
     }
@@ -147,7 +147,7 @@ class TelemetryMiddlewareTest {
 
         val sessionId = "1235"
         store.dispatch(ContentAction.UpdateIsSearchAction(sessionId, true, "$SEARCH_ENGINE_NAME 2"))
-            .joinBlocking()
+            
 
         assertTrue(searchState.isEmpty())
     }
@@ -159,7 +159,7 @@ class TelemetryMiddlewareTest {
         // Start searchState
         val sessionId = "1235"
         store.dispatch(ContentAction.UpdateIsSearchAction(sessionId, true, SEARCH_ENGINE_NAME))
-            .joinBlocking()
+            
 
         assertEquals(1, searchState.size)
         assertEquals(mutableMapOf(sessionId to timerId), searchState)
@@ -172,11 +172,11 @@ class TelemetryMiddlewareTest {
 
         assertNull(Events.normalAndPrivateUriCount.testGetValue())
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
-        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
+        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true))
         assertNull(Events.normalAndPrivateUriCount.testGetValue())
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, false)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, false))
         val count = Events.normalAndPrivateUriCount.testGetValue()!!
         assertEquals(1, count)
 
@@ -192,7 +192,7 @@ class TelemetryMiddlewareTest {
         // Start searchState
         val sessionId = "1235"
         store.dispatch(ContentAction.UpdateIsSearchAction(sessionId, true, SEARCH_ENGINE_NAME))
-            .joinBlocking()
+            
 
         assertEquals(1, searchState.size)
         assertEquals(mutableMapOf(sessionId to timerId), searchState)
@@ -205,11 +205,11 @@ class TelemetryMiddlewareTest {
 
         assertNull(Events.normalAndPrivateUriCount.testGetValue())
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
-        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
+        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true))
         assertNull(Events.normalAndPrivateUriCount.testGetValue())
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, false)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, false))
         val count = Events.normalAndPrivateUriCount.testGetValue()!!
         assertEquals(1, count)
 
@@ -223,7 +223,7 @@ class TelemetryMiddlewareTest {
         assertEquals(0, settings.openTabsCount)
         assertNull(Metrics.hasOpenTabs.testGetValue())
 
-        store.dispatch(TabListAction.AddTabAction(createTab("https://mozilla.org"))).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(createTab("https://mozilla.org")))
         assertEquals(1, settings.openTabsCount)
 
         assertTrue(Metrics.hasOpenTabs.testGetValue()!!)
@@ -234,7 +234,7 @@ class TelemetryMiddlewareTest {
         assertEquals(0, settings.openTabsCount)
         assertNull(Metrics.hasOpenTabs.testGetValue())
 
-        store.dispatch(TabListAction.AddTabAction(createTab("https://mozilla.org", private = true))).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(createTab("https://mozilla.org", private = true)))
         assertEquals(0, settings.openTabsCount)
 
         assertFalse(Metrics.hasOpenTabs.testGetValue()!!)
@@ -252,7 +252,7 @@ class TelemetryMiddlewareTest {
                     createTab("https://firefox.com"),
                 ),
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(2, settings.openTabsCount)
 
@@ -270,10 +270,10 @@ class TelemetryMiddlewareTest {
                     createTab(id = "2", url = "https://firefox.com"),
                 ),
             ),
-        ).joinBlocking()
+        )
         assertEquals(2, settings.openTabsCount)
 
-        store.dispatch(TabListAction.RemoveTabAction("1")).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction("1"))
         assertEquals(1, settings.openTabsCount)
 
         assertTrue(Metrics.hasOpenTabs.testGetValue()!!)
@@ -290,12 +290,12 @@ class TelemetryMiddlewareTest {
                     createTab("https://firefox.com"),
                 ),
             ),
-        ).joinBlocking()
+        )
         assertEquals(2, settings.openTabsCount)
 
         assertTrue(Metrics.hasOpenTabs.testGetValue()!!)
 
-        store.dispatch(TabListAction.RemoveAllTabsAction()).joinBlocking()
+        store.dispatch(TabListAction.RemoveAllTabsAction())
         assertEquals(0, settings.openTabsCount)
 
         assertFalse(Metrics.hasOpenTabs.testGetValue()!!)
@@ -313,11 +313,11 @@ class TelemetryMiddlewareTest {
                     createTab("https://getpocket.com", private = true),
                 ),
             ),
-        ).joinBlocking()
+        )
         assertEquals(2, settings.openTabsCount)
         assertTrue(Metrics.hasOpenTabs.testGetValue()!!)
 
-        store.dispatch(TabListAction.RemoveAllNormalTabsAction).joinBlocking()
+        store.dispatch(TabListAction.RemoveAllNormalTabsAction)
         assertEquals(0, settings.openTabsCount)
         assertFalse(Metrics.hasOpenTabs.testGetValue()!!)
     }
@@ -337,7 +337,7 @@ class TelemetryMiddlewareTest {
                 tabs = tabsToRestore,
                 restoreLocation = TabListAction.RestoreAction.RestoreLocation.BEGINNING,
             ),
-        ).joinBlocking()
+        )
         assertEquals(2, settings.openTabsCount)
 
         assertTrue(Metrics.hasOpenTabs.testGetValue()!!)
@@ -348,11 +348,11 @@ class TelemetryMiddlewareTest {
         val tab = createTab(id = "1", url = "https://mozilla.org")
         assertNull(Events.normalAndPrivateUriCount.testGetValue())
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
-        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
+        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true))
         assertNull(Events.normalAndPrivateUriCount.testGetValue())
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, false)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, false))
         val count = Events.normalAndPrivateUriCount.testGetValue()!!
         assertEquals(1, count)
     }
@@ -362,11 +362,11 @@ class TelemetryMiddlewareTest {
         val tab = createTab(id = "1", url = "https://mozilla.org", private = true)
         assertNull(Events.normalAndPrivateUriCount.testGetValue())
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
-        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
+        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true))
         assertNull(Events.normalAndPrivateUriCount.testGetValue())
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, false)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, false))
         val count = Events.normalAndPrivateUriCount.testGetValue()!!
         assertEquals(1, count)
     }
@@ -382,13 +382,13 @@ class TelemetryMiddlewareTest {
                 selectedTabId = "foreground",
                 restoreLocation = TabListAction.RestoreAction.RestoreLocation.BEGINNING,
             ),
-        ).joinBlocking()
+        )
 
         assertNull(EngineMetrics.tabKilled.testGetValue())
 
         store.dispatch(
             EngineAction.KillEngineSessionAction("background_pocket"),
-        ).joinBlocking()
+        )
 
         assertEquals(1, EngineMetrics.tabKilled.testGetValue()?.size)
         EngineMetrics.tabKilled.testGetValue()?.get(0)?.extra?.also {
@@ -399,11 +399,11 @@ class TelemetryMiddlewareTest {
 
         appStore.dispatch(
             AppAction.AppLifecycleAction.PauseAction,
-        ).joinBlocking()
+        )
 
         store.dispatch(
             EngineAction.KillEngineSessionAction("foreground"),
-        ).joinBlocking()
+        )
 
         assertEquals(2, EngineMetrics.tabKilled.testGetValue()?.size)
         EngineMetrics.tabKilled.testGetValue()?.get(1)?.extra?.also {
@@ -419,7 +419,7 @@ class TelemetryMiddlewareTest {
 
         store.dispatch(
             ContentAction.CheckForFormDataExceptionAction("1", RuntimeException("session form data request failed")),
-        ).joinBlocking()
+        )
 
         // Wait for the main looper to process the re-thrown exception.
         ShadowLooper.idleMainLooper()
@@ -432,16 +432,16 @@ class TelemetryMiddlewareTest {
         val tabId = "test-tab-id"
 
         store.dispatch(TabListAction.AddTabAction(createTab(id = tabId, url = "https://firefox.com")))
-            .joinBlocking()
+            
 
         store.dispatch(
             EngineAction.KillEngineSessionAction(tabId),
-        ).joinBlocking()
+        )
         assertTrue(store.state.recentlyKilledTabs.contains(tabId))
 
         store.dispatch(
             EngineAction.CreateEngineSessionAction(tabId),
-        ).joinBlocking()
+        )
 
         ShadowLooper.idleMainLooper()
 
@@ -458,11 +458,11 @@ class TelemetryMiddlewareTest {
 
         store.dispatch(
             TabListAction.AddTabAction(createTab(id = tabId, url = "https://firefox.com")),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             EngineAction.CreateEngineSessionAction(tabId),
-        ).joinBlocking()
+        )
 
         ShadowLooper.idleMainLooper()
 
@@ -474,8 +474,8 @@ class TelemetryMiddlewareTest {
     fun `GIVEN a tab that is killed multiple times WHEN checking recentlyKilledTabs THEN it only appears once`() {
         val tabId = "test-tab-id"
 
-        store.dispatch(EngineAction.KillEngineSessionAction(tabId)).joinBlocking()
-        store.dispatch(EngineAction.KillEngineSessionAction(tabId)).joinBlocking()
+        store.dispatch(EngineAction.KillEngineSessionAction(tabId))
+        store.dispatch(EngineAction.KillEngineSessionAction(tabId))
 
         assertEquals(1, store.state.recentlyKilledTabs.count { it == tabId })
     }
@@ -483,7 +483,7 @@ class TelemetryMiddlewareTest {
     @Test
     fun `GIVEN more than 50 tabs are killed WHEN checking recentlyKilledTabs THEN it does not exceed 50`() {
         repeat(51) { i ->
-            store.dispatch(EngineAction.KillEngineSessionAction("tab-$i")).joinBlocking()
+            store.dispatch(EngineAction.KillEngineSessionAction("tab-$i"))
         }
 
         assertEquals(50, store.state.recentlyKilledTabs.size)
@@ -497,22 +497,22 @@ class TelemetryMiddlewareTest {
         // Fill recentlyKilledTabs with 50 entries and verify max limit is reached
         repeat(50) { i ->
             val tabId = "tab-id-$i"
-            store.dispatch(TabListAction.AddTabAction(createTab(id = tabId, url = "https://example.com/$i"))).joinBlocking()
-            store.dispatch(EngineAction.KillEngineSessionAction(tabId)).joinBlocking()
+            store.dispatch(TabListAction.AddTabAction(createTab(id = tabId, url = "https://example.com/$i")))
+            store.dispatch(EngineAction.KillEngineSessionAction(tabId))
         }
         assertTrue(store.state.recentlyKilledTabs.contains(oldestTabId))
         assertEquals(50, store.state.recentlyKilledTabs.size)
 
         // Kill one more tab and verify oldest tab is removed
-        store.dispatch(TabListAction.AddTabAction(createTab(id = newTabId, url = "https://example.com/$newTabId"))).joinBlocking()
-        store.dispatch(EngineAction.KillEngineSessionAction(newTabId)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(createTab(id = newTabId, url = "https://example.com/$newTabId")))
+        store.dispatch(EngineAction.KillEngineSessionAction(newTabId))
         assertFalse(store.state.recentlyKilledTabs.contains(oldestTabId))
         assertTrue(store.state.recentlyKilledTabs.contains(newTabId))
         assertEquals(50, store.state.recentlyKilledTabs.size)
 
         // Verify the reload of the newest tab was recorded
         val recordedEventsBefore = EngineMetrics.reloaded.testGetValue()?.size ?: 0
-        store.dispatch(EngineAction.CreateEngineSessionAction(newTabId)).joinBlocking()
+        store.dispatch(EngineAction.CreateEngineSessionAction(newTabId))
         ShadowLooper.idleMainLooper()
         val recordedEventsAfter = EngineMetrics.reloaded.testGetValue()
         assertNotNull(recordedEventsAfter)
@@ -521,7 +521,7 @@ class TelemetryMiddlewareTest {
 
     @Test
     fun `WHEN uri loaded to engine THEN matching event is sent to metrics`() {
-        store.dispatch(EngineAction.LoadUrlAction("", "")).joinBlocking()
+        store.dispatch(EngineAction.LoadUrlAction("", ""))
 
         verify { metrics.track(Event.GrowthData.FirstUriLoadForDay) }
     }
@@ -531,7 +531,7 @@ class TelemetryMiddlewareTest {
         assertNull(Addons.extensionsProcessUiRetry.testGetValue())
         assertNull(Addons.extensionsProcessUiDisable.testGetValue())
 
-        store.dispatch(ExtensionsProcessAction.EnabledAction).joinBlocking()
+        store.dispatch(ExtensionsProcessAction.EnabledAction)
 
         assertEquals(1, Addons.extensionsProcessUiRetry.testGetValue())
         assertNull(Addons.extensionsProcessUiDisable.testGetValue())
@@ -542,7 +542,7 @@ class TelemetryMiddlewareTest {
         assertNull(Addons.extensionsProcessUiRetry.testGetValue())
         assertNull(Addons.extensionsProcessUiDisable.testGetValue())
 
-        store.dispatch(ExtensionsProcessAction.DisabledAction).joinBlocking()
+        store.dispatch(ExtensionsProcessAction.DisabledAction)
 
         assertEquals(1, Addons.extensionsProcessUiDisable.testGetValue())
         assertNull(Addons.extensionsProcessUiRetry.testGetValue())
@@ -552,7 +552,7 @@ class TelemetryMiddlewareTest {
     fun `WHEN TranslateOfferAction is dispatched THEN update telemetry`() {
         assertNull(Translations.offerEvent.testGetValue())
 
-        store.dispatch(TranslationsAction.TranslateOfferAction(tabId = "1", true)).joinBlocking()
+        store.dispatch(TranslationsAction.TranslateOfferAction(tabId = "1", true))
 
         val telemetry = Translations.offerEvent.testGetValue()?.firstOrNull()
         assertEquals("offer", telemetry?.extra?.get("item"))
@@ -562,7 +562,7 @@ class TelemetryMiddlewareTest {
     fun `WHEN TranslateExpectedAction is dispatched THEN update telemetry`() {
         assertNull(Translations.offerEvent.testGetValue())
 
-        store.dispatch(TranslationsAction.TranslateExpectedAction(tabId = "1")).joinBlocking()
+        store.dispatch(TranslationsAction.TranslateExpectedAction(tabId = "1"))
 
         val telemetry = Translations.offerEvent.testGetValue()?.firstOrNull()
         assertEquals("expected", telemetry?.extra?.get("item"))
@@ -579,7 +579,7 @@ class TelemetryMiddlewareTest {
                 toLanguage = "es",
                 options = null,
             ),
-        ).joinBlocking()
+        )
 
         val telemetry = Translations.translateRequested.testGetValue()?.firstOrNull()
         assertEquals("es", telemetry?.extra?.get("to_language"))
@@ -596,7 +596,7 @@ class TelemetryMiddlewareTest {
                 tabId = "1",
                 operation = TranslationOperation.FETCH_SUPPORTED_LANGUAGES,
             ),
-        ).joinBlocking()
+        )
         assertNull(Translations.translateSuccess.testGetValue())
 
         // Should record translate operations
@@ -605,7 +605,7 @@ class TelemetryMiddlewareTest {
                 tabId = "1",
                 operation = TranslationOperation.TRANSLATE,
             ),
-        ).joinBlocking()
+        )
 
         val telemetry = Translations.translateSuccess.testGetValue()?.firstOrNull()
         assertNotNull(telemetry)
@@ -622,7 +622,7 @@ class TelemetryMiddlewareTest {
                 operation = TranslationOperation.FETCH_SUPPORTED_LANGUAGES,
                 translationError = TranslationError.UnknownError(IllegalStateException()),
             ),
-        ).joinBlocking()
+        )
         assertNull(Translations.translateFailed.testGetValue())
 
         // Should record translate operations
@@ -632,7 +632,7 @@ class TelemetryMiddlewareTest {
                 operation = TranslationOperation.TRANSLATE,
                 translationError = TranslationError.CouldNotTranslateError(null),
             ),
-        ).joinBlocking()
+        )
 
         val telemetry = Translations.translateFailed.testGetValue()?.firstOrNull()
         assertEquals(TranslationError.CouldNotTranslateError(cause = null).errorName, telemetry?.extra?.get("error"))
@@ -646,7 +646,7 @@ class TelemetryMiddlewareTest {
             TranslationsAction.SetEngineSupportedAction(
                 isEngineSupported = true,
             ),
-        ).joinBlocking()
+        )
 
         val telemetry = Translations.engineSupported.testGetValue()?.firstOrNull()
         assertEquals("supported", telemetry?.extra?.get("support"))
@@ -660,7 +660,7 @@ class TelemetryMiddlewareTest {
             TranslationsAction.SetEngineSupportedAction(
                 isEngineSupported = false,
             ),
-        ).joinBlocking()
+        )
 
         val telemetry = Translations.engineSupported.testGetValue()?.firstOrNull()
         assertEquals("unsupported", telemetry?.extra?.get("support"))

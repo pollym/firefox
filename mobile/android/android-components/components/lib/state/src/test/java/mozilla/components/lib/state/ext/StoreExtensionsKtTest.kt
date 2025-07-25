@@ -63,7 +63,7 @@ class StoreExtensionsKtTest {
         var stateObserved = false
 
         store.observe(owner) { stateObserved = true }
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
 
         assertFalse(stateObserved)
     }
@@ -82,12 +82,12 @@ class StoreExtensionsKtTest {
         assertTrue(stateObserved)
 
         stateObserved = false
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(stateObserved)
 
         stateObserved = false
         owner.lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(stateObserved)
     }
 
@@ -108,7 +108,7 @@ class StoreExtensionsKtTest {
         // CREATED: Observer does still not get invoked
         stateObserved = false
         owner.lifecycleRegistry.currentState = Lifecycle.State.CREATED
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(stateObserved)
 
         // STARTED: Observer gets initial state and observers updates
@@ -117,25 +117,25 @@ class StoreExtensionsKtTest {
         assertTrue(stateObserved)
 
         stateObserved = false
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(stateObserved)
 
         // RESUMED: Observer continues to get updates
         stateObserved = false
         owner.lifecycleRegistry.currentState = Lifecycle.State.RESUMED
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(stateObserved)
 
         // CREATED: Not observing anymore
         stateObserved = false
         owner.lifecycleRegistry.currentState = Lifecycle.State.CREATED
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(stateObserved)
 
         // DESTROYED: Not observing
         stateObserved = false
         owner.lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(stateObserved)
     }
 
@@ -167,7 +167,7 @@ class StoreExtensionsKtTest {
         assertEquals(0, receivedValue)
 
         // Updating state: Nothing received yet.
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(0, receivedValue)
 
@@ -177,12 +177,12 @@ class StoreExtensionsKtTest {
         assertEquals(24, receivedValue)
         latch = CountDownLatch(1)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(25, receivedValue)
         latch = CountDownLatch(1)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
         latch = CountDownLatch(1)
@@ -190,7 +190,7 @@ class StoreExtensionsKtTest {
         job.cancelAndJoin()
         assertTrue(channel.isClosedForReceive)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
     }
@@ -241,7 +241,7 @@ class StoreExtensionsKtTest {
 
         // Updating state: Nothing received yet.
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(0, receivedValue)
 
@@ -251,12 +251,12 @@ class StoreExtensionsKtTest {
         assertEquals(24, receivedValue)
         latch = CountDownLatch(1)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(25, receivedValue)
         latch = CountDownLatch(1)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
         latch = CountDownLatch(1)
@@ -264,7 +264,7 @@ class StoreExtensionsKtTest {
         job.cancelAndJoin()
 
         // Receiving nothing anymore since coroutine is cancelled
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
     }
@@ -288,7 +288,7 @@ class StoreExtensionsKtTest {
             }
         }
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertTrue(store.subscriptions.isEmpty())
     }
@@ -312,7 +312,7 @@ class StoreExtensionsKtTest {
             }
         }
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertTrue(store.subscriptions.isEmpty())
     }
@@ -343,17 +343,17 @@ class StoreExtensionsKtTest {
         assertEquals(23, receivedValue)
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(24, receivedValue)
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(25, receivedValue)
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
 
@@ -362,7 +362,7 @@ class StoreExtensionsKtTest {
         job.cancelAndJoin()
 
         // Receiving nothing anymore since coroutine is cancelled
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
     }
@@ -392,24 +392,24 @@ class StoreExtensionsKtTest {
 
         // Updating state: Nothing received yet.
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(24, receivedValue)
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(25, receivedValue)
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
 
         scope.cancel()
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
     }
@@ -441,7 +441,7 @@ class StoreExtensionsKtTest {
 
         // Updating state: Nothing received yet.
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(0, receivedValue)
 
@@ -452,19 +452,19 @@ class StoreExtensionsKtTest {
         assertEquals(24, receivedValue)
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(25, receivedValue)
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
 
         scope.cancel()
 
         latch = CountDownLatch(1)
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(latch.await(1, TimeUnit.SECONDS))
         assertEquals(26, receivedValue)
     }
@@ -481,10 +481,10 @@ class StoreExtensionsKtTest {
         store.observeForever { state -> observedValue = state.counter }
         assertEquals(23, observedValue)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(24, observedValue)
 
-        store.dispatch(TestAction.DecrementAction).joinBlocking()
+        store.dispatch(TestAction.DecrementAction)
         assertEquals(23, observedValue)
     }
 
@@ -507,7 +507,7 @@ class StoreExtensionsKtTest {
         assertTrue(stateObserved)
 
         stateObserved = false
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertTrue(stateObserved)
 
         activity.windowManager.removeView(view)
@@ -515,7 +515,7 @@ class StoreExtensionsKtTest {
         assertFalse(view.isAttachedToWindow)
 
         stateObserved = false
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(stateObserved)
     }
 
@@ -536,7 +536,7 @@ class StoreExtensionsKtTest {
         assertFalse(stateObserved)
 
         stateObserved = false
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(stateObserved)
 
         activity.windowManager.addView(view, WindowManager.LayoutParams(100, 100))
@@ -558,7 +558,7 @@ class StoreExtensionsKtTest {
         assertFalse(view.isAttachedToWindow)
 
         stateObserved = false
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertFalse(stateObserved)
     }
 }

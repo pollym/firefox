@@ -16,7 +16,7 @@ class ShortcutStateReducerTest {
     fun `WHEN shortcut added action is dispatched THEN state is updated`() {
         val appStore = AppStore()
 
-        appStore.dispatch(AppAction.ShortcutAction.ShortcutAdded).joinBlocking()
+        appStore.dispatch(AppAction.ShortcutAction.ShortcutAdded)
 
         assertEquals(SnackbarState.ShortcutAdded, appStore.state.snackbarState)
     }
@@ -25,7 +25,7 @@ class ShortcutStateReducerTest {
     fun `WHEN shortcut removed action is dispatched THEN state is updated`() {
         val appStore = AppStore()
 
-        appStore.dispatch(AppAction.ShortcutAction.ShortcutRemoved).joinBlocking()
+        appStore.dispatch(AppAction.ShortcutAction.ShortcutRemoved)
 
         assertEquals(SnackbarState.ShortcutRemoved, appStore.state.snackbarState)
     }

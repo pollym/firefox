@@ -96,14 +96,14 @@ class FullScreenFeatureTest {
                 "A",
                 true,
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             ContentAction.ViewportFitChangedAction(
                 "A",
                 42,
             ),
-        ).joinBlocking()
+        )
 
         val feature = FullScreenFeature(
             store = store,
@@ -147,7 +147,7 @@ class FullScreenFeatureTest {
                 "A",
                 true,
             ),
-        ).joinBlocking()
+        )
 
         assertNull(viewPort)
         assertTrue(fullscreen!!)
@@ -180,14 +180,14 @@ class FullScreenFeatureTest {
                 "A",
                 true,
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             ContentAction.ViewportFitChangedAction(
                 "A",
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES,
             ),
-        ).joinBlocking()
+        )
 
         assertNotEquals(0, viewPort)
         assertEquals(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES, viewPort)
@@ -225,14 +225,14 @@ class FullScreenFeatureTest {
                 "B",
                 true,
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             ContentAction.ViewportFitChangedAction(
                 "B",
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES,
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES, viewPort)
         assertTrue(fullscreen!!)
@@ -242,14 +242,14 @@ class FullScreenFeatureTest {
                 "B",
                 false,
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             ContentAction.ViewportFitChangedAction(
                 "B",
                 0,
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(0, viewPort)
         assertFalse(fullscreen!!)
@@ -284,14 +284,14 @@ class FullScreenFeatureTest {
                 "B",
                 true,
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             ContentAction.ViewportFitChangedAction(
                 "B",
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER,
             ),
-        ).joinBlocking()
+        )
 
         feature.start()
 
@@ -305,14 +305,14 @@ class FullScreenFeatureTest {
                 "B",
                 false,
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             ContentAction.ViewportFitChangedAction(
                 "B",
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES,
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER, viewPort)
         assertTrue(fullscreen!!)
@@ -354,14 +354,14 @@ class FullScreenFeatureTest {
                 "B",
                 true,
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             ContentAction.ViewportFitChangedAction(
                 "B",
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(feature.onBackPressed())
 
@@ -395,21 +395,21 @@ class FullScreenFeatureTest {
                 "A",
                 true,
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             ContentAction.ViewportFitChangedAction(
                 "A",
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES,
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES, viewPort)
         assertTrue(fullscreen!!)
 
         store.dispatch(
             TabListAction.RemoveTabAction(tabId = "A"),
-        ).joinBlocking()
+        )
 
         assertEquals(0, viewPort)
         assertFalse(fullscreen!!)
@@ -488,7 +488,7 @@ class FullScreenFeatureTest {
                 "A",
                 true,
             ),
-        ).joinBlocking()
+        )
 
         feature.start()
         store.waitUntilIdle()

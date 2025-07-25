@@ -27,7 +27,7 @@ class HistoryMetadataActionTest {
             referrerUrl = "https://firefox.com",
         )
 
-        store.dispatch(HistoryMetadataAction.SetHistoryMetadataKeyAction(tab.id, historyMetadata)).joinBlocking()
+        store.dispatch(HistoryMetadataAction.SetHistoryMetadataKeyAction(tab.id, historyMetadata))
         assertEquals(historyMetadata, store.state.findTab(tab.id)?.historyMetadata)
     }
 
@@ -47,16 +47,16 @@ class HistoryMetadataActionTest {
         )
 
         // Okay to do this without any metadata associated with tabs.
-        store.dispatch(HistoryMetadataAction.DisbandSearchGroupAction("Download firefox")).joinBlocking()
+        store.dispatch(HistoryMetadataAction.DisbandSearchGroupAction("Download firefox"))
 
         // Okay to do this with an empty search term string.
-        store.dispatch(HistoryMetadataAction.DisbandSearchGroupAction("")).joinBlocking()
+        store.dispatch(HistoryMetadataAction.DisbandSearchGroupAction(""))
 
-        store.dispatch(HistoryMetadataAction.SetHistoryMetadataKeyAction(tab1.id, historyMetadata1)).joinBlocking()
-        store.dispatch(HistoryMetadataAction.SetHistoryMetadataKeyAction(tab2.id, historyMetadata2)).joinBlocking()
+        store.dispatch(HistoryMetadataAction.SetHistoryMetadataKeyAction(tab1.id, historyMetadata1))
+        store.dispatch(HistoryMetadataAction.SetHistoryMetadataKeyAction(tab2.id, historyMetadata2))
 
         // Search term matching is case-insensitive.
-        store.dispatch(HistoryMetadataAction.DisbandSearchGroupAction("Download firefox")).joinBlocking()
+        store.dispatch(HistoryMetadataAction.DisbandSearchGroupAction("Download firefox"))
 
         // tab1 is unchanged.
         assertEquals(historyMetadata1, store.state.findTab(tab1.id)?.historyMetadata)

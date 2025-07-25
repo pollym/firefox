@@ -27,7 +27,7 @@ class MenuBindingTest {
         )
 
         binding.start()
-        store.dispatch(HistoryFragmentAction.FinishSync).joinBlocking()
+        store.dispatch(HistoryFragmentAction.FinishSync)
 
         assertTrue(menuInvalidated)
     }

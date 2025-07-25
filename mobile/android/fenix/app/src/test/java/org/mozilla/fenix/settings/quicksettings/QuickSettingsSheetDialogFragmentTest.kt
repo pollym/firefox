@@ -67,7 +67,7 @@ class QuickSettingsSheetDialogFragmentTest {
             fragment.updateTrackers(tab)
         }
 
-        store.dispatch(TrackerLoadedAction(tab.id, mockk())).joinBlocking()
+        store.dispatch(TrackerLoadedAction(tab.id, mockk()))
 
         val updatedTab = store.state.findTab(tab.id)!!
 
@@ -93,7 +93,7 @@ class QuickSettingsSheetDialogFragmentTest {
             fragment.updateTrackers(tab)
         }
 
-        store.dispatch(TrackerBlockedAction(tab.id, mockk())).joinBlocking()
+        store.dispatch(TrackerBlockedAction(tab.id, mockk()))
 
         val updatedTab = store.state.findTab(tab.id)!!
 
@@ -159,8 +159,8 @@ class QuickSettingsSheetDialogFragmentTest {
     }
 
     private fun addAndSelectTab(tab: TabSessionState) {
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
-        store.dispatch(TabListAction.SelectTabAction(tab.id)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
+        store.dispatch(TabListAction.SelectTabAction(tab.id))
     }
 
     internal class MockedLifecycleOwner(initialState: Lifecycle.State) : LifecycleOwner {

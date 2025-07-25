@@ -306,7 +306,7 @@ class CustomTabBrowserToolbarMiddlewareTest {
         var securityIndicator = toolbarPageActions[0]
         assertEquals(expectedInsecureIndicator, securityIndicator)
 
-        browserStore.dispatch(UpdateSecurityInfoAction(customTabId, SecurityInfoState(true))).joinBlocking()
+        browserStore.dispatch(UpdateSecurityInfoAction(customTabId, SecurityInfoState(true)))
         testScheduler.advanceUntilIdle()
         toolbarPageActions = toolbarStore.state.displayState.pageActionsStart
         assertEquals(1, toolbarPageActions.size)
@@ -334,7 +334,7 @@ class CustomTabBrowserToolbarMiddlewareTest {
         var pageOrigin = toolbarStore.state.displayState.pageOrigin
         assertEquals(expectedDetails, pageOrigin)
 
-        browserStore.dispatch(UpdateTitleAction(customTabId, "UpdatedTitle")).joinBlocking()
+        browserStore.dispatch(UpdateTitleAction(customTabId, "UpdatedTitle"))
         testScheduler.advanceUntilIdle()
         pageOrigin = toolbarStore.state.displayState.pageOrigin
         assertEquals(expectedDetails.copy(title = "UpdatedTitle"), pageOrigin)
@@ -360,7 +360,7 @@ class CustomTabBrowserToolbarMiddlewareTest {
         var pageOrigin = toolbarStore.state.displayState.pageOrigin
         assertEquals(expectedDetails, pageOrigin)
 
-        browserStore.dispatch(UpdateUrlAction(customTabId, "UpdatedURL")).joinBlocking()
+        browserStore.dispatch(UpdateUrlAction(customTabId, "UpdatedURL"))
         testScheduler.advanceUntilIdle()
         pageOrigin = toolbarStore.state.displayState.pageOrigin
         assertEquals(expectedDetails.copy(url = "UpdatedURL"), pageOrigin)
@@ -386,7 +386,7 @@ class CustomTabBrowserToolbarMiddlewareTest {
         var pageOrigin = toolbarStore.state.displayState.pageOrigin
         assertEquals(expectedDetails, pageOrigin)
 
-        browserStore.dispatch(UpdateUrlAction(customTabId, "UpdatedURL")).joinBlocking()
+        browserStore.dispatch(UpdateUrlAction(customTabId, "UpdatedURL"))
         testScheduler.advanceUntilIdle()
         pageOrigin = toolbarStore.state.displayState.pageOrigin
         assertEquals(
@@ -473,7 +473,7 @@ class CustomTabBrowserToolbarMiddlewareTest {
         val middleware = buildMiddleware(browserStore)
         val toolbarStore = buildStore(middleware)
 
-        browserStore.dispatch(UpdateProgressAction(customTabId, 50)).joinBlocking()
+        browserStore.dispatch(UpdateProgressAction(customTabId, 50))
         testScheduler.advanceUntilIdle()
         assertEquals(
             ProgressBarConfig(
@@ -484,7 +484,7 @@ class CustomTabBrowserToolbarMiddlewareTest {
             toolbarStore.state.displayState.progressBarConfig,
         )
 
-        browserStore.dispatch(UpdateProgressAction(customTabId, 80)).joinBlocking()
+        browserStore.dispatch(UpdateProgressAction(customTabId, 80))
         testScheduler.advanceUntilIdle()
         assertEquals(
             ProgressBarConfig(
@@ -509,7 +509,7 @@ class CustomTabBrowserToolbarMiddlewareTest {
         val middleware = buildMiddleware(browserStore)
         val toolbarStore = buildStore(middleware)
 
-        browserStore.dispatch(UpdateProgressAction(customTabId, 22)).joinBlocking()
+        browserStore.dispatch(UpdateProgressAction(customTabId, 22))
         testScheduler.advanceUntilIdle()
         assertEquals(
             ProgressBarConfig(
@@ -520,7 +520,7 @@ class CustomTabBrowserToolbarMiddlewareTest {
             toolbarStore.state.displayState.progressBarConfig,
         )
 
-        browserStore.dispatch(UpdateProgressAction(customTabId, 67)).joinBlocking()
+        browserStore.dispatch(UpdateProgressAction(customTabId, 67))
         testScheduler.advanceUntilIdle()
         assertEquals(
             ProgressBarConfig(

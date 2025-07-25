@@ -27,7 +27,7 @@ class DebugActionTest {
         val store = BrowserStore(state)
         val timestamp = System.currentTimeMillis()
 
-        store.dispatch(DebugAction.UpdateCreatedAtAction(existingTab.id, timestamp)).joinBlocking()
+        store.dispatch(DebugAction.UpdateCreatedAtAction(existingTab.id, timestamp))
 
         assertEquals(timestamp, store.state.selectedTab?.createdAt)
     }

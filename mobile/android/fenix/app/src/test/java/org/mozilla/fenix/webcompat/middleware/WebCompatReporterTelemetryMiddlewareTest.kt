@@ -29,7 +29,7 @@ class WebCompatReporterTelemetryMiddlewareTest {
         val store = createStore()
         assertNull(Webcompatreporting.reasonDropdown.testGetValue())
 
-        store.dispatch(WebCompatReporterAction.ReasonChanged(WebCompatReporterState.BrokenSiteReason.Media)).joinBlocking()
+        store.dispatch(WebCompatReporterAction.ReasonChanged(WebCompatReporterState.BrokenSiteReason.Media))
 
         assertNotNull(Webcompatreporting.reasonDropdown.testGetValue())
         val snapshot = Webcompatreporting.reasonDropdown.testGetValue()!!
@@ -41,7 +41,7 @@ class WebCompatReporterTelemetryMiddlewareTest {
         val store = createStore()
         assertNull(Webcompatreporting.sendMoreInfo.testGetValue())
 
-        store.dispatch(WebCompatReporterAction.SendMoreInfoClicked).joinBlocking()
+        store.dispatch(WebCompatReporterAction.SendMoreInfoClicked)
 
         val snapshot = Webcompatreporting.sendMoreInfo.testGetValue()!!
         assertEquals(1, snapshot.size)
@@ -53,7 +53,7 @@ class WebCompatReporterTelemetryMiddlewareTest {
         val store = createStore()
         assertNull(Webcompatreporting.send.testGetValue())
 
-        store.dispatch(WebCompatReporterAction.SendReportClicked).joinBlocking()
+        store.dispatch(WebCompatReporterAction.SendReportClicked)
 
         val snapshot = Webcompatreporting.send.testGetValue()!!
         assertEquals(1, snapshot.size)

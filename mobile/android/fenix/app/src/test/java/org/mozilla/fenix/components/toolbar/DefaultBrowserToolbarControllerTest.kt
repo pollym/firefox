@@ -278,7 +278,7 @@ class DefaultBrowserToolbarControllerTest {
     @Test
     fun handleToolbackClickWithSearchTerms() {
         val searchResultsTab = createTab("https://google.com?q=mozilla+website", searchTerms = "mozilla website")
-        store.dispatch(TabListAction.AddTabAction(searchResultsTab, select = true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(searchResultsTab, select = true))
 
         assertNull(Events.searchBarTapped.testGetValue())
 
@@ -321,8 +321,8 @@ class DefaultBrowserToolbarControllerTest {
         val item = TabCounterMenu.Item.CloseTab
 
         val testTab = createTab("https://www.firefox.com")
-        store.dispatch(TabListAction.AddTabAction(testTab)).joinBlocking()
-        store.dispatch(TabListAction.SelectTabAction(testTab.id)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(testTab))
+        store.dispatch(TabListAction.SelectTabAction(testTab.id))
 
         val controller = createController()
         controller.handleTabCounterItemInteraction(item)

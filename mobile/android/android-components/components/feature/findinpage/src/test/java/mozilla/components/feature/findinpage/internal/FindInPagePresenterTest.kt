@@ -56,17 +56,17 @@ class FindInPagePresenterTest {
         presenter.start()
 
         val result = FindResultState(0, 2, false)
-        store.dispatch(ContentAction.AddFindResultAction("test-tab", result)).joinBlocking()
+        store.dispatch(ContentAction.AddFindResultAction("test-tab", result))
         dispatcher.scheduler.advanceUntilIdle()
         verify(view, never()).displayResult(result)
 
         presenter.bind(store.state.selectedTab!!)
-        store.dispatch(ContentAction.AddFindResultAction("test-tab", result)).joinBlocking()
+        store.dispatch(ContentAction.AddFindResultAction("test-tab", result))
         dispatcher.scheduler.advanceUntilIdle()
         verify(view).displayResult(result)
 
         val result2 = FindResultState(1, 2, true)
-        store.dispatch(ContentAction.AddFindResultAction("test-tab", result2)).joinBlocking()
+        store.dispatch(ContentAction.AddFindResultAction("test-tab", result2))
         dispatcher.scheduler.advanceUntilIdle()
         verify(view).displayResult(result2)
     }
@@ -78,12 +78,12 @@ class FindInPagePresenterTest {
         presenter.start()
 
         presenter.bind(store.state.selectedTab!!)
-        store.dispatch(ContentAction.AddFindResultAction("test-tab", mock())).joinBlocking()
+        store.dispatch(ContentAction.AddFindResultAction("test-tab", mock()))
         dispatcher.scheduler.advanceUntilIdle()
         verify(view, times(1)).displayResult(any())
 
         presenter.stop()
-        store.dispatch(ContentAction.AddFindResultAction("test-tab", mock())).joinBlocking()
+        store.dispatch(ContentAction.AddFindResultAction("test-tab", mock()))
         dispatcher.scheduler.advanceUntilIdle()
         verify(view, times(1)).displayResult(any())
     }

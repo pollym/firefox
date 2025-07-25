@@ -69,7 +69,7 @@ class RecentlyClosedMiddlewareTest {
             middleware = listOf(middleware),
         )
 
-        store.dispatch(RecentlyClosedAction.AddClosedTabsAction(listOf(closedTab))).joinBlocking()
+        store.dispatch(RecentlyClosedAction.AddClosedTabsAction(listOf(closedTab)))
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
 
@@ -94,8 +94,8 @@ class RecentlyClosedMiddlewareTest {
             middleware = listOf(UndoMiddleware(mainScope = scope), middleware),
         )
 
-        store.dispatch(TabListAction.RemoveTabsAction(listOf("1234", "5678"))).joinBlocking()
-        store.dispatch(UndoAction.ClearRecoverableTabs(store.state.undoHistory.tag)).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabsAction(listOf("1234", "5678")))
+        store.dispatch(UndoAction.ClearRecoverableTabs(store.state.undoHistory.tag))
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -134,8 +134,8 @@ class RecentlyClosedMiddlewareTest {
             middleware = listOf(UndoMiddleware(mainScope = scope), middleware),
         )
 
-        store.dispatch(TabListAction.RemoveTabAction("1234")).joinBlocking()
-        store.dispatch(UndoAction.ClearRecoverableTabs(store.state.undoHistory.tag)).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction("1234"))
+        store.dispatch(UndoAction.ClearRecoverableTabs(store.state.undoHistory.tag))
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -168,7 +168,7 @@ class RecentlyClosedMiddlewareTest {
             middleware = listOf(middleware),
         )
 
-        store.dispatch(TabListAction.RemoveTabAction("1234")).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction("1234"))
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
 
@@ -191,8 +191,8 @@ class RecentlyClosedMiddlewareTest {
             middleware = listOf(UndoMiddleware(mainScope = scope), middleware),
         )
 
-        store.dispatch(TabListAction.RemoveAllNormalTabsAction).joinBlocking()
-        store.dispatch(UndoAction.ClearRecoverableTabs(store.state.undoHistory.tag)).joinBlocking()
+        store.dispatch(TabListAction.RemoveAllNormalTabsAction)
+        store.dispatch(UndoAction.ClearRecoverableTabs(store.state.undoHistory.tag))
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -226,8 +226,8 @@ class RecentlyClosedMiddlewareTest {
             middleware = listOf(UndoMiddleware(mainScope = scope), middleware),
         )
 
-        store.dispatch(TabListAction.RemoveAllTabsAction()).joinBlocking()
-        store.dispatch(UndoAction.ClearRecoverableTabs(store.state.undoHistory.tag)).joinBlocking()
+        store.dispatch(TabListAction.RemoveAllTabsAction())
+        store.dispatch(UndoAction.ClearRecoverableTabs(store.state.undoHistory.tag))
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -255,19 +255,19 @@ class RecentlyClosedMiddlewareTest {
             middleware = listOf(UndoMiddleware(mainScope = scope), middleware),
         )
 
-        store.dispatch(TabListAction.AddTabAction(createTab("https://www.mozilla.org", id = "tab1"))).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(createTab("https://www.firefox.com", id = "tab2"))).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(createTab("https://getpocket.com", id = "tab3"))).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(createTab("https://theverge.com", id = "tab4"))).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(createTab("https://www.google.com", id = "tab5"))).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(createTab("https://www.mozilla.org", id = "tab1")))
+        store.dispatch(TabListAction.AddTabAction(createTab("https://www.firefox.com", id = "tab2")))
+        store.dispatch(TabListAction.AddTabAction(createTab("https://getpocket.com", id = "tab3")))
+        store.dispatch(TabListAction.AddTabAction(createTab("https://theverge.com", id = "tab4")))
+        store.dispatch(TabListAction.AddTabAction(createTab("https://www.google.com", id = "tab5")))
         assertEquals(5, store.state.tabs.size)
 
-        store.dispatch(TabListAction.RemoveTabAction("tab2")).joinBlocking()
-        store.dispatch(TabListAction.RemoveTabAction("tab3")).joinBlocking()
-        store.dispatch(TabListAction.RemoveTabAction("tab1")).joinBlocking()
-        store.dispatch(TabListAction.RemoveTabAction("tab5")).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction("tab2"))
+        store.dispatch(TabListAction.RemoveTabAction("tab3"))
+        store.dispatch(TabListAction.RemoveTabAction("tab1"))
+        store.dispatch(TabListAction.RemoveTabAction("tab5"))
 
-        store.dispatch(UndoAction.ClearRecoverableTabs(store.state.undoHistory.tag)).joinBlocking()
+        store.dispatch(UndoAction.ClearRecoverableTabs(store.state.undoHistory.tag))
 
         assertEquals(1, store.state.tabs.size)
         assertEquals("tab4", store.state.selectedTabId)
@@ -336,7 +336,7 @@ class RecentlyClosedMiddlewareTest {
             middleware = listOf(middleware),
         )
 
-        store.dispatch(RecentlyClosedAction.RemoveClosedTabAction(closedTab.state)).joinBlocking()
+        store.dispatch(RecentlyClosedAction.RemoveClosedTabAction(closedTab.state))
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
 
@@ -358,7 +358,7 @@ class RecentlyClosedMiddlewareTest {
             middleware = listOf(middleware),
         )
 
-        store.dispatch(RecentlyClosedAction.RemoveAllClosedTabAction).joinBlocking()
+        store.dispatch(RecentlyClosedAction.RemoveAllClosedTabAction)
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
 

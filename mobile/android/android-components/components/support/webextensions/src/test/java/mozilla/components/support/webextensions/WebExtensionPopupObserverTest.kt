@@ -41,7 +41,7 @@ class WebExtensionPopupObserverTest {
         observer.start()
         assertNull(extensionOpeningPopup)
 
-        store.dispatch(WebExtensionAction.UpdatePopupSessionAction(extensionId, popupSession = engineSession)).joinBlocking()
+        store.dispatch(WebExtensionAction.UpdatePopupSessionAction(extensionId, popupSession = engineSession))
         assertNotNull(extensionOpeningPopup)
         assertEquals(extensionId, extensionOpeningPopup!!.id)
         assertEquals(engineSession, extensionOpeningPopup!!.popupSession)
@@ -49,7 +49,7 @@ class WebExtensionPopupObserverTest {
         // Verify that stopped feature does not observe and forward requests to open popup
         extensionOpeningPopup = null
         observer.stop()
-        store.dispatch(WebExtensionAction.UpdatePopupSessionAction(extensionId, popupSession = mock())).joinBlocking()
+        store.dispatch(WebExtensionAction.UpdatePopupSessionAction(extensionId, popupSession = mock()))
         assertNull(extensionOpeningPopup)
     }
 }

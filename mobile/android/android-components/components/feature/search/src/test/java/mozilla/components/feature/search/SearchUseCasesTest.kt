@@ -94,7 +94,7 @@ class SearchUseCasesTest {
                 tab = createTab(url = "https://www.mozilla.org", id = id),
                 select = true,
             ),
-        ).joinBlocking()
+        )
 
         useCases.defaultSearch(
             searchTerms = searchTerms,

@@ -51,7 +51,7 @@ class AdsTelemetryMiddlewareTest {
                     triggeredByUser = false,
                 ),
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(1, adsMiddleware.redirectChain.size)
         assertEquals("https://mozilla.org", adsMiddleware.redirectChain[sessionId]!!.root)
@@ -74,7 +74,7 @@ class AdsTelemetryMiddlewareTest {
                     triggeredByUser = false,
                 ),
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(1, adsMiddleware.redirectChain.size)
         assertEquals("https://mozilla.org", adsMiddleware.redirectChain[sessionId]!!.root)
@@ -95,7 +95,7 @@ class AdsTelemetryMiddlewareTest {
 
         store
             .dispatch(ContentAction.UpdateUrlAction(sessionId, "https://mozilla.org/firefox"))
-            .joinBlocking()
+            
 
         verify(adsTelemetry).checkIfAddWasClicked(
             "https://mozilla.org",
@@ -110,17 +110,17 @@ class AdsTelemetryMiddlewareTest {
             initialState = browserState,
             middleware = listOf(adsMiddleware),
         )
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         store.dispatch(
             ContentAction.UpdateLoadRequestAction(
                 tab.id,
                 LoadRequestState("https://mozilla.org", true, true),
             ),
-        ).joinBlocking()
+        )
 
         assertNotNull(adsMiddleware.redirectChain[tab.id])
 
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://mozilla.org")).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://mozilla.org"))
         assertNull(adsMiddleware.redirectChain[tab.id])
     }
 }

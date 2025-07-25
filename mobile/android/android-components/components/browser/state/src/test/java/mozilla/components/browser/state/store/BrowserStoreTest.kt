@@ -59,7 +59,7 @@ class BrowserStoreTest {
         val tab = createTab(url = "https://www.mozilla.org")
 
         store.dispatch(TabListAction.AddTabAction(tab))
-            .join()
+            
 
         assertEquals(1, store.state.tabs.size)
         assertEquals(tab.id, store.state.selectedTabId)
@@ -86,10 +86,10 @@ class BrowserStoreTest {
         val store = BrowserStore()
         assertFalse(store.state.restoreComplete)
 
-        store.dispatch(RestoreCompleteAction).joinBlocking()
+        store.dispatch(RestoreCompleteAction)
         assertTrue(store.state.restoreComplete)
 
-        store.dispatch(RestoreCompleteAction).joinBlocking()
+        store.dispatch(RestoreCompleteAction)
         assertTrue(store.state.restoreComplete)
     }
 }

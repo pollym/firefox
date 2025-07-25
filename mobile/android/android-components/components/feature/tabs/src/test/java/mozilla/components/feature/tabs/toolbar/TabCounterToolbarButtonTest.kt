@@ -137,7 +137,7 @@ class TabCounterToolbarButtonTest {
 
         store.dispatch(
             TabListAction.AddTabAction(createTab("https://www.mozilla.org")),
-        ).joinBlocking()
+        )
 
         verify(button).updateCount(eq(1))
     }
@@ -168,7 +168,7 @@ class TabCounterToolbarButtonTest {
                 ),
                 restoreLocation = TabListAction.RestoreAction.RestoreLocation.BEGINNING,
             ),
-        ).joinBlocking()
+        )
 
         verify(button).updateCount(eq(1))
     }
@@ -190,7 +190,7 @@ class TabCounterToolbarButtonTest {
         whenever(button.updateCount(anyInt())).then { }
         button.createView(LinearLayout(testContext) as ViewGroup) as TabCounterView
 
-        store.dispatch(TabListAction.RemoveTabAction(tab.id)).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction(tab.id))
         verify(button).updateCount(eq(0))
     }
 
@@ -214,7 +214,7 @@ class TabCounterToolbarButtonTest {
 
         store.dispatch(
             TabListAction.AddTabAction(createTab("https://www.mozilla.org", private = true)),
-        ).joinBlocking()
+        )
 
         verify(button).updateCount(eq(1))
     }
@@ -238,7 +238,7 @@ class TabCounterToolbarButtonTest {
 
         button.createView(LinearLayout(testContext) as ViewGroup) as TabCounterView
 
-        store.dispatch(TabListAction.RemoveTabAction(tab.id)).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction(tab.id))
         verify(button).updateCount(eq(0))
     }
 

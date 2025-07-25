@@ -65,7 +65,7 @@ class WindowFeatureTest {
         whenever(windowRequest.type).thenReturn(WindowRequest.Type.OPEN)
         whenever(windowRequest.url).thenReturn("https://www.firefox.com")
 
-        store.dispatch(ContentAction.UpdateWindowRequestAction(tabId, windowRequest)).joinBlocking()
+        store.dispatch(ContentAction.UpdateWindowRequestAction(tabId, windowRequest))
 
         verify(addTabUseCase).invoke(url = "about:blank", selectTab = true, parentId = tabId)
         verify(store).dispatch(ContentAction.ConsumeWindowRequestAction(tabId))
@@ -80,8 +80,8 @@ class WindowFeatureTest {
         whenever(windowRequest.type).thenReturn(WindowRequest.Type.OPEN)
         whenever(windowRequest.url).thenReturn("https://www.firefox.com")
 
-        store.dispatch(TabListAction.SelectTabAction(privateTabId)).joinBlocking()
-        store.dispatch(ContentAction.UpdateWindowRequestAction(privateTabId, windowRequest)).joinBlocking()
+        store.dispatch(TabListAction.SelectTabAction(privateTabId))
+        store.dispatch(ContentAction.UpdateWindowRequestAction(privateTabId, windowRequest))
 
         verify(addTabUseCase).invoke(url = "about:blank", selectTab = true, parentId = privateTabId, private = true)
         verify(store).dispatch(ContentAction.ConsumeWindowRequestAction(privateTabId))
@@ -96,7 +96,7 @@ class WindowFeatureTest {
         whenever(windowRequest.type).thenReturn(WindowRequest.Type.CLOSE)
         whenever(windowRequest.prepare()).thenReturn(engineSession)
 
-        store.dispatch(ContentAction.UpdateWindowRequestAction(tabId, windowRequest)).joinBlocking()
+        store.dispatch(ContentAction.UpdateWindowRequestAction(tabId, windowRequest))
 
         verify(removeTabUseCase).invoke(tabId)
         verify(store).dispatch(ContentAction.ConsumeWindowRequestAction(tabId))
@@ -111,7 +111,7 @@ class WindowFeatureTest {
         val windowRequest: WindowRequest = mock()
         whenever(windowRequest.type).thenReturn(WindowRequest.Type.CLOSE)
 
-        store.dispatch(ContentAction.UpdateWindowRequestAction(tabId, windowRequest)).joinBlocking()
+        store.dispatch(ContentAction.UpdateWindowRequestAction(tabId, windowRequest))
 
         verify(removeTabUseCase, never()).invoke(tabId)
         verify(store, never()).dispatch(ContentAction.ConsumeWindowRequestAction(tabId))

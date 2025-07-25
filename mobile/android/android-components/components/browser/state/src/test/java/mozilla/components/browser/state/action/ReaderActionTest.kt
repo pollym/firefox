@@ -40,12 +40,12 @@ class ReaderActionTest {
         assertFalse(readerState().readerable)
 
         store.dispatch(ReaderAction.UpdateReaderableAction(tabId = tab.id, readerable = true))
-            .joinBlocking()
+            
 
         assertTrue(readerState().readerable)
 
         store.dispatch(ReaderAction.UpdateReaderableAction(tabId = tab.id, readerable = false))
-            .joinBlocking()
+            
 
         assertFalse(readerState().readerable)
     }
@@ -55,12 +55,12 @@ class ReaderActionTest {
         assertFalse(readerState().active)
 
         store.dispatch(ReaderAction.UpdateReaderActiveAction(tabId = tab.id, active = true))
-            .joinBlocking()
+            
 
         assertTrue(readerState().active)
 
         store.dispatch(ReaderAction.UpdateReaderActiveAction(tabId = tab.id, active = false))
-            .joinBlocking()
+            
 
         assertFalse(readerState().active)
     }
@@ -70,12 +70,12 @@ class ReaderActionTest {
         assertFalse(readerState().active)
 
         store.dispatch(ReaderAction.UpdateReaderableCheckRequiredAction(tabId = tab.id, checkRequired = true))
-            .joinBlocking()
+            
 
         assertTrue(readerState().checkRequired)
 
         store.dispatch(ReaderAction.UpdateReaderableCheckRequiredAction(tabId = tab.id, checkRequired = false))
-            .joinBlocking()
+            
 
         assertFalse(readerState().checkRequired)
     }
@@ -85,12 +85,12 @@ class ReaderActionTest {
         assertFalse(readerState().active)
 
         store.dispatch(ReaderAction.UpdateReaderConnectRequiredAction(tabId = tab.id, connectRequired = true))
-            .joinBlocking()
+            
 
         assertTrue(readerState().connectRequired)
 
         store.dispatch(ReaderAction.UpdateReaderConnectRequiredAction(tabId = tab.id, connectRequired = false))
-            .joinBlocking()
+            
 
         assertFalse(readerState().connectRequired)
     }
@@ -100,7 +100,7 @@ class ReaderActionTest {
         assertNull(readerState().baseUrl)
 
         store.dispatch(ReaderAction.UpdateReaderBaseUrlAction(tabId = tab.id, baseUrl = "moz-extension://test"))
-            .joinBlocking()
+            
 
         assertEquals("moz-extension://test", readerState().baseUrl)
     }
@@ -110,7 +110,7 @@ class ReaderActionTest {
         assertNull(readerState().activeUrl)
 
         store.dispatch(ReaderAction.UpdateReaderActiveUrlAction(tabId = tab.id, activeUrl = "https://mozilla.org"))
-            .joinBlocking()
+            
 
         assertEquals("https://mozilla.org", readerState().activeUrl)
     }
@@ -120,12 +120,12 @@ class ReaderActionTest {
         assertFalse(readerState().active)
 
         store.dispatch(ReaderAction.UpdateReaderActiveAction(tabId = tab.id, active = true))
-            .joinBlocking()
+            
 
         assertTrue(readerState().active)
 
         store.dispatch(ReaderAction.UpdateReaderScrollYAction(tabId = tab.id, scrollY = 1234))
-            .joinBlocking()
+            
 
         assertEquals(1234, readerState().scrollY)
     }
@@ -135,7 +135,7 @@ class ReaderActionTest {
         assertFalse(readerState().active)
 
         store.dispatch(ReaderAction.UpdateReaderScrollYAction(tabId = tab.id, scrollY = 1234))
-            .joinBlocking()
+            
 
         assertNull(readerState().scrollY)
     }
@@ -145,10 +145,10 @@ class ReaderActionTest {
         assertNull(readerState().activeUrl)
 
         store.dispatch(ReaderAction.UpdateReaderActiveUrlAction(tabId = tab.id, activeUrl = "https://mozilla.org"))
-            .joinBlocking()
+            
         assertEquals("https://mozilla.org", readerState().activeUrl)
 
-        store.dispatch(ReaderAction.ClearReaderActiveUrlAction(tabId = tab.id)).joinBlocking()
+        store.dispatch(ReaderAction.ClearReaderActiveUrlAction(tabId = tab.id))
         assertNull(readerState().activeUrl)
     }
 }

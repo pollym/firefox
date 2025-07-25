@@ -791,7 +791,7 @@ class TranslationsMiddlewareTest {
                 tabId = tab.id,
                 operation = TranslationOperation.FETCH_NEVER_TRANSLATE_SITES,
             ),
-        ).joinBlocking()
+        )
         waitForIdle()
 
         verify(store).dispatch(

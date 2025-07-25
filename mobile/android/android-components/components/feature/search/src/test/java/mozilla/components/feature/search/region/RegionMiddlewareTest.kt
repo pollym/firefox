@@ -64,7 +64,7 @@ class RegionMiddlewareTest {
         )
 
         store.waitUntilIdle()
-        middleware.updateJob?.joinBlocking()
+        middleware.updateJob
         store.waitUntilIdle()
 
         assertNotEquals(RegionState.Default, store.state.search.region)
@@ -81,7 +81,7 @@ class RegionMiddlewareTest {
             middleware = listOf(middleware),
         )
 
-        store.dispatch(InitAction).joinBlocking()
+        store.dispatch(InitAction)
 
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
@@ -103,8 +103,8 @@ class RegionMiddlewareTest {
             middleware = listOf(middleware),
         )
 
-        store.dispatch(InitAction).joinBlocking()
-        middleware.updateJob?.joinBlocking()
+        store.dispatch(InitAction)
+        middleware.updateJob
         store.waitUntilIdle()
 
         assertEquals("FR", store.state.search.region!!.home)
@@ -113,8 +113,8 @@ class RegionMiddlewareTest {
         locationService.region = LocationService.Region("DE", "Germany")
         regionManager.update()
 
-        store.dispatch(InitAction).joinBlocking()
-        middleware.updateJob?.joinBlocking()
+        store.dispatch(InitAction)
+        middleware.updateJob
         store.waitUntilIdle()
 
         assertEquals("FR", store.state.search.region!!.home)
@@ -122,8 +122,8 @@ class RegionMiddlewareTest {
 
         clock.advanceBy(1000L * 60L * 60L * 24L * 21L)
 
-        store.dispatch(InitAction).joinBlocking()
-        middleware.updateJob?.joinBlocking()
+        store.dispatch(InitAction)
+        middleware.updateJob
         store.waitUntilIdle()
 
         assertEquals("DE", store.state.search.region!!.home)
@@ -141,8 +141,8 @@ class RegionMiddlewareTest {
             middleware = listOf(middleware),
         )
 
-        store.dispatch(InitAction).joinBlocking()
-        middleware.updateJob?.joinBlocking()
+        store.dispatch(InitAction)
+        middleware.updateJob
         store.waitUntilIdle()
 
         assertEquals("FR", store.state.search.region!!.home)
@@ -151,8 +151,8 @@ class RegionMiddlewareTest {
         locationService.region = LocationService.Region("DE", "Germany")
         regionManager.update()
 
-        store.dispatch(RefreshSearchEnginesAction).joinBlocking()
-        middleware.updateJob?.joinBlocking()
+        store.dispatch(RefreshSearchEnginesAction)
+        middleware.updateJob
         store.waitUntilIdle()
 
         assertEquals("FR", store.state.search.region!!.home)

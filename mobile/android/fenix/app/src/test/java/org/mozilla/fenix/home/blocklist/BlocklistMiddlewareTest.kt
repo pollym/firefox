@@ -52,7 +52,7 @@ class BlocklistMiddlewareTest {
                 recentHistory = appStore.state.recentHistory,
                 recentSyncedTabState = appStore.state.recentSyncedTabState,
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(updatedBookmark, appStore.state.bookmarks[0])
     }
@@ -79,7 +79,7 @@ class BlocklistMiddlewareTest {
                 recentHistory = appStore.state.recentHistory,
                 recentSyncedTabState = appStore.state.recentSyncedTabState,
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(updatedBookmark, appStore.state.bookmarks[0])
     }
@@ -106,7 +106,7 @@ class BlocklistMiddlewareTest {
                 recentHistory = appStore.state.recentHistory,
                 recentSyncedTabState = appStore.state.recentSyncedTabState,
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(updatedBookmark, appStore.state.bookmarks[0])
     }
@@ -133,7 +133,7 @@ class BlocklistMiddlewareTest {
                 recentHistory = appStore.state.recentHistory,
                 recentSyncedTabState = appStore.state.recentSyncedTabState,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(appStore.state.bookmarks.isEmpty())
     }
@@ -162,7 +162,7 @@ class BlocklistMiddlewareTest {
                 recentHistory = appStore.state.recentHistory,
                 recentSyncedTabState = appStore.state.recentSyncedTabState,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(appStore.state.bookmarks.isEmpty())
         assertTrue(appStore.state.recentTabs.isEmpty())
@@ -200,7 +200,7 @@ class BlocklistMiddlewareTest {
                 recentHistory = appStore.state.recentHistory,
                 recentSyncedTabState = appStore.state.recentSyncedTabState,
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(unblockedBookmark, appStore.state.bookmarks[0])
         assertEquals(unblockedRecentTab, appStore.state.recentTabs[0])
@@ -223,7 +223,7 @@ class BlocklistMiddlewareTest {
 
         appStore.dispatch(
             AppAction.RemoveBookmark(removedBookmark),
-        ).joinBlocking()
+        )
 
         val capturedAction = captureMiddleware.findFirstAction(AppAction.Change::class)
         assertEquals(emptyList<Bookmark>(), capturedAction.bookmarks)
@@ -253,7 +253,7 @@ class BlocklistMiddlewareTest {
                 recentHistory = appStore.state.recentHistory,
                 recentSyncedTabState = appStore.state.recentSyncedTabState,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(appStore.state.bookmarks.isEmpty())
     }
@@ -281,7 +281,7 @@ class BlocklistMiddlewareTest {
                 recentHistory = appStore.state.recentHistory,
                 recentSyncedTabState = appStore.state.recentSyncedTabState,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(appStore.state.bookmarks.isEmpty())
     }
@@ -309,7 +309,7 @@ class BlocklistMiddlewareTest {
                 recentHistory = appStore.state.recentHistory,
                 recentSyncedTabState = appStore.state.recentSyncedTabState,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(appStore.state.bookmarks.isEmpty())
     }
@@ -349,7 +349,7 @@ class BlocklistMiddlewareTest {
                     ),
                 ),
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(
             allowedTab,
@@ -371,7 +371,7 @@ class BlocklistMiddlewareTest {
             AppAction.RecentSyncedTabStateChange(
                 RecentSyncedTabState.None,
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(RecentSyncedTabState.None, appStore.state.recentSyncedTabState)
     }
@@ -400,7 +400,7 @@ class BlocklistMiddlewareTest {
                     listOf(blockedTab),
                 ),
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(
             RecentSyncedTabState.None,
@@ -447,7 +447,7 @@ class BlocklistMiddlewareTest {
             AppAction.RemoveRecentSyncedTab(
                 currentTabs.first(),
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(
             2,

@@ -36,7 +36,7 @@ class HistoryTelemetryMiddlewareTest {
             middleware = listOf(middleware),
         )
 
-        store.dispatch(HistoryFragmentAction.HistoryItemClicked(history)).joinBlocking()
+        store.dispatch(HistoryFragmentAction.HistoryItemClicked(history))
 
         assertNotNull(GleanHistory.openedItem.testGetValue())
     }
@@ -52,7 +52,7 @@ class HistoryTelemetryMiddlewareTest {
             middleware = listOf(middleware),
         )
 
-        store.dispatch(HistoryFragmentAction.HistoryItemClicked(history)).joinBlocking()
+        store.dispatch(HistoryFragmentAction.HistoryItemClicked(history))
 
         assertNull(GleanHistory.openedItem.testGetValue())
     }
@@ -63,7 +63,7 @@ class HistoryTelemetryMiddlewareTest {
         val store =
             HistoryFragmentStore(HistoryFragmentState.initial, middleware = listOf(middleware))
 
-        store.dispatch(HistoryFragmentAction.HistoryItemClicked(history)).joinBlocking()
+        store.dispatch(HistoryFragmentAction.HistoryItemClicked(history))
 
         assertNotNull(GleanHistory.searchTermGroupTapped.testGetValue())
     }
@@ -74,7 +74,7 @@ class HistoryTelemetryMiddlewareTest {
         val store =
             HistoryFragmentStore(HistoryFragmentState.initial, middleware = listOf(middleware))
 
-        store.dispatch(HistoryFragmentAction.DeleteItems(setOf(history))).joinBlocking()
+        store.dispatch(HistoryFragmentAction.DeleteItems(setOf(history)))
 
         assertNotNull(GleanHistory.removed.testGetValue())
     }
@@ -84,7 +84,7 @@ class HistoryTelemetryMiddlewareTest {
         val store =
             HistoryFragmentStore(HistoryFragmentState.initial, middleware = listOf(middleware))
 
-        store.dispatch(HistoryFragmentAction.DeleteTimeRange(RemoveTimeFrame.LastHour)).joinBlocking()
+        store.dispatch(HistoryFragmentAction.DeleteTimeRange(RemoveTimeFrame.LastHour))
 
         assertNotNull(GleanHistory.removedLastHour.testGetValue())
     }
@@ -94,7 +94,7 @@ class HistoryTelemetryMiddlewareTest {
         val store =
             HistoryFragmentStore(HistoryFragmentState.initial, middleware = listOf(middleware))
 
-        store.dispatch(HistoryFragmentAction.DeleteTimeRange(RemoveTimeFrame.TodayAndYesterday)).joinBlocking()
+        store.dispatch(HistoryFragmentAction.DeleteTimeRange(RemoveTimeFrame.TodayAndYesterday))
 
         assertNotNull(GleanHistory.removedTodayAndYesterday.testGetValue())
     }
@@ -104,7 +104,7 @@ class HistoryTelemetryMiddlewareTest {
         val store =
             HistoryFragmentStore(HistoryFragmentState.initial, middleware = listOf(middleware))
 
-        store.dispatch(HistoryFragmentAction.DeleteTimeRange(null)).joinBlocking()
+        store.dispatch(HistoryFragmentAction.DeleteTimeRange(null))
 
         assertNotNull(GleanHistory.removedAll.testGetValue())
     }

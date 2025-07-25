@@ -169,7 +169,7 @@ class SitePermissionsFeatureTest {
         verify(sitePermissionFeature).setupLoadingCollector()
 
         // when
-        mockStore.dispatch(ContentAction.UpdateLoadingStateAction(SESSION_ID, true)).joinBlocking()
+        mockStore.dispatch(ContentAction.UpdateLoadingStateAction(SESSION_ID, true))
 
         // then
         verify(mockStore).dispatch(
@@ -187,7 +187,7 @@ class SitePermissionsFeatureTest {
         sitePermissionFeature.stop()
 
         // when
-        mockStore.dispatch(ContentAction.UpdateLoadingStateAction(SESSION_ID, true)).joinBlocking()
+        mockStore.dispatch(ContentAction.UpdateLoadingStateAction(SESSION_ID, true))
 
         verify(mockStorage).clearTemporaryPermissions()
 

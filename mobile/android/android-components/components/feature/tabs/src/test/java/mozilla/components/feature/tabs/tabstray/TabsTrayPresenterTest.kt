@@ -96,7 +96,7 @@ class TabsTrayPresenterTest {
             TabListAction.AddTabAction(
                 createTab("https://developer.mozilla.org/"),
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(3, tabsTray.updateTabs!!.size)
 
@@ -130,12 +130,12 @@ class TabsTrayPresenterTest {
 
         assertEquals(2, tabsTray.updateTabs!!.size)
 
-        store.dispatch(TabListAction.RemoveTabAction("a")).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction("a"))
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(1, tabsTray.updateTabs!!.size)
 
-        store.dispatch(TabListAction.RemoveTabAction("b")).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction("b"))
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(0, tabsTray.updateTabs!!.size)
@@ -170,7 +170,7 @@ class TabsTrayPresenterTest {
 
         assertEquals(2, tabsTray.updateTabs!!.size)
 
-        store.dispatch(TabListAction.RemoveAllTabsAction()).joinBlocking()
+        store.dispatch(TabListAction.RemoveAllTabsAction())
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(0, tabsTray.updateTabs!!.size)
@@ -208,7 +208,7 @@ class TabsTrayPresenterTest {
         assertEquals(5, tabsTray.updateTabs!!.size)
         assertEquals("a", tabsTray.selectedTabId)
 
-        store.dispatch(TabListAction.SelectTabAction("d")).joinBlocking()
+        store.dispatch(TabListAction.SelectTabAction("d"))
         dispatcher.scheduler.advanceUntilIdle()
 
         println("Selection: " + store.state.selectedTabId)
@@ -273,7 +273,7 @@ class TabsTrayPresenterTest {
 
         Assert.assertFalse(closed)
 
-        store.dispatch(TabListAction.RemoveAllTabsAction()).joinBlocking()
+        store.dispatch(TabListAction.RemoveAllTabsAction())
         dispatcher.scheduler.advanceUntilIdle()
 
         assertTrue(closed)
@@ -309,12 +309,12 @@ class TabsTrayPresenterTest {
 
         Assert.assertFalse(closed)
 
-        store.dispatch(TabListAction.RemoveTabAction("a")).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction("a"))
         dispatcher.scheduler.advanceUntilIdle()
 
         Assert.assertFalse(closed)
 
-        store.dispatch(TabListAction.RemoveTabAction("b")).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction("b"))
         dispatcher.scheduler.advanceUntilIdle()
 
         assertTrue(closed)

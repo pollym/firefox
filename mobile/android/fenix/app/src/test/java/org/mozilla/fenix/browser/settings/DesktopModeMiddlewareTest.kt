@@ -94,7 +94,7 @@ class DesktopModeMiddlewareTest {
 
         advanceUntilIdle()
         store.waitUntilIdle()
-        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode).joinBlocking()
+        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode)
         advanceUntilIdle()
         store.waitUntilIdle()
     }
@@ -118,7 +118,7 @@ class DesktopModeMiddlewareTest {
         advanceUntilIdle()
         store.waitUntilIdle()
 
-        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode).joinBlocking()
+        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode)
     }
 
     @Test
@@ -140,7 +140,7 @@ class DesktopModeMiddlewareTest {
 
         advanceUntilIdle()
         store.waitUntilIdle()
-        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode).joinBlocking()
+        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode)
         advanceUntilIdle()
         store.waitUntilIdle()
 
@@ -168,7 +168,7 @@ class DesktopModeMiddlewareTest {
 
         advanceUntilIdle()
         store.waitUntilIdle()
-        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode).joinBlocking()
+        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode)
         advanceUntilIdle()
         store.waitUntilIdle()
 
@@ -192,7 +192,7 @@ class DesktopModeMiddlewareTest {
 
         advanceUntilIdle()
         store.waitUntilIdle()
-        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode).joinBlocking()
+        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode)
         advanceUntilIdle()
         store.waitUntilIdle()
 

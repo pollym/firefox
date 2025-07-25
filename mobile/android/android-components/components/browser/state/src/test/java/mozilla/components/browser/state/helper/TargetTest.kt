@@ -69,7 +69,7 @@ class TargetTest {
 
         store.dispatch(
             TabListAction.SelectTabAction("example"),
-        ).joinBlocking()
+        )
 
         assertEquals(
             "https://www.example.org",
@@ -78,7 +78,7 @@ class TargetTest {
 
         store.dispatch(
             TabListAction.RemoveAllTabsAction(),
-        ).joinBlocking()
+        )
 
         assertNull(
             Target.SelectedTab.lookupIn(store),

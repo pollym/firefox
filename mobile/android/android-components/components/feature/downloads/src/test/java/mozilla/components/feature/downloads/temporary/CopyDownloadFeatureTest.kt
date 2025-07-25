@@ -106,7 +106,7 @@ class CopyDownloadFeatureTest {
         val action = CopyInternetResourceAction.AddCopyAction("123", download)
         copyFeature.start()
 
-        store.dispatch(action).joinBlocking()
+        store.dispatch(action)
         dispatcher.scheduler.advanceUntilIdle()
 
         verify(copyFeature).startCopy(download)

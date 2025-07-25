@@ -61,7 +61,7 @@ class LocaleMiddlewareTest {
 
         assertEquals(store.state.locale, null)
 
-        store.dispatch(LocaleAction.RestoreLocaleStateAction).joinBlocking()
+        store.dispatch(LocaleAction.RestoreLocaleStateAction)
         store.waitUntilIdle()
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -91,7 +91,7 @@ class LocaleMiddlewareTest {
         assertEquals(store.state.locale, null)
 
         val newLocale = "es".toLocale()
-        store.dispatch(LocaleAction.UpdateLocaleAction(newLocale)).joinBlocking()
+        store.dispatch(LocaleAction.UpdateLocaleAction(newLocale))
         dispatcher.scheduler.advanceUntilIdle()
 
         verify(localeManager).setNewLocale(testContext, locale = newLocale)

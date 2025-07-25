@@ -319,7 +319,7 @@ class WebExtensionSupportTest {
         verify(engineSession).loadUrl("url")
 
         // Update non-existing tab
-        store.dispatch(TabListAction.RemoveTabAction(tabId)).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction(tabId))
         assertFalse(tabHandlerCaptor.value.onUpdateTab(ext, engineSession, true, "url"))
     }
 
@@ -360,7 +360,7 @@ class WebExtensionSupportTest {
         verify(engineSession).loadUrl("url")
 
         // Update non-existing tab
-        store.dispatch(CustomTabListAction.RemoveCustomTabAction(tabId)).joinBlocking()
+        store.dispatch(CustomTabListAction.RemoveCustomTabAction(tabId))
         assertFalse(tabHandlerCaptor.value.onUpdateTab(ext, engineSession, true, "url"))
     }
 
@@ -426,7 +426,7 @@ class WebExtensionSupportTest {
         verify(store, times(3)).dispatch(webExtensionActionCaptor.capture())
         assertEquals(ext.id, (webExtensionActionCaptor.allValues.last() as WebExtensionAction.UpdateTabBrowserAction).extensionId)
 
-        store.dispatch(ContentAction.UpdateUrlAction(sessionId = "1", url = "https://www.firefox.com")).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(sessionId = "1", url = "https://www.firefox.com"))
         verify(ext, times(1)).registerActionHandler(eq(engineSession), actionHandlerCaptor.capture())
         verify(ext, times(1)).registerTabHandler(eq(engineSession), tabHandlerCaptor.capture())
 
@@ -667,12 +667,12 @@ class WebExtensionSupportTest {
         )
 
         val engineSession1: EngineSession = mock()
-        store.dispatch(EngineAction.LinkEngineSessionAction(tab.id, engineSession1)).joinBlocking()
+        store.dispatch(EngineAction.LinkEngineSessionAction(tab.id, engineSession1))
         verify(ext).registerActionHandler(eq(engineSession1), actionHandlerCaptor.capture())
         verify(ext).registerTabHandler(eq(engineSession1), tabHandlerCaptor.capture())
 
         val engineSession2: EngineSession = mock()
-        store.dispatch(EngineAction.LinkEngineSessionAction(customTab.id, engineSession2)).joinBlocking()
+        store.dispatch(EngineAction.LinkEngineSessionAction(customTab.id, engineSession2))
         verify(ext).registerActionHandler(eq(engineSession2), actionHandlerCaptor.capture())
         verify(ext).registerTabHandler(eq(engineSession2), tabHandlerCaptor.capture())
     }
@@ -1048,7 +1048,6 @@ class WebExtensionSupportTest {
 
         // Make sure we're running a single cleanup and stop the scope after
         store.dispatch(TabListAction.AddTabAction(createTab(id = "4", url = "moz-extension://1234-5678-90/")))
-            .joinBlocking()
 
         store.waitUntilIdle()
         assertNotNull(store.state.findTab("4"))

@@ -51,7 +51,7 @@ internal class FxAccountsPingTest {
             SyncAction.UpdateAccount(
                 account = mockAccount,
             ),
-        ).joinBlocking()
+        )
         assertEquals("123", syncStore.state.account?.uid)
         if (!validatorRun) fail("The ping was not sent")
     }
@@ -65,7 +65,7 @@ internal class FxAccountsPingTest {
             SyncAction.UpdateAccount(
                 account = mockAccount,
             ),
-        ).joinBlocking()
+        )
         assertEquals(syncStore.state.account?.uid, "123")
         fxAccounts.testBeforeNextSubmit {
             validatorRun = true
@@ -74,7 +74,7 @@ internal class FxAccountsPingTest {
             SyncAction.UpdateAccount(
                 account = mockAccount.copy(uid = null),
             ),
-        ).joinBlocking()
+        )
         assertEquals(null, syncStore.state.account?.uid)
         if (validatorRun) fail("The ping was sent")
     }
@@ -88,7 +88,7 @@ internal class FxAccountsPingTest {
             SyncAction.UpdateAccount(
                 account = mockAccount,
             ),
-        ).joinBlocking()
+        )
         assertEquals("123", syncStore.state.account?.uid)
         fxAccounts.testBeforeNextSubmit {
             validatorRun = true
@@ -97,7 +97,7 @@ internal class FxAccountsPingTest {
             SyncAction.UpdateAccount(
                 account = mockAccount.copy(email = "newEmail@email.com"),
             ),
-        ).joinBlocking()
+        )
         assertEquals("123", syncStore.state.account?.uid)
         assertEquals("newEmail@email.com", syncStore.state.account?.email)
         if (validatorRun) fail("The ping was sent")

@@ -91,13 +91,13 @@ class HomepageThumbnailsTest {
             TabListAction.AddTabAction(
                 createTab(homepageUrl, id = "1"),
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             TabListAction.SelectTabAction(
             tabId = "1",
         ),
-        ).joinBlocking()
+        )
 
         captureActionsMiddleware.assertLastAction(ContentAction.UpdateThumbnailAction::class) {
             assertEquals("1", it.sessionId)
@@ -107,13 +107,13 @@ class HomepageThumbnailsTest {
             TabListAction.AddTabAction(
                 createTab(homepageUrl, id = "2"),
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             TabListAction.SelectTabAction(
             "2",
         ),
-        ).joinBlocking()
+        )
 
         captureActionsMiddleware.assertLastAction(ContentAction.UpdateThumbnailAction::class) {
             assertEquals("2", it.sessionId)
@@ -123,13 +123,13 @@ class HomepageThumbnailsTest {
             TabListAction.AddTabAction(
                 createTab("www.google.com", id = "3"),
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             TabListAction.SelectTabAction(
             tabId = "3",
         ),
-        ).joinBlocking()
+        )
 
         captureActionsMiddleware.assertLastAction(ContentAction.UpdateThumbnailAction::class) {
             assertEquals("2", it.sessionId)
@@ -139,13 +139,13 @@ class HomepageThumbnailsTest {
             TabListAction.AddTabAction(
                 createTab(homepageUrl, id = "4"),
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             TabListAction.SelectTabAction(
                 tabId = "4",
             ),
-        ).joinBlocking()
+        )
 
         captureActionsMiddleware.assertLastAction(ContentAction.UpdateThumbnailAction::class) {
             assertEquals("4", it.sessionId)
@@ -165,7 +165,7 @@ class HomepageThumbnailsTest {
             TabListAction.AddTabAction(
                 createTab(homepageUrl, id = "1"),
             ),
-        ).joinBlocking()
+        )
 
         captureActionsMiddleware.assertNotDispatched(ContentAction.UpdateThumbnailAction::class)
     }

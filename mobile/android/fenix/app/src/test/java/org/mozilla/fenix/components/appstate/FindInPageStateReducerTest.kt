@@ -17,7 +17,7 @@ class FindInPageStateReducerTest {
     fun `WHEN find in page started action is dispatched THEN state is updated`() {
         val appStore = AppStore()
 
-        appStore.dispatch(FindInPageAction.FindInPageStarted).joinBlocking()
+        appStore.dispatch(FindInPageAction.FindInPageStarted)
 
         assertTrue(appStore.state.showFindInPage)
     }
@@ -26,7 +26,7 @@ class FindInPageStateReducerTest {
     fun `WHEN find in page dismissed action is dispatched THEN state is updated`() {
         val appStore = AppStore()
 
-        appStore.dispatch(FindInPageAction.FindInPageDismissed).joinBlocking()
+        appStore.dispatch(FindInPageAction.FindInPageDismissed)
 
         assertFalse(appStore.state.showFindInPage)
     }
@@ -35,7 +35,7 @@ class FindInPageStateReducerTest {
     fun `WHEN find in page shown action is dispatched THEN state is updated`() {
         val appStore = AppStore()
 
-        appStore.dispatch(FindInPageAction.FindInPageShown).joinBlocking()
+        appStore.dispatch(FindInPageAction.FindInPageShown)
 
         assertFalse(appStore.state.showFindInPage)
     }

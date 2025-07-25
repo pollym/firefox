@@ -43,7 +43,7 @@ class ReviewPromptMiddlewareTest {
     fun `GIVEN prompt has never been shown AND a trigger is satisfied WHEN check requested THEN sets eligible`() {
         triggers = sequenceOf(true)
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertTrue(store.state.reviewPrompt is ReviewPromptState.Eligible)
     }
@@ -52,7 +52,7 @@ class ReviewPromptMiddlewareTest {
     fun `GIVEN prompt has never been shown AND the first trigger is satisfied WHEN check requested THEN sets eligible`() {
         triggers = sequenceOf(true, false, false)
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertTrue(store.state.reviewPrompt is ReviewPromptState.Eligible)
     }
@@ -66,7 +66,7 @@ class ReviewPromptMiddlewareTest {
             yield(true)
         }
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertFalse(checkedOtherTriggers)
     }
@@ -75,7 +75,7 @@ class ReviewPromptMiddlewareTest {
     fun `GIVEN prompt has never been shown AND one of the triggers is satisfied WHEN check requested THEN sets eligible`() {
         triggers = sequenceOf(false, false, true, false, false)
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertTrue(store.state.reviewPrompt is ReviewPromptState.Eligible)
     }
@@ -84,7 +84,7 @@ class ReviewPromptMiddlewareTest {
     fun `GIVEN prompt has never been shown AND no triggers are satisfied WHEN check requested THEN sets not eligible`() {
         triggers = sequenceOf(false)
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertEquals(
             AppState(reviewPrompt = ReviewPromptState.NotEligible),
@@ -96,7 +96,7 @@ class ReviewPromptMiddlewareTest {
     fun `GIVEN prompt has never been shown AND there are no triggers WHEN check requested THEN sets not eligible`() {
         triggers = emptySequence()
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertEquals(
             AppState(reviewPrompt = ReviewPromptState.NotEligible),
@@ -109,7 +109,7 @@ class ReviewPromptMiddlewareTest {
         settings.lastReviewPromptTimeInMillis = MORE_THAN_4_MONTHS_FROM_TEST_TIME_NOW
         triggers = sequenceOf(true)
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertTrue(store.state.reviewPrompt is ReviewPromptState.Eligible)
     }
@@ -118,7 +118,7 @@ class ReviewPromptMiddlewareTest {
     fun `GIVEN prompt has been shown less than 4 months ago WHEN check requested THEN sets not eligible`() {
         settings.lastReviewPromptTimeInMillis = LESS_THAN_4_MONTHS_FROM_TEST_TIME_NOW
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertEquals(
             AppState(reviewPrompt = ReviewPromptState.NotEligible),
@@ -128,27 +128,27 @@ class ReviewPromptMiddlewareTest {
 
     @Test
     fun `GIVEN check ran WHEN check requested again THEN does nothing`() {
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
         val expectedState = store.state
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertEquals(expectedState, store.state)
     }
 
     @Test
     fun `GIVEN review prompt shown WHEN check requested THEN does nothing`() {
-        store.dispatch(ReviewPromptAction.ReviewPromptShown).joinBlocking()
+        store.dispatch(ReviewPromptAction.ReviewPromptShown)
         val expectedState = store.state
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertEquals(expectedState, store.state)
     }
 
     @Test
     fun `WHEN review prompt shown THEN last review prompt time updated`() {
-        store.dispatch(ReviewPromptAction.ReviewPromptShown).joinBlocking()
+        store.dispatch(ReviewPromptAction.ReviewPromptShown)
 
         assertEquals(TEST_TIME_NOW, settings.lastReviewPromptTimeInMillis)
     }
@@ -173,7 +173,7 @@ class ReviewPromptMiddlewareTest {
         settings.isTelemetryEnabled = true
         triggers = sequenceOf(true)
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertEquals(
             AppState(reviewPrompt = ReviewPromptState.Eligible(Type.Custom)),
@@ -186,7 +186,7 @@ class ReviewPromptMiddlewareTest {
         settings.isTelemetryEnabled = false
         triggers = sequenceOf(true)
 
-        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt).joinBlocking()
+        store.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
 
         assertEquals(
             AppState(reviewPrompt = ReviewPromptState.Eligible(Type.PlayStore)),
@@ -215,10 +215,10 @@ class ReviewPromptMiddlewareTest {
 
     private fun assertNoOp(action: ReviewPromptAction) {
         val withoutMiddleware = AppStore()
-        withoutMiddleware.dispatch(action).joinBlocking()
+        withoutMiddleware.dispatch(action)
         val expectedState = withoutMiddleware.state
 
-        store.dispatch(action).joinBlocking()
+        store.dispatch(action)
 
         assertEquals(
             expectedState,

@@ -85,7 +85,7 @@ class DefaultCollectionCreationControllerTest {
 
         browserStore.dispatch(
             TabListAction.AddMultipleTabsAction(listOf(tab1, tab2)),
-        ).joinBlocking()
+        )
 
         coEvery { tabCollectionStorage.addTabsToCollection(any(), any()) } returns 1L
         coEvery { tabCollectionStorage.createCollection(any(), any()) } returns 1L
@@ -192,7 +192,7 @@ class DefaultCollectionCreationControllerTest {
         val tab2 = createTab("https://www.mozilla.org", id = "session-2")
         browserStore.dispatch(
             TabListAction.AddMultipleTabsAction(listOf(tab1, tab2)),
-        ).joinBlocking()
+        )
 
         val tabs = listOf(
             Tab("session-1", "", "", ""),

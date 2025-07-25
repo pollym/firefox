@@ -34,7 +34,7 @@ class TrustPanelTelemetryMiddlewareTest {
         )
         assertNull(TrackingProtection.exceptionAdded.testGetValue())
 
-        store.dispatch(TrustPanelAction.ToggleTrackingProtection).joinBlocking()
+        store.dispatch(TrustPanelAction.ToggleTrackingProtection)
 
         assertNotNull(TrackingProtection.exceptionAdded.testGetValue())
     }
@@ -48,7 +48,7 @@ class TrustPanelTelemetryMiddlewareTest {
         )
         assertNull(TrackingProtection.exceptionAdded.testGetValue())
 
-        store.dispatch(TrustPanelAction.ToggleTrackingProtection).joinBlocking()
+        store.dispatch(TrustPanelAction.ToggleTrackingProtection)
 
         assertNull(TrackingProtection.exceptionAdded.testGetValue())
     }

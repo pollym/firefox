@@ -148,7 +148,7 @@ class AppStoreReducerTest {
 
         appStore.dispatch(
             AppAction.TranslationsAction.TranslationStarted(sessionId = sessionId),
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.TranslationInProgress(sessionId = sessionId),
@@ -178,7 +178,7 @@ class AppStoreReducerTest {
                 parentNode = parentNode,
             ),
         )
-            .joinBlocking()
+            
 
         assertEquals(
             SnackbarState.BookmarkAdded(
@@ -195,7 +195,7 @@ class AppStoreReducerTest {
         val bookmarkTitle = "test"
 
         appStore.dispatch(AppAction.BookmarkAction.BookmarkDeleted(title = bookmarkTitle))
-            .joinBlocking()
+            
 
         assertEquals(
             SnackbarState.BookmarkDeleted(title = bookmarkTitle),
@@ -209,7 +209,7 @@ class AppStoreReducerTest {
 
         appStore.dispatch(
             AppAction.DeleteAndQuitStarted,
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.DeletingBrowserDataInProgress,
@@ -223,7 +223,7 @@ class AppStoreReducerTest {
         assertFalse(appStore.state.openInFirefoxRequested)
 
         appStore.dispatch(AppAction.OpenInFirefoxStarted)
-            .joinBlocking()
+            
 
         assertTrue(appStore.state.openInFirefoxRequested)
     }
@@ -238,7 +238,7 @@ class AppStoreReducerTest {
         assertTrue(appStore.state.openInFirefoxRequested)
 
         appStore.dispatch(AppAction.OpenInFirefoxFinished)
-            .joinBlocking()
+            
 
         assertFalse(appStore.state.openInFirefoxRequested)
     }
@@ -249,7 +249,7 @@ class AppStoreReducerTest {
 
         appStore.dispatch(
             AppAction.UserAccountAuthenticated,
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.UserAccountAuthenticated,
@@ -263,7 +263,7 @@ class AppStoreReducerTest {
 
         appStore.dispatch(
             AppAction.SiteDataCleared,
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.SiteDataCleared,
@@ -277,7 +277,7 @@ class AppStoreReducerTest {
 
         appStore.dispatch(
             AppAction.CurrentTabClosed(true),
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.CurrentTabClosed(true),
@@ -289,7 +289,7 @@ class AppStoreReducerTest {
     fun `WHEN the current tab's URL has been copied THEN show a snackbar`() {
         val appStore = AppStore()
 
-        appStore.dispatch(AppAction.URLCopiedToClipboard).joinBlocking()
+        appStore.dispatch(AppAction.URLCopiedToClipboard)
 
         assertEquals(
             SnackbarState.URLCopiedToClipboard,
@@ -303,7 +303,7 @@ class AppStoreReducerTest {
 
         appStore.dispatch(
             AppAction.DownloadAction.DownloadInProgress("id"),
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.DownloadInProgress("id"),
@@ -317,7 +317,7 @@ class AppStoreReducerTest {
 
         appStore.dispatch(
             AppAction.DownloadAction.DownloadFailed("fileName"),
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.DownloadFailed("fileName"),
@@ -345,7 +345,7 @@ class AppStoreReducerTest {
             AppAction.DownloadAction.DownloadCompleted(
                 downloadState,
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.DownloadCompleted(
@@ -377,7 +377,7 @@ class AppStoreReducerTest {
             AppAction.DownloadAction.CannotOpenFile(
                 downloadState,
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(
             SnackbarState.CannotOpenFileError(

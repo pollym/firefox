@@ -23,7 +23,7 @@ class StoreExceptionTest {
 
         val store = Store(TestState(counter = 23), throwingReducer)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
 
         // Wait for the main looper to process the re-thrown exception.
         ShadowLooper.idleMainLooper()

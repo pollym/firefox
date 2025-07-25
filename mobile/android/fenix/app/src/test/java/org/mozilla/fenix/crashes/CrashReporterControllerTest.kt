@@ -84,7 +84,7 @@ class CrashReporterControllerTest {
         appStore = spyk(appStore)
         controller = CrashReporterController(sessionId, 2, components, enabledCrashReporterSettings, navController, appStore)
 
-        controller.submitPendingNonFatalCrashesIfNecessary(false)?.joinBlocking()
+        controller.submitPendingNonFatalCrashesIfNecessary(false)
 
         verify(exactly = 0) { components.analytics.crashReporter.submitReport(crash) }
         verify { appStore.dispatch(AppAction.RemoveAllNonFatalCrashes) }
@@ -98,7 +98,7 @@ class CrashReporterControllerTest {
         appStore = spyk(appStore)
         controller = CrashReporterController(sessionId, 2, components, disabledCrashReporterSettings, navController, appStore)
 
-        controller.submitPendingNonFatalCrashesIfNecessary(true)?.joinBlocking()
+        controller.submitPendingNonFatalCrashesIfNecessary(true)
 
         verify(exactly = 0) { components.analytics.crashReporter.submitReport(crash) }
         verify { appStore.dispatch(AppAction.RemoveAllNonFatalCrashes) }
@@ -112,7 +112,7 @@ class CrashReporterControllerTest {
         appStore = spyk(appStore)
         controller = CrashReporterController(sessionId, 2, components, disabledCrashReporterSettings, navController, appStore)
 
-        controller.submitPendingNonFatalCrashesIfNecessary(true)!!.joinBlocking()
+        controller.submitPendingNonFatalCrashesIfNecessary(true)!!
 
         verify { components.analytics.crashReporter.submitReport(crash) }
         verify { appStore.dispatch(AppAction.RemoveNonFatalCrash(crash)) }

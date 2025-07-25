@@ -55,7 +55,7 @@ class CoordinateScrollingFeatureTest {
         scrollFeature.start()
         shadowOf(getMainLooper()).idle()
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction("mozilla", true)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction("mozilla", true))
 
         verify((mockView.layoutParams as AppBarLayout.LayoutParams)).scrollFlags = 0
         verify(mockView).layoutParams = any()
@@ -68,7 +68,7 @@ class CoordinateScrollingFeatureTest {
         scrollFeature.start()
         shadowOf(getMainLooper()).idle()
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction("mozilla", true)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction("mozilla", true))
 
         verify((mockView.layoutParams as AppBarLayout.LayoutParams)).scrollFlags = DEFAULT_SCROLL_FLAGS
         verify(mockView).layoutParams = any()
@@ -81,7 +81,7 @@ class CoordinateScrollingFeatureTest {
         scrollFeature.start()
         shadowOf(getMainLooper()).idle()
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction("mozilla", true)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction("mozilla", true))
 
         verify((mockView.layoutParams as AppBarLayout.LayoutParams)).scrollFlags = 12
         verify(mockView).layoutParams = any()

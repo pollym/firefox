@@ -138,7 +138,7 @@ class DefaultPrivateBrowsingControllerTest {
             private = false,
             engineSession = mockk(relaxed = true),
         )
-        store.dispatch(TabListAction.AddTabAction(tab, select = true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab, select = true))
 
         val newMode = BrowsingMode.Private
 
@@ -168,7 +168,7 @@ class DefaultPrivateBrowsingControllerTest {
             private = true,
             engineSession = mockk(relaxed = true),
         )
-        store.dispatch(TabListAction.AddTabAction(tab, select = true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab, select = true))
 
         val newMode = BrowsingMode.Normal
 

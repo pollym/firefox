@@ -205,22 +205,22 @@ class WebAppHideToolbarFeatureTest {
 
         store.dispatch(
             ContentAction.UpdateUrlAction(customTabId, "https://mozilla.com/example-page"),
-        ).joinBlocking()
+        )
         assertFalse(toolbarVisible)
 
         store.dispatch(
             ContentAction.UpdateUrlAction(customTabId, "https://firefox.com/out-of-scope"),
-        ).joinBlocking()
+        )
         assertTrue(toolbarVisible)
 
         store.dispatch(
             ContentAction.UpdateUrlAction(customTabId, "https://mozilla.com/back-in-scope"),
-        ).joinBlocking()
+        )
         assertFalse(toolbarVisible)
 
         store.dispatch(
             ContentAction.UpdateUrlAction(customTabId, "https://m.mozilla.com/second-origin"),
-        ).joinBlocking()
+        )
         assertFalse(toolbarVisible)
     }
 
@@ -240,22 +240,22 @@ class WebAppHideToolbarFeatureTest {
 
         store.dispatch(
             ContentAction.UpdateUrlAction(customTabId, "https://mozilla.github.io/my-app/"),
-        ).joinBlocking()
+        )
         assertFalse(toolbarVisible)
 
         store.dispatch(
             ContentAction.UpdateUrlAction(customTabId, "https://firefox.com/out-of-scope"),
-        ).joinBlocking()
+        )
         assertTrue(toolbarVisible)
 
         store.dispatch(
             ContentAction.UpdateUrlAction(customTabId, "https://mozilla.github.io/my-app-almost-in-scope"),
-        ).joinBlocking()
+        )
         assertTrue(toolbarVisible)
 
         store.dispatch(
             ContentAction.UpdateUrlAction(customTabId, "https://mozilla.github.io/my-app/sub-page"),
-        ).joinBlocking()
+        )
         assertFalse(toolbarVisible)
     }
 
@@ -275,12 +275,12 @@ class WebAppHideToolbarFeatureTest {
 
         store.dispatch(
             ContentAction.UpdateUrlAction(customTabId, "https://mozilla.github.io/prefix/"),
-        ).joinBlocking()
+        )
         assertFalse(toolbarVisible)
 
         store.dispatch(
             ContentAction.UpdateUrlAction(customTabId, "https://mozilla.github.io/prefix-of/resource.html"),
-        ).joinBlocking()
+        )
         assertFalse(toolbarVisible)
     }
 
@@ -314,7 +314,7 @@ class WebAppHideToolbarFeatureTest {
                 "https://m.mozilla.com".toUri(),
                 VerificationStatus.PENDING,
             ),
-        ).joinBlocking()
+        )
         assertTrue(toolbarVisible)
 
         customTabsStore.dispatch(
@@ -324,7 +324,7 @@ class WebAppHideToolbarFeatureTest {
                 "https://mozilla.com".toUri(),
                 VerificationStatus.PENDING,
             ),
-        ).joinBlocking()
+        )
         assertFalse(toolbarVisible)
     }
 

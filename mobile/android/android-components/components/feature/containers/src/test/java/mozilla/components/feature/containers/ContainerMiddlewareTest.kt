@@ -51,7 +51,7 @@ class ContainerMiddlewareTest {
             store.waitUntilIdle() // wait to consume InitAction
             store.waitUntilIdle() // wait to consume AddContainersAction
 
-            store.dispatch(ContainerAction.AddContainerAction(container)).joinBlocking()
+            store.dispatch(ContainerAction.AddContainerAction(container))
 
             verify(storage).addContainer(
                 container.contextId,
@@ -96,7 +96,7 @@ class ContainerMiddlewareTest {
             store.waitUntilIdle() // wait to consume AddContainersAction
 
             store.dispatch(ContainerAction.RemoveContainerAction(container.contextId))
-                .joinBlocking()
+                
 
             verify(storage).removeContainer(container)
         }

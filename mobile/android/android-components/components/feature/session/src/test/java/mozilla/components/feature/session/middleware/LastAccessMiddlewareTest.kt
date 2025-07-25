@@ -58,7 +58,7 @@ class LastAccessMiddlewareTest {
         assertEquals(0L, store.state.tabs[0].lastAccess)
         assertEquals(0L, store.state.tabs[1].lastAccess)
 
-        store.dispatch(TabListAction.SelectTabAction("456")).joinBlocking()
+        store.dispatch(TabListAction.SelectTabAction("456"))
 
         assertEquals(0L, store.state.tabs[0].lastAccess)
         assertNotEquals(0L, store.state.tabs[1].lastAccess)
@@ -79,7 +79,7 @@ class LastAccessMiddlewareTest {
         assertEquals(0L, store.state.selectedTab?.lastAccess)
 
         val newTab = createTab("https://firefox.com", id = "456")
-        store.dispatch(TabListAction.AddTabAction(newTab, select = true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(newTab, select = true))
 
         assertEquals("456", store.state.selectedTabId)
         assertNotEquals(0L, store.state.selectedTab?.lastAccess)
@@ -100,7 +100,7 @@ class LastAccessMiddlewareTest {
         assertEquals(0L, store.state.selectedTab?.lastAccess)
 
         val newTab = createTab("https://firefox.com", id = "456")
-        store.dispatch(TabListAction.AddTabAction(newTab, select = false)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(newTab, select = false))
 
         assertEquals("123", store.state.selectedTabId)
         assertEquals(0L, store.state.selectedTab?.lastAccess)
@@ -119,7 +119,7 @@ class LastAccessMiddlewareTest {
         )
         assertEquals(0L, store.state.selectedTab?.lastAccess)
 
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://mozilla.org")).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://mozilla.org"))
         assertNotEquals(0L, store.state.selectedTab?.lastAccess)
     }
 
@@ -136,8 +136,8 @@ class LastAccessMiddlewareTest {
         assertEquals(0L, store.state.selectedTab?.lastAccess)
 
         val newTab = createTab("https://mozilla.org", id = "456")
-        store.dispatch(TabListAction.AddTabAction(newTab)).joinBlocking()
-        store.dispatch(ContentAction.UpdateUrlAction(newTab.id, "https://mozilla.org")).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(newTab))
+        store.dispatch(ContentAction.UpdateUrlAction(newTab.id, "https://mozilla.org"))
         assertEquals(0L, store.state.selectedTab?.lastAccess)
         assertEquals(0L, store.state.findTab(newTab.id)?.lastAccess)
     }
@@ -158,7 +158,7 @@ class LastAccessMiddlewareTest {
         assertEquals(0L, store.state.tabs[0].lastAccess)
         assertEquals(0L, store.state.tabs[1].lastAccess)
 
-        store.dispatch(TabListAction.RemoveTabAction("123")).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction("123"))
 
         val selectedTab = store.state.findTab("456")
         assertNotNull(selectedTab)
@@ -182,7 +182,7 @@ class LastAccessMiddlewareTest {
         assertEquals(0L, store.state.tabs[0].lastAccess)
         assertEquals(0L, store.state.tabs[1].lastAccess)
 
-        store.dispatch(TabListAction.RemoveTabAction("456")).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction("456"))
         val selectedTab = store.state.findTab("123")
         assertNotNull(selectedTab)
         assertEquals(selectedTab!!.id, store.state.selectedTabId)
@@ -207,7 +207,7 @@ class LastAccessMiddlewareTest {
         assertEquals(0L, store.state.tabs[1].lastAccess)
         assertEquals(0L, store.state.tabs[2].lastAccess)
 
-        store.dispatch(TabListAction.RemoveTabsAction(listOf("123", "456"))).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabsAction(listOf("123", "456")))
 
         val selectedTab = store.state.findTab("789")
         assertNotNull(selectedTab)
@@ -233,7 +233,7 @@ class LastAccessMiddlewareTest {
         assertEquals(0L, store.state.tabs[1].lastAccess)
         assertEquals(0L, store.state.tabs[2].lastAccess)
 
-        store.dispatch(TabListAction.RemoveTabsAction(listOf("456", "789"))).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabsAction(listOf("456", "789")))
         val selectedTab = store.state.findTab("123")
         assertEquals(selectedTab!!.id, store.state.selectedTabId)
         assertEquals(0L, selectedTab.lastAccess)
@@ -257,7 +257,7 @@ class LastAccessMiddlewareTest {
         assertEquals(0L, store.state.tabs[1].lastAccess)
         assertEquals(0L, store.state.tabs[2].lastAccess)
 
-        store.dispatch(TabListAction.RemoveAllPrivateTabsAction).joinBlocking()
+        store.dispatch(TabListAction.RemoveAllPrivateTabsAction)
 
         val selectedTab = store.state.findTab("123")
         assertNotNull(selectedTab)
@@ -289,7 +289,7 @@ class LastAccessMiddlewareTest {
                 "2",
                 TabListAction.RestoreAction.RestoreLocation.BEGINNING,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(store.state.tabs.size == 2)
 

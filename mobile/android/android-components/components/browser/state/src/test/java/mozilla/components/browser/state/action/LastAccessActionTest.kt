@@ -25,7 +25,7 @@ class LastAccessActionTest {
         val store = BrowserStore(state)
         val timestamp = System.currentTimeMillis()
 
-        store.dispatch(LastAccessAction.UpdateLastAccessAction(existingTab.id, timestamp)).joinBlocking()
+        store.dispatch(LastAccessAction.UpdateLastAccessAction(existingTab.id, timestamp))
 
         assertEquals(timestamp, store.state.selectedTab?.lastAccess)
     }

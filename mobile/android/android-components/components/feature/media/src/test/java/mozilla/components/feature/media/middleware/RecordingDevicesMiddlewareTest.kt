@@ -122,7 +122,7 @@ class RecordingDevicesMiddlewareTest {
                     RecordingDevice(RecordingDevice.Type.CAMERA, RecordingDevice.Status.RECORDING),
                 ),
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(1, notificationManager.size())
 
@@ -131,7 +131,7 @@ class RecordingDevicesMiddlewareTest {
                 sessionId = "mozilla",
                 devices = emptyList(),
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(0, notificationManager.size())
     }

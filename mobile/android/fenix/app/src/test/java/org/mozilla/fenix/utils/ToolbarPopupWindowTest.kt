@@ -53,7 +53,7 @@ class ToolbarPopupWindowTest {
         // Custom tab
         val customTabSession = createCustomTab("https://mozilla.org")
         var store = BrowserStore(BrowserState(customTabs = listOf(customTabSession)))
-        store.dispatch(ContentAction.UpdateUrlAction(customTabSession.id, "https://firefox.com")).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(customTabSession.id, "https://firefox.com"))
         assertEquals(
             "https://firefox.com",
             ToolbarPopupWindow.getUrlForClipboard(store, customTabSession.id),
@@ -62,7 +62,7 @@ class ToolbarPopupWindowTest {
         // Regular tab
         val regularTab = createTab(url = "http://firefox.com")
         store = BrowserStore(BrowserState(tabs = listOf(regularTab), selectedTabId = regularTab.id))
-        store.dispatch(ContentAction.UpdateUrlAction(regularTab.id, "https://mozilla.org")).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(regularTab.id, "https://mozilla.org"))
         assertEquals("https://mozilla.org", ToolbarPopupWindow.getUrlForClipboard(store))
     }
 }

@@ -58,23 +58,23 @@ class HistoryMetadataMiddlewareTest {
         val expectedKey = HistoryMetadataKey(url = tab.content.url)
         every { service.createMetadata(any(), any()) } returns expectedKey
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify(exactly = 1) { service.createMetadata(tab) }
 
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0))
         val capturedTab = slot<TabSessionState>()
         verify(exactly = 1) { service.createMetadata(capture(capturedTab)) }
 
         // Not recording if url didn't change.
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0))
         verify(exactly = 1) { service.createMetadata(capture(capturedTab)) }
 
         assertEquals(tab.id, capturedTab.captured.id)
         assertEquals(expectedKey, store.state.findTab(tab.id)?.historyMetadata)
 
         // Now, test that we'll record metadata for the same tab after url is changed.
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://firefox.com")).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://firefox.com"))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0))
 
         val capturedTabs = mutableListOf<TabSessionState>()
         verify(exactly = 2) { service.createMetadata(capture(capturedTabs)) }
@@ -92,10 +92,10 @@ class HistoryMetadataMiddlewareTest {
     fun `GIVEN normal tab has parent with session search terms WHEN history metadata is recorded THEN search terms and referrer url are provided`() {
         val parentTab = createTab("https://google.com?q=mozilla+website", searchTerms = "mozilla website")
         val tab = createTab("https://mozilla.org", parent = parentTab)
-        store.dispatch(TabListAction.AddTabAction(parentTab)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(parentTab))
+        store.dispatch(TabListAction.AddTabAction(tab))
 
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0))
         verify {
             service.createMetadata(any(), eq("mozilla website"), eq("https://google.com?q=mozilla+website"))
         }
@@ -107,10 +107,10 @@ class HistoryMetadataMiddlewareTest {
 
         val parentTab = createTab("https://google.com?q=mozilla+website")
         val tab = createTab("https://mozilla.org", parent = parentTab)
-        store.dispatch(TabListAction.AddTabAction(parentTab)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(parentTab))
+        store.dispatch(TabListAction.AddTabAction(tab))
 
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0))
         verify {
             service.createMetadata(any(), eq("mozilla website"), eq("https://google.com?q=mozilla+website"))
         }
@@ -130,9 +130,9 @@ class HistoryMetadataMiddlewareTest {
         setupGoogleSearchEngine()
 
         val serpUrl = "https://google.com?q=mozilla+website"
-        store.dispatch(EngineAction.LoadUrlAction(tab.id, serpUrl)).joinBlocking()
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, serpUrl)).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("Google Search", serpUrl)), currentIndex = 0)).joinBlocking()
+        store.dispatch(EngineAction.LoadUrlAction(tab.id, serpUrl))
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, serpUrl))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("Google Search", serpUrl)), currentIndex = 0))
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(1, this.count())
             assertEquals("https://google.com?q=mozilla+website", this[0].url)
@@ -155,8 +155,8 @@ class HistoryMetadataMiddlewareTest {
         setupGoogleSearchEngine()
 
         val serpUrl = "https://google.com?q=mozilla+website"
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, serpUrl)).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("Google Search", "https://google.com"), HistoryItem("Google Search", serpUrl)), currentIndex = 1)).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, serpUrl))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("Google Search", "https://google.com"), HistoryItem("Google Search", serpUrl)), currentIndex = 1))
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(1, this.count())
             assertEquals("https://google.com?q=mozilla+website", this[0].url)
@@ -177,8 +177,8 @@ class HistoryMetadataMiddlewareTest {
 
         val parentTab = createTab("https://google.com?q=mozilla+website", searchTerms = "mozilla website")
         val tab = createTab("https://google.com?url=https://mozilla.org", parent = parentTab)
-        store.dispatch(TabListAction.AddTabAction(parentTab, select = true)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(parentTab, select = true))
+        store.dispatch(TabListAction.AddTabAction(tab))
 
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(2, this.count())
@@ -192,16 +192,16 @@ class HistoryMetadataMiddlewareTest {
         }
 
         // Both tabs load.
-        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website")), 0)).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=mozilla+website")), currentIndex = 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website")), 0))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=mozilla+website")), currentIndex = 0))
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(2, this.count())
         }
 
         // Parent navigates away.
-        store.dispatch(ContentAction.UpdateUrlAction(parentTab.id, "https://firefox.com")).joinBlocking()
-        store.dispatch(ContentAction.UpdateSearchTermsAction(parentTab.id, "")).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1)).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(parentTab.id, "https://firefox.com"))
+        store.dispatch(ContentAction.UpdateSearchTermsAction(parentTab.id, ""))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1))
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(3, this.count())
             assertEquals("https://firefox.com", this[2].url)
@@ -210,8 +210,8 @@ class HistoryMetadataMiddlewareTest {
         }
 
         // Redirect the child tab (url changed, history stack has single item).
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://mozilla.org")).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("Mozilla", "https://mozilla.org")), currentIndex = 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://mozilla.org"))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("Mozilla", "https://mozilla.org")), currentIndex = 0))
         val tab2 = store.state.findTab(tab.id)!!
         assertEquals("https://mozilla.org", tab2.content.url)
         with((service as TestingMetadataService).createdMetadata) {
@@ -222,8 +222,8 @@ class HistoryMetadataMiddlewareTest {
         }
 
         // Navigate the child tab.
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://mozilla.org/manifesto")).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("Mozilla", "https://mozilla.org"), HistoryItem("Mozilla Manifesto", "https://mozilla.org/manifesto")), currentIndex = 1)).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://mozilla.org/manifesto"))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("Mozilla", "https://mozilla.org"), HistoryItem("Mozilla Manifesto", "https://mozilla.org/manifesto")), currentIndex = 1))
         val tab3 = store.state.findTab(tab.id)!!
         assertEquals("https://mozilla.org/manifesto", tab3.content.url)
 
@@ -247,8 +247,8 @@ class HistoryMetadataMiddlewareTest {
 
         val parentTab = createTab("https://google.com?q=mozilla+website", searchTerms = "mozilla website")
         val tab = createTab("https://google.com?url=https://mozilla.org", parent = parentTab)
-        store.dispatch(TabListAction.AddTabAction(parentTab, select = true)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(parentTab, select = true))
+        store.dispatch(TabListAction.AddTabAction(tab))
 
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(2, this.count())
@@ -262,22 +262,22 @@ class HistoryMetadataMiddlewareTest {
         }
 
         // Parent tab loads.
-        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website")), 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website")), 0))
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(2, this.count())
         }
 
         // Simulate a state where search metadata is missing for the child tab.
-        store.dispatch(HistoryMetadataAction.SetHistoryMetadataKeyAction(tab.id, HistoryMetadataKey("https://google.com?url=https://mozilla.org", null, null))).joinBlocking()
+        store.dispatch(HistoryMetadataAction.SetHistoryMetadataKeyAction(tab.id, HistoryMetadataKey("https://google.com?url=https://mozilla.org", null, null)))
 
         // Parent navigates away, while the child starts loading. A mostly realistic sequence of events...
-        store.dispatch(ContentAction.UpdateUrlAction(parentTab.id, "https://firefox.com")).joinBlocking()
-        store.dispatch(ContentAction.UpdateSearchTermsAction(parentTab.id, "")).joinBlocking()
-        store.dispatch(EngineAction.LoadUrlAction(tab.id, "https://google.com?url=https://mozilla.org")).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=https://mozilla.org")), currentIndex = 0)).joinBlocking()
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://mozilla.org")).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("Mozilla", "https://mozilla.org")), currentIndex = 0)).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1)).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(parentTab.id, "https://firefox.com"))
+        store.dispatch(ContentAction.UpdateSearchTermsAction(parentTab.id, ""))
+        store.dispatch(EngineAction.LoadUrlAction(tab.id, "https://google.com?url=https://mozilla.org"))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=https://mozilla.org")), currentIndex = 0))
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://mozilla.org"))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("Mozilla", "https://mozilla.org")), currentIndex = 0))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1))
 
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(4, this.count())
@@ -309,8 +309,8 @@ class HistoryMetadataMiddlewareTest {
 
         val parentTab = createTab("https://google.com?q=mozilla+website", searchTerms = "mozilla website")
         val tab = createTab("https://google.com?url=https://mozilla.org", parent = parentTab)
-        store.dispatch(TabListAction.AddTabAction(parentTab, select = true)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(parentTab, select = true))
+        store.dispatch(TabListAction.AddTabAction(tab))
 
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(2, this.count())
@@ -324,16 +324,16 @@ class HistoryMetadataMiddlewareTest {
         }
 
         // Both tabs load.
-        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website")), 0)).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=mozilla+website")), currentIndex = 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website")), 0))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=mozilla+website")), currentIndex = 0))
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(2, this.count())
         }
 
         // Direct load occurs on child tab. Search terms should be cleared.
-        store.dispatch(EngineAction.LoadUrlAction(tab.id, "https://firefox.com")).joinBlocking()
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://firefox.com")).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1)).joinBlocking()
+        store.dispatch(EngineAction.LoadUrlAction(tab.id, "https://firefox.com"))
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://firefox.com"))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1))
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(3, this.count())
             assertEquals("https://firefox.com", this[2].url)
@@ -342,10 +342,10 @@ class HistoryMetadataMiddlewareTest {
         }
 
         // Direct load occurs on parent tab. Search terms should be cleared.
-        store.dispatch(EngineAction.LoadUrlAction(parentTab.id, "https://firefox.com")).joinBlocking()
-        store.dispatch(ContentAction.UpdateSearchTermsAction(parentTab.id, "")).joinBlocking()
-        store.dispatch(ContentAction.UpdateUrlAction(parentTab.id, "https://firefox.com")).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1)).joinBlocking()
+        store.dispatch(EngineAction.LoadUrlAction(parentTab.id, "https://firefox.com"))
+        store.dispatch(ContentAction.UpdateSearchTermsAction(parentTab.id, ""))
+        store.dispatch(ContentAction.UpdateUrlAction(parentTab.id, "https://firefox.com"))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1))
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(4, this.count())
             assertEquals("https://firefox.com", this[3].url)
@@ -366,8 +366,8 @@ class HistoryMetadataMiddlewareTest {
 
         val parentTab = createTab("https://google.com?q=mozilla+website", searchTerms = "mozilla website")
         val tab = createTab("https://google.com?url=https://mozilla.org", parent = parentTab)
-        store.dispatch(TabListAction.AddTabAction(parentTab, select = true)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(parentTab, select = true))
+        store.dispatch(TabListAction.AddTabAction(tab))
 
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(2, this.count())
@@ -381,16 +381,16 @@ class HistoryMetadataMiddlewareTest {
         }
 
         // Both tabs load.
-        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website")), 0)).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=mozilla+website")), currentIndex = 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website")), 0))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=mozilla+website")), currentIndex = 0))
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(2, this.count())
         }
 
         // Direct load occurs on child tab. Search terms should be cleared.
-        store.dispatch(EngineAction.OptimizedLoadUrlTriggeredAction(tab.id, "https://firefox.com")).joinBlocking()
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://firefox.com")).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1)).joinBlocking()
+        store.dispatch(EngineAction.OptimizedLoadUrlTriggeredAction(tab.id, "https://firefox.com"))
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://firefox.com"))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, listOf(HistoryItem("", "https://google.com?url=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1))
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(3, this.count())
             assertEquals("https://firefox.com", this[2].url)
@@ -399,10 +399,10 @@ class HistoryMetadataMiddlewareTest {
         }
 
         // Direct load occurs on parent tab. Search terms should be cleared.
-        store.dispatch(EngineAction.OptimizedLoadUrlTriggeredAction(parentTab.id, "https://firefox.com")).joinBlocking()
-        store.dispatch(ContentAction.UpdateSearchTermsAction(parentTab.id, "")).joinBlocking()
-        store.dispatch(ContentAction.UpdateUrlAction(parentTab.id, "https://firefox.com")).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1)).joinBlocking()
+        store.dispatch(EngineAction.OptimizedLoadUrlTriggeredAction(parentTab.id, "https://firefox.com"))
+        store.dispatch(ContentAction.UpdateSearchTermsAction(parentTab.id, ""))
+        store.dispatch(ContentAction.UpdateUrlAction(parentTab.id, "https://firefox.com"))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(parentTab.id, listOf(HistoryItem("Google - mozilla website", "https://google.com?q=mozilla+website"), HistoryItem("Firefox", "https://firefox.com")), 1))
         with((service as TestingMetadataService).createdMetadata) {
             assertEquals(4, this.count())
             assertEquals("https://firefox.com", this[3].url)
@@ -415,27 +415,27 @@ class HistoryMetadataMiddlewareTest {
     fun `GIVEN normal tab has parent WHEN url is the same THEN nothing happens`() {
         val parentTab = createTab("https://mozilla.org")
         val tab = createTab("https://mozilla.org", parent = parentTab)
-        store.dispatch(TabListAction.AddTabAction(parentTab)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(parentTab))
+        store.dispatch(TabListAction.AddTabAction(tab))
 
         verify(exactly = 1) { service.createMetadata(parentTab, null, null) }
         // Without our referrer url check, we would have recorded this metadata.
         verify(exactly = 0) { service.createMetadata(tab, "mozilla website", "https://mozilla.org") }
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0))
         verify(exactly = 1) { service.createMetadata(any(), any(), any()) }
     }
 
     @Test
     fun `GIVEN normal tab has no parent WHEN history metadata is recorded THEN search terms and referrer url are provided`() {
         val tab = createTab("https://mozilla.org")
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         setupGoogleSearchEngine()
 
         val historyState = listOf(
             HistoryItem("firefox", "https://google.com?q=mozilla+website"),
             HistoryItem("mozilla", "https://mozilla.org"),
         )
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, historyState, currentIndex = 1)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, historyState, currentIndex = 1))
 
         verify {
             service.createMetadata(any(), eq("mozilla website"), eq("https://google.com?q=mozilla+website"))
@@ -445,14 +445,14 @@ class HistoryMetadataMiddlewareTest {
     @Test
     fun `GIVEN normal tab has no parent WHEN history metadata is recorded without search terms THEN no referrer is provided`() {
         val tab = createTab("https://mozilla.org")
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         setupGoogleSearchEngine()
 
         val historyState = listOf(
             HistoryItem("firefox", "https://mozilla.org"),
             HistoryItem("mozilla", "https://firefox.com"),
         )
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, historyState, currentIndex = 1)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, historyState, currentIndex = 1))
 
         verify {
             service.createMetadata(any(), null, null)
@@ -462,22 +462,22 @@ class HistoryMetadataMiddlewareTest {
     @Test
     fun `GIVEN a normal tab with history state WHEN directly loaded THEN search terms and referrer not recorded`() {
         val tab = createTab("https://mozilla.org")
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         setupGoogleSearchEngine()
 
         val historyState = listOf(
             HistoryItem("firefox", "https://google.com?q=mozilla+website"),
             HistoryItem("mozilla", "https://mozilla.org"),
         )
-        store.dispatch(EngineAction.LoadUrlAction(tab.id, tab.content.url)).joinBlocking()
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, historyState, currentIndex = 1)).joinBlocking()
+        store.dispatch(EngineAction.LoadUrlAction(tab.id, tab.content.url))
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, historyState, currentIndex = 1))
 
         verify {
             service.createMetadata(any(), null, null)
         }
 
         // Once direct load is "consumed", we're looking up the history stack again.
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, historyState, currentIndex = 1)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, historyState, currentIndex = 1))
         verify {
             service.createMetadata(any(), eq("mozilla website"), eq("https://google.com?q=mozilla+website"))
         }
@@ -490,10 +490,10 @@ class HistoryMetadataMiddlewareTest {
         val expectedKey = HistoryMetadataKey(url = tab.content.url)
         every { service.createMetadata(any(), any()) } returns expectedKey
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify { service wasNot Called }
 
-        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0)).joinBlocking()
+        store.dispatch(ContentAction.UpdateHistoryStateAction(tab.id, emptyList(), currentIndex = 0))
         verify { service wasNot Called }
     }
 
@@ -502,10 +502,10 @@ class HistoryMetadataMiddlewareTest {
         val existingKey = HistoryMetadataKey(url = "https://mozilla.org")
         val tab = createTab(url = existingKey.url, historyMetadata = existingKey)
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify { service wasNot Called }
 
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://www.someother.url")).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, "https://www.someother.url"))
         val capturedTab = slot<TabSessionState>()
         verify { service.updateMetadata(existingKey, capture(capturedTab)) }
 
@@ -517,10 +517,10 @@ class HistoryMetadataMiddlewareTest {
         val existingKey = HistoryMetadataKey(url = "https://mozilla.org")
         val tab = createTab(url = existingKey.url, historyMetadata = existingKey)
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify { service wasNot Called }
 
-        store.dispatch(ContentAction.UpdateUrlAction(tab.id, existingKey.url)).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction(tab.id, existingKey.url))
         verify { service wasNot Called }
     }
 
@@ -528,10 +528,10 @@ class HistoryMetadataMiddlewareTest {
     fun `GIVEN tab without metadata WHEN user navigates and new page starts loading THEN nothing happens`() {
         val tab = createTab(url = "https://mozilla.org")
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify(exactly = 1) { service.createMetadata(tab) }
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true))
         verify(exactly = 1) { service.createMetadata(any()) }
         verify(exactly = 0) { service.updateMetadata(any(), any()) }
     }
@@ -542,13 +542,13 @@ class HistoryMetadataMiddlewareTest {
         val tab = createTab(url = "https://mozilla.org", historyMetadata = existingKey)
         val otherTab = createTab(url = "https://blog.mozilla.org")
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(otherTab, select = true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
+        store.dispatch(TabListAction.AddTabAction(otherTab, select = true))
         val capturedTab = slot<TabSessionState>()
         verify(exactly = 1) { service.updateMetadata(existingKey, capture(capturedTab)) }
         assertEquals(tab.id, capturedTab.captured.id)
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction(tab.id, true))
         verify(exactly = 1) { service.updateMetadata(existingKey, capture(capturedTab)) }
     }
 
@@ -559,7 +559,7 @@ class HistoryMetadataMiddlewareTest {
         val expectedKey = HistoryMetadataKey(url = tab.content.url)
         every { service.createMetadata(any(), any()) } returns expectedKey
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         val capturedTabs = mutableListOf<TabSessionState>()
         verify {
             service.createMetadata(capture(capturedTabs), null, null)
@@ -568,7 +568,7 @@ class HistoryMetadataMiddlewareTest {
         assertNull(capturedTabs[0].historyMetadata)
         assertEquals(expectedKey, store.state.findTab(tab.id)?.historyMetadata)
 
-        store.dispatch(MediaSessionAction.UpdateMediaMetadataAction(tab.id, mockk())).joinBlocking()
+        store.dispatch(MediaSessionAction.UpdateMediaMetadataAction(tab.id, mockk()))
         verify {
             service.createMetadata(capture(capturedTabs), null, null)
         }
@@ -586,10 +586,10 @@ class HistoryMetadataMiddlewareTest {
         val expectedKey = HistoryMetadataKey(url = tab.content.url)
         every { service.createMetadata(any(), any()) } returns expectedKey
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify { service wasNot Called }
 
-        store.dispatch(MediaSessionAction.UpdateMediaMetadataAction(tab.id, mockk())).joinBlocking()
+        store.dispatch(MediaSessionAction.UpdateMediaMetadataAction(tab.id, mockk()))
         verify { service wasNot Called }
     }
 
@@ -600,12 +600,12 @@ class HistoryMetadataMiddlewareTest {
         val otherTab = createTab(url = "https://blog.mozilla.org")
         val yetAnotherTab = createTab(url = "https://media.mozilla.org")
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(otherTab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
+        store.dispatch(TabListAction.AddTabAction(otherTab))
         verify(exactly = 1) { service.createMetadata(any()) }
         verify(exactly = 0) { service.updateMetadata(any(), any()) }
 
-        store.dispatch(TabListAction.AddTabAction(yetAnotherTab, select = true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(yetAnotherTab, select = true))
         val capturedTab = slot<TabSessionState>()
         verify(exactly = 2) { service.createMetadata(any()) }
         verify(exactly = 1) { service.updateMetadata(existingKey, capture(capturedTab)) }
@@ -619,12 +619,12 @@ class HistoryMetadataMiddlewareTest {
         val otherTab = createTab(url = "https://blog.mozilla.org")
         val yetAnotherTab = createTab(url = "https://media.mozilla.org")
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify { service wasNot Called }
-        store.dispatch(TabListAction.AddTabAction(otherTab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(otherTab))
         verify { service.createMetadata(otherTab) }
 
-        store.dispatch(TabListAction.AddTabAction(yetAnotherTab, select = true)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(yetAnotherTab, select = true))
         verify { service.createMetadata(yetAnotherTab) }
     }
 
@@ -634,10 +634,10 @@ class HistoryMetadataMiddlewareTest {
         val tab = createTab(url = "https://mozilla.org", historyMetadata = existingKey)
         val otherTab = createTab(url = "https://blog.mozilla.org")
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify { service wasNot Called }
 
-        store.dispatch(TabListAction.SelectTabAction(otherTab.id)).joinBlocking()
+        store.dispatch(TabListAction.SelectTabAction(otherTab.id))
         val capturedTab = slot<TabSessionState>()
         verify(exactly = 1) { service.updateMetadata(existingKey, capture(capturedTab)) }
         assertEquals(tab.id, capturedTab.captured.id)
@@ -649,10 +649,10 @@ class HistoryMetadataMiddlewareTest {
         val tab = createTab(url = "https://mozilla.org", historyMetadata = existingKey, private = true)
         val otherTab = createTab(url = "https://blog.mozilla.org")
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify { service wasNot Called }
 
-        store.dispatch(TabListAction.SelectTabAction(otherTab.id)).joinBlocking()
+        store.dispatch(TabListAction.SelectTabAction(otherTab.id))
         verify { service wasNot Called }
     }
 
@@ -661,10 +661,10 @@ class HistoryMetadataMiddlewareTest {
         val existingKey = HistoryMetadataKey(url = "https://mozilla.org")
         val tab = createTab(url = "https://mozilla.org", historyMetadata = existingKey)
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify { service wasNot Called }
 
-        store.dispatch(TabListAction.RemoveTabAction(tab.id)).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction(tab.id))
         val capturedTab = slot<TabSessionState>()
         verify(exactly = 1) { service.updateMetadata(existingKey, capture(capturedTab)) }
         assertEquals(tab.id, capturedTab.captured.id)
@@ -675,10 +675,10 @@ class HistoryMetadataMiddlewareTest {
         val existingKey = HistoryMetadataKey(url = "https://mozilla.org")
         val tab = createTab(url = "https://mozilla.org", historyMetadata = existingKey, private = true)
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify { service wasNot Called }
 
-        store.dispatch(TabListAction.RemoveTabAction(tab.id)).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction(tab.id))
         verify { service wasNot Called }
     }
 
@@ -688,12 +688,12 @@ class HistoryMetadataMiddlewareTest {
         val tab = createTab(url = "https://mozilla.org", historyMetadata = existingKey)
         val otherTab = createTab(url = "https://blog.mozilla.org")
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(otherTab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
+        store.dispatch(TabListAction.AddTabAction(otherTab))
         // 1 because 'tab' already has a metadata key set.
         verify(exactly = 1) { service.createMetadata(any()) }
 
-        store.dispatch(TabListAction.RemoveTabAction(otherTab.id)).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabAction(otherTab.id))
         verify(exactly = 1) { service.createMetadata(any()) }
     }
 
@@ -704,13 +704,13 @@ class HistoryMetadataMiddlewareTest {
         val otherTab = createTab(url = "https://blog.mozilla.org")
         val yetAnotherTab = createTab(url = "https://media.mozilla.org")
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(otherTab)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(yetAnotherTab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
+        store.dispatch(TabListAction.AddTabAction(otherTab))
+        store.dispatch(TabListAction.AddTabAction(yetAnotherTab))
         // 'tab' already has an existing key, so metadata isn't created for it.
         verify(exactly = 2) { service.createMetadata(any()) }
 
-        store.dispatch(TabListAction.RemoveTabsAction(listOf(tab.id, otherTab.id))).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabsAction(listOf(tab.id, otherTab.id)))
         val capturedTab = slot<TabSessionState>()
         verify(exactly = 1) { service.updateMetadata(existingKey, capture(capturedTab)) }
         assertEquals(tab.id, capturedTab.captured.id)
@@ -723,13 +723,13 @@ class HistoryMetadataMiddlewareTest {
         val otherTab = createTab(url = "https://blog.mozilla.org")
         val yetAnotherTab = createTab(url = "https://media.mozilla.org")
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
         verify { service wasNot Called }
-        store.dispatch(TabListAction.AddTabAction(otherTab)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(yetAnotherTab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(otherTab))
+        store.dispatch(TabListAction.AddTabAction(yetAnotherTab))
         verify(exactly = 2) { service.createMetadata(any()) }
 
-        store.dispatch(TabListAction.RemoveTabsAction(listOf(tab.id, otherTab.id))).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabsAction(listOf(tab.id, otherTab.id)))
         verify(exactly = 2) { service.createMetadata(any()) }
         verify(exactly = 0) { service.updateMetadata(any(), any()) }
     }
@@ -741,13 +741,13 @@ class HistoryMetadataMiddlewareTest {
         val otherTab = createTab(url = "https://blog.mozilla.org")
         val yetAnotherTab = createTab(url = "https://media.mozilla.org")
 
-        store.dispatch(TabListAction.AddTabAction(tab)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(otherTab)).joinBlocking()
-        store.dispatch(TabListAction.AddTabAction(yetAnotherTab)).joinBlocking()
+        store.dispatch(TabListAction.AddTabAction(tab))
+        store.dispatch(TabListAction.AddTabAction(otherTab))
+        store.dispatch(TabListAction.AddTabAction(yetAnotherTab))
         verify(exactly = 2) { service.createMetadata(any()) }
         verify(exactly = 0) { service.updateMetadata(any(), any()) }
 
-        store.dispatch(TabListAction.RemoveTabsAction(listOf(otherTab.id, yetAnotherTab.id))).joinBlocking()
+        store.dispatch(TabListAction.RemoveTabsAction(listOf(otherTab.id, yetAnotherTab.id)))
         verify(exactly = 2) { service.createMetadata(any()) }
         verify(exactly = 0) { service.updateMetadata(any(), any()) }
     }
@@ -774,7 +774,7 @@ class HistoryMetadataMiddlewareTest {
                 additionalSearchEngines = emptyList(),
                 regionSearchEnginesOrder = listOf("google"),
             ),
-        ).joinBlocking()
+        )
     }
 
     // Provides a more convenient way of capturing arguments for the functions we care about.

@@ -28,7 +28,7 @@ class TabGroupActionTest {
 
         val partition = "testFeaturePartition"
         val testGroup = TabGroup("test", "testGroup")
-        store.dispatch(TabGroupAction.AddTabGroupAction(partition = partition, group = testGroup)).joinBlocking()
+        store.dispatch(TabGroupAction.AddTabGroupAction(partition = partition, group = testGroup))
 
         val expectedPartition = store.state.tabPartitions[partition]
         assertNotNull(expectedPartition)
@@ -49,7 +49,7 @@ class TabGroupActionTest {
 
         val partition = "testFeaturePartition"
         val testGroup = TabGroup("test", tabIds = listOf("tab1", "tab2"))
-        store.dispatch(TabGroupAction.AddTabGroupAction(partition = partition, group = testGroup)).joinBlocking()
+        store.dispatch(TabGroupAction.AddTabGroupAction(partition = partition, group = testGroup))
 
         val expectedPartition = store.state.tabPartitions[partition]
         assertNotNull(expectedPartition)
@@ -75,7 +75,7 @@ class TabGroupActionTest {
 
         assertNotNull(store.state.tabPartitions[tabPartition.id]?.getGroupById(tabGroup1.id))
         assertNotNull(store.state.tabPartitions[tabPartition.id]?.getGroupById(tabGroup2.id))
-        store.dispatch(TabGroupAction.RemoveTabGroupAction(tabPartition.id, tabGroup1.id)).joinBlocking()
+        store.dispatch(TabGroupAction.RemoveTabGroupAction(tabPartition.id, tabGroup1.id))
         assertNull(store.state.tabPartitions[tabPartition.id]?.getGroupById(tabGroup1.id))
         assertNotNull(store.state.tabPartitions[tabPartition.id]?.getGroupById(tabGroup2.id))
     }
@@ -96,7 +96,7 @@ class TabGroupActionTest {
         )
 
         assertNotNull(store.state.tabPartitions[tabPartition.id]?.getGroupById(tabGroup.id))
-        store.dispatch(TabGroupAction.RemoveTabGroupAction(tabPartition.id, tabGroup.id)).joinBlocking()
+        store.dispatch(TabGroupAction.RemoveTabGroupAction(tabPartition.id, tabGroup.id))
         assertNull(store.state.tabPartitions[tabPartition.id])
     }
 
@@ -113,7 +113,7 @@ class TabGroupActionTest {
             ),
         )
 
-        store.dispatch(TabGroupAction.AddTabAction(tabPartition.id, tabGroup.id, tab.id)).joinBlocking()
+        store.dispatch(TabGroupAction.AddTabAction(tabPartition.id, tabGroup.id, tab.id))
 
         val expectedPartition = store.state.tabPartitions[tabPartition.id]
         assertNotNull(expectedPartition)
@@ -134,7 +134,7 @@ class TabGroupActionTest {
             ),
         )
 
-        store.dispatch(TabGroupAction.AddTabAction(tabPartition.id, tabGroup.id, tab.id)).joinBlocking()
+        store.dispatch(TabGroupAction.AddTabAction(tabPartition.id, tabGroup.id, tab.id))
 
         val expectedPartition = store.state.tabPartitions[tabPartition.id]
         assertNotNull(expectedPartition)
@@ -156,7 +156,7 @@ class TabGroupActionTest {
             ),
         )
 
-        store.dispatch(TabGroupAction.AddTabAction(tabPartition.id, tabGroup.id, tab.id)).joinBlocking()
+        store.dispatch(TabGroupAction.AddTabAction(tabPartition.id, tabGroup.id, tab.id))
 
         val expectedPartition = store.state.tabPartitions[tabPartition.id]
         assertNotNull(expectedPartition)
@@ -182,7 +182,7 @@ class TabGroupActionTest {
 
         store.dispatch(
             TabGroupAction.AddTabsAction(tabPartition.id, tabGroup.id, listOf(tab1.id, tab2.id)),
-        ).joinBlocking()
+        )
 
         val expectedPartition = store.state.tabPartitions[tabPartition.id]
         assertNotNull(expectedPartition)
@@ -207,7 +207,7 @@ class TabGroupActionTest {
 
         store.dispatch(
             TabGroupAction.AddTabsAction(tabPartition.id, tabGroup.id, listOf(tab1.id, tab2.id)),
-        ).joinBlocking()
+        )
 
         val expectedPartition = store.state.tabPartitions[tabPartition.id]
         assertNotNull(expectedPartition)
@@ -233,7 +233,7 @@ class TabGroupActionTest {
 
         store.dispatch(
             TabGroupAction.AddTabsAction(tabPartition.id, tabGroup.id, listOf(tab1.id, tab2.id)),
-        ).joinBlocking()
+        )
 
         val expectedPartition = store.state.tabPartitions[tabPartition.id]
         assertNotNull(expectedPartition)
@@ -258,7 +258,7 @@ class TabGroupActionTest {
 
         store.dispatch(
             TabGroupAction.AddTabsAction(tabPartition.id, tabGroup.id, listOf(tab1.id, tab1.id)),
-        ).joinBlocking()
+        )
 
         val expectedPartition = store.state.tabPartitions[tabPartition.id]
         assertNotNull(expectedPartition)
@@ -282,7 +282,7 @@ class TabGroupActionTest {
             ),
         )
 
-        store.dispatch(TabGroupAction.RemoveTabAction(tabPartition.id, tabGroup.id, tab1.id)).joinBlocking()
+        store.dispatch(TabGroupAction.RemoveTabAction(tabPartition.id, tabGroup.id, tab1.id))
 
         val expectedPartition = store.state.tabPartitions[tabPartition.id]
         assertNotNull(expectedPartition)
@@ -308,7 +308,7 @@ class TabGroupActionTest {
 
         store.dispatch(
             TabGroupAction.RemoveTabsAction(tabPartition.id, tabGroup.id, listOf(tab1.id, tab2.id)),
-        ).joinBlocking()
+        )
 
         val expectedPartition = store.state.tabPartitions[tabPartition.id]
         assertNotNull(expectedPartition)

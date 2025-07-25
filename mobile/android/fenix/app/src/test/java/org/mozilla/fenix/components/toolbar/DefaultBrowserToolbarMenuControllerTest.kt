@@ -262,7 +262,7 @@ class DefaultBrowserToolbarMenuControllerTest {
     @Test
     fun `WHEN open in Fenix menu item is pressed THEN menu item is handled correctly`() = runTest {
         val customTab = createCustomTab("https://mozilla.org")
-        browserStore.dispatch(CustomTabListAction.AddCustomTabAction(customTab)).joinBlocking()
+        browserStore.dispatch(CustomTabListAction.AddCustomTabAction(customTab))
         val controller = createController(
             scope = this,
             store = browserStore,

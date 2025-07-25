@@ -78,7 +78,7 @@ class ContainerToolbarFeatureTest {
             ),
         )
         val containerToolbarFeature = getContainerToolbarFeature(toolbar, store)
-        store.dispatch(TabListAction.SelectTabAction("tab2")).joinBlocking()
+        store.dispatch(TabListAction.SelectTabAction("tab2"))
         coroutinesTestRule.testDispatcher.scheduler.advanceUntilIdle()
 
         verify(store).observeManually(any())

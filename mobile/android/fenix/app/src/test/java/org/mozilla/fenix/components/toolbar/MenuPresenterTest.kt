@@ -44,10 +44,10 @@ class MenuPresenterTest {
     fun `WHEN loading state is updated THEN toolbar is invalidated`() {
         verify(exactly = 0) { menuToolbar.invalidateActions() }
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction(testTab.id, true)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction(testTab.id, true))
         verify(exactly = 1) { menuToolbar.invalidateActions() }
 
-        store.dispatch(ContentAction.UpdateLoadingStateAction(testTab.id, false)).joinBlocking()
+        store.dispatch(ContentAction.UpdateLoadingStateAction(testTab.id, false))
         verify(exactly = 2) { menuToolbar.invalidateActions() }
     }
 
@@ -55,10 +55,10 @@ class MenuPresenterTest {
     fun `WHEN back navigation state is updated THEN toolbar is invalidated`() {
         verify(exactly = 0) { menuToolbar.invalidateActions() }
 
-        store.dispatch(ContentAction.UpdateBackNavigationStateAction(testTab.id, true)).joinBlocking()
+        store.dispatch(ContentAction.UpdateBackNavigationStateAction(testTab.id, true))
         verify(exactly = 1) { menuToolbar.invalidateActions() }
 
-        store.dispatch(ContentAction.UpdateBackNavigationStateAction(testTab.id, false)).joinBlocking()
+        store.dispatch(ContentAction.UpdateBackNavigationStateAction(testTab.id, false))
         verify(exactly = 2) { menuToolbar.invalidateActions() }
     }
 
@@ -66,10 +66,10 @@ class MenuPresenterTest {
     fun `WHEN forward navigation state is updated THEN toolbar is invalidated`() {
         verify(exactly = 0) { menuToolbar.invalidateActions() }
 
-        store.dispatch(ContentAction.UpdateForwardNavigationStateAction(testTab.id, true)).joinBlocking()
+        store.dispatch(ContentAction.UpdateForwardNavigationStateAction(testTab.id, true))
         verify(exactly = 1) { menuToolbar.invalidateActions() }
 
-        store.dispatch(ContentAction.UpdateForwardNavigationStateAction(testTab.id, false)).joinBlocking()
+        store.dispatch(ContentAction.UpdateForwardNavigationStateAction(testTab.id, false))
         verify(exactly = 2) { menuToolbar.invalidateActions() }
     }
 
@@ -77,7 +77,7 @@ class MenuPresenterTest {
     fun `WHEN web app manifest is updated THEN toolbar is invalidated`() {
         verify(exactly = 0) { menuToolbar.invalidateActions() }
 
-        store.dispatch(ContentAction.UpdateWebAppManifestAction(testTab.id, mockk())).joinBlocking()
+        store.dispatch(ContentAction.UpdateWebAppManifestAction(testTab.id, mockk()))
         verify(exactly = 1) { menuToolbar.invalidateActions() }
     }
 }

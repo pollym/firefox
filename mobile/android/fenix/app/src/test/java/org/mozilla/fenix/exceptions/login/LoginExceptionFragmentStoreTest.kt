@@ -23,7 +23,7 @@ class LoginExceptionFragmentStoreTest {
                 get() = "test"
         }
 
-        store.dispatch(ExceptionsFragmentAction.Change(listOf(newExceptionsItem))).joinBlocking()
+        store.dispatch(ExceptionsFragmentAction.Change(listOf(newExceptionsItem)))
         assertNotSame(initialState, store.state)
         assertEquals(listOf(newExceptionsItem), store.state.items)
     }

@@ -40,7 +40,7 @@ class LastMediaAccessMiddlewareTest {
 
         store
             .dispatch(MediaSessionAction.UpdateMediaPlaybackStateAction(mediaTabId, MediaSession.PlaybackState.PLAYING))
-            .joinBlocking()
+            
 
         val updatedMediaState = store.state.tabs[1].lastMediaAccessState
         assertTrue(
@@ -71,7 +71,7 @@ class LastMediaAccessMiddlewareTest {
 
         store
             .dispatch(MediaSessionAction.UpdateMediaPlaybackStateAction(mediaTabId, MediaSession.PlaybackState.PLAYING))
-            .joinBlocking()
+            
 
         val updatedMediaState = store.state.tabs[1].lastMediaAccessState
         assertTrue(
@@ -101,7 +101,7 @@ class LastMediaAccessMiddlewareTest {
 
         store
             .dispatch(MediaSessionAction.UpdateMediaPlaybackStateAction(mediaTabId, MediaSession.PlaybackState.PAUSED))
-            .joinBlocking()
+            
 
         assertEquals(222, store.state.tabs[0].lastMediaAccessState.lastMediaAccess)
     }
@@ -126,7 +126,7 @@ class LastMediaAccessMiddlewareTest {
 
         store
             .dispatch(MediaSessionAction.UpdateMediaPlaybackStateAction(mediaTabId, MediaSession.PlaybackState.PAUSED))
-            .joinBlocking()
+            
 
         assertEquals(333, store.state.tabs[0].lastMediaAccessState.lastMediaAccess)
     }
@@ -151,7 +151,7 @@ class LastMediaAccessMiddlewareTest {
 
         store
             .dispatch(MediaSessionAction.UpdateMediaPlaybackStateAction(mediaTabId, MediaSession.PlaybackState.STOPPED))
-            .joinBlocking()
+            
 
         assertEquals(222, store.state.tabs[0].lastMediaAccessState.lastMediaAccess)
     }
@@ -176,7 +176,7 @@ class LastMediaAccessMiddlewareTest {
 
         store
             .dispatch(MediaSessionAction.UpdateMediaPlaybackStateAction(mediaTabId, MediaSession.PlaybackState.STOPPED))
-            .joinBlocking()
+            
 
         assertEquals(333, store.state.tabs[0].lastMediaAccessState.lastMediaAccess)
     }
@@ -201,7 +201,7 @@ class LastMediaAccessMiddlewareTest {
 
         store
             .dispatch(MediaSessionAction.UpdateMediaPlaybackStateAction(mediaTabId, MediaSession.PlaybackState.UNKNOWN))
-            .joinBlocking()
+            
 
         assertEquals(222, store.state.tabs[0].lastMediaAccessState.lastMediaAccess)
     }
@@ -226,7 +226,7 @@ class LastMediaAccessMiddlewareTest {
 
         store
             .dispatch(MediaSessionAction.UpdateMediaPlaybackStateAction(mediaTabId, MediaSession.PlaybackState.UNKNOWN))
-            .joinBlocking()
+            
 
         assertEquals(333, store.state.tabs[0].lastMediaAccessState.lastMediaAccess)
     }
@@ -251,7 +251,7 @@ class LastMediaAccessMiddlewareTest {
 
         store
             .dispatch(MediaSessionAction.DeactivatedMediaSessionAction(mediaTabId))
-            .joinBlocking()
+            
 
         assertEquals(mediaTabUrl, store.state.tabs[0].lastMediaAccessState.lastMediaUrl)
         assertEquals(222, store.state.tabs[0].lastMediaAccessState.lastMediaAccess)
@@ -278,7 +278,7 @@ class LastMediaAccessMiddlewareTest {
 
         store
             .dispatch(MediaSessionAction.DeactivatedMediaSessionAction(mediaTabId))
-            .joinBlocking()
+            
 
         assertEquals(mediaTabUrl, store.state.tabs[0].lastMediaAccessState.lastMediaUrl)
         assertEquals(333, store.state.tabs[0].lastMediaAccessState.lastMediaAccess)

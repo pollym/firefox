@@ -81,7 +81,7 @@ class ContextMenuFeatureTest {
                 "test-tab",
                 HitResult.UNKNOWN("https://www.mozilla.org"),
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -111,7 +111,7 @@ class ContextMenuFeatureTest {
                 "test-tab",
                 HitResult.UNKNOWN("https://www.mozilla.org"),
             ),
-        ).joinBlocking()
+        )
 
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -134,7 +134,7 @@ class ContextMenuFeatureTest {
                 "test-tab",
                 HitResult.UNKNOWN("https://www.mozilla.org"),
             ),
-        ).joinBlocking()
+        )
 
         val feature = ContextMenuFeature(
             fragmentManager,
@@ -206,7 +206,7 @@ class ContextMenuFeatureTest {
         )
 
         store.dispatch(TabListAction.RemoveTabAction("test-tab"))
-            .joinBlocking()
+            
 
         feature.start()
 
@@ -263,7 +263,7 @@ class ContextMenuFeatureTest {
                 "test-tab",
                 HitResult.UNKNOWN("https://www.mozilla.org"),
             ),
-        ).joinBlocking()
+        )
 
         val (engineView, _) = mockEngineView()
 
@@ -300,7 +300,7 @@ class ContextMenuFeatureTest {
                 "test-tab",
                 HitResult.UNKNOWN("https://www.mozilla.org"),
             ),
-        ).joinBlocking()
+        )
 
         val (engineView, view) = mockEngineView()
         var actionInvoked = false
@@ -351,7 +351,7 @@ class ContextMenuFeatureTest {
                 "test-tab",
                 HitResult.UNKNOWN("https://www.mozilla.org"),
             ),
-        ).joinBlocking()
+        )
 
         val (engineView, _) = mockEngineView()
         val candidate = ContextMenuCandidate(

@@ -32,7 +32,7 @@ class TrustPanelStoreTest {
     fun `WHEN toggle tracking protection action is dispatched THEN tracking protection enabled state is updated`() = runTest {
         val store = TrustPanelStore(initialState = TrustPanelState())
 
-        store.dispatch(TrustPanelAction.ToggleTrackingProtection).join()
+        store.dispatch(TrustPanelAction.ToggleTrackingProtection)
 
         assertFalse(store.state.isTrackingProtectionEnabled)
     }
@@ -41,7 +41,7 @@ class TrustPanelStoreTest {
     fun `WHEN update number of trackers blocked action is dispatched THEN number of trackers blocked state is updated`() = runTest {
         val store = TrustPanelStore(initialState = TrustPanelState())
 
-        store.dispatch(TrustPanelAction.UpdateNumberOfTrackersBlocked(1)).join()
+        store.dispatch(TrustPanelAction.UpdateNumberOfTrackersBlocked(1))
 
         assertEquals(store.state.numberOfTrackersBlocked, 1)
     }
@@ -51,7 +51,7 @@ class TrustPanelStoreTest {
         val store = TrustPanelStore(initialState = TrustPanelState())
         val baseDomain = "mozilla.org"
 
-        store.dispatch(TrustPanelAction.UpdateBaseDomain(baseDomain)).join()
+        store.dispatch(TrustPanelAction.UpdateBaseDomain(baseDomain))
 
         assertEquals(store.state.baseDomain, baseDomain)
     }
@@ -61,7 +61,7 @@ class TrustPanelStoreTest {
         val store = TrustPanelStore(initialState = TrustPanelState())
         val trackerCategory = TrackingProtectionCategory.CRYPTOMINERS
 
-        store.dispatch(TrustPanelAction.UpdateDetailedTrackerCategory(trackerCategory)).join()
+        store.dispatch(TrustPanelAction.UpdateDetailedTrackerCategory(trackerCategory))
 
         assertEquals(store.state.detailedTrackerCategory, trackerCategory)
     }
@@ -162,7 +162,7 @@ class TrustPanelStoreTest {
         val store = TrustPanelStore(initialState = TrustPanelState())
         val newSitePermissions: SitePermissions = mock()
 
-        store.dispatch(TrustPanelAction.UpdateSitePermissions(newSitePermissions)).join()
+        store.dispatch(TrustPanelAction.UpdateSitePermissions(newSitePermissions))
 
         assertEquals(store.state.sitePermissions, newSitePermissions)
     }
@@ -182,7 +182,7 @@ class TrustPanelStoreTest {
             ),
         )
 
-        store.dispatch(TrustPanelAction.WebsitePermissionAction.GrantPermissionBlockedByAndroid(PhoneFeature.CAMERA)).join()
+        store.dispatch(TrustPanelAction.WebsitePermissionAction.GrantPermissionBlockedByAndroid(PhoneFeature.CAMERA))
 
         assertEquals(
             (store.state.websitePermissionsState[PhoneFeature.CAMERA]as? WebsitePermission.Toggleable)
@@ -206,7 +206,7 @@ class TrustPanelStoreTest {
             ),
         )
 
-        store.dispatch(TrustPanelAction.WebsitePermissionAction.TogglePermission(PhoneFeature.CAMERA)).join()
+        store.dispatch(TrustPanelAction.WebsitePermissionAction.TogglePermission(PhoneFeature.CAMERA))
 
         assertEquals(
             (store.state.websitePermissionsState[PhoneFeature.CAMERA]as? WebsitePermission.Toggleable)
@@ -231,7 +231,7 @@ class TrustPanelStoreTest {
 
         store.dispatch(
             TrustPanelAction.WebsitePermissionAction.ChangeAutoplay(AutoplayValue.AUTOPLAY_ALLOW_ALL),
-        ).join()
+        )
 
         assertEquals(
             (store.state.websitePermissionsState[PhoneFeature.AUTOPLAY]as? WebsitePermission.Autoplay)

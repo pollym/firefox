@@ -103,7 +103,7 @@ class AutoSaveTest {
                 TabListAction.AddTabAction(
                     createTab("https://www.mozilla.org"),
                 ),
-            ).joinBlocking()
+            )
 
             dispatcher.scheduler.advanceUntilIdle()
 
@@ -139,7 +139,7 @@ class AutoSaveTest {
             assertNull(autoSave.saveJob)
             verify(sessionStorage, never()).save(any())
 
-            store.dispatch(TabListAction.RemoveTabAction("mozilla")).joinBlocking()
+            store.dispatch(TabListAction.RemoveTabAction("mozilla"))
 
             dispatcher.scheduler.advanceUntilIdle()
 
@@ -175,7 +175,7 @@ class AutoSaveTest {
             assertNull(autoSave.saveJob)
             verify(sessionStorage, never()).save(any())
 
-            store.dispatch(TabListAction.RemoveAllNormalTabsAction).joinBlocking()
+            store.dispatch(TabListAction.RemoveAllNormalTabsAction)
 
             dispatcher.scheduler.advanceUntilIdle()
 
@@ -208,7 +208,7 @@ class AutoSaveTest {
             assertNull(autoSave.saveJob)
             verify(sessionStorage, never()).save(any())
 
-            store.dispatch(TabListAction.RemoveTabAction("firefox")).joinBlocking()
+            store.dispatch(TabListAction.RemoveTabAction("firefox"))
             dispatcher.scheduler.advanceUntilIdle()
 
             autoSave.saveJob?.join()
@@ -243,7 +243,7 @@ class AutoSaveTest {
             assertNull(autoSave.saveJob)
             verify(sessionStorage, never()).save(any())
 
-            store.dispatch(TabListAction.SelectTabAction("mozilla")).joinBlocking()
+            store.dispatch(TabListAction.SelectTabAction("mozilla"))
 
             dispatcher.scheduler.advanceUntilIdle()
 
@@ -278,7 +278,7 @@ class AutoSaveTest {
                     sessionId = "mozilla",
                     loading = true,
                 ),
-            ).joinBlocking()
+            )
 
             dispatcher.scheduler.advanceUntilIdle()
 
@@ -290,7 +290,7 @@ class AutoSaveTest {
                     sessionId = "mozilla",
                     loading = false,
                 ),
-            ).joinBlocking()
+            )
 
             dispatcher.scheduler.advanceUntilIdle()
 

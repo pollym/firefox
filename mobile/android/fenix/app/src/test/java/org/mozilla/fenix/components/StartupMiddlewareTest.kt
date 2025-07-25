@@ -48,7 +48,7 @@ class StartupMiddlewareTest {
         settings.enableHomepageAsNewTab = true
         val store = createStore()
 
-        store.dispatch(RestoreCompleteAction).joinBlocking()
+        store.dispatch(RestoreCompleteAction)
 
         captureActionsMiddleware.assertLastAction(RestoreCompleteAction::class) {}
 
@@ -62,7 +62,7 @@ class StartupMiddlewareTest {
         settings.enableHomepageAsNewTab = false
         val store = createStore()
 
-        store.dispatch(RestoreCompleteAction).joinBlocking()
+        store.dispatch(RestoreCompleteAction)
 
         captureActionsMiddleware.assertLastAction(RestoreCompleteAction::class) {}
 
@@ -79,7 +79,7 @@ class StartupMiddlewareTest {
             initialState = BrowserState(tabs = listOf(tab)),
         )
 
-        store.dispatch(RestoreCompleteAction).joinBlocking()
+        store.dispatch(RestoreCompleteAction)
 
         captureActionsMiddleware.assertLastAction(RestoreCompleteAction::class) {}
 

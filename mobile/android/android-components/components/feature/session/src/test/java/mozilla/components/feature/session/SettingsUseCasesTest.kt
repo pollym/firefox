@@ -40,14 +40,14 @@ class SettingsUseCasesTest {
                 tabId = "A",
                 engineSession = engineSessionA,
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             EngineAction.LinkEngineSessionAction(
                 tabId = "B",
                 engineSession = engineSessionB,
             ),
-        ).joinBlocking()
+        )
 
         val engine: Engine = mock()
         val settings: Settings = mock()

@@ -44,8 +44,8 @@ class ThumbnailStorageTest {
         val bitmap: Bitmap = mock()
         val thumbnailStorage = spy(ThumbnailStorage(testContext, testDispatcher))
 
-        thumbnailStorage.saveThumbnail(ImageSaveRequest("test-tab1", false), bitmap).joinBlocking()
-        thumbnailStorage.saveThumbnail(ImageSaveRequest("test-tab2", false), bitmap).joinBlocking()
+        thumbnailStorage.saveThumbnail(ImageSaveRequest("test-tab1", false), bitmap)
+        thumbnailStorage.saveThumbnail(ImageSaveRequest("test-tab2", false), bitmap)
         var thumbnail1 = thumbnailStorage.loadThumbnail(ImageLoadRequest("test-tab1", 100, false)).await()
         var thumbnail2 = thumbnailStorage.loadThumbnail(ImageLoadRequest("test-tab2", 100, false)).await()
         assertNotNull(thumbnail1)
@@ -64,11 +64,11 @@ class ThumbnailStorageTest {
         val bitmap: Bitmap = mock()
         val thumbnailStorage = spy(ThumbnailStorage(testContext, testDispatcher))
 
-        thumbnailStorage.saveThumbnail(request, bitmap).joinBlocking()
+        thumbnailStorage.saveThumbnail(request, bitmap)
         var thumbnail = thumbnailStorage.loadThumbnail(ImageLoadRequest(request.id, 100, request.isPrivate)).await()
         assertNotNull(thumbnail)
 
-        thumbnailStorage.deleteThumbnail(request.id, request.isPrivate).joinBlocking()
+        thumbnailStorage.deleteThumbnail(request.id, request.isPrivate)
         thumbnail = thumbnailStorage.loadThumbnail(ImageLoadRequest(request.id, 100, request.isPrivate)).await()
         assertNull(thumbnail)
     }
@@ -82,7 +82,7 @@ class ThumbnailStorageTest {
 
         assertNull(thumbnail)
 
-        thumbnailStorage.saveThumbnail(ImageSaveRequest(request.id, request.isPrivate), bitmap).joinBlocking()
+        thumbnailStorage.saveThumbnail(ImageSaveRequest(request.id, request.isPrivate), bitmap)
         thumbnail = thumbnailStorage.loadThumbnail(request).await()
         assertNotNull(thumbnail)
     }
@@ -96,7 +96,7 @@ class ThumbnailStorageTest {
 
         assertNull(thumbnail)
 
-        thumbnailStorage.saveThumbnail(ImageSaveRequest(request.id, request.isPrivate), bitmap).joinBlocking()
+        thumbnailStorage.saveThumbnail(ImageSaveRequest(request.id, request.isPrivate), bitmap)
         thumbnail = thumbnailStorage.loadThumbnail(request).await()
         assertNotNull(thumbnail)
     }

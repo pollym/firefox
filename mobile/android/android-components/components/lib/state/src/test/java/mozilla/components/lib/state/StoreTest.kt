@@ -20,12 +20,12 @@ class StoreTest {
             ::reducer,
         )
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
 
         assertEquals(24, store.state.counter)
 
-        store.dispatch(TestAction.DecrementAction).joinBlocking()
-        store.dispatch(TestAction.DecrementAction).joinBlocking()
+        store.dispatch(TestAction.DecrementAction)
+        store.dispatch(TestAction.DecrementAction)
 
         assertEquals(22, store.state.counter)
     }
@@ -43,7 +43,7 @@ class StoreTest {
             it.resume()
         }
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
 
         assertEquals(24, observedValue)
     }
@@ -81,7 +81,7 @@ class StoreTest {
         assertTrue(stateChangeObserved)
         stateChangeObserved = false
 
-        store.dispatch(TestAction.DoNothingAction).joinBlocking()
+        store.dispatch(TestAction.DoNothingAction)
 
         assertFalse(stateChangeObserved)
     }
@@ -101,17 +101,17 @@ class StoreTest {
             it.resume()
         }
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
 
         assertEquals(24, observedValue)
 
-        store.dispatch(TestAction.DecrementAction).joinBlocking()
+        store.dispatch(TestAction.DecrementAction)
 
         assertEquals(23, observedValue)
 
         subscription.unsubscribe()
 
-        store.dispatch(TestAction.DecrementAction).joinBlocking()
+        store.dispatch(TestAction.DecrementAction)
 
         assertEquals(23, observedValue)
         assertEquals(22, store.state.counter)
@@ -144,19 +144,19 @@ class StoreTest {
             ),
         )
 
-        store.dispatch(TestAction.DoNothingAction).joinBlocking()
+        store.dispatch(TestAction.DoNothingAction)
 
         assertEquals(2, store.state.counter)
 
-        store.dispatch(TestAction.DoNothingAction).joinBlocking()
+        store.dispatch(TestAction.DoNothingAction)
 
         assertEquals(6, store.state.counter)
 
-        store.dispatch(TestAction.DoNothingAction).joinBlocking()
+        store.dispatch(TestAction.DoNothingAction)
 
         assertEquals(14, store.state.counter)
 
-        store.dispatch(TestAction.DecrementAction).joinBlocking()
+        store.dispatch(TestAction.DecrementAction)
 
         assertEquals(13, store.state.counter)
     }
@@ -173,13 +173,13 @@ class StoreTest {
             listOf(interceptingMiddleware),
         )
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(0, store.state.counter)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(0, store.state.counter)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(0, store.state.counter)
     }
 
@@ -195,13 +195,13 @@ class StoreTest {
             listOf(rewritingMiddleware),
         )
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(-1, store.state.counter)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(-2, store.state.counter)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(-3, store.state.counter)
     }
 
@@ -221,13 +221,13 @@ class StoreTest {
             listOf(rewritingMiddleware),
         )
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(-1, store.state.counter)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(-2, store.state.counter)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(-3, store.state.counter)
     }
 
@@ -248,19 +248,19 @@ class StoreTest {
             listOf(observingMiddleware),
         )
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(0, countBefore)
         assertEquals(1, countAfter)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(1, countBefore)
         assertEquals(2, countAfter)
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
         assertEquals(2, countBefore)
         assertEquals(3, countAfter)
 
-        store.dispatch(TestAction.DecrementAction).joinBlocking()
+        store.dispatch(TestAction.DecrementAction)
         assertEquals(3, countBefore)
         assertEquals(2, countAfter)
     }
@@ -283,7 +283,7 @@ class StoreTest {
             listOf(catchingMiddleware),
         )
 
-        store.dispatch(TestAction.IncrementAction).joinBlocking()
+        store.dispatch(TestAction.IncrementAction)
 
         assertNotNull(caughtException)
         assertTrue(caughtException is IOException)

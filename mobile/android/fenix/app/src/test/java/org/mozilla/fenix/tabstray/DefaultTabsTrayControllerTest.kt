@@ -1092,7 +1092,7 @@ class DefaultTabsTrayControllerTest {
 
         val controller = createController()
 
-        browserStore.dispatch(TabListAction.SelectTabAction(privateTab.id)).joinBlocking()
+        browserStore.dispatch(TabListAction.SelectTabAction(privateTab.id))
         controller.handleTabSelected(privateTab, null)
 
         assertEquals(privateTab.id, browserStore.state.selectedTabId)
@@ -1100,7 +1100,7 @@ class DefaultTabsTrayControllerTest {
         assertEquals(BrowsingMode.Private, appStateModeUpdate)
 
         controller.handleTabDeletion("privateTab")
-        browserStore.dispatch(TabListAction.SelectTabAction(normalTab.id)).joinBlocking()
+        browserStore.dispatch(TabListAction.SelectTabAction(normalTab.id))
         controller.handleTabSelected(normalTab, null)
 
         assertEquals(normalTab.id, browserStore.state.selectedTabId)

@@ -69,7 +69,7 @@ class WebExtensionToolbarTest {
 
         val action = WebExtensionToolbarAction(browserAction, iconJobDispatcher = testDispatcher) {}
         action.bind(view)
-        action.iconJob?.joinBlocking()
+        action.iconJob
         testDispatcher.scheduler.advanceUntilIdle()
 
         val iconCaptor = argumentCaptor<BitmapDrawable>()
@@ -103,7 +103,7 @@ class WebExtensionToolbarTest {
 
         val action = WebExtensionToolbarAction(browserAction, iconJobDispatcher = testDispatcher) {}
         action.bind(view)
-        action.iconJob?.joinBlocking()
+        action.iconJob
         testDispatcher.scheduler.advanceUntilIdle()
 
         verify(imageView).setImageResource(

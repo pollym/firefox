@@ -87,6 +87,6 @@ class PrivacyPreferencesStoreTest {
  * Dispatches the [action] and ensures all [store] processing is completed.
  */
 private fun safeDispatch(store: PrivacyPreferencesStore, action: PrivacyPreferencesAction) {
-    store.dispatch(action).joinBlocking()
+    store.dispatch(action)
     store.waitUntilIdle()
 }

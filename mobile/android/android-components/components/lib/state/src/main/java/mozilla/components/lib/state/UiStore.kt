@@ -26,5 +26,4 @@ open class UiStore<S : State, A : Action>(
     initialState,
     reducer,
     middleware,
-    UiStoreDispatcher(),
 )

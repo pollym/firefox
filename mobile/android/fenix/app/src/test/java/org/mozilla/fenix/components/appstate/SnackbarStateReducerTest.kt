@@ -22,7 +22,7 @@ class SnackbarStateReducerTest {
 
     @Test
     fun `WHEN snackbar dismissed action is dispatched THEN state is updated`() {
-        appStore.dispatch(SnackbarAction.SnackbarDismissed).joinBlocking()
+        appStore.dispatch(SnackbarAction.SnackbarDismissed)
 
         assertTrue(appStore.state.snackbarState is Dismiss)
         assertTrue((appStore.state.snackbarState as Dismiss).previous == DeletingBrowserDataInProgress)
@@ -30,7 +30,7 @@ class SnackbarStateReducerTest {
 
     @Test
     fun `WHEN snackbar shown action is dispatched THEN state is updated`() {
-        appStore.dispatch(SnackbarAction.SnackbarShown).joinBlocking()
+        appStore.dispatch(SnackbarAction.SnackbarShown)
 
         assertTrue(appStore.state.snackbarState is None)
         assertTrue((appStore.state.snackbarState as None).previous == DeletingBrowserDataInProgress)
@@ -38,7 +38,7 @@ class SnackbarStateReducerTest {
 
     @Test
     fun `WHEN reset action is dispatched THEN state is updated`() {
-        appStore.dispatch(SnackbarAction.Reset).joinBlocking()
+        appStore.dispatch(SnackbarAction.Reset)
 
         assertTrue(appStore.state.snackbarState is None)
         assertTrue((appStore.state.snackbarState as None).previous == DeletingBrowserDataInProgress)

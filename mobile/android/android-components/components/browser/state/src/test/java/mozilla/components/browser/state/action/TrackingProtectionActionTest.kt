@@ -40,22 +40,22 @@ class TrackingProtectionActionTest {
         assertFalse(trackingProtectionState().enabled)
 
         store.dispatch(TrackingProtectionAction.ToggleAction(tabId = tab.id, enabled = true))
-            .joinBlocking()
+            
 
         assertTrue(trackingProtectionState().enabled)
 
         store.dispatch(TrackingProtectionAction.ToggleAction(tabId = tab.id, enabled = true))
-            .joinBlocking()
+            
 
         assertTrue(trackingProtectionState().enabled)
 
         store.dispatch(TrackingProtectionAction.ToggleAction(tabId = tab.id, enabled = false))
-            .joinBlocking()
+            
 
         assertFalse(trackingProtectionState().enabled)
 
         store.dispatch(TrackingProtectionAction.ToggleAction(tabId = tab.id, enabled = true))
-            .joinBlocking()
+            
 
         assertTrue(trackingProtectionState().enabled)
     }
@@ -69,7 +69,7 @@ class TrackingProtectionActionTest {
                 tabId = tab.id,
                 excluded = true,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(trackingProtectionState().ignoredOnTrackingProtection)
 
@@ -78,7 +78,7 @@ class TrackingProtectionActionTest {
                 tabId = tab.id,
                 excluded = true,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(trackingProtectionState().ignoredOnTrackingProtection)
 
@@ -87,7 +87,7 @@ class TrackingProtectionActionTest {
                 tabId = tab.id,
                 excluded = false,
             ),
-        ).joinBlocking()
+        )
 
         assertFalse(trackingProtectionState().ignoredOnTrackingProtection)
 
@@ -96,7 +96,7 @@ class TrackingProtectionActionTest {
                 tabId = tab.id,
                 excluded = true,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(trackingProtectionState().ignoredOnTrackingProtection)
     }
@@ -107,16 +107,16 @@ class TrackingProtectionActionTest {
         assertTrue(trackingProtectionState().loadedTrackers.isEmpty())
 
         store.dispatch(TrackingProtectionAction.TrackerBlockedAction(tabId = tab.id, tracker = mock()))
-            .joinBlocking()
+            
 
         assertEquals(1, trackingProtectionState().blockedTrackers.size)
         assertEquals(0, trackingProtectionState().loadedTrackers.size)
 
         store.dispatch(TrackingProtectionAction.TrackerBlockedAction(tabId = tab.id, tracker = mock()))
-            .joinBlocking()
+            
 
         store.dispatch(TrackingProtectionAction.TrackerBlockedAction(tabId = tab.id, tracker = mock()))
-            .joinBlocking()
+            
 
         assertEquals(3, trackingProtectionState().blockedTrackers.size)
         assertEquals(0, trackingProtectionState().loadedTrackers.size)
@@ -128,16 +128,16 @@ class TrackingProtectionActionTest {
         assertTrue(trackingProtectionState().loadedTrackers.isEmpty())
 
         store.dispatch(TrackingProtectionAction.TrackerLoadedAction(tabId = tab.id, tracker = mock()))
-            .joinBlocking()
+            
 
         assertEquals(0, trackingProtectionState().blockedTrackers.size)
         assertEquals(1, trackingProtectionState().loadedTrackers.size)
 
         store.dispatch(TrackingProtectionAction.TrackerLoadedAction(tabId = tab.id, tracker = mock()))
-            .joinBlocking()
+            
 
         store.dispatch(TrackingProtectionAction.TrackerLoadedAction(tabId = tab.id, tracker = mock()))
-            .joinBlocking()
+            
 
         assertEquals(0, trackingProtectionState().blockedTrackers.size)
         assertEquals(3, trackingProtectionState().loadedTrackers.size)
@@ -146,24 +146,24 @@ class TrackingProtectionActionTest {
     @Test
     fun `ClearTrackers - Removes trackers from TrackingProtectionState`() {
         store.dispatch(TrackingProtectionAction.TrackerBlockedAction(tabId = tab.id, tracker = mock()))
-            .joinBlocking()
+            
 
         store.dispatch(TrackingProtectionAction.TrackerBlockedAction(tabId = tab.id, tracker = mock()))
-            .joinBlocking()
+            
 
         store.dispatch(TrackingProtectionAction.TrackerLoadedAction(tabId = tab.id, tracker = mock()))
-            .joinBlocking()
+            
 
         store.dispatch(TrackingProtectionAction.TrackerLoadedAction(tabId = tab.id, tracker = mock()))
-            .joinBlocking()
+            
 
         store.dispatch(TrackingProtectionAction.TrackerLoadedAction(tabId = tab.id, tracker = mock()))
-            .joinBlocking()
+            
 
         assertEquals(2, trackingProtectionState().blockedTrackers.size)
         assertEquals(3, trackingProtectionState().loadedTrackers.size)
 
-        store.dispatch(TrackingProtectionAction.ClearTrackersAction(tab.id)).joinBlocking()
+        store.dispatch(TrackingProtectionAction.ClearTrackersAction(tab.id))
 
         assertEquals(0, trackingProtectionState().blockedTrackers.size)
         assertEquals(0, trackingProtectionState().loadedTrackers.size)

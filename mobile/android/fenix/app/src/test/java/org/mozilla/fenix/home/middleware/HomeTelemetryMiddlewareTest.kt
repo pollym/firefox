@@ -68,7 +68,7 @@ class HomeTelemetryMiddlewareTest {
                 recommendation = recommendation,
                 position = position,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(pingReceived)
     }
@@ -116,7 +116,7 @@ class HomeTelemetryMiddlewareTest {
             ContentRecommendationsAction.PocketStoriesShown(
                 impressions = impressions,
             ),
-        ).joinBlocking()
+        )
 
         assertTrue(pingReceived)
     }

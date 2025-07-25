@@ -276,8 +276,8 @@ class WebExtensionToolbarFeatureTest {
         assertEquals(2, webExtToolbarFeature.webExtensionBrowserActions.size)
         assertEquals(2, webExtToolbarFeature.webExtensionPageActions.size)
 
-        store.dispatch(WebExtensionAction.UninstallWebExtensionAction("1")).joinBlocking()
-        store.dispatch(WebExtensionAction.UpdateWebExtensionEnabledAction("2", false)).joinBlocking()
+        store.dispatch(WebExtensionAction.UninstallWebExtensionAction("1"))
+        store.dispatch(WebExtensionAction.UpdateWebExtensionEnabledAction("2", false))
 
         webExtToolbarFeature.start()
         assertEquals(0, webExtToolbarFeature.webExtensionBrowserActions.size)

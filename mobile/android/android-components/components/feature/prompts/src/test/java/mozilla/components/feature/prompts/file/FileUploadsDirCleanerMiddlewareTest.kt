@@ -40,20 +40,20 @@ class FileUploadsDirCleanerMiddlewareTest {
             ),
         )
 
-        store.dispatch(ContentAction.UpdateUrlAction("test-tab", "https://www.wikipedia.org")).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction("test-tab", "https://www.wikipedia.org"))
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
 
         verify(fileUploadsDirCleaner).cleanRecentUploads()
 
-        store.dispatch(ContentAction.UpdateUrlAction("test-tab", "https://www.wikipedia.org/cats")).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction("test-tab", "https://www.wikipedia.org/cats"))
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
 
         // Same site, no cleanups expected
         verify(fileUploadsDirCleaner, times(1)).cleanRecentUploads()
 
-        store.dispatch(ContentAction.UpdateUrlAction("test-tab", "https://www.example.com")).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction("test-tab", "https://www.example.com"))
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
 
@@ -76,7 +76,7 @@ class FileUploadsDirCleanerMiddlewareTest {
             ),
         )
 
-        store.dispatch(ContentAction.UpdateUrlAction("test-tab", "https://www.mozilla.org")).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction("test-tab", "https://www.mozilla.org"))
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
 
@@ -98,7 +98,7 @@ class FileUploadsDirCleanerMiddlewareTest {
             ),
         )
 
-        store.dispatch(ContentAction.UpdateUrlAction("test-tab", "https://www.wikipedia.org")).joinBlocking()
+        store.dispatch(ContentAction.UpdateUrlAction("test-tab", "https://www.wikipedia.org"))
         dispatcher.scheduler.advanceUntilIdle()
         store.waitUntilIdle()
 

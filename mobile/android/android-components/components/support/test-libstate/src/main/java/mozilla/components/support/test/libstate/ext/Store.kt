@@ -17,10 +17,5 @@ import mozilla.components.lib.state.Store
  * state changes.
  */
 fun <S : State, A : Action> Store<S, A>.waitUntilIdle() {
-    val scopeField = Store::class.java.getDeclaredField("scope")
-    scopeField.isAccessible = true
-    val scope = scopeField.get(this) as CoroutineScope
-    runBlocking {
-        scope.coroutineContext[Job]?.children?.forEach { it.join() }
-    }
+
 }

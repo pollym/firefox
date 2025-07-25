@@ -15,7 +15,7 @@ class TabStripActionTest {
     fun `WHEN the last remaining tab that was closed was private THEN state should reflect that`() {
         val store = AppStore(initialState = AppState())
 
-        store.dispatch(AppAction.TabStripAction.UpdateLastTabClosed(true)).joinBlocking()
+        store.dispatch(AppAction.TabStripAction.UpdateLastTabClosed(true))
 
         val expected = AppState(wasLastTabClosedPrivate = true)
 
@@ -26,7 +26,7 @@ class TabStripActionTest {
     fun `WHEN the last remaining tab that was closed was not private THEN state should reflect that`() {
         val store = AppStore(initialState = AppState())
 
-        store.dispatch(AppAction.TabStripAction.UpdateLastTabClosed(false)).joinBlocking()
+        store.dispatch(AppAction.TabStripAction.UpdateLastTabClosed(false))
 
         val expected = AppState(wasLastTabClosedPrivate = false)
 

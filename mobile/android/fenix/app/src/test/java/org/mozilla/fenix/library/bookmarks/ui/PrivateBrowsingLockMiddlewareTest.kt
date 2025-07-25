@@ -50,7 +50,7 @@ class PrivateBrowsingLockMiddlewareTest {
         assertFalse(testMiddlewareInvoked)
         assertNull(middleware.pendingAction)
 
-        store.dispatch(action).joinBlocking()
+        store.dispatch(action)
         store.waitUntilIdle()
 
         assertTrue(verificationRequested)
@@ -80,7 +80,7 @@ class PrivateBrowsingLockMiddlewareTest {
         assertFalse(testMiddlewareInvoked)
         assertNull(middleware.pendingAction)
 
-        store.dispatch(action).joinBlocking()
+        store.dispatch(action)
         store.waitUntilIdle()
 
         assertTrue(verificationRequested)
@@ -110,7 +110,7 @@ class PrivateBrowsingLockMiddlewareTest {
         assertFalse(testMiddlewareInvoked)
         assertNull(middleware.pendingAction)
 
-        store.dispatch(action).joinBlocking()
+        store.dispatch(action)
         store.waitUntilIdle()
 
         assertTrue(verificationRequested)
@@ -142,7 +142,7 @@ class PrivateBrowsingLockMiddlewareTest {
         assertFalse(testMiddlewareInvoked)
         assertNull(middleware.pendingAction)
 
-        store.dispatch(action).joinBlocking()
+        store.dispatch(action)
         store.waitUntilIdle()
 
         assertFalse(verificationRequested)
@@ -172,7 +172,7 @@ class PrivateBrowsingLockMiddlewareTest {
         assertFalse(testMiddlewareInvoked)
         assertNull(middleware.pendingAction)
 
-        store.dispatch(action).joinBlocking()
+        store.dispatch(action)
         store.waitUntilIdle()
 
         assertFalse(verificationRequested)
@@ -202,7 +202,7 @@ class PrivateBrowsingLockMiddlewareTest {
         assertFalse(testMiddlewareInvoked)
         assertNull(middleware.pendingAction)
 
-        store.dispatch(action).joinBlocking()
+        store.dispatch(action)
         store.waitUntilIdle()
 
         assertFalse(verificationRequested)
@@ -230,7 +230,7 @@ class PrivateBrowsingLockMiddlewareTest {
         assertFalse(testMiddlewareInvoked)
         assertNotNull(middleware.pendingAction)
 
-        store.dispatch(action).joinBlocking()
+        store.dispatch(action)
         store.waitUntilIdle()
 
         assertTrue(testMiddlewareInvoked)

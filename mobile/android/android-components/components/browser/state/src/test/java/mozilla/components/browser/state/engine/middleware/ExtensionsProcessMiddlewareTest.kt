@@ -28,7 +28,7 @@ class ExtensionsProcessMiddlewareTest {
 
     @Test
     fun `WHEN EnabledAction is dispatched THEN enable the process spawning`() {
-        store.dispatch(ExtensionsProcessAction.EnabledAction).joinBlocking()
+        store.dispatch(ExtensionsProcessAction.EnabledAction)
 
         Mockito.verify(engine).enableExtensionProcessSpawning()
         Mockito.verify(engine, Mockito.never()).disableExtensionProcessSpawning()
@@ -36,7 +36,7 @@ class ExtensionsProcessMiddlewareTest {
 
     @Test
     fun `WHEN DisabledAction is dispatched THEN disable the process spawning`() {
-        store.dispatch(ExtensionsProcessAction.DisabledAction).joinBlocking()
+        store.dispatch(ExtensionsProcessAction.DisabledAction)
 
         Mockito.verify(engine).disableExtensionProcessSpawning()
         Mockito.verify(engine, Mockito.never()).enableExtensionProcessSpawning()

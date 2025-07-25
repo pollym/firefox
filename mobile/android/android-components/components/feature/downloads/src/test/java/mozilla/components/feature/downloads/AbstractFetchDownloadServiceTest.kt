@@ -173,7 +173,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -198,7 +198,7 @@ class AbstractFetchDownloadServiceTest {
 
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
 
         service.onStartCommand(downloadIntent, 0, 0)
 
@@ -216,7 +216,7 @@ class AbstractFetchDownloadServiceTest {
 
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
 
         service.onStartCommand(downloadIntent, 0, 0)
 
@@ -235,7 +235,7 @@ class AbstractFetchDownloadServiceTest {
 
             downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
             val newDownloadState = download.copy(status = DOWNLOADING)
-            browserStore.dispatch(DownloadAction.AddDownloadAction(newDownloadState)).joinBlocking()
+            browserStore.dispatch(DownloadAction.AddDownloadAction(newDownloadState))
 
             service.onStartCommand(downloadIntent, 0, 0)
 
@@ -254,7 +254,7 @@ class AbstractFetchDownloadServiceTest {
 
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
 
         service.onStartCommand(downloadIntent, 0, 0)
 
@@ -492,7 +492,7 @@ class AbstractFetchDownloadServiceTest {
             downloadDeleted = false,
         )
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(downloadState)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(downloadState))
         service.downloadJobs[downloadJobState.state.id] = downloadJobState
         service.verifyDownload(downloadJobState)
         browserStore.waitUntilIdle()
@@ -515,7 +515,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -554,7 +554,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -601,7 +601,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -654,7 +654,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -707,7 +707,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -761,7 +761,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -806,9 +806,9 @@ class AbstractFetchDownloadServiceTest {
 
         doNothing().`when`(service).performDownload(any(), anyBoolean())
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
-        service.downloadJobs.values.first().job!!.joinBlocking()
+        service.downloadJobs.values.first().job!!
 
         verify(service).startDownloadJob(any())
         assertEquals(DOWNLOADING, service.downloadJobs.values.first().status)
@@ -821,7 +821,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
 
         verify(service, never()).startDownloadJob(any())
@@ -837,7 +837,7 @@ class AbstractFetchDownloadServiceTest {
 
         doNothing().`when`(service).performDownload(any(), anyBoolean())
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
 
         verify(service).setForegroundNotification(any())
@@ -944,7 +944,7 @@ class AbstractFetchDownloadServiceTest {
 
         doNothing().`when`(service).performDownload(any(), anyBoolean())
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
 
         val foregroundId = service.downloadJobs.values.first().foregroundServiceId
@@ -1190,7 +1190,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -1238,7 +1238,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -1269,7 +1269,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -1302,7 +1302,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -1329,7 +1329,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -1447,7 +1447,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.registerNotificationActionsReceiver()
         service.onStartCommand(downloadIntent, 0, 0)
 
@@ -1518,7 +1518,7 @@ class AbstractFetchDownloadServiceTest {
         val downloadIntent = Intent("ACTION_DOWNLOAD")
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.registerNotificationActionsReceiver()
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
@@ -2011,7 +2011,7 @@ class AbstractFetchDownloadServiceTest {
         val cancelledDownloadIntent = Intent("ACTION_DOWNLOAD")
         cancelledDownloadIntent.putExtra(EXTRA_DOWNLOAD_ID, cancelledDownload.id)
 
-        browserStore.dispatch(DownloadAction.AddDownloadAction(cancelledDownload)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(cancelledDownload))
         service.onStartCommand(cancelledDownloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
 
@@ -2034,7 +2034,7 @@ class AbstractFetchDownloadServiceTest {
         downloadIntent.putExtra(EXTRA_DOWNLOAD_ID, download.id)
 
         // Start another download to ensure its notifications are presented
-        browserStore.dispatch(DownloadAction.AddDownloadAction(download)).joinBlocking()
+        browserStore.dispatch(DownloadAction.AddDownloadAction(download))
         service.onStartCommand(downloadIntent, 0, 0)
         service.downloadJobs.values.forEach { it.job?.join() }
         verify(service, times(2)).performDownload(providedDownload.capture(), anyBoolean())

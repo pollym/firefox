@@ -262,7 +262,7 @@ class BrowserToolbarSearchMiddlewareTest {
             SearchSelectorItemClicked(
                 fakeSearchState().applicationSearchEngines.first { it.id == TABS_SEARCH_ENGINE_ID },
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(
             listOf(
@@ -286,7 +286,7 @@ class BrowserToolbarSearchMiddlewareTest {
             SearchSelectorItemClicked(
                 fakeSearchState().applicationSearchEngines.first { it.id == BOOKMARKS_SEARCH_ENGINE_ID },
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(
             listOf(components.core.bookmarksStorage),
@@ -307,7 +307,7 @@ class BrowserToolbarSearchMiddlewareTest {
             SearchSelectorItemClicked(
                 fakeSearchState().applicationSearchEngines.first { it.id == HISTORY_SEARCH_ENGINE_ID },
             ),
-        ).joinBlocking()
+        )
 
         assertEquals(
             listOf(components.core.historyStorage),
@@ -321,7 +321,7 @@ class BrowserToolbarSearchMiddlewareTest {
         configureAutocompleteProvidersInComponents()
         val (_, store) = buildMiddlewareAndAddToStore()
 
-        store.dispatch(SearchSelectorItemClicked(mockk(relaxed = true))).joinBlocking()
+        store.dispatch(SearchSelectorItemClicked(mockk(relaxed = true)))
         store.dispatch(ToggleEditMode(true))
 
         assertEquals(
@@ -339,7 +339,7 @@ class BrowserToolbarSearchMiddlewareTest {
         store.dispatch(ToggleEditMode(true))
         val newSearchEngines = fakeSearchState().applicationSearchEngines
 
-        browserStore.dispatch(ApplicationSearchEnginesLoaded(newSearchEngines)).joinBlocking()
+        browserStore.dispatch(ApplicationSearchEnginesLoaded(newSearchEngines))
         shadowOf(Looper.getMainLooper()).idle() // wait for observing and processing the search engines update
 
         assertSearchSelectorEquals(
@@ -365,7 +365,7 @@ class BrowserToolbarSearchMiddlewareTest {
         store.dispatch(ToggleEditMode(true))
         val newSearchEngines = fakeSearchState().applicationSearchEngines
 
-        browserStore.dispatch(ApplicationSearchEnginesLoaded(newSearchEngines)).joinBlocking()
+        browserStore.dispatch(ApplicationSearchEnginesLoaded(newSearchEngines))
         shadowOf(Looper.getMainLooper()).idle() // wait for observing and processing the search engines update
 
         assertSearchSelectorEquals(
