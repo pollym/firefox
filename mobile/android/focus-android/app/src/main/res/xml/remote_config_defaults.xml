@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><defaults>
+  <entry>
+    <key>upcomingMinSdkVersion</key>
+    <value>30</value>
+  </entry>
+  <entry>
+    <key>upcomingRaiseDate</key>
+    <value>1764547200000</value>
+  </entry>
+</defaults>

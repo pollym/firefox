@@ -50,7 +50,9 @@ work = "2.10.5"
 
 # Google other
 accompanist = "0.37.3"
+desugar-jdk-libs = "2.1.5"
 firebase-messaging = "25.0.1"
+firebase-bom = "34.2.0"
 installreferrer = "2.2"
 material = "1.13.0"
 osslicenses-plugin = "0.10.7"
@@ -108,6 +110,8 @@ zxing = "3.5.3"
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle-plugin" }
 
 # Kotlin
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
+firebase-config = { module = "com.google.firebase:firebase-config" }
 kotlin-annotations-jvm = { group = "org.jetbrains.kotlin", name = "kotlin-annotations-jvm", version.ref = "kotlin" }
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
 kotlin-serialization = { group = "org.jetbrains.kotlin.plugin.serialization", name = "org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
