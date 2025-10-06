@@ -508,8 +508,13 @@ abstract class BaseBrowserFragment :
             view = view,
         )
 
-        SunsetWarningChecker().checkWarnings()
-        SunsetWarningFeature()
+        SunsetWarningChecker().checkWarnings { warning ->
+            val warningString =
+                "We are about to raise the minimum supported android version to ${warning.upcomingRaiseVersion}!"
+            findNavController().navigate(
+                NavGraphDirections.actionGlobalSunsetWarningFragment(warningString)
+            )
+        }
 
         // DO NOT MOVE ANYTHING BELOW THIS addMarker CALL!
         requireComponents.core.engine.profiler?.addMarker(
