@@ -206,9 +206,6 @@
     <action
         android:id="@+id/action_global_to_installedAddonDetailsFragment"
         app:destination="@id/installedAddonDetailsFragment" />
-    <action
-        android:id="@+id/action_global_sunsetWarningFragment"
-        app:destination="@id/sunsetWarningFragment" />
     <dialog
         android:id="@+id/tabsTrayFragment"
         android:name="org.mozilla.fenix.tabstray.TabsTrayFragment">
@@ -1356,13 +1353,6 @@
         <argument
             android:name="addon"
             app:argType="mozilla.components.feature.addons.Addon" />
-    </fragment>
-    <fragment
-        android:id="@+id/sunsetWarningFragment"
-        android:name="org.mozilla.fenix.sunsetmode.SunsetWarningFragment">
-        <argument
-            android:name="sunsetWarning"
-            app:argType="string" />
     </fragment>
     <navigation
         android:id="@+id/addons_management_graph"

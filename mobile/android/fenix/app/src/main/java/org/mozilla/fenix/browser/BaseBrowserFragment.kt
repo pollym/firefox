@@ -508,13 +508,11 @@ abstract class BaseBrowserFragment :
         )
 
         SunsetWarningChecker().checkWarnings { warning ->
-            val warningString =
-                "We are about to raise the minimum supported android version to ${warning.upcomingRaiseVersion}!"
             val sunsetWarningFeature = requireComponents.core.sunsetWarningFeature
-            if (!sunsetWarningFeature.warningShown) {
-                sunsetWarningFeature.warningShown = true
-                findNavController().navigate(
-                    NavGraphDirections.actionGlobalSunsetWarningFragment(warningString)
+            if (!sunsetWarningFeature.warningDialogShown) {
+                sunsetWarningFeature.showDialog(
+                    container = binding.browserLayout,
+                    warning = warning
                 )
             }
         }
