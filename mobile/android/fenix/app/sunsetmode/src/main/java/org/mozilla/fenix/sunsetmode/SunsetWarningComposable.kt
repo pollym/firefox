@@ -1,10 +1,9 @@
 package org.mozilla.fenix.sunsetmode
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,18 +18,18 @@ fun SunsetWarningComposable(warning: String) {
     Column(
         modifier = Modifier
             .background(Color.Yellow)
-            .height(200.dp)
-            .fillMaxWidth()
             .padding(24.dp),
+        verticalArrangement = Arrangement.Center
     ) {
-        Row(modifier = Modifier
-            .background(Color.DarkGray)
-            .padding(24.dp)
+        Row(
+            modifier = Modifier
+                .background(Color.DarkGray)
+                .padding(24.dp)
         ) {
             Text(
                 color = Color.White,
                 text = warning,
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }

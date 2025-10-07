@@ -1,24 +1,28 @@
 package org.mozilla.fenix.sunsetmode
 
+import android.app.Dialog
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import androidx.compose.material3.MaterialTheme
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.compose.content
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-class SunsetWarningFragment : Fragment() {
+class SunsetWarningFragment : DialogFragment() {
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ) = content {
-        val sunsetWarning = arguments?.getString("sunsetWarning")
-            ?: throw IllegalStateException("no warning")
-        MaterialTheme {
-            SunsetWarningComposable(sunsetWarning)
-        }
+    companion object {
+        const val SUNSET_WARNING_KEY = "sunsetWarning"
     }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
+        MaterialAlertDialogBuilder(requireContext())
+            .setCancelable(true)
+            .setView(content {
+                val sunsetWarning = this.arguments?.getString(SUNSET_WARNING_KEY)
+                    ?: throw IllegalStateException("no warning")
+                MaterialTheme {
+                    SunsetWarningComposable(sunsetWarning)
+                }
+            })
+            .create()
 
 }
