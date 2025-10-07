@@ -8,6 +8,7 @@ import com.google.firebase.remoteconfig.get
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
 import org.mozilla.fenix.sunsetmode.SunsetWarning
+import org.mozilla.fenix.R
 
 class SunsetWarningChecker {
     val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
@@ -16,15 +17,18 @@ class SunsetWarningChecker {
     }
 
     init {
-        remoteConfig.setConfigSettingsAsync(configSettings)
+        with (remoteConfig) {
+            setConfigSettingsAsync(configSettings)
+            setDefaultsAsync(R.xml.remote_config_defaults)
+        }
     }
 
     fun checkWarnings(onWarning: (SunsetWarning) -> Unit) {
         remoteConfig.fetchAndActivate().addOnCompleteListener {
             val upcomingMinSdk = remoteConfig["upcomingMinSdkVersion"].asLong().toInt()
             val upcomingRaiseDate = remoteConfig["upcomingRaiseDate"].asLong()
-            Log.d("polly", "upcomingMinSdk = $upcomingMinSdk")
-            Log.d("polly", "upcomingRaiseDate = $upcomingRaiseDate")
+            Log.d("polly", "remote upcomingMinSdk = $upcomingMinSdk")
+            Log.d("polly", "remote upcomingRaiseDate = $upcomingRaiseDate")
             if (Build.VERSION.SDK_INT <= upcomingMinSdk) {
                 onWarning(
                     SunsetWarning(
@@ -35,5 +39,4 @@ class SunsetWarningChecker {
             }
         }
     }
-
 }

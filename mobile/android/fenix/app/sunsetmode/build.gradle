@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 apply plugin: 'com.android.library'
 
@@ -27,6 +28,24 @@ dependencies {
     implementation libs.google.material
     implementation platform(libs.firebase.bom)
     implementation libs.firebase.config
+    implementation libs.androidx.ui
+    implementation libs.androidx.ui.tooling.preview
+    implementation libs.androidx.material3
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.androidx.compose.animation
+    implementation libs.androidx.compose.foundation
+    implementation libs.androidx.compose.material.icons
+    implementation libs.androidx.compose.material3
+    implementation libs.androidx.compose.material3.adaptive
+    implementation libs.androidx.compose.material3.adaptivelayout
+    implementation libs.androidx.compose.material3.adaptivenavigation
+    implementation libs.androidx.compose.material3.adaptivenavigationsuite
+    implementation libs.androidx.compose.material3.windowsizeclass
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.ui.tooling.preview
+    implementation libs.androidx.fragment
+    implementation libs.androidx.fragment.compose
     testImplementation libs.junit4
     androidTestImplementation libs.androidx.test.junit
+    debugImplementation libs.androidx.ui.tooling
 }
