@@ -132,6 +132,7 @@ import org.mozilla.fenix.settings.advanced.getSelectedLocale
 import org.mozilla.fenix.share.DefaultSentFromFirefoxManager
 import org.mozilla.fenix.share.DefaultSentFromStorage
 import org.mozilla.fenix.share.SaveToPDFMiddleware
+import org.mozilla.fenix.sunsetmode.SunsetWarningFeature
 import org.mozilla.fenix.telemetry.TelemetryMiddleware
 import org.mozilla.fenix.utils.getUndoDelay
 import org.mozilla.geckoview.GeckoRuntime
@@ -652,6 +653,8 @@ class Core(
     val webAppManifestStorage by lazyMonitored { ManifestStorage(context) }
 
     val loginExceptionStorage by lazyMonitored { LoginExceptionStorage(context) }
+
+    val sunsetWarningFeature by lazyMonitored { SunsetWarningFeature() }
 
     /**
      * Shared Preferences that encrypt/decrypt using Android KeyStore and lib-dataprotect for 23+
