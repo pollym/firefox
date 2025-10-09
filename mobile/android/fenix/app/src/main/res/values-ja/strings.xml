@@ -1481,7 +1481,7 @@
   <!-- Content description for tabs tray multiselect menu -->
   <string name="tab_tray_multiselect_menu_content_description">選択したタブのメニュー</string>
   <!-- Title text displayed for a homepage tab in the tabs tray. -->
-  <string name="tab_tray_homepage_tab">ホームページ</string>
+  <string name="tab_tray_homepage_tab" tools:ignore="UnusedResources" moz:removedIn="145">ホームページ</string>
   <!-- Content description (not visible, for screen readers etc.): Removes tab from collection button. Removes the selected tab from collection when pressed -->
   <string name="remove_tab_from_collection">タブをコレクションから削除</string>
   <!-- Text for button to enter multiselect mode in tabs tray -->
@@ -1517,9 +1517,9 @@
   <!-- Text for the button to clear all history -->
   <string name="history_delete_all">履歴を削除</string>
   <!-- Text for the snackbar to confirm that multiple browsing history items has been deleted -->
-  <string name="history_delete_multiple_items_snackbar" tools:ignore="UnusedResources" moz:removedIn="143">履歴が削除されました</string>
+  <string name="history_delete_multiple_items_snackbar">履歴が削除されました</string>
   <!-- Text for the snackbar to confirm that a single browsing history item has been deleted. %1$s is the shortened URL of the deleted history item. -->
-  <string name="history_delete_single_item_snackbar" tools:ignore="UnusedResources" moz:removedIn="143">%1$s を履歴から削除しました</string>
+  <string name="history_delete_single_item_snackbar">%1$s を履歴から削除しました</string>
   <!-- Context description text for the button to delete a single history item -->
   <string name="history_delete_item">削除</string>
   <!--

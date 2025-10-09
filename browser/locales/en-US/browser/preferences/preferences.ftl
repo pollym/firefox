@@ -142,8 +142,11 @@ always-check-default =
     .label = Always check if { -brand-short-name } is your default browser
     .accesskey = y
 
-is-default = { -brand-short-name } is currently your default browser
-is-not-default = { -brand-short-name } is not your default browser
+is-default-browser =
+    .message = { -brand-short-name } is currently your default browser
+
+is-not-default-browser =
+    .message = { -brand-short-name } is not your default browser
 
 set-as-my-default-browser =
     .label = Make Default…
@@ -152,12 +155,13 @@ set-as-my-default-browser =
 startup-restore-windows-and-tabs =
     .label = Open previous windows and tabs
     .accesskey = s
+startup-windows-launch-on-login-profile-disabled =
+    .message = Enable this preference by checking “{ profile-manager-use-selected.label }” in the “Choose User Profile” window.
 
 windows-launch-on-login =
     .label = Open { -brand-short-name } automatically when your computer starts up
     .accesskey = O
 windows-launch-on-login-disabled = This preference has been disabled in Windows. To change, visit <a data-l10n-name="startup-link">Startup Apps</a> in System settings.
-windows-launch-on-login-profile-disabled = Enable this preference by checking “{ profile-manager-use-selected.label }” in the “Choose User Profile” window.
 
 disable-extension =
     .label = Disable Extension
@@ -183,6 +187,9 @@ ctrl-tab-recently-used-order =
 open-new-link-as-tabs =
     .label = Open links in tabs instead of new windows
     .accesskey = w
+
+open-external-link-next-to-active-tab =
+    .label = Open links from apps next to your active tab
 
 ask-on-close-multiple-tabs =
     .label = Ask before closing multiple tabs
@@ -1219,6 +1226,7 @@ sitedata-settings2 =
 
 sitedata-cookies-exceptions =
     .label = Manage Exceptions…
+    .accesskey = x
 
 sitedata-cookies-exceptions2 =
     .label = Manage exceptions
@@ -1576,9 +1584,9 @@ security-block-uncommon-software =
 
 ## Privacy Section - Certificates
 
-certs-header = Certificates
-
-certs-description = Configure the certificates that { -brand-short-name } uses for authentication.
+certs-description2 =
+    .label = Certificates
+    .description = Configure the certificates that { -brand-short-name } uses for authentication.
 
 certs-view =
     .label = View Certificates…
@@ -1591,6 +1599,8 @@ certs-devices =
 certs-thirdparty-toggle =
     .label = Allow { -brand-short-name } to automatically trust third-party root certificates you install
     .accesskey = t
+
+certs-devices-enable-fips = Enable FIPS
 
 space-alert-over-5gb-settings-button =
     .label = Open Settings

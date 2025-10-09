@@ -633,12 +633,16 @@ nsresult nsHttpChannel::PrepareToConnect() {
   // This may be async; the dictionary headers may need to fetch an origin
   // dictionary cache entry from disk before adding the headers.  We can
   // continue with channel creation, and just block on this being done later
-  bool async;
+  bool async = false;
   AUTO_PROFILER_FLOW_MARKER("nsHttpHandler::AddAcceptAndDictionaryHeaders",
                             NETWORK, Flow::FromPointer(this));
+  // AddAcceptAndDictionaryHeaders must call this->Suspend before kicking
+  // off the async operation that can result in calling the lambda (which
+  // will Resume), to avoid a race condition.
+  bool aAsync;
   nsresult rv = gHttpHandler->AddAcceptAndDictionaryHeaders(
       mURI, mLoadInfo->GetExternalContentPolicyType(), &mRequestHead, IsHTTPS(),
-      async,
+      aAsync, this, nsHttpChannel::StaticSuspend,
       [self = RefPtr(this)](bool aNeedsResume, DictionaryCacheEntry* aDict) {
         self->mDictDecompress = aDict;
         if (aNeedsResume) {
@@ -659,6 +663,9 @@ nsresult nsHttpChannel::PrepareToConnect() {
           PROFILER_MARKER("Dictionary Prefetch", NETWORK,
                           MarkerTiming::IntervalStart(), FlowMarker,
                           Flow::FromPointer(self));
+          // XXX if this fails, retry the connection (we assume that the
+          // DictionaryCacheEntry has been removed).  Failure should be only in
+          // weird cases like no storage service.
           return NS_SUCCEEDED(self->mDictDecompress->Prefetch(
               GetLoadContextInfo(self), self->mShouldSuspendForDictionary,
               [self]() {
@@ -7139,6 +7146,9 @@ nsHttpChannel::Suspend() {
 
   return NS_FAILED(rvTransaction) ? rvTransaction : rvCache;
 }
+
+// static
+void nsHttpChannel::StaticSuspend(nsHttpChannel* aChan) { aChan->Suspend(); }
 
 NS_IMETHODIMP
 nsHttpChannel::Resume() {

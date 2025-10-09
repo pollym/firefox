@@ -1303,7 +1303,7 @@
   <!-- Content description for tabs tray multiselect menu -->
   <string name="tab_tray_multiselect_menu_content_description">የተመረጡ የትሮች ምናሌ</string>
   <!-- Title text displayed for a homepage tab in the tabs tray. -->
-  <string name="tab_tray_homepage_tab">መነሻ ገጽ</string>
+  <string name="tab_tray_homepage_tab" tools:ignore="UnusedResources" moz:removedIn="145">መነሻ ገጽ</string>
   <!-- Content description (not visible, for screen readers etc.): Removes tab from collection button. Removes the selected tab from collection when pressed -->
   <string name="remove_tab_from_collection">ትርን ከስብስብ ያስወግዱ</string>
   <!-- Text for button to enter multiselect mode in tabs tray -->
@@ -1339,9 +1339,9 @@
   <!-- Text for the button to clear all history -->
   <string name="history_delete_all">ታሪክ ሰርዝ</string>
   <!-- Text for the snackbar to confirm that multiple browsing history items has been deleted -->
-  <string name="history_delete_multiple_items_snackbar" tools:ignore="UnusedResources" moz:removedIn="143">ታሪክ ተሰርዟል</string>
+  <string name="history_delete_multiple_items_snackbar">ታሪክ ተሰርዟል</string>
   <!-- Text for the snackbar to confirm that a single browsing history item has been deleted. %1$s is the shortened URL of the deleted history item. -->
-  <string name="history_delete_single_item_snackbar" tools:ignore="UnusedResources" moz:removedIn="143">%1$s ተሰርዟል</string>
+  <string name="history_delete_single_item_snackbar">%1$s ተሰርዟል</string>
   <!-- Context description text for the button to delete a single history item -->
   <string name="history_delete_item">ሰርዝ</string>
   <!--

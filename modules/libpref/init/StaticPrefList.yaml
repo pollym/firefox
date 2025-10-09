@@ -294,11 +294,7 @@
 # * 2: Enable unless incompatible accessibility clients are detected.
 - name: accessibility.uia.enable
   type: uint32_t
-#ifdef NIGHTLY_BUILD
   value: 2
-#else
-  value: 0
-#endif
   mirror: always
   do_not_use_directly: true
 
@@ -1807,6 +1803,17 @@
   type: RelaxedAtomicUint32
   value: 2
   mirror: always
+
+# Whether (-moz-native-theme) evaluates to true by default.
+- name: browser.theme.native-theme
+  type: RelaxedAtomicBool
+#ifdef MOZ_WIDGET_GTK
+  value: true
+#else
+  value: false
+#endif
+  mirror: always
+  rust: true
 
 # Communicates the preferred content theme color to platform (for e.g.,
 # prefers-color-scheme).
@@ -4434,7 +4441,7 @@
 # (https://w3c.github.io/trusted-types/dist/spec/) is enabled.
 - name: dom.security.trusted_types.enabled
   type: RelaxedAtomicBool
-  value: @IS_NIGHTLY_BUILD@
+  value: @IS_EARLY_BETA_OR_EARLIER@
   mirror: always
 
 # If true, all content requests will get upgraded to HTTPS://
@@ -4804,7 +4811,7 @@
 # Enable Storage-Access-Headers
 - name: dom.storage_access.headers.enabled
   type: bool
-  value: false
+  value: @IS_NIGHTLY_BUILD@
   mirror: always
 
 # Forward-Declared Storage-access API.
@@ -5538,14 +5545,29 @@
 #
 # When this condition changes, be sure to update the `run-if` / `skip-if`
 # conditions in `dom/webgpu/tests/mochitest/*.toml` accordingly.
+#
+# preprocessor.py doesn't understand parentheses, but && is higher precedence
+# than ||, meaning this pref defaults to true on any Windows architecture, or
+# on aarch64 (Apple Silicon) MacOS.
 - name: dom.webgpu.enabled
   type: RelaxedAtomicBool
-#ifdef XP_WIN
+#if defined(XP_WIN) || defined(XP_MACOSX) && defined(MOZ_AARCH64)
   value: true
 #else
   value: @IS_EARLY_BETA_OR_EARLIER@
 #endif
   mirror: always
+
+# Is WebGPU allowed to run in the parent process? This should be false if
+# on a platform that supports the GPU process, else true.
+- name: dom.webgpu.allow-in-parent
+  type: bool
+#if defined(XP_WIN) || defined(ANDROID)
+  value: false
+#else
+  value: true
+#endif
+  mirror: once
 
 # Is support for the Web GPU API enabled on service workers?
 - name: dom.webgpu.service-workers.enabled
@@ -6641,6 +6663,15 @@
   value: false
 #endif
   mirror: always
+
+- name: gfx.canvas.accelerated.allow-in-parent
+  type: bool
+#if defined(XP_WIN) || defined(ANDROID)
+  value: false
+#else
+  value: true
+#endif
+  mirror: once
 
 # Whether to attempt to enable Accelerated Canvas2D regardless of blocklisting.
 - name: gfx.canvas.accelerated.force-enabled
@@ -8087,14 +8118,14 @@
 - name: gfx.webrender.precise-radial-gradients
   type: bool
   rust: true
-  value: false
+  value: true
   mirror: once
 
 # Use a more precise method for sampling gradients when using SWGL.
 - name: gfx.webrender.precise-radial-gradients-swgl
   type: bool
   rust: true
-  value: false
+  value: true
   mirror: once
 
 # Use a more precise method for sampling gradients when *not* using SWGL .
@@ -9385,7 +9416,7 @@
   # making this mirror: once, and set_spidermonkey_pref: startup is
   # broken: See Bug 1989094
   mirror: always
-  set_spidermonkey_pref: startup
+  set_spidermonkey_pref: always
 
 # Whether to use the off-thread script compilation and decoding.
 - name: javascript.options.parallel_parsing
@@ -9523,6 +9554,13 @@
 #endif
   mirror: always
 
+# If true, allow the parent process as a fallback for compositing due to an
+# unstable GPU process, otherwise simply crash the parent process.
+- name: layers.gpu-process.allow-fallback-to-parent
+  type: bool
+  value: false
+  mirror: once
+
 - name: layers.gpu-process.allow-software
   type: bool
 #if defined(XP_WIN)
@@ -9569,14 +9607,21 @@
   value: 20000
   mirror: once
 
+# How many additional attempts to launch the GPU process we try if we fail
+# during process launch, before any configuration is attempted.
+- name: layers.gpu-process.max_launch_attempts
+  type: RelaxedAtomicInt32
+#if defined(XP_WIN) || defined(MOZ_WIDGET_GTK) || defined(XP_MACOSX)
+  value: 2
+#else
+  value: 0
+#endif
+  mirror: always
+
 # How many unstable GPU process restarts we allow for a given configuration.
 - name: layers.gpu-process.max_restarts
   type: RelaxedAtomicInt32
-#if defined(XP_WIN) || defined(MOZ_WIDGET_GTK) || defined(MOZ_WIDGET_ANDROID)
   value: 6
-#else
-  value: 1
-#endif
   mirror: always
 
 # How many frames we must render before declaring the GPU process stable, and
@@ -9591,7 +9636,7 @@
 # restarts.
 - name: layers.gpu-process.stable.min-uptime-ms
   type: RelaxedAtomicInt32
-  value: 4 * 60000
+  value: 30000
   mirror: always
 
 # Note: This pref will only be used if it is less than layers.gpu-process.max_restarts.
@@ -10964,6 +11009,21 @@
   value: false
   mirror: always
 
+# Determines how we snap css outline-offset:
+#   0: No snapping (historical behavior)
+#   1: Always snap as border-width (proposed behavior in
+#      https://github.com/w3c/csswg-drafts/issues/12906)
+#   2: The above, but only on chrome code, for now.
+- name: layout.css.outline-offset.snapping
+  type: RelaxedAtomicInt32
+#ifdef NIGHTLY_BUILD
+  value: 1
+#else
+  value: 2
+#endif
+  mirror: always
+  rust: true
+
 - name: layout.visibility.min-recompute-interval-ms
   type: uint32_t
   value: 1000
@@ -12133,7 +12193,13 @@
   mirror: always
 
 # This pref disables using PQ crypto for WebRTC DTLS code.
-- name: media.webrtc.enable_pq_dtls
+- name: media.webrtc.enable_pq_hybrid_kex
+  type: RelaxedAtomicBool
+  value: true
+  mirror: always
+
+# This pref enabled sending ssl_grp_kem_mlkem768x25519 Key Share for WebRTC DTLS code.
+- name: media.webrtc.send_mlkem_keyshare
   type: RelaxedAtomicBool
   value: @IS_EARLY_BETA_OR_EARLIER@
   mirror: always
@@ -12272,11 +12338,7 @@
 # Hls
 - name: media.hls.enabled
   type: RelaxedAtomicBool
-#if defined(ANDROID)
-  value: @IS_NOT_EARLY_BETA_OR_EARLIER@
-#else
-  value: false
-#endif
+  value: @IS_ANDROID@
   mirror: always
 
 # Max number of HLS players that can be created concurrently. Used only on
@@ -15135,12 +15197,7 @@
 # Use NSPR for HTTP3 UDP IO
 - name: network.http.http3.use_nspr_for_io
   type: RelaxedAtomicBool
-#ifdef ANDROID
-  # Holding back on Android for now given <https://bugzilla.mozilla.org/show_bug.cgi?id=1987256>.
-  value: @IS_NOT_EARLY_BETA_OR_EARLIER@
-#else
   value: false
-#endif
   mirror: always
   rust: true
 
@@ -15178,6 +15235,11 @@
   # Disable GSO on Windows.
   #
   # See https://bugzilla.mozilla.org/show_bug.cgi?id=1979279 for details.
+  value: 1
+#elif defined(ANDROID)
+  # Disable GSO on Android.
+  #
+  # See <https://bugzilla.mozilla.org/show_bug.cgi?id=1987256> for details.
   value: 1
 #else
   # Current industry standard. Likely worth tuning.
@@ -15278,11 +15340,7 @@
 # Has no effect unless security.tls.enable_kyber is true.
 - name: network.http.http3.enable_kyber
   type: RelaxedAtomicBool
-#ifdef ANDROID
-  value: @IS_NIGHTLY_BUILD@
-#else
   value: true
-#endif
   mirror: always
   rust: true
 
@@ -17355,17 +17413,13 @@
 
 - name: security.tls.enable_kyber
   type: RelaxedAtomicBool
-#ifdef ANDROID
-  value: @IS_NIGHTLY_BUILD@
-#else
   value: true
-#endif
   mirror: always
   rust: true
 
 - name: security.tls.client_hello.send_p256_keyshare
   type: RelaxedAtomicBool
-  value: true
+  value: @IS_NOT_NIGHTLY_BUILD@
   mirror: always
   rust: true
 
@@ -19316,6 +19370,16 @@
 - name: widget.windows.mica.toplevel-backdrop
   type: RelaxedAtomicInt32
   value: 0
+  mirror: always
+
+# Whether to use the Windows App SDK to disable the minimize/maximize/close buttons.
+# This should only be disabled if crashes are happening, because it will make
+# double minimize/maximize/close buttons draw. Note that this preference is disregarded
+# when running on Windows 11 H2 or earlier (which includes Windows 10), as we never use
+# the Windows App SDK on those versions.
+- name: widget.windows.windowsappsdk.enabled
+  type: bool
+  value: true
   mirror: always
 #endif
 

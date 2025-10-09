@@ -78,7 +78,6 @@
 #include "mozilla/Likely.h"
 #include "mozilla/Logging.h"
 #include "mozilla/LookAndFeel.h"
-#include "mozilla/MacroForEach.h"
 #include "mozilla/MappedDeclarationsBuilder.h"
 #include "mozilla/Maybe.h"
 #include "mozilla/MediaFeatureChange.h"
@@ -1416,6 +1415,7 @@ Document::Document(const char* aContentType)
       mStyleSheetChangeEventsEnabled(false),
       mDevToolsAnonymousAndShadowEventsEnabled(false),
       mPausedByDevTools(false),
+      mForceNonNativeTheme(false),
       mIsSrcdocDocument(false),
       mHasDisplayDocument(false),
       mFontFaceSetDirty(true),
@@ -13435,13 +13435,18 @@ bool Document::IsActive() const {
          !GetBrowsingContext()->IsInBFCache();
 }
 
-bool Document::HasBeenScrolled() const {
-  nsGlobalWindowInner* window = nsGlobalWindowInner::Cast(GetInnerWindow());
-  if (!window) {
-    return false;
+uint32_t Document::LastScrollGeneration() const {
+  if (nsPresContext* pc = GetPresContext()) {
+    pc->LastScrollGeneration();
   }
-  if (ScrollContainerFrame* frame = window->GetScrollContainerFrame()) {
-    return frame->HasBeenScrolled();
+
+  return 0;
+}
+
+bool Document::HasBeenScrolledSince(
+    const uint32_t& aLastScrollGeneration) const {
+  if (nsPresContext* pc = GetPresContext()) {
+    pc->HasBeenScrolledSince(aLastScrollGeneration);
   }
 
   return false;
@@ -14853,6 +14858,18 @@ NS_INTERFACE_MAP_END
 
 NS_IMPL_CYCLE_COLLECTING_ADDREF(UnblockParsingPromiseHandler)
 NS_IMPL_CYCLE_COLLECTING_RELEASE(UnblockParsingPromiseHandler)
+
+void Document::SetForceNonNativeTheme(bool aForce) {
+  if (mForceNonNativeTheme == aForce) {
+    return;
+  }
+  mForceNonNativeTheme = aForce;
+  if (auto* pc = GetPresContext()) {
+    pc->MediaFeatureValuesChanged(
+        {MediaFeatureChangeReason::PreferenceChange},
+        MediaFeatureChangePropagation::JustThisDocument);
+  }
+}
 
 already_AddRefed<Promise> Document::BlockParsing(
     Promise& aPromise, const BlockParsingOptions& aOptions, ErrorResult& aRv) {

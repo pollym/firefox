@@ -55,6 +55,8 @@ use crate::stylesheets::{
     CssRule, EffectiveRulesIterator, Origin, OriginSet, PageRule, PerOrigin, PerOriginIter,
     StylesheetContents, StylesheetInDocument,
 };
+use crate::values::computed::DashedIdentAndOrTryTactic;
+use crate::values::specified::position::PositionTryFallbacksTryTactic;
 use crate::values::{computed, AtomIdent};
 use crate::AllocErr;
 use crate::{Atom, LocalName, Namespace, ShrinkIfNeeded, WeakAtom};
@@ -1204,9 +1206,71 @@ impl Stylist {
             parent_style,
             parent_style,
             FirstLineReparenting::No,
+            PositionTryFallbacksTryTactic::default(),
             /* rule_cache = */ None,
             &mut RuleCacheConditions::default(),
         )
+    }
+
+    /// Computes a fallback style lazily given the current and parent styles, and name.
+    pub fn resolve_position_try<E>(
+        &self,
+        style: &ComputedValues,
+        guards: &StylesheetGuards,
+        element: E,
+        name_and_try_tactic: &DashedIdentAndOrTryTactic,
+    ) -> Option<Arc<ComputedValues>>
+    where
+        E: TElement,
+    {
+        let fallback_rule = if !name_and_try_tactic.ident.is_empty() {
+            Some(self.lookup_position_try(&name_and_try_tactic.ident.0, element)?)
+        } else {
+            None
+        };
+        let fallback_block = fallback_rule.as_ref().map(|r| &r.read_with(guards.author).block);
+        let pseudo = style
+            .pseudo()
+            .or_else(|| element.implemented_pseudo_element());
+        let inputs = {
+            let mut inputs = CascadeInputs::new_from_style(style);
+            // @position-try doesn't care about any :visited-dependent property.
+            inputs.visited_rules = None;
+            let rules = inputs.rules.as_ref().unwrap_or(self.rule_tree.root());
+            let mut important_rules_changed = false;
+            if let Some(fallback_block) = fallback_block {
+                let new_rules = self.rule_tree.update_rule_at_level(
+                    CascadeLevel::PositionFallback,
+                    LayerOrder::root(),
+                    Some(fallback_block.borrow_arc()),
+                    rules,
+                    guards,
+                    &mut important_rules_changed,
+                );
+                if new_rules.is_some() {
+                    inputs.rules = new_rules;
+                } else {
+                    // This will return an identical style to `style`. We could consider optimizing
+                    // this a bit more but for now just perform the cascade, this can only happen with
+                    // the same position-try name repeated multiple times anyways.
+                }
+            }
+            inputs
+        };
+        crate::style_resolver::with_default_parent_styles(element, |parent_style, layout_parent_style| {
+            Some(self.cascade_style_and_visited(
+                Some(element),
+                pseudo.as_ref(),
+                inputs,
+                guards,
+                parent_style,
+                layout_parent_style,
+                FirstLineReparenting::No,
+                name_and_try_tactic.try_tactic,
+                /* rule_cache = */ None,
+                &mut RuleCacheConditions::default(),
+            ))
+        })
     }
 
     /// Computes a style using the given CascadeInputs.  This can be used to
@@ -1230,6 +1294,7 @@ impl Stylist {
         parent_style: Option<&ComputedValues>,
         layout_parent_style: Option<&ComputedValues>,
         first_line_reparenting: FirstLineReparenting,
+        try_tactic: PositionTryFallbacksTryTactic,
         rule_cache: Option<&RuleCache>,
         rule_cache_conditions: &mut RuleCacheConditions,
     ) -> Arc<ComputedValues>
@@ -1269,6 +1334,7 @@ impl Stylist {
             parent_style,
             layout_parent_style,
             first_line_reparenting,
+            try_tactic,
             visited_rules,
             inputs.flags,
             rule_cache,
@@ -1564,7 +1630,8 @@ impl Stylist {
 
     /// Returns the registered `@position-try-rule` animation for the specified name.
     #[inline]
-    pub fn lookup_position_try<'a, E>(
+    #[cfg(feature = "gecko")]
+    fn lookup_position_try<'a, E>(
         &'a self,
         name: &Atom,
         element: E,
@@ -1731,6 +1798,7 @@ impl Stylist {
             Some(parent_style),
             Some(parent_style),
             FirstLineReparenting::No,
+            PositionTryFallbacksTryTactic::default(),
             CascadeMode::Unvisited {
                 visited_rules: None,
             },

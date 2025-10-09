@@ -9,6 +9,7 @@ import {
 import { Preferences } from "chrome://global/content/preferences/Preferences.mjs";
 
 /** @import { type Preference } from "chrome://global/content/preferences/Preference.mjs" */
+/** @import { PreferencesSettingsConfig } from "chrome://global/content/preferences/Preferences.mjs" */
 
 const { EventEmitter } = ChromeUtils.importESModule(
   "resource://gre/modules/EventEmitter.sys.mjs"
@@ -27,8 +28,23 @@ ChromeUtils.defineESModuleGetters(lazy, {
  * (keys) so that the dependencies of a setting can
  * be easily looked up by just their ID.
  *
- * @typedef {Record<string, any>} PreferenceSettingDepsMap
+ * @typedef {Record<string, Setting | undefined>} PreferenceSettingDepsMap
  */
+
+/**
+ * @typedef {string | boolean | number} SettingValue
+ */
+
+class PreferenceNotAddedError extends Error {
+  constructor(settingId, prefId) {
+    super(
+      `Setting "${settingId}" was unable to find Preference "${prefId}". Did you register it with Preferences.add/addAll?`
+    );
+    this.name = "PreferenceNotAddedError";
+    this.settingId = settingId;
+    this.prefId = prefId;
+  }
+}
 
 export class Setting extends EventEmitter {
   /**
@@ -52,6 +68,8 @@ export class Setting extends EventEmitter {
   /**
    * @param {PreferencesSettingsConfig['id']} id
    * @param {PreferencesSettingsConfig} config
+   * @throws {Error} Will throw an error (PreferenceNotAddedError) if
+   *    config.pref was not registered
    */
   constructor(id, config) {
     super();
@@ -63,6 +81,9 @@ export class Setting extends EventEmitter {
     this.id = id;
     this.config = config;
     this.pref = config.pref && Preferences.get(config.pref);
+    if (config.pref && !this.pref) {
+      throw new PreferenceNotAddedError(id, config.pref);
+    }
     this._emitting = false;
 
     this.controllingExtensionInfo = {
@@ -121,7 +142,7 @@ export class Setting extends EventEmitter {
   }
 
   /**
-   * @type {string | undefined}
+   * @type {SettingValue}
    */
   get value() {
     let prefVal = this.pref?.value;
@@ -132,7 +153,7 @@ export class Setting extends EventEmitter {
   }
 
   /**
-   * @param {string} val
+   * @param {SettingValue} val
    */
   set value(val) {
     let newVal = this.config.set ? this.config.set(val, this.deps, this) : val;

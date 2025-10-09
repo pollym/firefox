@@ -1301,7 +1301,7 @@
   <!-- Content description for tabs tray multiselect menu -->
   <string name="tab_tray_multiselect_menu_content_description">Izbornik odabranih kartica</string>
   <!-- Title text displayed for a homepage tab in the tabs tray. -->
-  <string name="tab_tray_homepage_tab">Početna stranica</string>
+  <string name="tab_tray_homepage_tab" tools:ignore="UnusedResources" moz:removedIn="145">Početna stranica</string>
   <!-- Content description (not visible, for screen readers etc.): Removes tab from collection button. Removes the selected tab from collection when pressed -->
   <string name="remove_tab_from_collection">Ukloni karticu iz zbirke</string>
   <!-- Text for button to enter multiselect mode in tabs tray -->
@@ -1337,9 +1337,9 @@
   <!-- Text for the button to clear all history -->
   <string name="history_delete_all">Izbriši povijest</string>
   <!-- Text for the snackbar to confirm that multiple browsing history items has been deleted -->
-  <string name="history_delete_multiple_items_snackbar" tools:ignore="UnusedResources" moz:removedIn="143">Povijest izbrisana</string>
+  <string name="history_delete_multiple_items_snackbar">Povijest izbrisana</string>
   <!-- Text for the snackbar to confirm that a single browsing history item has been deleted. %1$s is the shortened URL of the deleted history item. -->
-  <string name="history_delete_single_item_snackbar" tools:ignore="UnusedResources" moz:removedIn="143">Izbrisano: %1$s</string>
+  <string name="history_delete_single_item_snackbar">Izbrisano: %1$s</string>
   <!-- Context description text for the button to delete a single history item -->
   <string name="history_delete_item">Izbriši</string>
   <!--

@@ -2,7 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>UndocumentedPublicClass:AddToHomescreenDialogFragment.kt$AddToHomescreenDialogFragment$Companion</ID>
     <ID>UndocumentedPublicClass:AdvancedSettingsFragment.kt$AdvancedSettingsFragment : BaseSettingsFragmentOnSharedPreferenceChangeListener</ID>
     <ID>UndocumentedPublicClass:AppAction.kt$AppAction$NavigateUp : AppAction</ID>
     <ID>UndocumentedPublicClass:AppAction.kt$AppAction$OpenSettings : AppAction</ID>
@@ -15,12 +14,10 @@
     <ID>UndocumentedPublicClass:AppState.kt$Screen$Settings : Screen</ID>
     <ID>UndocumentedPublicClass:AppState.kt$Screen$SitePermissionOptionsScreen : Screen</ID>
     <ID>UndocumentedPublicClass:AppState.kt$Screen.Settings$Page</ID>
-    <ID>UndocumentedPublicClass:AppViewHolder.kt$AppViewHolder$Companion</ID>
     <ID>UndocumentedPublicClass:AutocompleteDomainFormatter.kt$AutocompleteDomainFormatter</ID>
     <ID>UndocumentedPublicClass:AutocompleteRemoveFragment.kt$AutocompleteRemoveFragment : AutocompleteListFragmentCoroutineScope</ID>
     <ID>UndocumentedPublicClass:BaseFragment.kt$BaseFragment : Fragment</ID>
     <ID>UndocumentedPublicClass:BaseSettingsFragment.kt$BaseSettingsFragment : PreferenceFragmentCompatMenuProvider</ID>
-    <ID>UndocumentedPublicClass:BiometricAuthenticationFragment.kt$BiometricAuthenticationFragment$Companion</ID>
     <ID>UndocumentedPublicClass:BrowserToolbarIntegration.kt$BrowserToolbarIntegration : LifecycleAwareFeature</ID>
     <ID>UndocumentedPublicClass:Config.kt$Config</ID>
     <ID>UndocumentedPublicClass:ConnectionDetailsPanel.kt$ConnectionDetailsPanel : BottomSheetDialog</ID>
@@ -35,7 +32,6 @@
     <ID>UndocumentedPublicClass:CustomTabsService.kt$CustomTabsService : AbstractCustomTabsService</ID>
     <ID>UndocumentedPublicClass:DebugFocusApplication.kt$DebugFocusApplication : FocusApplication</ID>
     <ID>UndocumentedPublicClass:DefaultBrowserPreference.kt$DefaultBrowserPreference : Preference</ID>
-    <ID>UndocumentedPublicClass:DefaultLanguageScreenInteractor.kt$DefaultLanguageScreenInteractor</ID>
     <ID>UndocumentedPublicClass:DefaultSitePermissionOptionsScreenInteractor.kt$DefaultSitePermissionOptionsScreenInteractor</ID>
     <ID>UndocumentedPublicClass:DownloadService.kt$DownloadService : AbstractFetchDownloadService</ID>
     <ID>UndocumentedPublicClass:EngineSharedPreferencesListener.kt$EngineSharedPreferencesListener$ChangeSource</ID>
@@ -58,23 +54,14 @@
     <ID>UndocumentedPublicClass:IconGenerator.kt$IconGenerator</ID>
     <ID>UndocumentedPublicClass:InputToolbarIntegration.kt$InputToolbarIntegration : LifecycleAwareFeature</ID>
     <ID>UndocumentedPublicClass:InstalledSearchEnginesSettingsFragment.kt$InstalledSearchEnginesSettingsFragment : BaseSettingsFragment</ID>
-    <ID>UndocumentedPublicClass:InstalledSearchEnginesSettingsFragment.kt$InstalledSearchEnginesSettingsFragment$Companion</ID>
     <ID>UndocumentedPublicClass:IntentProcessor.kt$IntentProcessor$Result</ID>
     <ID>UndocumentedPublicClass:IntentProcessor.kt$IntentProcessor.Result$CustomTab : Result</ID>
     <ID>UndocumentedPublicClass:IntentProcessor.kt$IntentProcessor.Result$None : Result</ID>
     <ID>UndocumentedPublicClass:IntentProcessor.kt$IntentProcessor.Result$Tab : Result</ID>
-    <ID>UndocumentedPublicClass:LanguageScreenStore.kt$LanguageScreenAction$InitLanguages : LanguageScreenAction</ID>
-    <ID>UndocumentedPublicClass:LanguageScreenStore.kt$LanguageScreenAction$Select : LanguageScreenAction</ID>
-    <ID>UndocumentedPublicClass:LanguageScreenStore.kt$LanguageScreenAction$UpdateLanguages : LanguageScreenAction</ID>
-    <ID>UndocumentedPublicClass:LanguageScreenStore.kt$LanguageScreenStore : Store</ID>
-    <ID>UndocumentedPublicClass:LanguageStorage.kt$LanguageStorage</ID>
-    <ID>UndocumentedPublicClass:LearnMoreSwitchPreference.kt$LearnMoreSwitchPreference : SwitchPreferenceCompat</ID>
     <ID>UndocumentedPublicClass:LocaleDescriptor.kt$LocaleDescriptor : Comparable</ID>
     <ID>UndocumentedPublicClass:MainActivity.kt$MainActivity$AppOpenType</ID>
     <ID>UndocumentedPublicClass:ManualAddSearchEnginePreference.kt$ManualAddSearchEnginePreference : Preference</ID>
-    <ID>UndocumentedPublicClass:ManualAddSearchEnginePreference.kt$ManualAddSearchEnginePreference$Companion</ID>
     <ID>UndocumentedPublicClass:ManualAddSearchEngineSettingsFragment.kt$ManualAddSearchEngineSettingsFragment : BaseSettingsFragment</ID>
-    <ID>UndocumentedPublicClass:ManualAddSearchEngineSettingsFragment.kt$ManualAddSearchEngineSettingsFragment$Companion</ID>
     <ID>UndocumentedPublicClass:MozillaPreference.kt$MozillaPreference : Preference</ID>
     <ID>UndocumentedPublicClass:MozillaSettingsFragment.kt$MozillaSettingsFragment : BaseSettingsFragment</ID>
     <ID>UndocumentedPublicClass:MultiselectSearchEngineListPreference.kt$MultiselectSearchEngineListPreference : SearchEngineListPreference</ID>
@@ -108,6 +95,7 @@
     <ID>UndocumentedPublicClass:SearchWidgetUtils.kt$SearchWidgetUtils</ID>
     <ID>UndocumentedPublicClass:SecretSettingsFragment.kt$SecretSettingsFragment : BaseSettingsFragmentOnSharedPreferenceChangeListener</ID>
     <ID>UndocumentedPublicClass:SettingsFragment.kt$SettingsFragment : BaseSettingsFragment</ID>
+    <ID>UndocumentedPublicFunction:SitePermissionOptionsStorage.kt$SitePermissionOptionsStorage$fun getSitePermissionLabel(sitePermission: SitePermission): String</ID>
     <ID>UndocumentedPublicClass:SitePermission.kt$SitePermission : Parcelable</ID>
     <ID>UndocumentedPublicClass:SitePermissionOption.kt$AutoplayOption</ID>
     <ID>UndocumentedPublicClass:SitePermissionOption.kt$AutoplayOption$AllowAudioVideo : SitePermissionOption</ID>
@@ -157,7 +145,6 @@
     <ID>UndocumentedPublicFunction:ClientWrapper.kt$ClientWrapper$@Deprecated("Non-private Client usage should be prevented") fun unwrap(): Client</ID>
     <ID>UndocumentedPublicFunction:CookiesPreference.kt$CookiesPreference$fun updateSummary()</ID>
     <ID>UndocumentedPublicFunction:DefaultBrowserPreference.kt$DefaultBrowserPreference$fun update()</ID>
-    <ID>UndocumentedPublicFunction:DefaultLanguageScreenInteractor.kt$DefaultLanguageScreenInteractor$fun handleLanguageSelected(language: Language)</ID>
     <ID>UndocumentedPublicFunction:DefaultSitePermissionOptionsScreenInteractor.kt$DefaultSitePermissionOptionsScreenInteractor$fun handleSitePermissionOptionSelected(sitePermissionOption: SitePermissionOption)</ID>
     <ID>UndocumentedPublicFunction:ExceptionsListFragment.kt$ExceptionsListFragment.DomainListAdapter$fun move(from: Int, to: Int)</ID>
     <ID>UndocumentedPublicFunction:ExceptionsListFragment.kt$ExceptionsListFragment.DomainListAdapter$fun refresh(context: Context, body: (() -&gt; Unit)? = null)</ID>
@@ -172,11 +159,8 @@
     <ID>UndocumentedPublicFunction:FocusTheme.kt$fun phoneDimensions()</ID>
     <ID>UndocumentedPublicFunction:FocusTheme.kt$fun tabletDimensions()</ID>
     <ID>UndocumentedPublicFunction:HomeMenu.kt$HomeMenu$fun getMenuBuilder(): BrowserMenuBuilder</ID>
-    <ID>UndocumentedPublicFunction:LearnMoreSwitchPreference.kt$LearnMoreSwitchPreference$abstract fun getLearnMoreUrl(): String</ID>
-    <ID>UndocumentedPublicFunction:LearnMoreSwitchPreference.kt$LearnMoreSwitchPreference$open fun getDescription(): String?</ID>
     <ID>UndocumentedPublicFunction:LocaleDescriptor.kt$LocaleDescriptor$fun getNativeName(): String?</ID>
     <ID>UndocumentedPublicFunction:LocaleDescriptor.kt$LocaleDescriptor$fun getTag(): String</ID>
-    <ID>UndocumentedPublicFunction:LocaleFragmentCompose.kt$@Composable fun LanguageNameAndTagItem( language: Language, isSelected: Boolean, onClick: (String) -&gt; Unit, )</ID>
     <ID>UndocumentedPublicFunction:MainActivity.kt$MainActivity$fun getToolbar(): ActionBar</ID>
     <ID>UndocumentedPublicFunction:MainActivityNavigation.kt$MainActivityNavigation$@Suppress("CyclomaticComplexMethod") fun settings(page: Screen.Settings.Page)</ID>
     <ID>UndocumentedPublicFunction:MainActivityNavigation.kt$MainActivityNavigation$fun showOnBoardingSecondScreen()</ID>
@@ -219,33 +203,6 @@
     <ID>UndocumentedPublicFunction:SearchSuggestionsViewModel.kt$SearchSuggestionsViewModel$fun setSearchQuery(query: String)</ID>
     <ID>UndocumentedPublicFunction:SearchUtils.kt$SearchUtils$fun createSearchUrl(context: Context?, text: String): String</ID>
     <ID>UndocumentedPublicFunction:SecretSettingsUnlocker.kt$SecretSettingsUnlocker$fun increment()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun addSearchWidgetInstalled(count: Int)</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun getAppLaunchCount()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun getClearBrowsingSessions()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun getCurrentCookieBannerOptionFromSharePref(): CookieBannerOption</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun getHttpsOnlyMode(): Engine.HttpsOnlyMode</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun getTotalBlockedTrackersCount()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun hasAdvertisingBlocked()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun hasAnalyticsBlocked()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun hasRequestedDesktop()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun hasSocialBlocked()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun saveCurrentCookieBannerOptionInSharePref( cookieBannerOption: CookieBannerOption, )</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun setDefaultSearchEngineByName(name: String)</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldAutocompleteFromCustomDomainList()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldAutocompleteFromShippedDomainList()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldBlockAdTrackers()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldBlockAnalyticTrackers()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldBlockJavaScript(): Boolean</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldBlockOtherTrackers()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldBlockSocialTrackers()</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldBlockWebFonts(): Boolean</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldEnableRemoteDebugging(): Boolean</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldShowSearchSuggestions(): Boolean</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldUseBiometrics(): Boolean</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun shouldUseSecureMode(): Boolean</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun userHasDismissedNoSuggestionsMessage(): Boolean</ID>
-    <ID>UndocumentedPublicFunction:Settings.kt$Settings$fun userHasToggledSearchSuggestions(): Boolean</ID>
-    <ID>UndocumentedPublicFunction:SitePermissionOptionsStorage.kt$SitePermissionOptionsStorage$fun getSitePermissionLabel(sitePermission: SitePermission): String</ID>
     <ID>UndocumentedPublicFunction:SitePermissionOptionsStorage.kt$SitePermissionOptionsStorage$fun getSitePermissionsSettingsRules()</ID>
     <ID>UndocumentedPublicFunction:SitePermissionOptionsStorage.kt$SitePermissionOptionsStorage$fun isAndroidPermissionGranted(sitePermission: SitePermission): Boolean</ID>
     <ID>UndocumentedPublicFunction:SitePermissionOptionsStorage.kt$SitePermissionOptionsStorage$fun isSitePermissionNotBlocked(permissionsList: Array&lt;String&gt;): Boolean</ID>

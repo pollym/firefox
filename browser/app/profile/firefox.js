@@ -375,12 +375,6 @@ pref("browser.overlink-delay", 80);
   pref("browser.taskbarTabs.enabled", false);
 #endif
 
-#if defined(MOZ_WIDGET_GTK)
-  pref("browser.theme.native-theme", true);
-#else
-  pref("browser.theme.native-theme", false);
-#endif
-
 // Whether using `ctrl` when hitting return/enter in the URL bar
 // (or clicking 'go') should prefix 'www.' and suffix
 // browser.fixup.alternate.suffix to the URL bar value prior to
@@ -785,6 +779,11 @@ pref("browser.urlbar.suggest.yelpRealtime", true);
 // settings.
 pref("browser.urlbar.yelpRealtime.minKeywordLength", 0);
 
+// Timestamp of the time the user last performed a search via the urlbar
+// so that experiments can target users who have / have not performed
+// urlbar searches.
+pref("browser.urlbar.lastUrlbarSearchSeconds", 0);
+
 pref("browser.altClickSave", false);
 
 // Number of milliseconds to wait for the http headers (and thus
@@ -884,7 +883,7 @@ pref("browser.search.suggest.ohttp.enabled", true);
 pref("browser.spin_cursor_while_busy", false);
 
 // Enable display of contextual-password-manager option in browser sidebar
-pref("browser.contextual-password-manager.enabled", false);
+pref("browser.contextual-password-manager.enabled", true);
 
 // Whether the user has opted-in to recommended settings for data features.
 pref("browser.dataFeatureRecommendations.enabled", false);
@@ -1036,12 +1035,7 @@ pref("browser.tabs.hoverPreview.enabled", true);
 pref("browser.tabs.hoverPreview.showThumbnails", true);
 
 pref("browser.tabs.groups.enabled", true);
-
-#ifdef NIGHTLY_BUILD
 pref("browser.tabs.groups.hoverPreview.enabled", true);
-#else
-pref("browser.tabs.groups.hoverPreview.enabled", false);
-#endif
 
 pref("browser.tabs.groups.smart.enabled", true);
 
@@ -1241,6 +1235,9 @@ pref("privacy.globalprivacycontrol.functionality.enabled",  true);
 
 // Enable GPC in private browsing mode
 pref("privacy.globalprivacycontrol.pbmode.enabled", true);
+
+// What custom schemes to treat as accessing digital wallets, comma separated
+pref("privacy.wallet_schemes", "openid4vp,mdoc,mdoc-openid4vp,haip,eudi-wallet,eudi-openid4vp,openid-credential-offer");
 
 pref("network.proxy.share_proxy_settings",  false); // use the same proxy settings for all protocols
 
@@ -2168,6 +2165,7 @@ pref("sidebar.revamp.round-content-area", false);
 pref("sidebar.animation.enabled", true);
 pref("sidebar.animation.duration-ms", 200);
 pref("sidebar.animation.expand-on-hover.duration-ms", 400);
+pref("sidebar.animation.expand-on-hover.delay-duration-ms", 200);
 
 // This pref is used to store user customized tools in the sidebar launcher and shouldn't be changed.
 // See https://firefox-source-docs.mozilla.org/browser/components/sidebar/docs/index.html for ways
@@ -3434,6 +3432,11 @@ pref("browser.backup.template.fallback-download.esr", " https://www.firefox.com/
 pref("browser.backup.errorCode", 0);
 pref("browser.backup.backup-retry-limit", 100);
 pref("browser.backup.disabled-on-idle-backup-retry", false);
+// Limit of number of unremovable staging directories and archives that are
+// permitted before backup will stop making additional backups.  Unremovable
+// staging directories/archives are ones that the file system prevents us from
+// removing for any reason.
+pref("browser.backup.max-num-unremovable-staging-items", 5);
 
 #ifdef NIGHTLY_BUILD
   // Pref to enable the new profiles
@@ -3444,6 +3447,8 @@ pref("browser.backup.disabled-on-idle-backup-retry", false);
 pref("browser.profiles.profile-name.updated", false);
 // Whether to allow the user to merge profile data
 pref("browser.profiles.sync.allow-danger-merge", false);
+// Allow Firefox Refresh even if profile is ineligible, see Bug 1928138
+pref("browser.profiles.forceEnableRefresh", false);
 
 pref("startup.homepage_override_url_nimbus", "");
 // These prefs are referring to the Fx update version
@@ -3468,6 +3473,8 @@ pref("browser.contextual-services.contextId.rust-component.enabled", true);
 pref("browser.ipProtection.enabled", false);
 pref("browser.ipProtection.userEnabled", false);
 pref("browser.ipProtection.variant", "");
+pref("browser.ipProtection.exceptionsMode", "all");
+pref("browser.ipProtection.domainExclusions", "");
 pref("browser.ipProtection.log", false);
 pref("browser.ipProtection.guardian.endpoint", "https://vpn.mozilla.org/");
 

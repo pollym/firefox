@@ -6,7 +6,7 @@ android-lint = "31.13.0"
 # Kotlin
 coroutines = "1.10.2"
 kotlin = "2.2.20" # remember to change ksp-plugin
-ksp-plugin = "2.2.20-2.0.3"
+ksp-plugin = "2.2.20-2.0.4"
 serialization = "1.9.0"
 
 # AndroidX
@@ -78,7 +78,7 @@ ktlint = "1.7.1"
 spotless = "8.0.0"
 
 # Mozilla
-glean = "65.2.1"
+glean = "65.2.2"
 
 # Testing libraries
 androidx-test = "1.7.0"
@@ -92,7 +92,7 @@ junit4 = "4.13.2"
 junit6 = "6.0.0"
 leakcanary = "2.14"
 mockito = "5.20.0"
-mockk = "1.14.5"
+mockk = "1.14.6"
 robolectric = "4.16"
 
 # Third party libraries
@@ -102,7 +102,7 @@ disklrucache = "2.0.2"
 jna = "5.18.1"
 okhttp = "4.12.0"
 okio = "3.15.0"
-sentry = "8.22.0"
+sentry = "8.23.0"
 zxing = "3.5.3"
 ui = "1.9.2"
 ui-tooling-preview = "1.9.2"

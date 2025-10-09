@@ -728,6 +728,13 @@ export const PREFS_CONFIG = new Map([
     },
   ],
   [
+    "discoverystream.sections.personalization.inferred.interests.override",
+    {
+      title:
+        "Testing feature to allow specification of specific user interests",
+    },
+  ],
+  [
     "discoverystream.dailyBrief.enabled",
     {
       title: "Boolean flag to enable the daily brief section",
@@ -1263,6 +1270,13 @@ export const PREFS_CONFIG = new Map([
       title: "Enables topic labels for discovery stream",
       // pref is dynamic
       getValue: showTopicLabels,
+    },
+  ],
+  [
+    "discoverystream.spocs.onDemand",
+    {
+      title: "Set sponsored content to only update cache when requested.",
+      value: false,
     },
   ],
   [
