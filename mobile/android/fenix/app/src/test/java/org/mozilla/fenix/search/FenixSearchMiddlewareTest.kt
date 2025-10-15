@@ -33,7 +33,6 @@ import mozilla.components.concept.engine.EngineSession.LoadUrlFlags
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.lib.state.MiddlewareContext
 import mozilla.components.lib.state.Store
-import mozilla.components.support.test.ext.joinBlocking
 import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import mozilla.components.support.test.middleware.CaptureActionsMiddleware
 import mozilla.components.support.test.robolectric.testContext
@@ -286,7 +285,7 @@ class FenixSearchMiddlewareTest {
         every { settings.shouldShowSearchSuggestions } returns true
         val defaultSearchEngine = fakeSearchEnginesState().selectedOrDefaultSearchEngine
 
-        store.dispatch(SearchStarted(defaultSearchEngine, false, false, true)).joinBlocking()
+        store.dispatch(SearchStarted(defaultSearchEngine, false, false, true))
 
         searchActionsCaptor.assertLastAction(SearchSuggestionsVisibilityUpdated::class) {
             assertTrue(it.visible)
@@ -300,7 +299,7 @@ class FenixSearchMiddlewareTest {
         every { settings.shouldShowSearchSuggestions } returns true
         val defaultSearchEngine = fakeSearchEnginesState().selectedOrDefaultSearchEngine
 
-        store.dispatch(SearchStarted(defaultSearchEngine, false, false, true)).joinBlocking()
+        store.dispatch(SearchStarted(defaultSearchEngine, false, false, true))
 
         searchActionsCaptor.assertLastAction(SearchSuggestionsVisibilityUpdated::class) {
             assertTrue(it.visible)
@@ -314,7 +313,7 @@ class FenixSearchMiddlewareTest {
         every { settings.shouldShowSearchSuggestions } returns true
         val defaultSearchEngine = fakeSearchEnginesState().selectedOrDefaultSearchEngine
 
-        store.dispatch(SearchStarted(defaultSearchEngine, false, false, true)).joinBlocking()
+        store.dispatch(SearchStarted(defaultSearchEngine, false, false, true))
 
         searchActionsCaptor.assertLastAction(SearchSuggestionsVisibilityUpdated::class) {
             assertTrue(it.visible)
@@ -456,8 +455,8 @@ class FenixSearchMiddlewareTest {
         val (_, store) = buildMiddlewareAndAddToSearchStore(appStore = appStore)
 
         appStore.dispatch(AppAction.SearchAction.SearchStarted())
-        store.dispatch(SearchStarted(defaultSearchEngine, false, false, false)).joinBlocking()
-        appStore.dispatch(SearchEngineSelected(searchEngineClicked, true)).joinBlocking()
+        store.dispatch(SearchStarted(defaultSearchEngine, false, false, false))
+        appStore.dispatch(SearchEngineSelected(searchEngineClicked, true))
         shadowOf(Looper.getMainLooper()).idle()
 
         assertEquals(Bookmarks(searchEngineClicked), store.state.searchEngineSource)

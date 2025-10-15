@@ -19,7 +19,6 @@ import mozilla.components.service.pocket.PocketStory.ContentRecommendation
 import mozilla.components.service.pocket.PocketStory.PocketRecommendedStory
 import mozilla.components.service.pocket.PocketStory.SponsoredContent
 import mozilla.components.service.pocket.PocketStory.SponsoredContentCallbacks
-import mozilla.components.support.test.ext.joinBlocking
 import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import mozilla.components.support.test.middleware.CaptureActionsMiddleware
 import mozilla.components.support.test.rule.MainCoroutineRule
@@ -84,7 +83,7 @@ class PocketMiddlewareTest {
                     ),
                 ),
             ),
-        ).joinBlocking()
+        )
 
         coVerify { pocketService.updateStoriesTimesShown(listOf(story2.copy(timesShown = 1))) }
     }
@@ -172,7 +171,7 @@ class PocketMiddlewareTest {
             ),
         )
 
-        appStore.dispatch(ContentRecommendationsAction.PocketStoriesCategoriesChange(currentCategories)).joinBlocking()
+        appStore.dispatch(ContentRecommendationsAction.PocketStoriesCategoriesChange(currentCategories))
 
         advanceUntilIdle()
 
@@ -211,11 +210,11 @@ class PocketMiddlewareTest {
         dataStore.assertSelectedCategories()
         appStore.assertSelectedCategories()
 
-        appStore.dispatch(ContentRecommendationsAction.SelectPocketStoriesCategory(categ2.name)).joinBlocking()
+        appStore.dispatch(ContentRecommendationsAction.SelectPocketStoriesCategory(categ2.name))
         dataStore.assertSelectedCategories(categ2.name)
         appStore.assertSelectedCategories(categ2.name)
 
-        appStore.dispatch(ContentRecommendationsAction.SelectPocketStoriesCategory(categ1.name)).joinBlocking()
+        appStore.dispatch(ContentRecommendationsAction.SelectPocketStoriesCategory(categ1.name))
         dataStore.assertSelectedCategories(categ2.name, categ1.name)
         appStore.assertSelectedCategories(categ2.name, categ1.name)
     }
@@ -248,11 +247,11 @@ class PocketMiddlewareTest {
         dataStore.assertSelectedCategories(persistedCateg1.name, persistedCateg2.name)
         appStore.assertSelectedCategories(persistedCateg1.name, persistedCateg2.name)
 
-        appStore.dispatch(ContentRecommendationsAction.DeselectPocketStoriesCategory(categ2.name)).joinBlocking()
+        appStore.dispatch(ContentRecommendationsAction.DeselectPocketStoriesCategory(categ2.name))
         dataStore.assertSelectedCategories(persistedCateg1.name)
         appStore.assertSelectedCategories(persistedCateg1.name)
 
-        appStore.dispatch(ContentRecommendationsAction.DeselectPocketStoriesCategory(categ1.name)).joinBlocking()
+        appStore.dispatch(ContentRecommendationsAction.DeselectPocketStoriesCategory(categ1.name))
         dataStore.assertSelectedCategories()
         appStore.assertSelectedCategories()
     }

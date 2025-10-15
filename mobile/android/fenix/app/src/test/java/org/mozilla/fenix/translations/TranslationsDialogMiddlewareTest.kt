@@ -46,7 +46,6 @@ class TranslationsDialogMiddlewareTest {
                 middlewares = listOf(translationsDialogMiddleware),
             )
             translationStore.dispatch(TranslationsDialogAction.FetchSupportedLanguages)
-                .joinBlocking()
 
             translationStore.waitUntilIdle()
 
@@ -70,7 +69,7 @@ class TranslationsDialogMiddlewareTest {
                 ),
                 middlewares = listOf(translationsDialogMiddleware),
             )
-            translationStore.dispatch(TranslationsDialogAction.TranslateAction).joinBlocking()
+            translationStore.dispatch(TranslationsDialogAction.TranslateAction)
 
             translationStore.waitUntilIdle()
 
@@ -93,7 +92,7 @@ class TranslationsDialogMiddlewareTest {
                 initialState = TranslationsDialogState(),
                 middlewares = listOf(translationsDialogMiddleware),
             )
-            translationStore.dispatch(TranslationsDialogAction.RestoreTranslation).joinBlocking()
+            translationStore.dispatch(TranslationsDialogAction.RestoreTranslation)
 
             translationStore.waitUntilIdle()
 
@@ -118,7 +117,7 @@ class TranslationsDialogMiddlewareTest {
                     toLanguage = Language("en", "English"),
                     fromLanguage = Language("fr", "France"),
                 ),
-            ).joinBlocking()
+            )
 
             translationStore.waitUntilIdle()
 
@@ -140,7 +139,7 @@ class TranslationsDialogMiddlewareTest {
                 initialState = TranslationsDialogState(),
                 middlewares = listOf(translationsDialogMiddleware),
             )
-            translationStore.dispatch(TranslationsDialogAction.FetchPageSettings).joinBlocking()
+            translationStore.dispatch(TranslationsDialogAction.FetchPageSettings)
 
             translationStore.waitUntilIdle()
 
@@ -167,7 +166,7 @@ class TranslationsDialogMiddlewareTest {
                     type = TranslationPageSettingsOption.AlwaysOfferPopup(),
                     checkValue = false,
                 ),
-            ).joinBlocking()
+            )
 
             translationStore.waitUntilIdle()
 
@@ -193,7 +192,7 @@ class TranslationsDialogMiddlewareTest {
                     type = TranslationPageSettingsOption.AlwaysTranslateLanguage(),
                     checkValue = false,
                 ),
-            ).joinBlocking()
+            )
 
             translationStore.waitUntilIdle()
 
@@ -220,7 +219,7 @@ class TranslationsDialogMiddlewareTest {
                     type = TranslationPageSettingsOption.NeverTranslateLanguage(),
                     checkValue = true,
                 ),
-            ).joinBlocking()
+            )
 
             translationStore.waitUntilIdle()
 
@@ -247,7 +246,7 @@ class TranslationsDialogMiddlewareTest {
                     type = TranslationPageSettingsOption.NeverTranslateSite(),
                     checkValue = false,
                 ),
-            ).joinBlocking()
+            )
 
             translationStore.waitUntilIdle()
 

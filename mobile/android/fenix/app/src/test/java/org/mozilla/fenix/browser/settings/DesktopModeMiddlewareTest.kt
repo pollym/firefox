@@ -12,7 +12,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import mozilla.components.browser.state.action.DefaultDesktopModeAction
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.store.BrowserStore
-import mozilla.components.support.test.ext.joinBlocking
 import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import mozilla.components.support.test.robolectric.testContext
 import mozilla.components.support.test.rule.MainCoroutineRule
@@ -96,7 +95,7 @@ class DesktopModeMiddlewareTest {
 
         advanceUntilIdle()
         store.waitUntilIdle()
-        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode).joinBlocking()
+        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode)
         advanceUntilIdle()
         store.waitUntilIdle()
     }
@@ -120,7 +119,7 @@ class DesktopModeMiddlewareTest {
         advanceUntilIdle()
         store.waitUntilIdle()
 
-        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode).joinBlocking()
+        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode)
     }
 
     @Test
@@ -142,7 +141,7 @@ class DesktopModeMiddlewareTest {
 
         advanceUntilIdle()
         store.waitUntilIdle()
-        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode).joinBlocking()
+        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode)
         advanceUntilIdle()
         store.waitUntilIdle()
 
@@ -170,7 +169,7 @@ class DesktopModeMiddlewareTest {
 
         advanceUntilIdle()
         store.waitUntilIdle()
-        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode).joinBlocking()
+        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode)
         advanceUntilIdle()
         store.waitUntilIdle()
 
@@ -194,7 +193,7 @@ class DesktopModeMiddlewareTest {
 
         advanceUntilIdle()
         store.waitUntilIdle()
-        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode).joinBlocking()
+        store.dispatch(DefaultDesktopModeAction.ToggleDesktopMode)
         advanceUntilIdle()
         store.waitUntilIdle()
 

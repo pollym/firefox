@@ -16,7 +16,6 @@ import mozilla.components.compose.browser.toolbar.store.BrowserToolbarAction.Exi
 import mozilla.components.compose.browser.toolbar.store.BrowserToolbarStore
 import mozilla.components.compose.browser.toolbar.store.EnvironmentCleared
 import mozilla.components.compose.browser.toolbar.store.EnvironmentRehydrated
-import mozilla.components.support.test.ext.joinBlocking
 import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import mozilla.components.support.test.robolectric.testContext
 import mozilla.components.support.test.rule.MainLooperTestRule
@@ -68,12 +67,12 @@ class BrowserToolbarSearchStatusSyncMiddlewareTest {
         assertFalse(appStore.state.searchState.isSearchActive)
         assertFalse(toolbarStore.state.isEditMode())
 
-        appStore.dispatch(SearchStarted()).joinBlocking()
+        appStore.dispatch(SearchStarted())
         mainLooperRule.idle()
         assertTrue(appStore.state.searchState.isSearchActive)
         assertTrue(toolbarStore.state.isEditMode())
 
-        toolbarStore.dispatch(ExitEditMode).joinBlocking()
+        toolbarStore.dispatch(ExitEditMode)
         appStore.waitUntilIdle()
         mainLooperRule.idle()
         assertFalse(appStore.state.searchState.isSearchActive)
@@ -86,7 +85,7 @@ class BrowserToolbarSearchStatusSyncMiddlewareTest {
         assertFalse(toolbarStore.state.isEditMode())
         assertFalse(appStore.state.searchState.isSearchActive)
 
-        toolbarStore.dispatch(EnterEditMode).joinBlocking()
+        toolbarStore.dispatch(EnterEditMode)
         mainLooperRule.idle()
 
         assertFalse(appStore.state.searchState.isSearchActive)
@@ -96,7 +95,7 @@ class BrowserToolbarSearchStatusSyncMiddlewareTest {
     fun `WHEN search starts in the application THEN put the toolbar in search mode also`() = runTest {
         val (_, toolbarStore) = buildMiddlewareAndAddToSearchStore()
 
-        appStore.dispatch(SearchStarted()).joinBlocking()
+        appStore.dispatch(SearchStarted())
         mainLooperRule.idle()
 
         assertTrue(toolbarStore.state.isEditMode())
@@ -106,12 +105,12 @@ class BrowserToolbarSearchStatusSyncMiddlewareTest {
     @Test
     fun `WHEN search is closed in the application THEN synchronize exiting edit mode in the toolbar`() = runTest {
         val (_, toolbarStore) = buildMiddlewareAndAddToSearchStore()
-        appStore.dispatch(SearchStarted()).joinBlocking()
+        appStore.dispatch(SearchStarted())
         mainLooperRule.idle()
         assertTrue(toolbarStore.state.isEditMode())
         assertTrue(appStore.state.searchState.isSearchActive)
 
-        appStore.dispatch(SearchEnded).joinBlocking()
+        appStore.dispatch(SearchEnded)
         mainLooperRule.idle()
         assertFalse(appStore.state.searchState.isSearchActive)
         assertFalse(toolbarStore.state.isEditMode())

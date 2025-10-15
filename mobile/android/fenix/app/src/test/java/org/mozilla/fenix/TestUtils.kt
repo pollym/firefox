@@ -53,6 +53,6 @@ object TestUtils {
  * Blocking [Store.dispatch] call of the given [action] ensures completion of the [Job].
  */
 fun <S : State, A : Action> Store<S, A>.testDispatch(action: A) {
-    dispatch(action).joinBlocking()
+    dispatch(action)
     waitUntilIdle()
 }

@@ -13,7 +13,6 @@ import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.createTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.lib.state.Middleware
-import mozilla.components.support.test.ext.joinBlocking
 import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import mozilla.components.support.test.middleware.CaptureActionsMiddleware
 import mozilla.components.support.test.mock
@@ -98,13 +97,13 @@ class HomepageThumbnailsTest {
             TabListAction.AddTabAction(
                 createTab(homepageUrl, id = "1"),
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             TabListAction.SelectTabAction(
             tabId = "1",
         ),
-        ).joinBlocking()
+        )
 
         store.waitUntilIdle()
 
@@ -116,13 +115,13 @@ class HomepageThumbnailsTest {
             TabListAction.AddTabAction(
                 createTab(homepageUrl, id = "2"),
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             TabListAction.SelectTabAction(
             "2",
         ),
-        ).joinBlocking()
+        )
 
         store.waitUntilIdle()
 
@@ -134,13 +133,13 @@ class HomepageThumbnailsTest {
             TabListAction.AddTabAction(
                 createTab("www.google.com", id = "3"),
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             TabListAction.SelectTabAction(
             tabId = "3",
         ),
-        ).joinBlocking()
+        )
 
         store.waitUntilIdle()
 
@@ -152,13 +151,13 @@ class HomepageThumbnailsTest {
             TabListAction.AddTabAction(
                 createTab(homepageUrl, id = "4"),
             ),
-        ).joinBlocking()
+        )
 
         store.dispatch(
             TabListAction.SelectTabAction(
                 tabId = "4",
             ),
-        ).joinBlocking()
+        )
 
         store.waitUntilIdle()
 
@@ -180,7 +179,7 @@ class HomepageThumbnailsTest {
             TabListAction.AddTabAction(
                 createTab(homepageUrl, id = "1"),
             ),
-        ).joinBlocking()
+        )
 
         store.waitUntilIdle()
 
