@@ -14,8 +14,6 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.translate.Language
 import mozilla.components.concept.engine.translate.TranslationOperation
 import mozilla.components.concept.engine.translate.TranslationPageSettingOperation
-import mozilla.components.support.test.ext.joinBlocking
-import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import mozilla.components.support.test.robolectric.testContext
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -47,8 +45,6 @@ class TranslationsDialogMiddlewareTest {
             )
             translationStore.dispatch(TranslationsDialogAction.FetchSupportedLanguages)
 
-            translationStore.waitUntilIdle()
-
             verify {
                 browserStore.dispatch(
                     TranslationsAction.OperationRequestedAction(
@@ -71,8 +67,6 @@ class TranslationsDialogMiddlewareTest {
             )
             translationStore.dispatch(TranslationsDialogAction.TranslateAction)
 
-            translationStore.waitUntilIdle()
-
             verify {
                 browserStore.dispatch(
                     TranslationsAction.TranslateAction(
@@ -93,8 +87,6 @@ class TranslationsDialogMiddlewareTest {
                 middlewares = listOf(translationsDialogMiddleware),
             )
             translationStore.dispatch(TranslationsDialogAction.RestoreTranslation)
-
-            translationStore.waitUntilIdle()
 
             verify {
                 browserStore.dispatch(
@@ -119,8 +111,6 @@ class TranslationsDialogMiddlewareTest {
                 ),
             )
 
-            translationStore.waitUntilIdle()
-
             verify {
                 browserStore.dispatch(
                     TranslationsAction.FetchTranslationDownloadSizeAction(
@@ -140,8 +130,6 @@ class TranslationsDialogMiddlewareTest {
                 middlewares = listOf(translationsDialogMiddleware),
             )
             translationStore.dispatch(TranslationsDialogAction.FetchPageSettings)
-
-            translationStore.waitUntilIdle()
 
             verify {
                 browserStore.dispatch(
@@ -168,8 +156,6 @@ class TranslationsDialogMiddlewareTest {
                 ),
             )
 
-            translationStore.waitUntilIdle()
-
             verify {
                 browserStore.dispatch(
                     TranslationsAction.UpdateGlobalOfferTranslateSettingAction(
@@ -193,8 +179,6 @@ class TranslationsDialogMiddlewareTest {
                     checkValue = false,
                 ),
             )
-
-            translationStore.waitUntilIdle()
 
             verify {
                 browserStore.dispatch(
@@ -221,8 +205,6 @@ class TranslationsDialogMiddlewareTest {
                 ),
             )
 
-            translationStore.waitUntilIdle()
-
             verify {
                 browserStore.dispatch(
                     TranslationsAction.UpdatePageSettingAction(
@@ -247,8 +229,6 @@ class TranslationsDialogMiddlewareTest {
                     checkValue = false,
                 ),
             )
-
-            translationStore.waitUntilIdle()
 
             verify {
                 browserStore.dispatch(

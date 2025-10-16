@@ -53,7 +53,6 @@ import org.mozilla.fenix.home.recentvisits.RecentlyVisitedItem.RecentHistoryGrou
 import org.mozilla.fenix.home.recentvisits.RecentlyVisitedItem.RecentHistoryHighlight
 import org.mozilla.fenix.messaging.FenixMessageSurfaceId
 import org.mozilla.fenix.onboarding.FenixOnboarding
-import org.mozilla.fenix.testDispatch
 
 class AppStoreTest {
     private lateinit var context: Context
@@ -903,7 +902,7 @@ class AppStoreTest {
     fun `WHEN init action is dispatched THEN the setup checklist state remains the same`() {
         val appState = AppState(setupChecklistState = SetupChecklistState())
 
-        appStore.testDispatch(AppAction.SetupChecklistAction.Init)
+        appStore.dispatch(AppAction.SetupChecklistAction.Init)
 
         assertEquals(SetupChecklistState(), appState.setupChecklistState)
     }
@@ -912,7 +911,7 @@ class AppStoreTest {
     fun `WHEN closed action is dispatched THEN the setup checklist state visible value is updated`() {
         val appState = AppState(setupChecklistState = SetupChecklistState())
 
-        appStore.testDispatch(AppAction.SetupChecklistAction.Closed)
+        appStore.dispatch(AppAction.SetupChecklistAction.Closed)
 
         assertEquals(SetupChecklistState(isVisible = true), appState.setupChecklistState)
     }
@@ -958,7 +957,7 @@ class AppStoreTest {
         assertTrue((store.state.setupChecklistState!!.checklistItems[0] as ChecklistItem.Group).isExpanded)
         assertFalse((store.state.setupChecklistState!!.checklistItems[1] as ChecklistItem.Group).isExpanded)
 
-        store.testDispatch(AppAction.SetupChecklistAction.ChecklistItemClicked(collapsedGroup))
+        store.dispatch(AppAction.SetupChecklistAction.ChecklistItemClicked(collapsedGroup))
 
         // Verify that the expanded group was collapsed, and the other one got expanded
         assertFalse((store.state.setupChecklistState!!.checklistItems[0] as ChecklistItem.Group).isExpanded)
@@ -977,7 +976,7 @@ class AppStoreTest {
         val appState =
             AppState(setupChecklistState = SetupChecklistState(checklistItems = listOf(task)))
         val store = AppStore(appState)
-        store.testDispatch(AppAction.SetupChecklistAction.ChecklistItemClicked(task))
+        store.dispatch(AppAction.SetupChecklistAction.ChecklistItemClicked(task))
 
         assertFalse((store.state.setupChecklistState!!.checklistItems[0] as ChecklistItem.Task).isCompleted)
     }
@@ -994,11 +993,11 @@ class AppStoreTest {
         val appState =
             AppState(setupChecklistState = SetupChecklistState(checklistItems = listOf(task)))
         val store = AppStore(appState)
-        store.testDispatch(AppAction.SetupChecklistAction.TaskPreferenceUpdated(task.type, true))
+        store.dispatch(AppAction.SetupChecklistAction.TaskPreferenceUpdated(task.type, true))
 
         assertTrue((store.state.setupChecklistState!!.checklistItems[0] as ChecklistItem.Task).isCompleted)
 
-        store.testDispatch(AppAction.SetupChecklistAction.TaskPreferenceUpdated(task.type, false))
+        store.dispatch(AppAction.SetupChecklistAction.TaskPreferenceUpdated(task.type, false))
 
         assertFalse((store.state.setupChecklistState!!.checklistItems[0] as ChecklistItem.Task).isCompleted)
     }
@@ -1026,12 +1025,17 @@ class AppStoreTest {
         val appState =
             AppState(setupChecklistState = SetupChecklistState(checklistItems = listOf(group)))
         val store = AppStore(appState)
-        store.testDispatch(AppAction.SetupChecklistAction.TaskPreferenceUpdated(updatedTask.type, true))
+        store.dispatch(AppAction.SetupChecklistAction.TaskPreferenceUpdated(updatedTask.type, true))
 
         assertTrue((store.state.setupChecklistState!!.checklistItems[0] as ChecklistItem.Group).tasks[0].isCompleted)
         assertFalse((store.state.setupChecklistState!!.checklistItems[0] as ChecklistItem.Group).tasks[1].isCompleted)
 
-        store.testDispatch(AppAction.SetupChecklistAction.TaskPreferenceUpdated(updatedTask.type, false))
+        store.dispatch(
+            AppAction.SetupChecklistAction.TaskPreferenceUpdated(
+                updatedTask.type,
+                false,
+            ),
+        )
 
         assertFalse((store.state.setupChecklistState!!.checklistItems[0] as ChecklistItem.Group).tasks[0].isCompleted)
         assertFalse((store.state.setupChecklistState!!.checklistItems[0] as ChecklistItem.Group).tasks[1].isCompleted)

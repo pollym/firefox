@@ -23,7 +23,6 @@ import mozilla.components.concept.engine.EngineSession.LoadUrlFlags
 import mozilla.components.feature.search.ext.createSearchEngine
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
-import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import mozilla.components.support.test.middleware.CaptureActionsMiddleware
 import mozilla.components.support.test.mock
 import mozilla.components.support.test.whenever
@@ -102,7 +101,6 @@ class SearchUseCasesTest {
             searchTerms = searchTerms,
             searchEngine = searchEngine,
         )
-        store.waitUntilIdle()
 
         val isSearchAction = middleware.findFirstAction(ContentAction.UpdateIsSearchAction::class)
         assertEquals(id, isSearchAction.sessionId)
@@ -133,7 +131,6 @@ class SearchUseCasesTest {
             sessionId = "mozilla",
             searchEngine = searchEngine,
         )
-        store.waitUntilIdle()
 
         verify(newTabUseCase).invoke(
             url = searchUrl,
@@ -156,7 +153,6 @@ class SearchUseCasesTest {
         whenever(newTabUseCase(searchUrl, isSearch = true)).thenReturn("2342")
 
         useCases.newTabSearch(searchTerms, SessionState.Source.Internal.NewTab)
-        store.waitUntilIdle()
 
         verify(newTabUseCase).invoke(
             searchUrl,
@@ -196,7 +192,6 @@ class SearchUseCasesTest {
             flags = flags,
             additionalHeaders = additionalHeaders,
         )
-        store.waitUntilIdle()
 
         verify(newTabUseCase).invoke(
             url = searchUrl,
@@ -219,7 +214,6 @@ class SearchUseCasesTest {
         whenever(newTabUseCase(searchUrl, isSearch = true)).thenReturn("2342")
 
         useCases.defaultSearch(searchTerms)
-        store.waitUntilIdle()
 
         verify(newTabUseCase).invoke(
             searchUrl,
@@ -258,7 +252,6 @@ class SearchUseCasesTest {
             flags = flags,
             additionalHeaders = additionalHeaders,
         )
-        store.waitUntilIdle()
 
         verify(newTabUseCase).invoke(
             url = searchUrl,
@@ -287,7 +280,6 @@ class SearchUseCasesTest {
         ).thenReturn("1177")
 
         useCases.newPrivateTabSearch.invoke(searchTerms)
-        store.waitUntilIdle()
 
         verify(newTabUseCase).invoke(
             searchUrl,
@@ -319,8 +311,6 @@ class SearchUseCasesTest {
 
         useCases.newPrivateTabSearch.invoke(searchTerms, parentSessionId = "test-parent")
 
-        store.waitUntilIdle()
-
         verify(newTabUseCase).invoke(
             searchUrl,
             parentId = "test-parent",
@@ -345,8 +335,6 @@ class SearchUseCasesTest {
             store.findSearchEngineById("engine-d"),
         )
 
-        store.waitUntilIdle()
-
         assertEquals("engine-d", store.state.search.userSelectedSearchEngineId)
         assertNull(store.state.search.userSelectedSearchEngineName)
 
@@ -354,16 +342,12 @@ class SearchUseCasesTest {
             store.findSearchEngineById("engine-b"),
         )
 
-        store.waitUntilIdle()
-
         assertEquals("engine-b", store.state.search.userSelectedSearchEngineId)
         assertEquals("Engine B", store.state.search.userSelectedSearchEngineName)
 
         useCases.selectSearchEngine.invoke(
             store.findSearchEngineById("engine-f"),
         )
-
-        store.waitUntilIdle()
 
         assertEquals("engine-f", store.state.search.userSelectedSearchEngineId)
         assertNull(store.state.search.userSelectedSearchEngineName)
@@ -381,8 +365,6 @@ class SearchUseCasesTest {
         useCases.addSearchEngine.invoke(
             store.findSearchEngineById("engine-i"),
         )
-
-        store.waitUntilIdle()
 
         assertEquals(8, store.state.search.searchEngines.size)
         assertEquals(2, store.state.search.availableSearchEngines.size)
@@ -406,8 +388,6 @@ class SearchUseCasesTest {
         useCases.addSearchEngine.invoke(
             store.findSearchEngineById("engine-h"),
         )
-
-        store.waitUntilIdle()
 
         assertEquals(8, store.state.search.searchEngines.size)
         assertEquals(2, store.state.search.availableSearchEngines.size)
@@ -436,8 +416,6 @@ class SearchUseCasesTest {
             ),
         )
 
-        store.waitUntilIdle()
-
         assertEquals(8, store.state.search.searchEngines.size)
         assertEquals(3, store.state.search.availableSearchEngines.size)
 
@@ -462,8 +440,6 @@ class SearchUseCasesTest {
             store.findSearchEngineById("engine-b"),
         )
 
-        store.waitUntilIdle()
-
         assertEquals(6, store.state.search.searchEngines.size)
         assertEquals(4, store.state.search.availableSearchEngines.size)
 
@@ -486,8 +462,6 @@ class SearchUseCasesTest {
         useCases.removeSearchEngine.invoke(
             store.findSearchEngineById("engine-f"),
         )
-
-        store.waitUntilIdle()
 
         assertEquals(6, store.state.search.searchEngines.size)
         assertEquals(4, store.state.search.availableSearchEngines.size)
@@ -512,8 +486,6 @@ class SearchUseCasesTest {
             store.findSearchEngineById("engine-d"),
         )
 
-        store.waitUntilIdle()
-
         assertEquals(6, store.state.search.searchEngines.size)
         assertEquals(3, store.state.search.availableSearchEngines.size)
 
@@ -531,7 +503,6 @@ class SearchUseCasesTest {
             searchEngineId = "engine-d",
             isEnabled = false,
         )
-        store.waitUntilIdle()
 
         assertEquals(1, store.state.search.disabledSearchEngineIds.size)
     }
@@ -547,7 +518,6 @@ class SearchUseCasesTest {
             searchEngineId = "engine-d",
             isEnabled = true,
         )
-        store.waitUntilIdle()
 
         assertEquals(0, store.state.search.disabledSearchEngineIds.size)
     }
@@ -577,7 +547,6 @@ class SearchUseCasesTest {
         assertEquals("bundled-engine-c", store.state.search.hiddenSearchEngines[0].id)
 
         useCases.restoreHiddenSearchEngines.invoke()
-        store.waitUntilIdle()
 
         assertEquals(3, store.state.search.regionSearchEngines.size)
         assertEquals(0, store.state.search.hiddenSearchEngines.size)
@@ -605,7 +574,6 @@ class SearchUseCasesTest {
         assertEquals("bundled-engine-c", store.state.search.regionSearchEngines[2].id)
 
         useCases.restoreHiddenSearchEngines.invoke()
-        store.waitUntilIdle()
 
         assertEquals(0, store.state.search.hiddenSearchEngines.size)
         assertEquals(3, store.state.search.regionSearchEngines.size)

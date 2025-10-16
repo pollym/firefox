@@ -29,7 +29,6 @@ import mozilla.components.feature.search.SearchUseCases
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.feature.top.sites.TopSitesUseCases
-import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import mozilla.components.support.test.middleware.CaptureActionsMiddleware
 import mozilla.components.support.test.robolectric.testContext
 import mozilla.components.ui.tabcounter.TabCounterMenu
@@ -194,8 +193,6 @@ class DefaultBrowserToolbarControllerTest {
             searchUseCases.defaultSearch.invoke(pastedText, "1")
         }
 
-        store.waitUntilIdle()
-
         captureMiddleware.assertFirstAction(ContentAction.UpdateSearchTermsAction::class) { action ->
             assertEquals("1", action.sessionId)
             assertEquals(pastedText, action.searchTerms)
@@ -212,8 +209,6 @@ class DefaultBrowserToolbarControllerTest {
         verify {
             sessionUseCases.loadUrl(pastedText)
         }
-
-        store.waitUntilIdle()
 
         captureMiddleware.assertFirstAction(ContentAction.UpdateSearchTermsAction::class) { action ->
             assertEquals("1", action.sessionId)

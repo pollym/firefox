@@ -16,7 +16,6 @@ import mozilla.components.compose.browser.toolbar.store.BrowserToolbarAction.Exi
 import mozilla.components.compose.browser.toolbar.store.BrowserToolbarStore
 import mozilla.components.compose.browser.toolbar.store.EnvironmentCleared
 import mozilla.components.compose.browser.toolbar.store.EnvironmentRehydrated
-import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import mozilla.components.support.test.robolectric.testContext
 import mozilla.components.support.test.rule.MainLooperTestRule
 import org.junit.Assert.assertFalse
@@ -73,7 +72,6 @@ class BrowserToolbarSearchStatusSyncMiddlewareTest {
         assertTrue(toolbarStore.state.isEditMode())
 
         toolbarStore.dispatch(ExitEditMode)
-        appStore.waitUntilIdle()
         mainLooperRule.idle()
         assertFalse(appStore.state.searchState.isSearchActive)
         assertFalse(toolbarStore.state.isEditMode())

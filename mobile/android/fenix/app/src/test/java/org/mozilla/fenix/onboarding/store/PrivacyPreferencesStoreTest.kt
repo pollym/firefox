@@ -5,7 +5,6 @@
 package org.mozilla.fenix.onboarding.store
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -19,7 +18,7 @@ class PrivacyPreferencesStoreTest {
     fun `WHEN the init action is dispatched THEN the state remains the same`() {
         val state = PrivacyPreferencesState()
         val store = PrivacyPreferencesStore(initialState = state)
-        safeDispatch(store, PrivacyPreferencesAction.Init)
+        store.dispatch(PrivacyPreferencesAction.Init)
         assertEquals(state, store.state)
         assertFalse(state.crashReportingEnabled)
         assertTrue(state.usageDataEnabled)
@@ -30,10 +29,10 @@ class PrivacyPreferencesStoreTest {
         val store = PrivacyPreferencesStore(initialState = PrivacyPreferencesState())
         assertFalse(store.state.crashReportingEnabled)
 
-        safeDispatch(store, PrivacyPreferencesAction.CrashReportingPreferenceUpdatedTo(true))
+        store.dispatch(PrivacyPreferencesAction.CrashReportingPreferenceUpdatedTo(true))
         assertTrue(store.state.crashReportingEnabled)
 
-        safeDispatch(store, PrivacyPreferencesAction.CrashReportingPreferenceUpdatedTo(false))
+        store.dispatch(PrivacyPreferencesAction.CrashReportingPreferenceUpdatedTo(false))
         assertFalse(store.state.crashReportingEnabled)
     }
 
@@ -42,10 +41,10 @@ class PrivacyPreferencesStoreTest {
         val store = PrivacyPreferencesStore(initialState = PrivacyPreferencesState())
         assertTrue(store.state.usageDataEnabled)
 
-        safeDispatch(store, PrivacyPreferencesAction.UsageDataPreferenceUpdatedTo(false))
+        store.dispatch(PrivacyPreferencesAction.UsageDataPreferenceUpdatedTo(false))
         assertFalse(store.state.usageDataEnabled)
 
-        safeDispatch(store, PrivacyPreferencesAction.UsageDataPreferenceUpdatedTo(true))
+        store.dispatch(PrivacyPreferencesAction.UsageDataPreferenceUpdatedTo(true))
         assertTrue(store.state.usageDataEnabled)
     }
 
@@ -58,7 +57,7 @@ class PrivacyPreferencesStoreTest {
         assertFalse(state.crashReportingEnabled)
         assertTrue(state.usageDataEnabled)
 
-        safeDispatch(store, PrivacyPreferencesAction.UsageDataUserLearnMore)
+        store.dispatch(PrivacyPreferencesAction.UsageDataUserLearnMore)
 
         assertEquals(state, store.state)
         assertFalse(state.crashReportingEnabled)
@@ -74,18 +73,10 @@ class PrivacyPreferencesStoreTest {
         assertFalse(state.crashReportingEnabled)
         assertTrue(state.usageDataEnabled)
 
-        safeDispatch(store, PrivacyPreferencesAction.CrashReportingLearnMore)
+        store.dispatch(PrivacyPreferencesAction.CrashReportingLearnMore)
 
         assertEquals(state, store.state)
         assertFalse(state.crashReportingEnabled)
         assertTrue(state.usageDataEnabled)
     }
-}
-
-/**
- * Dispatches the [action] and ensures all [store] processing is completed.
- */
-private fun safeDispatch(store: PrivacyPreferencesStore, action: PrivacyPreferencesAction) {
-    store.dispatch(action)
-    store.waitUntilIdle()
 }

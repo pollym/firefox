@@ -17,7 +17,6 @@ import mozilla.components.feature.search.ext.createSearchEngine
 import mozilla.components.feature.search.storage.CustomSearchEngineStorage
 import mozilla.components.feature.search.storage.SearchMetadataStorage
 import mozilla.components.support.test.fakes.android.FakeSharedPreferences
-import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import mozilla.components.support.test.mock
 import mozilla.components.support.test.robolectric.testContext
 import mozilla.components.support.test.rule.MainCoroutineRule
@@ -78,7 +77,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -109,7 +108,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -139,7 +138,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -177,7 +176,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -215,7 +214,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -253,7 +252,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -291,7 +290,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -329,7 +328,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -368,7 +367,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -407,7 +406,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -446,7 +445,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -484,7 +483,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -523,7 +522,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -563,7 +562,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -603,7 +602,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -641,7 +640,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -679,7 +678,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -717,7 +716,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -755,7 +754,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -793,7 +792,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -832,7 +831,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -869,7 +868,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -901,7 +900,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isNotEmpty())
@@ -949,7 +948,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isNotEmpty())
@@ -1001,7 +1000,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(RegionState.Default),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.customSearchEngines.isNotEmpty())
         assertNull(store.state.search.userSelectedSearchEngineId)
@@ -1027,7 +1026,7 @@ class SearchMiddlewareTest {
             SearchAction.SetRegionAction(RegionState.Default),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertEquals("test-id", store.state.search.userSelectedSearchEngineId)
     }
@@ -1053,13 +1052,13 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(RegionState.Default),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertNull(store.state.search.userSelectedSearchEngineId)
 
             store.dispatch(SearchAction.SelectSearchEngineAction(id, null))
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertEquals(id, store.state.search.userSelectedSearchEngineId)
         }
@@ -1080,7 +1079,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(RegionState.Default),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertEquals(id, store.state.search.userSelectedSearchEngineId)
         }
@@ -1108,7 +1107,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(RegionState.Default),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
             assertTrue(store.state.search.additionalAvailableSearchEngines.isNotEmpty())
@@ -1134,7 +1133,7 @@ class SearchMiddlewareTest {
                 SearchAction.AddAdditionalSearchEngineAction("youtube"),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
             assertTrue(store.state.search.additionalAvailableSearchEngines.isNotEmpty())
@@ -1163,7 +1162,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(RegionState.Default),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
             assertTrue(store.state.search.additionalAvailableSearchEngines.isNotEmpty())
@@ -1189,7 +1188,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
             assertTrue(store.state.search.additionalAvailableSearchEngines.isNotEmpty())
@@ -1220,7 +1219,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(RegionState.Default),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
             assertTrue(store.state.search.additionalAvailableSearchEngines.isNotEmpty())
@@ -1264,7 +1263,7 @@ class SearchMiddlewareTest {
                 SearchAction.SetRegionAction(RegionState.Default),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertTrue(store.state.search.customSearchEngines.isEmpty())
             verify(storage).loadSearchEngineList()
@@ -1275,7 +1274,7 @@ class SearchMiddlewareTest {
             val engine1 = SearchEngine("test-id-1", "test engine one", mock(), type = SearchEngine.Type.CUSTOM)
             store.dispatch(SearchAction.UpdateCustomSearchEngineAction(engine1))
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertTrue(store.state.search.customSearchEngines.isNotEmpty())
             assertEquals(1, store.state.search.customSearchEngines.size)
@@ -1287,7 +1286,7 @@ class SearchMiddlewareTest {
             val engine2 = SearchEngine("test-id-2", "test engine two", mock(), type = SearchEngine.Type.CUSTOM)
             store.dispatch(SearchAction.UpdateCustomSearchEngineAction(engine2))
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertTrue(store.state.search.customSearchEngines.isNotEmpty())
             assertEquals(2, store.state.search.customSearchEngines.size)
@@ -1304,7 +1303,7 @@ class SearchMiddlewareTest {
             )
             store.dispatch(SearchAction.UpdateCustomSearchEngineAction(updated))
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertTrue(store.state.search.customSearchEngines.isNotEmpty())
             assertEquals(2, store.state.search.customSearchEngines.size)
@@ -1318,7 +1317,7 @@ class SearchMiddlewareTest {
 
             store.dispatch(SearchAction.RemoveCustomSearchEngineAction(engine2.id))
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertTrue(store.state.search.customSearchEngines.isNotEmpty())
             assertEquals(1, store.state.search.customSearchEngines.size)
@@ -1369,7 +1368,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(metadataStorage.getDisabledSearchEngineIds().contains("bing"))
         assertTrue(store.state.search.disabledSearchEngineIds.contains("bing"))
@@ -1381,7 +1380,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertFalse(metadataStorage.getDisabledSearchEngineIds().contains("bing"))
         assertFalse(store.state.search.disabledSearchEngineIds.contains("bing"))
@@ -1403,7 +1402,7 @@ class SearchMiddlewareTest {
                 RegionState("US", "US"),
             ),
         )
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         val google = store.state.search.regionSearchEngines.find { searchEngine -> searchEngine.name == "Google" }
         assertNotNull(google!!)
@@ -1411,7 +1410,7 @@ class SearchMiddlewareTest {
         assertEquals(0, metadataStorage.getHiddenSearchEngines().size)
 
         store.dispatch(SearchAction.HideSearchEngineAction(google.id))
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertNull(store.state.search.regionSearchEngines.find { it.id == google.id })
 
@@ -1421,7 +1420,7 @@ class SearchMiddlewareTest {
         assertNotNull(metadataStorage.getHiddenSearchEngines().find { it == google.id })
 
         store.dispatch(SearchAction.RestoreHiddenSearchEnginesAction)
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertNotNull(store.state.search.regionSearchEngines.find { it.id == google.id })
 
@@ -1447,7 +1446,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             store.state.search.regionSearchEngines.find { searchEngine -> searchEngine.name == "Google" }
         }
@@ -1462,7 +1461,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertNotNull(store.state.search.regionSearchEngines.find { it.id == google.id })
             assertEquals(0, store.state.search.hiddenSearchEngines.size)
@@ -1471,7 +1470,7 @@ class SearchMiddlewareTest {
                 SearchAction.HideSearchEngineAction(google.id),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertNull(store.state.search.regionSearchEngines.find { it.id == google.id })
             assertEquals(1, store.state.search.hiddenSearchEngines.size)
@@ -1487,7 +1486,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertNull(store.state.search.regionSearchEngines.find { it.id == google.id })
             assertEquals(1, store.state.search.hiddenSearchEngines.size)
@@ -1510,7 +1509,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertNotNull(store.state.search.regionSearchEngines.find { it.id == google.id })
             assertEquals(0, store.state.search.hiddenSearchEngines.size)
@@ -1535,7 +1534,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             val google = store.state.search.searchEngines.find { it.name == "Google" }
             assertNotNull(google!!)
@@ -1548,7 +1547,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertEquals("google-b-1-m", store.state.search.userSelectedSearchEngineId)
             assertEquals("Google", store.state.search.userSelectedSearchEngineName)
@@ -1568,7 +1567,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertEquals("google-b-1-m", store.state.search.userSelectedSearchEngineId)
             assertEquals("Google", store.state.search.userSelectedSearchEngineName)
@@ -1598,7 +1597,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertEquals(0, store.state.search.customSearchEngines.size)
 
@@ -1616,7 +1615,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertEquals(1, store.state.search.customSearchEngines.size)
         }
@@ -1630,7 +1629,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertEquals(1, store.state.search.customSearchEngines.size)
         }
@@ -1669,7 +1668,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertEquals(1, store.state.search.customSearchEngines.size)
 
@@ -1696,7 +1695,7 @@ class SearchMiddlewareTest {
                 ),
             )
 
-            wait(store, dispatcher)
+            wait(dispatcher)
 
             assertEquals(1, store.state.search.customSearchEngines.size)
 
@@ -1728,7 +1727,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         // ///////////////////////////////////////////////////////////////////////////////////////////
         // Verify initial state
@@ -1814,7 +1813,7 @@ class SearchMiddlewareTest {
             ),
         )
 
-        wait(store, dispatcher)
+        wait(dispatcher)
 
         assertTrue(store.state.search.regionSearchEngines.isNotEmpty())
         assertTrue(store.state.search.additionalAvailableSearchEngines.isEmpty())
@@ -1835,13 +1834,7 @@ class SearchMiddlewareTest {
     }
 }
 
-private fun wait(store: BrowserStore, dispatcher: TestDispatcher) {
-    // First we wait for the InitAction that may still need to be processed.
-    store.waitUntilIdle()
-
+private fun wait(dispatcher: TestDispatcher) {
     // Now we wait for the Middleware that may need to asynchronously process an action the test dispatched
     dispatcher.scheduler.advanceUntilIdle()
-
-    // Since the Middleware may have dispatched an action, we now wait for the store again.
-    store.waitUntilIdle()
 }

@@ -19,7 +19,6 @@ import mozilla.components.service.pocket.PocketStory.ContentRecommendation
 import mozilla.components.service.pocket.PocketStory.PocketRecommendedStory
 import mozilla.components.service.pocket.PocketStory.SponsoredContent
 import mozilla.components.service.pocket.PocketStory.SponsoredContentCallbacks
-import mozilla.components.support.test.libstate.ext.waitUntilIdle
 import mozilla.components.support.test.middleware.CaptureActionsMiddleware
 import mozilla.components.support.test.rule.MainCoroutineRule
 import mozilla.components.support.test.rule.runTestOnMain
@@ -283,7 +282,6 @@ class PocketMiddlewareTest {
             store = appStore,
             selectedPocketCategoriesDataStore = dataStore,
         )
-        appStore.waitUntilIdle()
 
         captorMiddleware.assertLastAction(PocketStoriesCategoriesSelectionsChange::class) {
             assertEquals(1, it.categoriesSelected.size)
