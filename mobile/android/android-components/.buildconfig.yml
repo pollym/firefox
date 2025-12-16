@@ -36,23 +36,6 @@ projects:
     - components:tooling-fetch-tests
     - components:tooling-lint
     - components:ui-icons
-  components:browser-engine-system:
-    description: Engine implementation based on the system WebView.
-    path: components/browser/engine-system
-    publish: true
-    upstream_dependencies:
-    - components:browser-errorpages
-    - components:concept-base
-    - components:concept-engine
-    - components:concept-fetch
-    - components:concept-storage
-    - components:lib-publicsuffixlist
-    - components:support-base
-    - components:support-ktx
-    - components:support-test
-    - components:support-utils
-    - components:tooling-lint
-    - components:ui-icons
   components:browser-errorpages:
     description: Responsive browser error pages for Android apps.
     path: components/browser/errorpages
@@ -1848,7 +1831,6 @@ projects:
     upstream_dependencies:
     - components:browser-domains
     - components:browser-engine-gecko
-    - components:browser-engine-system
     - components:browser-errorpages
     - components:browser-icons
     - components:browser-menu

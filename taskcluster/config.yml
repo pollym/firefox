@@ -218,7 +218,6 @@ treeherder:
         # This list is based on mobile/android/android-components/.buildconfig.yml except the exceptions down below
         'browser-domains': 'browser-domains'
         'browser-engine-gecko': 'browser-engine-gecko'
-        'browser-engine-system': 'browser-engine-system'
         'browser-errorpages': 'browser-errorpages'
         'browser-icons': 'browser-icons'
         'browser-menu': 'browser-menu'

@@ -79,7 +79,7 @@ dependencies {
     geckoImplementation project(':components:browser-engine-gecko')
 
     implementation project(':components:browser-domains')
-    implementation project(':components:browser-engine-system')
+    implementation project(':components:browser-engine-gecko')
     implementation project(':components:browser-icons')
     implementation project(':components:browser-menu')
     implementation project(':components:browser-session-storage')

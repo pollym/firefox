@@ -14,7 +14,7 @@ import androidx.core.content.edit
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import mozilla.components.browser.domains.autocomplete.ShippedDomainsProvider
-import mozilla.components.browser.engine.system.SystemEngine
+import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.menu.BrowserMenuHighlight
 import mozilla.components.browser.menu.WebExtensionBrowserMenuBuilder
@@ -148,7 +148,7 @@ open class DefaultComponents(private val applicationContext: Context) {
 
     // Engine
     open val engine: Engine by lazy {
-        SystemEngine(applicationContext, engineSettings)
+        GeckoEngine(applicationContext, engineSettings)
     }
 
     open val client: Client by lazy { HttpURLConnectionClient() }
