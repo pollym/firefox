@@ -454,6 +454,9 @@ features:
       - channel: nightly
         value:
           isolationStrategy: 2
+      - channel: developer
+        value:
+          isolationStrategy: 2
 
   suggest-shipped-domains:
     description: Feature that suggests domains from the shipped domain list.
