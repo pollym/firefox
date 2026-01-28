@@ -14,30 +14,51 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun GameCanvas(state: GameState, onSize: (Size, Offset) -> Unit) {
+
     Canvas(modifier = Modifier
         .background(color = Color.Black)
         .fillMaxSize()
     ) {
         onSize(size, center)
-        state.snake.forEach { (x, y) ->
-            drawRect(
-                color = Color.Green,
-                topLeft = Offset(x * state.cellSize, y * state.cellSize),
-                size = Size(state.cellSize, state.cellSize)
-            )
-        }
+        drawHead(state)
+        drawTail(state)
+        drawFood(state)
+    }
+}
 
+fun DrawScope.drawHead(state: GameState) {
+    val head = state.snake.first()
+    drawRect(
+        color = Color.Red,
+        topLeft = Offset(head.x * state.cellSize, head.y * state.cellSize),
+        size = Size(state.cellSize, state.cellSize)
+    )
+}
+
+fun DrawScope.drawTail(state: GameState) {
+    val brush = Brush.linearGradient(listOf(Color.Red, Color.Yellow))
+    state.snake.drop(1).forEach { (x, y) ->
         drawRect(
-            color = Color.Red,
-            topLeft = Offset(state.food.x * state.cellSize, state.food.y * state.cellSize),
+            brush = brush,
+            topLeft = Offset(x * state.cellSize, y * state.cellSize),
             size = Size(state.cellSize, state.cellSize)
         )
     }
+}
+
+fun DrawScope.drawFood(state: GameState) {
+    drawRect(
+        color = Color.Green,
+        topLeft = Offset(state.food.x * state.cellSize, state.food.y * state.cellSize),
+        size = Size(state.cellSize, state.cellSize)
+    )
 }
 
 @Preview

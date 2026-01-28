@@ -23,7 +23,7 @@ data class GameState(
     val size: Size = Size(0f, 0f),
     val centre: Offset = Offset(0f, 0f),
     val snake: List<GridPoint> = listOf(GridPoint(5, 5)),
-    val food: GridPoint = GridPoint(10, 10),
+    val food: GridPoint = GridPoint(8, 8),
     val direction: Direction = RIGHT,
     val isGameOver: Boolean = false,
     val score: Int = 0,
@@ -34,7 +34,7 @@ data class GameState(
         else copy(size = size, centre = centre)
     }
 
-    val numCellsWide = 20
+    val numCellsWide = 15
     val cellSize = size.minDimension / numCellsWide
 
     fun toPx(gridPoint: GridPoint): Point =
