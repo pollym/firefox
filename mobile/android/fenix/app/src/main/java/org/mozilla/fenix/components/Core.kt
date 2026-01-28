@@ -140,6 +140,7 @@ import org.mozilla.fenix.utils.getUndoDelay
 import org.mozilla.geckoview.GeckoRuntime
 import java.util.concurrent.TimeUnit
 import mozilla.components.service.pocket.mars.api.Placement as MarsSpocsPlacement
+import org.mozilla.fenix.firesnake.FireSnakeFeature
 
 /**
  * Component group for all core browser functionality.
@@ -659,6 +660,8 @@ class Core(
     val webAppManifestStorage by lazyMonitored { ManifestStorage(context) }
 
     val loginExceptionStorage by lazyMonitored { LoginExceptionStorage(context) }
+
+    val fireSnakeFeature by lazyMonitored { FireSnakeFeature() }
 
     /**
      * Fenix implementation of [SummarizeFeatureDiscoverySettings]

@@ -1,0 +1,44 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+plugins {
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.android.library)
+}
+
+android {
+    namespace 'org.mozilla.fenix.firesnake'
+    compileSdk {
+        version = release(project.ext.compileSdkMajorVersion) { minorApiLevel = project.ext.compileSdkMinorVersion }
+    }
+    defaultConfig {
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+}
+
+dependencies {
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.google.material
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.androidx.compose.animation
+    implementation libs.androidx.compose.foundation
+    implementation libs.androidx.compose.material.icons
+    implementation libs.androidx.compose.material3
+    implementation libs.androidx.compose.material3.adaptive
+    implementation libs.androidx.compose.material3.adaptivelayout
+    implementation libs.androidx.compose.material3.adaptivenavigation
+    implementation libs.androidx.compose.material3.adaptivenavigationsuite
+    implementation libs.androidx.compose.material3.windowsizeclass
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.ui.tooling.preview
+    implementation libs.androidx.compose.ui.graphics
+    testImplementation libs.junit4
+    androidTestImplementation libs.androidx.test.junit
+    androidTestImplementation libs.androidx.test.espresso.core
+    debugImplementation libs.androidx.compose.ui.tooling
+}

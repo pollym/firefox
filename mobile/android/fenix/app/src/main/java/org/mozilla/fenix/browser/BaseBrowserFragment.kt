@@ -522,6 +522,8 @@ abstract class BaseBrowserFragment :
             view = view,
         )
 
+        requireComponents.core.fireSnakeFeature.start(container = binding.browserWindow)
+
         // DO NOT MOVE ANYTHING BELOW THIS addMarker CALL!
         requireComponents.core.engine.profiler?.addMarker(
             MarkersFragmentLifecycleCallbacks.MARKER_NAME,
