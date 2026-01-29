@@ -22,32 +22,28 @@ data class GridPoint(val x: Int, val y: Int)
 data class GameState(
     val size: Size = Size(0f, 0f),
     val centre: Offset = Offset(0f, 0f),
-    val snake: List<GridPoint> = listOf(GridPoint(5, 5)),
+    val snake: List<GridPoint> = listOf(GridPoint(5, 5), GridPoint(4, 5)),
     val food: GridPoint = GridPoint(8, 8),
     val direction: Direction = RIGHT,
     val isGameOver: Boolean = false,
     val score: Int = 0,
 ) {
+    val numCellsWide = 15
+    val cellSize = size.minDimension / numCellsWide
 
     fun onSized(size: Size, centre: Offset): GameState {
         return if (this.size == size && this.centre == centre) this
         else copy(size = size, centre = centre)
     }
-
-    val numCellsWide = 15
-    val cellSize = size.minDimension / numCellsWide
-
     fun toPx(gridPoint: GridPoint): Point =
         Point((gridPoint.x * cellSize).toInt(), (gridPoint.y * cellSize).toInt())
 
     fun toGridPoint(x: Int, y: Int): GridPoint =
         GridPoint((x / cellSize).toInt(), (y / cellSize).toInt())
 
-    fun randomGridPoint(): GridPoint =
-        toGridPoint(
-            Random.nextInt(size.width.toInt()),
-            Random.nextInt(size.height.toInt())
-        )
+    fun randomGridPoint(): GridPoint = toGridPoint(
+        Random.nextInt(size.width.toInt()), Random.nextInt(size.height.toInt())
+    )
 
     fun moveSnake(): GameState {
         val head = snake.first()
@@ -82,10 +78,10 @@ data class GameState(
     private fun withinBounds(newHeadPos: Point): Boolean {
         val width = size.width
         val height = size.height
-        val left = (centre.x - width/2).toInt()
-        val right = (centre.x + width/2).toInt()
-        val top = (centre.y - height/2).toInt()
-        val bottom = (centre.y + height/2).toInt()
+        val left = (centre.x - width / 2).toInt()
+        val right = (centre.x + width / 2).toInt()
+        val top = (centre.y - height / 2).toInt()
+        val bottom = (centre.y + height / 2).toInt()
         return newHeadPos.x in left..right && newHeadPos.y in top..bottom
     }
 
