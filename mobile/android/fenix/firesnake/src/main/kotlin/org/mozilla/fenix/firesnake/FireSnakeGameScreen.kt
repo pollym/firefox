@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
 @Composable
@@ -50,8 +51,7 @@ fun FireSnakeGameScreen() {
                 detectTapGestures(onTap = onTap)
             },
     ) {
-        val context = LocalContext.current
-
+        val soundEffectsPlayer = SoundEffectsPlayer(LocalContext.current)
         LaunchedEffect(gameState) {
             while (!gameState.isGameOver) {
                 delay(160L)
@@ -59,19 +59,21 @@ fun FireSnakeGameScreen() {
                 gameState = gameState.moveSnake()
                 val newScore = gameState.score
                 if (newScore > oldScore)
-                    SoundEffectsPlayer.playSound(R.raw.chirrup, context)
-
-                //beep boop beep boop
-                if (gameState.beepNext) {
-                    SoundEffectsPlayer.playSound(R.raw.beep, context)
-                } else {
-                    SoundEffectsPlayer.playSound(R.raw.boop, context)
+                    soundEffectsPlayer.playSound(R.raw.eatfood)
+                else {
+                    //beep boop beep boop
+                    if (gameState.beepNext) {
+                        soundEffectsPlayer.playSound(R.raw.beep)
+                    } else {
+                        soundEffectsPlayer.playSound(R.raw.boop)
+                    }
                 }
+
                 gameState = gameState.toggleBeepNext()
             }
         }
         if (gameState.isGameOver) {
-            SoundEffectsPlayer.playSound(R.raw.sadwobble, context)
+            soundEffectsPlayer.playSound(R.raw.sadwobble)
             GameOverScreen(restartGame)
         }
         GameCanvas(gameState, onSize)
@@ -85,7 +87,8 @@ fun FireSnakeGameScreen() {
         Text(
             text = "Score: ${gameState.score}",
             color = Color.White,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontSize = 32.sp
         )
     }
 
