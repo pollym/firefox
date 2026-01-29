@@ -27,6 +27,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,7 +41,6 @@ fun FireSnakeGameScreen() {
     val onTap: (Offset) -> Unit = { offset ->
         gameState = gameState.onTap(offset)
     }
-
     Card(
         modifier = Modifier
             .fillMaxSize()
@@ -50,13 +50,28 @@ fun FireSnakeGameScreen() {
                 detectTapGestures(onTap = onTap)
             },
     ) {
+        val context = LocalContext.current
+
         LaunchedEffect(gameState) {
             while (!gameState.isGameOver) {
-                delay(180L)
+                delay(160L)
+                val oldScore = gameState.score
                 gameState = gameState.moveSnake()
+                val newScore = gameState.score
+                if (newScore > oldScore)
+                    SoundEffectsPlayer.playSound(R.raw.chirrup, context)
+
+                //beep boop beep boop
+                if (gameState.beepNext) {
+                    SoundEffectsPlayer.playSound(R.raw.beep, context)
+                } else {
+                    SoundEffectsPlayer.playSound(R.raw.boop, context)
+                }
+                gameState = gameState.toggleBeepNext()
             }
         }
         if (gameState.isGameOver) {
+            SoundEffectsPlayer.playSound(R.raw.sadwobble, context)
             GameOverScreen(restartGame)
         }
         GameCanvas(gameState, onSize)
@@ -73,7 +88,12 @@ fun FireSnakeGameScreen() {
             fontWeight = FontWeight.Bold
         )
     }
+
 }
+
+
+
+
 
 @Preview
 @Composable

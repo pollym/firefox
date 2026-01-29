@@ -1,0 +1,23 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+package org.mozilla.fenix.firesnake
+
+import android.content.Context
+import android.media.MediaPlayer
+import androidx.annotation.RawRes
+
+object SoundEffectsPlayer {
+
+    fun playSound(@RawRes soundId: Int, context: Context) {
+        MediaPlayer.create(context, soundId).apply {
+            start()
+            setOnCompletionListener {
+                release()
+            }
+        }
+    }
+}

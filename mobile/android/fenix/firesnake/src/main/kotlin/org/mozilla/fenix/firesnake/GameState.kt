@@ -17,19 +17,51 @@ import kotlin.random.Random
 
 enum class Direction { UP, DOWN, LEFT, RIGHT }
 
-data class GridPoint(val x: Int, val y: Int)
+data class GridPoint(val x: Int, val y: Int) {
+    fun isAbove(secondPoint: GridPoint): Boolean = y < secondPoint.y
+    fun isBelow(secondPoint: GridPoint): Boolean = y > secondPoint.y
+    fun isLeftOf(secondPoint: GridPoint): Boolean = x < secondPoint.x
+    fun isRightOf(secondPoint: GridPoint): Boolean = x > secondPoint.x
+}
 
 data class GameState(
     val size: Size = Size(0f, 0f),
     val centre: Offset = Offset(0f, 0f),
-    val snake: List<GridPoint> = listOf(GridPoint(5, 5), GridPoint(4, 5)),
+    val snake: List<GridPoint> = listOf(GridPoint(5, 5), GridPoint(5, 4), GridPoint(5, 3), GridPoint(5, 2)),
     val food: GridPoint = GridPoint(8, 8),
-    val direction: Direction = RIGHT,
+    val direction: Direction = DOWN,
     val isGameOver: Boolean = false,
     val score: Int = 0,
+    val beepNext: Boolean = true
 ) {
-    val numCellsWide = 15
+    val numCellsWide = 12
     val cellSize = size.minDimension / numCellsWide
+
+    val shouldersDirection: Direction = when {
+        snake.size < 3 -> direction
+        else -> {
+            getDirectionBetweenPoints(snake[1], snake[2])
+        }
+    }
+
+    val tailDirection: Direction = when {
+        snake.size < 3 -> direction
+        else -> {
+            getDirectionBetweenPoints(snake[snake.size-2], snake[snake.size-3])
+        }
+    }
+
+    fun toggleBeepNext(): GameState =
+        copy(beepNext = !beepNext)
+
+    private fun getDirectionBetweenPoints(thisPoint: GridPoint, otherPoint: GridPoint): Direction {
+        return when {
+            thisPoint.isAbove(otherPoint) -> UP
+            thisPoint.isBelow(otherPoint) -> DOWN
+            thisPoint.isLeftOf(otherPoint) -> LEFT
+            else -> RIGHT
+        }
+    }
 
     fun onSized(size: Size, centre: Offset): GameState {
         return if (this.size == size && this.centre == centre) this
