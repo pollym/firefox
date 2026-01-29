@@ -10,14 +10,18 @@ import android.content.Context
 import android.media.MediaPlayer
 import androidx.annotation.RawRes
 
-object SoundEffectsPlayer {
+class SoundEffectsPlayer(private val context: Context) {
 
-    fun playSound(@RawRes soundId: Int, context: Context) {
-        MediaPlayer.create(context, soundId).apply {
-            start()
-            setOnCompletionListener {
-                release()
-            }
+    private var mediaPlayer: MediaPlayer? = null
+
+    fun playSound(@RawRes soundResId: Int) {
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = MediaPlayer.create(context, soundResId)
+        mediaPlayer?.start()
+        mediaPlayer?.setOnCompletionListener {
+            it.release()
+            mediaPlayer = null
         }
     }
 }
