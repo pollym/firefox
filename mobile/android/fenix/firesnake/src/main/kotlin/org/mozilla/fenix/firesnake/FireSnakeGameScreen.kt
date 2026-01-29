@@ -44,7 +44,7 @@ fun FireSnakeGameScreen() {
     Card(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Yellow)
+            .background(Color.Blue)
             .padding(horizontal = 32.dp, vertical = 128.dp)
             .pointerInput(Unit) {
                 detectTapGestures(onTap = onTap)
@@ -69,6 +69,7 @@ fun FireSnakeGameScreen() {
     ) {
         Text(
             text = "Score: ${gameState.score}",
+            color = Color.White,
             fontWeight = FontWeight.Bold
         )
     }
