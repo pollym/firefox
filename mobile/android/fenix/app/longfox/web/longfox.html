@@ -84,7 +84,7 @@
 
         get shouldersDirection() {
           if (this.fox.length < 3) return this.direction;
-          return dirBetween(this.fox[1], this.fox[2]);
+          return dirBetween(this.fox[0], this.fox[1]);
         }
 
         get tailDirection() {
@@ -325,14 +325,31 @@
         ctx.fillRect(state.food.x * cellSize, state.food.y * cellSize, cellSize, cellSize);
 
         // body (excluding head and tail)
-        const body = state.fox.slice(1, -1);
+        const body = state.fox.slice(0, -1);
         if (body.length > 0) {
           const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
           grad.addColorStop(0, '#ff0000');
           grad.addColorStop(1, '#ffff00');
           ctx.fillStyle = grad;
-          for (const seg of body) {
-            ctx.fillRect(seg.x * cellSize, seg.y * cellSize, cellSize, cellSize);
+          for (const [i, seg] of body.entries()) {
+            if (i == 0) {
+              const shouldersRot = {UP: Math.PI, RIGHT: -Math.PI/2, DOWN: 0, LEFT: Math.PI/2}[state.shouldersDirection];
+              ctx.save();        
+              ctx.translate(seg.x * cellSize, seg.y * cellSize);
+              ctx.save()
+              ctx.translate(cellSize/2, cellSize/2);
+              ctx.rotate(shouldersRot);
+              ctx.beginPath();
+              ctx.lineTo(-cellSize/2, -cellSize/2);
+              ctx.lineTo(0, 0);
+              ctx.lineTo(cellSize/2, -cellSize/2);
+              ctx.closePath();     
+              ctx.restore();
+              ctx.restore();
+              ctx.fill();      
+            } else {
+              ctx.fillRect(seg.x * cellSize, seg.y * cellSize, cellSize, cellSize);  
+            }
           }
         }
 
