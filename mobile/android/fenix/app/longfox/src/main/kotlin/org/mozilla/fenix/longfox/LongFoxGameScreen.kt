@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.mozilla.fenix.firesnake
+package org.mozilla.fenix.longfox
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
 @Composable
-fun FireSnakeGameScreen() {
+fun LongFoxGameScreen() {
     var gameState by remember { mutableStateOf(GameState()) }
     val restartGame = { gameState = GameState() }
     val onSize: (Size, Offset) -> Unit = { size, offset -> gameState = gameState.onSized(size, offset) }
@@ -56,12 +56,12 @@ fun FireSnakeGameScreen() {
             while (!gameState.isGameOver) {
                 delay(160L)
                 val oldScore = gameState.score
-                gameState = gameState.moveSnake()
+                gameState = gameState.moveFox()
                 val newScore = gameState.score
-                if (newScore > oldScore)
+                if (newScore > oldScore) {
                     soundEffectsPlayer.playSound(R.raw.eatfood)
-                else {
-                    //beep boop beep boop
+                } else {
+                    // beep boop beep boop
                     if (gameState.beepNext) {
                         soundEffectsPlayer.playSound(R.raw.beep)
                     } else {
@@ -82,26 +82,21 @@ fun FireSnakeGameScreen() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(6.dp),
-        contentAlignment = Alignment.CenterEnd
+        contentAlignment = Alignment.CenterEnd,
     ) {
         Text(
             text = "Score: ${gameState.score}",
             color = Color.White,
             fontWeight = FontWeight.Bold,
-            fontSize = 32.sp
+            fontSize = 32.sp,
         )
     }
-
 }
-
-
-
-
 
 @Preview
 @Composable
-fun FireSnakeGameScreenPreview() {
+fun LongFoxGameScreenPreview() {
     MaterialTheme {
-        FireSnakeGameScreen()
+        LongFoxGameScreen()
     }
 }

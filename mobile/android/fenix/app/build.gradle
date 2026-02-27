@@ -538,7 +538,7 @@ nimbus {
 }
 
 dependencies {
-    implementation project(':fenix:firesnake')
+    implementation project(':fenix:longfox')
     implementation project(':components:browser-engine-gecko')
     implementation project(':components:compose-awesomebar')
     implementation project(':components:compose-base')

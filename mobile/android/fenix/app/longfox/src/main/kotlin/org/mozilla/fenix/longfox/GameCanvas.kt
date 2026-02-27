@@ -4,7 +4,7 @@
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-package org.mozilla.fenix.firesnake
+package org.mozilla.fenix.longfox
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import org.mozilla.fenix.firesnake.Direction.*
+import org.mozilla.fenix.longfox.Direction.*
 
 @Composable
 fun GameCanvas(state: GameState, onSize: (Size, Offset) -> Unit) {
@@ -67,7 +67,7 @@ fun GameCanvas(state: GameState, onSize: (Size, Offset) -> Unit) {
 
 fun DrawScope.drawHead(state: GameState, kitHeadBitmap: ImageBitmap?, margin: Int) {
     if (kitHeadBitmap == null) return
-    val head = state.snake.first()
+    val head = state.fox.first()
 
     val topLeft = Offset(
         (head.x * state.cellSize) - margin, (head.y * state.cellSize) - margin
@@ -91,7 +91,7 @@ fun DrawScope.drawHead(state: GameState, kitHeadBitmap: ImageBitmap?, margin: In
 
 fun DrawScope.drawBody(state: GameState, shouldersPath: Path, bottomPath: Path) {
     val brush = Brush.linearGradient(listOf(Color.Red, Color.Yellow))
-    val snakeBody = state.snake.drop(1).dropLast(1)
+    val snakeBody = state.fox.drop(1).dropLast(1)
     val cornerRadiusPx = state.cellSize/2
     val cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx)
     when (snakeBody.size) {
@@ -188,7 +188,7 @@ fun DrawScope.drawBody(state: GameState, shouldersPath: Path, bottomPath: Path) 
 
 fun DrawScope.drawTail(state: GameState, kitTailBitmap: ImageBitmap?) {
     if (kitTailBitmap == null) return
-    val tail = state.snake.last()
+    val tail = state.fox.last()
     val rotateAngle = when (state.tailDirection) {
         UP -> 0F
         DOWN -> 180F

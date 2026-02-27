@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.mozilla.fenix.firesnake
+package org.mozilla.fenix.longfox
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -25,6 +25,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("org.mozilla.fenix.firesnake.test", appContext.packageName)
+        assertEquals("org.mozilla.fenix.longfox.test", appContext.packageName)
     }
 }

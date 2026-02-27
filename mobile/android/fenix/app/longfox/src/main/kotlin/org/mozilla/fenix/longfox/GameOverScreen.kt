@@ -4,7 +4,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.mozilla.fenix.firesnake
+package org.mozilla.fenix.longfox
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,13 +30,13 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun GameOverScreen(restartGame: () -> Unit) {
     Column(
-        modifier = Modifier.Companion
+        modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
             .padding(24.dp)
     ) {
         Row(
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .background(Color.DarkGray)
                 .padding(24.dp)
                 .fillMaxSize()
@@ -47,7 +47,7 @@ fun GameOverScreen(restartGame: () -> Unit) {
             Column()
             {
                 Row(
-                    modifier = Modifier.Companion.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Image(
@@ -57,7 +57,7 @@ fun GameOverScreen(restartGame: () -> Unit) {
                 }
                 Spacer(modifier = Modifier.height(48.dp))
                 Row(
-                    modifier = Modifier.Companion.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(

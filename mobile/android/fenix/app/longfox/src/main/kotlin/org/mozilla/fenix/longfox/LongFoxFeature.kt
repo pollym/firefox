@@ -4,14 +4,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.mozilla.fenix.firesnake
+package org.mozilla.fenix.longfox
 
 import android.view.ViewGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 
-class FireSnakeFeature {
+class LongFoxFeature {
     fun start(container: ViewGroup) {
         val context = container.context ?: return
         container.addView(
@@ -19,10 +19,10 @@ class FireSnakeFeature {
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                 setContent {
                     MaterialTheme {
-                        FireSnakeGameScreen()
+                        LongFoxGameScreen()
                     }
                 }
-            }
+            },
         )
     }
 }

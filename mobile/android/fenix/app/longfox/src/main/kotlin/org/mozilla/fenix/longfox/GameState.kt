@@ -4,15 +4,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.mozilla.fenix.firesnake
+package org.mozilla.fenix.longfox
 
 import android.graphics.Point
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import org.mozilla.fenix.firesnake.Direction.DOWN
-import org.mozilla.fenix.firesnake.Direction.LEFT
-import org.mozilla.fenix.firesnake.Direction.RIGHT
-import org.mozilla.fenix.firesnake.Direction.UP
+import org.mozilla.fenix.longfox.Direction.DOWN
+import org.mozilla.fenix.longfox.Direction.LEFT
+import org.mozilla.fenix.longfox.Direction.RIGHT
+import org.mozilla.fenix.longfox.Direction.UP
 import kotlin.random.Random
 
 enum class Direction { UP, DOWN, LEFT, RIGHT }
@@ -27,27 +27,27 @@ data class GridPoint(val x: Int, val y: Int) {
 data class GameState(
     val size: Size = Size(0f, 0f),
     val centre: Offset = Offset(0f, 0f),
-    val snake: List<GridPoint> = listOf(GridPoint(5, 5), GridPoint(5, 4), GridPoint(5, 3), GridPoint(5, 2)),
+    val fox: List<GridPoint> = listOf(GridPoint(5, 5), GridPoint(5, 4), GridPoint(5, 3), GridPoint(5, 2)),
     val food: GridPoint = GridPoint(8, 8),
     val direction: Direction = DOWN,
     val isGameOver: Boolean = false,
     val score: Int = 0,
-    val beepNext: Boolean = true
+    val beepNext: Boolean = true,
 ) {
     val numCellsWide = 12
     val cellSize = size.minDimension / numCellsWide
 
     val shouldersDirection: Direction = when {
-        snake.size < 3 -> direction
+        fox.size < 3 -> direction
         else -> {
-            getDirectionBetweenPoints(snake[1], snake[2])
+            getDirectionBetweenPoints(fox[1], fox[2])
         }
     }
 
     val tailDirection: Direction = when {
-        snake.size < 3 -> direction
+        fox.size < 3 -> direction
         else -> {
-            getDirectionBetweenPoints(snake[snake.size-2], snake[snake.size-3])
+            getDirectionBetweenPoints(fox[fox.size - 2], fox[fox.size - 3])
         }
     }
 
@@ -64,8 +64,11 @@ data class GameState(
     }
 
     fun onSized(size: Size, centre: Offset): GameState {
-        return if (this.size == size && this.centre == centre) this
-        else copy(size = size, centre = centre)
+        return if (this.size == size && this.centre == centre) {
+            this
+        } else {
+            copy(size = size, centre = centre)
+        }
     }
     fun toPx(gridPoint: GridPoint): Point =
         Point((gridPoint.x * cellSize).toInt(), (gridPoint.y * cellSize).toInt())
@@ -74,11 +77,12 @@ data class GameState(
         GridPoint((x / cellSize).toInt(), (y / cellSize).toInt())
 
     fun randomGridPoint(): GridPoint = toGridPoint(
-        Random.nextInt(size.width.toInt()), Random.nextInt(size.height.toInt())
+        Random.nextInt(size.width.toInt()),
+        Random.nextInt(size.height.toInt()),
     )
 
-    fun moveSnake(): GameState {
-        val head = snake.first()
+    fun moveFox(): GameState {
+        val head = fox.first()
         val newHead = when (direction) {
             UP -> head.copy(y = head.y - 1)
             DOWN -> head.copy(y = head.y + 1)
@@ -87,7 +91,7 @@ data class GameState(
         }
         val newHeadPos = toPx(newHead)
 
-        val collidedWithSelf = newHead in snake.drop(1)
+        val collidedWithSelf = newHead in fox.drop(1)
         val collidedWithEdge = !withinBounds(newHeadPos)
         val collidedWithFood = newHead == food
         val isGameOver = collidedWithSelf || collidedWithEdge
@@ -95,13 +99,13 @@ data class GameState(
         return if (collidedWithFood && !isGameOver) {
             copy(
                 food = randomGridPoint(),
-                snake = listOf(newHead) + snake,
+                fox = listOf(newHead) + fox,
                 isGameOver = false,
-                score = score + 1
+                score = score + 1,
             )
         } else {
             copy(
-                snake = listOf(newHead) + snake.dropLast(1),
+                fox = listOf(newHead) + fox.dropLast(1),
                 isGameOver = isGameOver,
             )
         }
@@ -119,12 +123,11 @@ data class GameState(
 
     fun onTap(offset: Offset): GameState {
         val (x, y) = offset
-        val snakeHeadPos = toPx(snake.first())
+        val snakeHeadPos = toPx(fox.first())
         val newDirection = when (direction) {
             UP, DOWN -> if (x < snakeHeadPos.x) LEFT else RIGHT
             LEFT, RIGHT -> if (y < snakeHeadPos.y) UP else DOWN
         }
         return copy(direction = newDirection)
     }
-
 }
