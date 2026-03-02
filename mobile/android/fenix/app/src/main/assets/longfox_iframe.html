@@ -1,0 +1,402 @@
+<!doctype html>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LongFox</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          background: #111;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100dvh;
+          overflow: hidden;
+        }
+        #game {
+          background: #000;
+          display: block;
+          touch-action: none;
+        }
+        #score {
+          position: fixed;
+          top: 8px;
+          right: 12px;
+          color: #fff;
+          font: bold 32px sans-serif;
+          pointer-events: none;
+        }
+        #gameover {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: #000;
+          padding: 24px;
+          cursor: pointer;
+        }
+        #gameover-card {
+          background: #333;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          gap: 48px;
+          padding: 24px;
+        }
+        #gameover-card img {
+          max-width: 210px;
+          max-height: 218px;
+        }
+        #gameover-card p {
+          color: #fff;
+          font: bold 32px sans-serif;
+        }
+    </style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="score">Score: 0</div>
+<div id="gameover">
+    <div id="gameover-card">
+        <img id="gameover-img" src="" alt="you died">
+        <p>YOU DIED !!</p>
+    </div>
+</div>
+<script>
+    const NUM_CELLS = 12;
+
+    class GameState {
+      constructor() {
+        this.fox = [{x:5,y:5},{x:5,y:4},{x:5,y:3},{x:5,y:2}];
+        this.food = {x:8, y:8};
+        this.direction = 'DOWN';
+        this.score = 0;
+        this.isGameOver = false;
+        this.beepNext = true;
+      }
+
+      get shouldersDirection() {
+        if (this.fox.length < 3) return this.direction;
+        return dirBetween(this.fox[0], this.fox[1]);
+      }
+
+      get tailDirection() {
+        if (this.fox.length < 3) return this.direction;
+        const n = this.fox.length;
+        return dirBetween(this.fox[n - 2], this.fox[n - 3]);
+      }
+
+      moveFox() {
+        const head = this.fox[0];
+        const delta = {UP:{x:0,y:-1}, DOWN:{x:0,y:1}, LEFT:{x:-1,y:0}, RIGHT:{x:1,y:0}}[this.direction];
+        const newHead = {x: head.x + delta.x, y: head.y + delta.y};
+
+        if (newHead.x < 0 || newHead.x >= NUM_CELLS || newHead.y < 0 || newHead.y >= NUM_CELLS) {
+          this.isGameOver = true;
+          return;
+        }
+        if (this.fox.slice(1).some(s => s.x === newHead.x && s.y === newHead.y)) {
+          this.isGameOver = true;
+          return;
+        }
+
+        const ateFood = newHead.x === this.food.x && newHead.y === this.food.y;
+        this.fox = [newHead, ...this.fox];
+        if (ateFood) {
+          this.score++;
+          this.food = this.randomFood();
+        } else {
+          this.fox.pop();
+        }
+      }
+
+      onTap(tapX, tapY, cellSize) {
+        const head = this.fox[0];
+        const headPx = head.x * cellSize + cellSize / 2;
+        const headPy = head.y * cellSize + cellSize / 2;
+        if (this.direction === 'LEFT' || this.direction === 'RIGHT') {
+          this.direction = tapY < headPy ? 'UP' : 'DOWN';
+        } else {
+          this.direction = tapX < headPx ? 'LEFT' : 'RIGHT';
+        }
+      }
+
+      randomFood() {
+        let pos;
+        do {
+          pos = {x: Math.floor(Math.random() * NUM_CELLS), y: Math.floor(Math.random() * NUM_CELLS)};
+        } while (this.fox.some(s => s.x === pos.x && s.y === pos.y));
+        return pos;
+      }
+    }
+
+    function dirBetween(a, b) {
+      if (a.y < b.y) return 'UP';
+      if (a.y > b.y) return 'DOWN';
+      if (a.x < b.x) return 'LEFT';
+      return 'RIGHT';
+    }
+
+    class AudioEngine {
+      constructor() {
+        this.ctx = null;
+      }
+
+      _ensure() {
+        if (!this.ctx) this.ctx = new AudioContext();
+      }
+
+      _tone(freq, duration, type = 'sine', gain = 0.3, startDelay = 0) {
+        this._ensure();
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.type = type;
+        osc.frequency.value = freq;
+        const start = this.ctx.currentTime + startDelay;
+        g.gain.setValueAtTime(gain, start);
+        g.gain.exponentialRampToValueAtTime(0.001, start + duration);
+        osc.start(start);
+        osc.stop(start + duration);
+      }
+
+      playBeep() { this._tone(440, 0.08); }
+      playBoop() { this._tone(330, 0.08); }
+
+      playEat() {
+        this._tone(523, 0.1);
+        this._tone(659, 0.12, 'sine', 0.3, 0.08);
+      }
+
+      playSadWobble() {
+        this._ensure();
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.type = 'sine';
+        const t = this.ctx.currentTime;
+        osc.frequency.setValueAtTime(400, t);
+        osc.frequency.linearRampToValueAtTime(200, t + 0.6);
+        osc.frequency.setValueAtTime(220, t + 0.6);
+        osc.frequency.linearRampToValueAtTime(150, t + 1.0);
+        g.gain.setValueAtTime(0.3, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+        osc.start(t);
+        osc.stop(t + 1.0);
+      }
+    }
+
+    function svgUrl(svg) {
+      return 'data:image/svg+xml,' + encodeURIComponent(svg);
+    }
+
+    const kitHeadSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 127.96 109.44"><defs>
+<linearGradient id="kh2" x1="86.65" y1="3.05" x2="-9.05" y2="239.9" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FF6600"/><stop offset="0.33" stop-color="#FFB029"/><stop offset="0.46" stop-color="#FF9218"/><stop offset="0.63" stop-color="#FF6600"/><stop offset="0.97" stop-color="#FB2872"/></linearGradient>
+<linearGradient id="kh3" x1="84.86" y1="34.96" x2="88.24" y2="-4.92" gradientUnits="userSpaceOnUse"><stop offset="0.15" stop-color="#FB2872" stop-opacity="0"/><stop offset="0.37" stop-color="#E41A63" stop-opacity="0.176"/><stop offset="0.64" stop-color="#CF0E54" stop-opacity="0.357"/><stop offset="0.85" stop-color="#C2064C" stop-opacity="0.459"/><stop offset="1" stop-color="#BE0449" stop-opacity="0.498"/></linearGradient>
+<linearGradient id="kh4" x1="41" y1="33.79" x2="33.97" y2="-0.19" gradientUnits="userSpaceOnUse"><stop offset="0.09" stop-color="#FB2872" stop-opacity="0"/><stop offset="0.1" stop-color="#F92771" stop-opacity="0.008"/><stop offset="0.38" stop-color="#DF175F" stop-opacity="0.22"/><stop offset="0.63" stop-color="#CD0D53" stop-opacity="0.369"/><stop offset="0.84" stop-color="#C2064B" stop-opacity="0.467"/><stop offset="1" stop-color="#BE0449" stop-opacity="0.498"/></linearGradient>
+<linearGradient id="kh5" x1="64.79" y1="7.01" x2="-19.31" y2="218.73" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FF6600"/><stop offset="0.33" stop-color="#FFB029"/><stop offset="0.46" stop-color="#FF9218"/><stop offset="0.63" stop-color="#FF6600"/><stop offset="1" stop-color="#FB2872"/></linearGradient>
+<linearGradient id="kh6" x1="131.52" y1="33.52" x2="47.42" y2="245.25" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FF6600"/><stop offset="0.33" stop-color="#FFB029"/><stop offset="0.46" stop-color="#FF9218"/><stop offset="0.63" stop-color="#FF6600"/><stop offset="1" stop-color="#FB2872"/></linearGradient>
+<linearGradient id="kh7" x1="51.21" y1="54.64" x2="46.67" y2="76.22" gradientUnits="userSpaceOnUse"><stop offset="0.15" stop-color="#A030B9"/><stop offset="0.88" stop-color="#00073A"/></linearGradient>
+<linearGradient id="kh8" x1="80.6" y1="53.91" x2="78.12" y2="71.88" gradientUnits="userSpaceOnUse"><stop offset="0.16" stop-color="#A030B9"/><stop offset="0.88" stop-color="#00073A"/></linearGradient>
+<linearGradient id="kh9" x1="31.04" y1="75.35" x2="47.59" y2="229.98" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFEB49"/><stop offset="0.36" stop-color="#FFB52B" stop-opacity="0.6"/><stop offset="0.67" stop-color="#FF8A14" stop-opacity="0.278"/><stop offset="0.89" stop-color="#FF7005" stop-opacity="0.078"/><stop offset="1" stop-color="#FF6600" stop-opacity="0"/></linearGradient>
+<linearGradient id="kh10" x1="110.76" y1="66.81" x2="127.31" y2="221.46" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFEB49"/><stop offset="0.36" stop-color="#FFB52B" stop-opacity="0.6"/><stop offset="0.67" stop-color="#FF8A14" stop-opacity="0.278"/><stop offset="0.89" stop-color="#FF7005" stop-opacity="0.078"/><stop offset="1" stop-color="#FF6600" stop-opacity="0"/></linearGradient>
+</defs>
+<path fill="url(#kh2)" d="M122.76,64.16C121.26,60.61 117.96,61.42 113.07,56.44C111.24,54.57 109.79,52.07 108.53,49.24C106.51,44.66 105.04,39.23 103.43,34.24C102.53,31.43 102.52,29.06 101.61,22.36C100.33,12.83 98.89,3.05 95.3,1.61C91.04,-0.11 85.94,1.57 79.46,9.21C71.92,18.09 68.79,28.01 65.78,27.94C63.64,27.89 61.01,28.16 60.19,28.12C60.04,28.12 59.96,28.1 59.93,28.07C59.8,27.9 59.69,27.68 59.59,27.39C59.14,26.01 59.08,23.08 59.56,16.69C60.43,4.82 58.38,0.66 54.41,0.05C50.12,-0.62 40.85,5.32 36.06,11.41C29.85,19.31 23.77,31.06 21.49,39.72C20.95,41.78 20.4,44.05 19.52,46.21C18.94,47.65 18.22,49.05 17.24,50.3C12.02,56.95 -1.27,60.56 0.78,65.27C2.14,68.41 6.47,66.6 5.28,67.63C22.95,66.3 39.25,78.74 53.31,89.16C54.02,89.68 54.7,90.12 55.37,90.5C55.39,90.42 55.43,90.38 55.48,90.39C57.05,90.83 58.32,90.92 59.56,90.87C67.97,90.6 74.84,79.14 85.76,79.13C91.76,79.13 95.73,83.12 97.81,86.8C102.88,83.63 109.75,69.07 120.35,68C120.34,67.97 120.31,67.95 120.3,67.92C119.86,67 123.94,66.93 122.76,64.15Z"/>
+<path fill="url(#kh3)" d="M80.41,37.51C90.08,40.32 97.51,49.03 97.51,49.03L108.58,53.25L108.55,49.23C106.52,44.65 105.06,39.22 103.44,34.23C102.54,31.42 102.53,29.05 101.63,22.35C100.34,12.82 98.9,3.04 95.32,1.6C91.06,-0.12 85.95,1.55 79.47,9.19C71.93,18.08 68.81,28 65.79,27.93C63.66,27.88 61.02,28.15 60.2,28.11C61.14,29.27 65.23,33.09 80.44,37.5Z"/>
+<path fill="url(#kh4)" d="M59.58,27.39C59.13,26.01 59.07,23.08 59.54,16.69C60.42,4.82 58.37,0.66 54.39,0.05C50.11,-0.62 40.83,5.32 36.05,11.41C29.84,19.31 23.76,31.06 21.48,39.72C20.94,41.78 20.39,44.05 19.51,46.21C24.71,42.88 33.33,37.79 42.87,33.94C49.61,31.22 56.33,28.64 59.57,27.39Z"/>
+<path fill="url(#kh5)" d="M55.37,90.5C54.7,90.12 54.02,89.67 53.31,89.16C39.25,78.74 22.95,66.3 5.28,67.63C5.2,67.7 5.09,67.79 4.94,67.9C3.78,68.74 -0.94,71.43 0.17,74.5C1.35,77.77 6.5,74.92 6.92,76.47C7.37,78.16 3.48,79.53 4.27,82.08C5.29,85.36 9.19,82.29 11.3,84.05C12.13,84.74 10.07,86.45 10.07,86.45H24.57C28.82,86.45 31.73,87.78 36.86,89.53C43.53,91.81 53.19,94.42 58.57,99.01C60.74,100.86 62.89,102.29 65,103.4C57.24,98.62 55.13,91.44 55.37,90.49Z"/>
+<path fill="url(#kh6)" d="M97.82,86.82C98.47,87.96 98.93,89.07 99.21,90.04C99.73,91.82 99.72,93.94 99.12,96.07C99.48,95.31 100,94.18 100.82,92.5C101.48,91.14 104.56,88.56 107.39,87.22C108.82,86.55 110.57,86.46 110.57,86.46H115.43C115.43,86.46 116.92,85.23 117.86,84.89C121.19,83.65 124.34,84.09 124.86,81.53C125.44,78.71 120.8,77.65 120.9,75.79C120.97,74.43 126.5,75.64 126.51,72.65C126.52,69.06 121.23,69.49 120.34,68.03C109.74,69.12 102.87,83.67 97.79,86.84Z"/>
+<path fill="#FFC635" d="M99.21,90.04C98.93,89.09 98.45,87.96 97.82,86.82C95.74,83.12 91.76,79.13 85.77,79.14C74.86,79.15 67.99,90.61 59.57,90.88C58.34,90.92 57.07,90.83 55.49,90.4C55.44,90.39 55.41,90.43 55.38,90.51C55.14,91.47 57.25,98.65 65.01,103.43C67.51,104.96 70.59,106.26 74.38,107C89.37,109.97 97.24,102.93 99.14,96.08C99.72,93.94 99.75,91.83 99.22,90.05Z"/>
+<path fill="#00073A" d="M89.8,94.8C92.86,94.11 94.82,95.04 95.57,96.15C96.5,97.52 95.89,100.95 92.12,101.8C88.54,102.61 85.83,100.14 85.93,98.37C86,97.12 87.08,95.41 89.79,94.8Z"/>
+<path fill="url(#kh7)" d="M67.53,69.89C67.67,74.38 65.11,76.8 63.1,76.98C59.46,77.31 57.65,75.88 56.57,69.61C55.38,62.74 57.59,60.37 61.15,60.01C64.82,59.65 67.33,63.77 67.54,69.9Z"/>
+<path fill="#ffffff" d="M64.16,74.67C65.07,74.44 65.6,73.47 65.36,72.51C65.11,71.55 64.18,70.96 63.27,71.19C62.36,71.43 61.83,72.39 62.07,73.35C62.32,74.31 63.25,74.9 64.16,74.67Z"/>
+<path fill="url(#kh8)" d="M98.59,65.2C99.5,70.84 97.51,72.72 95.31,73.48C92.86,74.32 90.03,72.96 89.25,68.87C87.94,61.95 88.13,57.54 92.58,57.51C95.5,57.5 97.76,60.12 98.57,65.2Z"/>
+<path fill="#ffffff" d="M94.94,72.13C95.82,71.97 96.38,71.07 96.2,70.11C96.02,69.16 95.17,68.52 94.3,68.68C93.42,68.84 92.86,69.75 93.03,70.7C93.21,71.66 94.07,72.3 94.94,72.13Z"/>
+<path fill="url(#kh9)" fill-opacity="0.6" d="M55.37,90.5C54.7,90.12 54.02,89.67 53.31,89.16C39.25,78.74 22.95,66.3 5.28,67.63C5.2,67.7 5.09,67.79 4.94,67.9C3.78,68.74 -0.94,71.43 0.17,74.5C1.35,77.77 6.5,74.92 6.92,76.47C7.37,78.16 3.48,79.53 4.27,82.08C5.29,85.36 9.19,82.29 11.3,84.05C12.13,84.74 10.07,86.45 10.07,86.45H24.57C28.82,86.45 31.73,87.78 36.86,89.53C43.53,91.81 53.19,94.42 58.57,99.01C60.74,100.86 62.89,102.29 65,103.4C57.24,98.62 55.13,91.44 55.37,90.49Z"/>
+<path fill="url(#kh10)" fill-opacity="0.6" d="M97.82,86.82C98.47,87.96 98.93,89.07 99.21,90.04C99.73,91.82 99.72,93.94 99.12,96.07C99.48,95.31 100,94.18 100.82,92.5C101.48,91.14 104.56,88.56 107.39,87.22C108.82,86.55 110.57,86.46 110.57,86.46H115.43C115.43,86.46 116.92,85.23 117.86,84.89C121.19,83.65 124.34,84.09 124.86,81.53C125.44,78.71 120.8,77.65 120.9,75.79C120.97,74.43 126.5,75.64 126.51,72.65C126.52,69.06 121.23,69.49 120.34,68.03C109.74,69.12 102.87,83.67 97.79,86.84Z"/>
+</svg>`;
+
+    const kitTailSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108.55 170.64"><defs>
+<linearGradient id="kt0" x1="39.14" y1="-2.5" x2="69.83" y2="171.62" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFEB49"/><stop offset="0.32" stop-color="#FF9B1D"/><stop offset="0.56" stop-color="#FF6600"/><stop offset="0.74" stop-color="#FD4835"/><stop offset="0.91" stop-color="#FB3161"/><stop offset="1" stop-color="#FB2872"/></linearGradient>
+<linearGradient id="kt1" x1="46.5" y1="44.57" x2="87.34" y2="93.48" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFC635"/><stop offset="0.09" stop-color="#FFC132" stop-opacity="0.957"/><stop offset="0.24" stop-color="#FFB62C" stop-opacity="0.839"/><stop offset="0.44" stop-color="#FFA422" stop-opacity="0.659"/><stop offset="0.67" stop-color="#FF8C15" stop-opacity="0.4"/><stop offset="0.94" stop-color="#FF6C03" stop-opacity="0.067"/><stop offset="1" stop-color="#FF6600" stop-opacity="0"/></linearGradient>
+</defs>
+<path fill="url(#kt0)" d="M75.17,169.95C75.17,169.95 74.78,171.27 76.24,170.26C90.14,160.66 96.39,149.96 101.59,134.59C104.7,125.37 107.62,111.6 107,95.03C106.73,87.7 105.52,80.94 105.52,80.94C105.52,80.94 104.92,83.37 103.95,86.37C103.18,88.74 102.36,89.93 102.36,89.93C102.36,89.93 102.05,86.04 100.64,81.04C95.65,63.35 90.31,53.91 74.63,42.63C59.74,31.93 51.73,33.99 40.53,25.73C27.35,16.01 29.24,-0.76 29.24,-0.76C29.24,-0.76 7.45,20.98 1.36,53.49C-2.04,71.68 1.82,91.27 21.1,107.79C40.99,124.84 75.18,137.25 75.18,143.97L75.18,169.94Z"/>
+<path fill="url(#kt1)" d="M93.78,80.37C88.63,68.07 86.23,64.81 78.34,54.74C73.02,47.95 68.59,45.45 68.59,45.45L73.14,55.07L76.83,64.28C78.09,64.98 72.21,58.3 63.73,51.09C57.76,46.01 49.53,43.36 49.53,43.36C49.53,43.36 57.89,53.49 63.94,63.86C69.99,74.22 75.95,97.15 76.28,104.21C76.85,116.92 86.18,109.71 92.54,109.98C98.89,110.25 100.32,100.15 93.8,80.37Z"/>
+</svg>`;
+
+    const firefoxSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 218"><defs>
+<linearGradient id="fw0" x1="162.42" y1="100.88" x2="157.41" y2="49.09" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EFE7F7"/><stop offset="0.5" stop-color="#F5F0FA"/><stop offset="1" stop-color="#ffffff"/></linearGradient>
+<linearGradient id="fw1" x1="104.35" y1="7.51" x2="106.46" y2="262.17" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FF6600"/><stop offset="0.17" stop-color="#FF9C00"/><stop offset="0.26" stop-color="#FF9200"/><stop offset="0.39" stop-color="#FF7900"/><stop offset="0.47" stop-color="#FF6600"/><stop offset="0.53" stop-color="#FE5B13"/><stop offset="0.65" stop-color="#FC453C"/><stop offset="0.76" stop-color="#FB3559"/><stop offset="0.85" stop-color="#FB2B6B"/><stop offset="0.92" stop-color="#FB2872"/></linearGradient>
+<linearGradient id="fw2" x1="104.23" y1="18.64" x2="105.34" y2="152.23" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FF6600"/><stop offset="0.27" stop-color="#FFB029"/><stop offset="0.33" stop-color="#FFA623"/><stop offset="0.43" stop-color="#FF8D15"/><stop offset="0.55" stop-color="#FF6600"/><stop offset="0.59" stop-color="#FE5B13"/><stop offset="0.69" stop-color="#FC453C"/><stop offset="0.78" stop-color="#FB3559"/><stop offset="0.86" stop-color="#FB2B6B"/><stop offset="0.92" stop-color="#FB2872"/></linearGradient>
+<radialGradient id="fw3" cx="108.29" cy="57.6" r="85.78" gradientUnits="userSpaceOnUse"><stop offset="0.12" stop-color="#FFEB49"/><stop offset="0.2" stop-color="#FFD53D" stop-opacity="0.839"/><stop offset="0.39" stop-color="#FFA623" stop-opacity="0.478"/><stop offset="0.55" stop-color="#FF8310" stop-opacity="0.22"/><stop offset="0.66" stop-color="#FF6E04" stop-opacity="0.059"/><stop offset="0.71" stop-color="#FF6600" stop-opacity="0"/></radialGradient>
+<linearGradient id="fw4" x1="104.39" y1="26.46" x2="104.16" y2="13.39" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#D4002F" stop-opacity="0"/><stop offset="0.88" stop-color="#D4002F"/></linearGradient>
+<linearGradient id="fw5" x1="122.27" y1="21.51" x2="128.63" y2="-6.6" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FF6600" stop-opacity="0"/><stop offset="0.07" stop-color="#FF6600" stop-opacity="0.2"/><stop offset="0.21" stop-color="#FF6600" stop-opacity="0.537"/><stop offset="0.31" stop-color="#FF6600" stop-opacity="0.788"/><stop offset="0.39" stop-color="#FF6600" stop-opacity="0.937"/><stop offset="0.43" stop-color="#FF6600"/><stop offset="0.72" stop-color="#FD4737"/><stop offset="1" stop-color="#FB2872"/></linearGradient>
+<linearGradient id="fw6" x1="86.89" y1="22.72" x2="80.54" y2="-5.39" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FF6600" stop-opacity="0"/><stop offset="0.05" stop-color="#FF6600" stop-opacity="0.098"/><stop offset="0.17" stop-color="#FF6600" stop-opacity="0.357"/><stop offset="0.34" stop-color="#FF6600" stop-opacity="0.757"/><stop offset="0.43" stop-color="#FF6600"/><stop offset="0.72" stop-color="#FD4737"/><stop offset="1" stop-color="#FB2872"/></linearGradient>
+<linearGradient id="fw7" x1="90.84" y1="40.19" x2="90.84" y2="54.13" gradientUnits="userSpaceOnUse"><stop offset="0.16" stop-color="#A030B9"/><stop offset="0.88" stop-color="#00073A"/></linearGradient>
+<linearGradient id="fw8" x1="116.74" y1="40.19" x2="116.74" y2="54.13" gradientUnits="userSpaceOnUse"><stop offset="0.16" stop-color="#A030B9"/><stop offset="0.88" stop-color="#00073A"/></linearGradient>
+<linearGradient id="fw9" x1="121.79" y1="98.65" x2="126.09" y2="81.93" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EF4533"/><stop offset="0.38" stop-color="#FF6600"/><stop offset="1" stop-color="#FF9C00"/></linearGradient>
+<linearGradient id="fw10" x1="160.48" y1="100.19" x2="82.29" y2="89.2" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#BE0449" stop-opacity="0"/><stop offset="0.22" stop-color="#BF054A" stop-opacity="0.047"/><stop offset="0.34" stop-color="#C3094D" stop-opacity="0.208"/><stop offset="0.45" stop-color="#CA1054" stop-opacity="0.478"/><stop offset="0.54" stop-color="#D41B5C" stop-opacity="0.859"/><stop offset="0.57" stop-color="#D81F60"/><stop offset="0.67" stop-color="#BA1F55"/><stop offset="0.85" stop-color="#891F44"/><stop offset="0.94" stop-color="#771F3E"/></linearGradient>
+<linearGradient id="fw11" x1="88.51" y1="98.65" x2="84.2" y2="81.93" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EF4533"/><stop offset="0.38" stop-color="#FF6600"/><stop offset="1" stop-color="#FF9C00"/></linearGradient>
+<linearGradient id="fw12" x1="49.81" y1="100.19" x2="128" y2="89.2" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#BE0449" stop-opacity="0"/><stop offset="0.22" stop-color="#BF054A" stop-opacity="0.047"/><stop offset="0.34" stop-color="#C3094D" stop-opacity="0.208"/><stop offset="0.45" stop-color="#CA1054" stop-opacity="0.478"/><stop offset="0.54" stop-color="#D41B5C" stop-opacity="0.859"/><stop offset="0.57" stop-color="#D81F60"/><stop offset="0.67" stop-color="#BA1F55"/><stop offset="0.85" stop-color="#891F44"/><stop offset="0.94" stop-color="#771F3E"/></linearGradient>
+<linearGradient id="fw13" x1="61.71" y1="236.94" x2="197.14" y2="96.7" gradientUnits="userSpaceOnUse"><stop offset="0.14" stop-color="#FFEB49"/><stop offset="0.41" stop-color="#FF9B1D"/><stop offset="0.6" stop-color="#FF6600"/><stop offset="0.73" stop-color="#FD4835"/><stop offset="0.85" stop-color="#FB3161"/><stop offset="0.91" stop-color="#FB2872"/></linearGradient>
+<linearGradient id="fw14" x1="95.78" y1="206.88" x2="139.81" y2="193.72" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFEB49"/><stop offset="0.09" stop-color="#FFE847" stop-opacity="0.957"/><stop offset="0.24" stop-color="#FFE143" stop-opacity="0.839"/><stop offset="0.44" stop-color="#FFD63D" stop-opacity="0.659"/><stop offset="0.67" stop-color="#FFC735" stop-opacity="0.4"/><stop offset="0.94" stop-color="#FFB42B" stop-opacity="0.067"/><stop offset="1" stop-color="#FFB029" stop-opacity="0"/></linearGradient>
+<linearGradient id="fw15" x1="132.55" y1="171.9" x2="131.75" y2="127.29" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FB2872" stop-opacity="0"/><stop offset="0.88" stop-color="#FB2872"/></linearGradient>
+<linearGradient id="fw16" x1="31.23" y1="51.8" x2="30.73" y2="25.59" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EFE7F7"/><stop offset="0.5" stop-color="#F5F0FA"/><stop offset="1" stop-color="#ffffff"/></linearGradient>
+<linearGradient id="fw17" x1="108.81" y1="179.55" x2="107.97" y2="113.39" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#EFE7F7"/><stop offset="0.5" stop-color="#F5F0FA"/><stop offset="1" stop-color="#ffffff"/></linearGradient>
+</defs>
+<path fill="url(#fw0)" d="M157.41,50.55C161.57,50.2 170.88,50.9 177.51,54.46C180.76,56.2 183.62,57.34 189.24,58.93C193.51,60.13 198.83,60.71 202.81,62.64C207.77,65.06 211.45,69.15 207.89,75.12C205.45,79.21 200.72,79.1 193.77,80.22C187.18,81.28 179.29,81.03 176.96,81.06C172.68,81.1 170.4,84.1 152.27,84.29C139.08,84.43 139.37,80.44 130.46,80.24C120.57,80.02 106.43,77.69 110.56,69.24C113.43,63.39 120.14,58.88 128.73,58.19C139.81,57.31 130.33,52.83 157.42,50.56Z"/>
+<path fill="url(#fw1)" d="M147.77,42.16C146.89,39.61 140.9,40.74 137.28,37.71C136.14,36.76 135.29,34.46 134.65,32.16C134.09,30.15 133.69,28.13 133.42,27C132.35,22.52 131.49,19.45 129.48,12.74C127.6,6.45 124.55,0.83 121.6,0.16C118.86,-0.45 115.96,3.47 112.58,10.38C110.78,14.07 109.32,17.99 107.81,20.45C107.71,20.6 107.62,20.74 107.53,20.88C107.48,20.96 107.42,21.04 107.37,21.12C107.28,21.25 103.18,21.5 101.44,21.35C101.37,21.35 101.29,21.28 101.21,21.19C101.14,21.12 101.07,21.02 100.99,20.9C100.15,19.52 98.65,15.05 95.72,9.09C92.63,2.82 90.77,-0.08 87.38,0.43C83.87,0.95 80.85,10.14 79.05,16.61C77.57,21.97 77.49,23.06 76.87,25.02C76.21,27.11 75.42,29.74 74.46,32.19C73.41,34.86 72.14,37.31 70.57,38.55C66.76,41.58 62.15,40.42 61.49,43.03C60.98,45.01 63.4,44.82 63.05,45.45C63.01,45.52 62.94,45.59 62.86,45.65C69.94,45.47 76.68,50.13 81.97,54.07C86.07,57.11 88.13,60.09 90.69,60.27C94.29,60.53 97.85,54.49 104.11,54.26C108.98,54.09 113.9,60.88 117.37,60.56C117.54,60.53 117.71,60.49 117.88,60.42C117.9,60.42 117.92,60.42 117.93,60.43C117.99,60.42 118.04,60.4 118.1,60.38C119.64,59.69 120.84,58.68 125.48,54.1C130.33,49.32 139.11,45.48 146.81,45.17C146.81,45.17 146.8,45.17 146.79,45.16C145.11,44.32 148.46,44.18 147.76,42.16Z"/>
+<path fill="url(#fw2)" d="M117.37,60.57C113.91,60.88 108.99,54.09 104.12,54.27C97.86,54.5 94.3,60.53 90.69,60.28C88.13,60.1 86.07,57.11 81.98,54.07C76.68,50.14 69.95,45.47 62.87,45.66C61.9,46.44 58.46,46.22 58.29,48.58C58.14,50.66 62.03,49.86 62.01,50.81C61.99,52.11 59.18,52.64 59.18,53.94C59.18,57.21 62.01,54.39 73.46,63.16C79.56,67.83 78.5,76.6 77.95,86.43C77.67,91.36 76.81,102.26 76.61,108.05C76.46,112.24 76.5,115.49 76.5,120.8C76.5,121.75 135.14,121.75 135.14,121.18C135.14,114.37 134.71,112.75 134.69,107.12C134.65,98.78 133.46,89.05 132.58,83.99C130.83,73.95 131.93,65 137.38,60.84C143.68,56.02 146.95,57.11 147.24,54.53C147.38,53.31 145.41,53.08 145.46,51.85C145.54,49.93 150.86,49.9 150.67,47.99C150.44,45.73 147.74,45.61 146.83,45.17C139.13,45.48 130.34,49.33 125.5,54.1C120.85,58.68 119.66,59.7 118.11,60.38C118.06,60.4 118,60.42 117.95,60.43"/>
+<path fill="url(#fw3)" fill-opacity="0.6" d="M117.37,60.57C113.91,60.88 108.99,54.09 104.12,54.27C97.86,54.5 94.3,60.53 90.69,60.28C88.13,60.1 86.07,57.11 81.98,54.07C76.68,50.14 69.95,45.47 62.87,45.66C61.9,46.44 58.46,46.22 58.29,48.58C58.14,50.66 62.03,49.86 62.01,50.81C61.99,52.11 59.18,52.64 59.18,53.94C59.18,57.21 62.01,54.39 73.46,63.16C79.56,67.83 78.5,76.6 77.95,86.43C77.67,91.36 76.81,102.26 76.61,108.05C76.46,112.24 76.5,115.49 76.5,120.8C76.5,121.75 135.14,121.75 135.14,121.18C135.14,114.37 134.71,112.75 134.69,107.12C134.65,98.78 133.46,89.05 132.58,83.99C130.83,73.95 131.93,65 137.38,60.84C143.68,56.02 146.95,57.11 147.24,54.53C147.38,53.31 145.41,53.08 145.46,51.85C145.54,49.93 150.86,49.9 150.67,47.99C150.44,45.73 147.74,45.61 146.83,45.17C139.13,45.48 130.34,49.33 125.5,54.1C120.85,58.68 119.66,59.7 118.11,60.38C118.06,60.4 118,60.42 117.95,60.43"/>
+<path fill="#FFC635" d="M117.37,60.57C116.2,60.8 114.97,60.15 113.7,59.18C110.82,57.3 107.49,54.18 104.18,54.26C104.16,54.26 104.14,54.26 104.12,54.26C100.51,54.4 97.8,56.46 95.46,58.13C93.74,59.36 92.22,60.38 90.69,60.27C90.68,60.27 90.68,60.27 90.66,60.27L89.65,60.05C88.52,59.64 91.84,74.6 104.42,74.36C117.41,74.12 118.53,60.88 117.94,60.44C117.92,60.43 117.91,60.42 117.89,60.43C117.72,60.49 117.55,60.54 117.38,60.57Z"/>
+<path fill="#00073A" d="M104.8,67.56C102.61,67.54 101.41,68.46 101.06,69.33C100.63,70.4 101.55,72.65 104.25,72.68C106.81,72.71 108.29,70.63 107.96,69.43C107.73,68.59 106.74,67.58 104.8,67.56Z"/>
+<path fill="url(#fw4)" d="M101.44,21.36C101.37,21.35 101.29,21.29 101.21,21.2L103.09,27.75L105.77,27.56L107.38,21.12C107.29,21.25 103.19,21.51 101.45,21.36Z"/>
+<path fill="url(#fw5)" d="M121.5,24.64C126.79,27.72 132.21,30.83 134.65,32.17C134.1,30.15 133.7,28.13 133.43,27.01C132.35,22.53 131.5,19.46 129.49,12.74C127.6,6.45 124.55,0.83 121.6,0.17C118.86,-0.45 115.97,3.47 112.58,10.39C110.78,14.07 109.32,18 107.81,20.45L107.69,20.89C110.59,20.97 116.23,21.57 121.5,24.64Z"/>
+<path fill="url(#fw6)" d="M101,20.9C100.16,19.52 98.66,15.05 95.73,9.09C92.64,2.82 90.78,-0.08 87.39,0.43C83.88,0.95 80.86,10.14 79.06,16.61C77.58,21.97 77.5,23.06 76.88,25.02C76.22,27.11 75.43,29.74 74.47,32.19C76.88,30.87 82.35,27.74 87.68,24.63C92.67,21.72 97.99,21.02 101.01,20.89Z"/>
+<path fill="url(#fw7)" d="M85.14,47.75C84.54,47.38 83.91,48.19 84.41,48.69C85.59,49.85 87.41,50.95 90.14,51.2C93.43,51.5 95.69,50.56 97.21,49.41C97.78,48.98 97.21,48.09 96.57,48.42C94.74,49.34 92.28,50.07 89.48,49.51C87.76,49.17 86.29,48.47 85.14,47.76Z"/>
+<path fill="url(#fw8)" d="M122.44,47.75C123.04,47.38 123.67,48.19 123.17,48.69C121.99,49.85 120.17,50.95 117.44,51.2C114.15,51.5 111.89,50.56 110.37,49.41C109.8,48.98 110.37,48.09 111.01,48.42C112.84,49.34 115.3,50.07 118.1,49.51C119.82,49.17 121.29,48.47 122.44,47.76Z"/>
+<path fill="url(#fw9)" d="M134.49,82.91C132.73,79 131.8,74.76 131.8,74.76C131.8,74.76 131.8,84.97 131.8,92.81C131.8,93.87 128.38,93.75 121.07,93.85C115.35,93.92 112.27,93.54 110.52,89.16C108.65,84.45 106.93,83.83 106.01,84.15C105.09,84.48 105.02,85.78 105.02,88.94C105.02,92.49 104.92,93.37 105.94,94.99C107.73,97.81 115.05,101.03 121.13,102.77C127.21,104.49 132.73,104.92 137.88,103.38C142.08,102.12 142.37,98.76 140.42,93.67C139.18,90.44 136.24,86.84 134.48,82.92Z"/>
+<path fill="url(#fw10)" d="M133.89,100.65C136.55,98.93 137.43,97.36 137.43,97.36C137.43,97.36 135.51,98.1 133.51,98.24C130.87,98.43 129.55,98.4 128.92,98.19C128.38,98 130.41,97.05 131.8,96.03C134.65,93.94 134.71,92.1 134.71,92.1C134.71,92.1 133.55,92.78 131.47,93.27C131.01,93.53 130.04,93.66 128.55,93.73C127.93,93.77 127.28,93.79 126.58,93.78C125.08,93.81 123.25,93.82 121.06,93.85C115.34,93.92 112.26,93.54 110.52,89.16C108.64,84.45 106.93,83.83 106.01,84.15C105.45,84.35 105.21,84.9 105.1,85.99C105.02,86.72 105.01,87.68 105.01,88.94C105.01,90.7 104.99,91.81 105.09,92.68C105.19,93.55 105.42,94.17 105.94,94.99C107.73,97.81 115.05,101.03 121.12,102.77C126.3,104.24 131.07,104.76 135.56,103.93C131.68,103.06 128.86,101.95 129.26,102.05C129.76,102.17 132.51,101.53 133.88,100.65Z"/>
+<path fill="url(#fw11)" d="M104.28,84.15C103.36,83.82 101.64,84.44 99.77,89.16C98.02,93.54 94.95,93.91 89.22,93.84C81.91,93.75 78.49,93.87 78.49,92.8C78.49,84.96 78.49,74.75 78.49,74.75C78.49,74.75 77.57,78.99 75.8,82.91C74.04,86.82 71.1,90.43 69.87,93.66C67.91,98.75 68.21,102.1 72.4,103.36C77.56,104.91 83.08,104.48 89.16,102.75C95.23,101.03 102.55,97.8 104.34,94.97C105.37,93.36 105.27,92.48 105.27,88.93C105.27,85.77 105.19,84.47 104.27,84.14Z"/>
+<path fill="url(#fw12)" d="M76.4,100.65C73.74,98.93 72.86,97.36 72.86,97.36C72.86,97.36 74.78,98.1 76.78,98.24C79.42,98.43 80.74,98.4 81.37,98.19C81.92,98 79.88,97.05 78.49,96.03C75.64,93.94 75.58,92.1 75.58,92.1C75.58,92.1 76.74,92.78 78.82,93.27C79.28,93.53 80.25,93.66 81.74,93.73C82.36,93.77 83.02,93.79 83.71,93.78C85.21,93.81 87.04,93.82 89.23,93.85C94.95,93.92 98.03,93.54 99.77,89.16C101.65,84.45 103.36,83.83 104.29,84.15C104.84,84.35 105.08,84.9 105.19,85.99C105.27,86.72 105.28,87.68 105.28,88.94C105.28,90.7 105.3,91.81 105.2,92.68C105.1,93.55 104.87,94.17 104.35,94.99C102.56,97.81 95.24,101.03 89.17,102.77C83.99,104.24 79.22,104.76 74.73,103.93C78.61,103.06 81.43,101.95 81.04,102.05C80.53,102.17 77.78,101.53 76.41,100.65Z"/>
+<path fill="url(#fw13)" d="M158.36,138.36C157.79,137.79 98.23,137.78 98.62,138.16C99.54,139.09 102.6,140.35 103.31,140.64C108.62,142.84 110.06,143.04 114.94,145.13C121.24,147.84 127.29,152.37 127.49,159.49C127.73,167.67 120.02,173.27 113.3,174.43C110.64,174.89 108.65,175.33 104.26,174.95C100.97,174.66 98.19,174.2 96.18,173.84C95.84,173.77 95.51,173.72 95.21,173.66C91.07,172.88 88.36,173.6 88.36,173.6C88.36,173.6 89.72,173.95 90.73,174.83C91.53,175.52 92.48,176.38 92.48,176.38C92.48,176.38 88.89,175.78 87.72,175.75C84.13,175.68 80.92,175.71 77.02,176.68C66.38,179.3 56.38,186.08 52.48,196.29C58.38,194.26 64.4,194.7 70.26,198.3C78.11,203.12 80.83,210.86 91.96,214.53C105.61,219.02 122.56,217.02 136.53,211.31C137.41,210.95 140.03,209.59 140.03,209.59C140.03,209.59 139.84,210.61 139.42,211.53C138.94,212.6 138.47,213.57 138.47,213.57C138.47,213.57 141.8,212.15 143.4,210.95C151.08,205.23 154.46,201.83 158.54,196.8C163.46,190.73 166.65,183.26 168.05,175.53C170.53,161.9 167.44,147.45 158.36,138.37Z"/>
+<path fill="url(#fw14)" d="M147.79,182.76C142.04,179.36 137.8,185.24 133.96,189.73C130.05,194.29 118.78,198.79 109.32,201.61C103.13,203.45 95.68,204.51 95.68,204.51C95.68,204.51 101.29,205.86 106.07,205.95C111.78,206.06 117.91,205.66 119.54,205.36C118.85,205.78 117.08,206.84 115.58,207.71C113.67,208.79 110.75,210.1 110.75,210.1C110.75,210.1 116.46,210.72 122.1,209.57C129.42,208.08 133.53,206.28 137.59,203.88C150.23,196.18 153.55,186.15 147.8,182.76Z"/>
+<path fill="url(#fw15)" d="M168.05,175.52C170.52,161.89 167.44,147.43 158.36,138.35C157.79,137.78 98.23,137.77 98.62,138.16C99.54,139.08 102.6,140.34 103.31,140.63C108.62,142.83 110.06,143.04 114.94,145.13C121.25,147.83 127.29,152.37 127.49,159.48C127.73,167.66 120.02,173.26 113.3,174.43C110.64,174.88 108.65,175.33 104.26,174.94C100.97,174.65 98.19,174.19 96.18,173.83V175.52Z"/>
+<path fill="url(#fw16)" d="M29.59,21.69C32.11,21.47 37.75,21.9 41.77,24.05C43.74,25.11 45.47,25.8 48.87,26.76C51.46,27.49 54.68,27.84 57.09,29.01C60.09,30.47 62.33,32.94 60.17,36.56C58.7,39.04 55.83,38.97 51.61,39.65C47.62,40.3 42.84,40.15 41.43,40.16C38.84,40.19 37.46,42 26.47,42.12C18.48,42.2 18.65,39.79 13.26,39.66C7.27,39.52 -1.3,38.12 1.21,32.99C2.94,29.44 7.01,26.72 12.21,26.3C18.92,25.77 13.18,23.05 29.59,21.68Z"/>
+<path fill="url(#fw17)" d="M106.31,104.3C99.09,104.12 80.96,107.42 69.85,114.18C64.4,117.49 63.19,116.63 53.14,117.55C31.87,119.5 25.39,140.1 32.1,150.07C36.69,156.89 44.84,156.26 56.95,157.55C68.41,158.76 74.56,157.27 78.59,157.1C85.99,156.78 91.88,162.63 123.19,161.26C145.96,160.27 133.89,158.28 149.24,157.1C166.29,155.79 190.46,152.04 186.66,134.95C185.23,128.53 173.72,118.34 164.62,116.77C158.12,115.66 151.08,116.9 148.86,116.46C135.57,113.8 136.71,105.07 106.32,104.31Z"/>
+</svg>`;
+
+    const headImg = new Image();
+    headImg.src = svgUrl(kitHeadSvg);
+
+    const tailImg = new Image();
+    tailImg.src = svgUrl(kitTailSvg);
+
+    document.getElementById('gameover-img').src = svgUrl(firefoxSvg);
+
+    const canvas = document.getElementById('game');
+    const scoreEl = document.getElementById('score');
+    const gameoverEl = document.getElementById('gameover');
+
+    let state = new GameState();
+    const audio = new AudioEngine();
+    let cellSize = 0;
+
+    function resize() {
+      const size = Math.min(window.innerWidth, window.innerHeight);
+      canvas.width = canvas.height = size;
+      cellSize = size / NUM_CELLS;
+    }
+
+    function tick() {
+      if (state.isGameOver) return;
+      const oldScore = state.score;
+      state.moveFox();
+      if (state.score > oldScore) {
+        audio.playEat();
+      } else {
+        state.beepNext ? audio.playBeep() : audio.playBoop();
+        state.beepNext = !state.beepNext;
+      }
+      if (state.isGameOver) {
+        audio.playSadWobble();
+        gameoverEl.style.display = 'block';
+      }
+      draw();
+      scoreEl.textContent = 'Score: ' + state.score;
+    }
+
+    function draw() {
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // food
+      ctx.fillStyle = '#00ff00';
+      ctx.fillRect(state.food.x * cellSize, state.food.y * cellSize, cellSize, cellSize);
+
+      // body (excluding head and tail)
+      const body = state.fox.slice(0, -1);
+      if (body.length > 0) {
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, '#ff0000');
+        grad.addColorStop(1, '#ffff00');
+        ctx.fillStyle = grad;
+        for (const [i, seg] of body.entries()) {
+          if (i == 0) {
+            const shouldersRot = {UP: Math.PI, RIGHT: -Math.PI/2, DOWN: 0, LEFT: Math.PI/2}[state.shouldersDirection];
+            ctx.save();
+            ctx.translate(seg.x * cellSize, seg.y * cellSize);
+            ctx.save()
+            ctx.translate(cellSize/2, cellSize/2);
+            ctx.rotate(shouldersRot);
+            ctx.beginPath();
+            ctx.lineTo(-cellSize/2, -cellSize/2);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(cellSize/2, -cellSize/2);
+            ctx.closePath();
+            ctx.restore();
+            ctx.restore();
+            ctx.fill();
+          } else {
+            ctx.fillRect(seg.x * cellSize, seg.y * cellSize, cellSize, cellSize);
+          }
+        }
+      }
+
+      // tail sprite (rotated)
+      const tail = state.fox[state.fox.length - 1];
+      const tailRot = {UP: 0, RIGHT: Math.PI/2, DOWN: Math.PI, LEFT: -Math.PI/2}[state.tailDirection];
+      const tx = tail.x * cellSize + cellSize / 2;
+      const ty = tail.y * cellSize + cellSize / 2;
+      ctx.save();
+      ctx.translate(tx, ty);
+      ctx.rotate(tailRot);
+      ctx.drawImage(tailImg, -cellSize / 2, -cellSize / 2, cellSize, cellSize);
+      ctx.restore();
+
+      // head sprite (no rotation)
+      const head = state.fox[0];
+      ctx.drawImage(headImg, head.x * cellSize, head.y * cellSize, cellSize, cellSize);
+    }
+
+    canvas.addEventListener('pointerdown', e => {
+      if (state.isGameOver) return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      state.onTap((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY, cellSize);
+    });
+
+    document.addEventListener('keydown', e => {
+      const map = {ArrowUp:'UP', ArrowDown:'DOWN', ArrowLeft:'LEFT', ArrowRight:'RIGHT',
+                   w:'UP', s:'DOWN', a:'LEFT', d:'RIGHT'};
+      const newDir = map[e.key];
+      if (!newDir) return;
+      const opposites = {UP:'DOWN', DOWN:'UP', LEFT:'RIGHT', RIGHT:'LEFT'};
+      if (newDir !== opposites[state.direction]) state.direction = newDir;
+    });
+
+    gameoverEl.addEventListener('click', () => {
+      state = new GameState();
+      scoreEl.textContent = 'Score: 0';
+      gameoverEl.style.display = 'none';
+      draw();
+    });
+
+    window.addEventListener('resize', () => { resize(); draw(); });
+
+    resize();
+    draw();
+    setInterval(tick, 120);
+</script>
+</body>
+</html>

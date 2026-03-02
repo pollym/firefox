@@ -43,11 +43,19 @@ function injectValues(queryMap) {
 
   // If no image is passed in, remove the element so as not to leave an empty iframe
   const errorImage = document.getElementById("errorImage");
-  if (!queryMap.image) {
-    errorImage.remove();
-  } else {
-    errorImage.src = "resource://android/assets/" + queryMap.image;
-  }
+  errorImage.remove();
+
+//  if (!queryMap.image) {
+//    errorImage.remove();
+//  } else {
+//    errorImage.src = "resource://android/assets/" + queryMap.image;
+      const surprise = document.getElementById("surprise");
+//      surprise.width = 350;
+      surprise.height = 350;
+//      surprise.src = "resource://android/assets/" + queryMap.image;
+      surprise.src = "resource://android/assets/longfox_iframe.html";
+
+//  }
 
   if (queryMap.showContinueHttp === "true") {
     // On the "HTTPS-Only" error page "Try again" doesn't make sense since reloading the page
