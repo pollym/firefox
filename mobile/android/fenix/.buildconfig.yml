@@ -103,6 +103,9 @@ projects:
     - components:ui-richtext
     - components:ui-tabcounter
     - components:ui-widgets
+  fenix:longfox:
+    description: Longfox minigame
+    path: app/longfox
 variants:
 - apks:
   - abi: arm64-v8a
