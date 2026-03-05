@@ -5,15 +5,16 @@
  */
 
 plugins {
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.android.library)
 }
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
     namespace 'org.mozilla.fenix.longfox'
     compileSdk {
-        version = release(project.ext.compileSdkMajorVersion) { minorApiLevel = project.ext.compileSdkMinorVersion }
+        version = release(config.compileSdkMajorVersion) { minorApiLevel = config.compileSdkMinorVersion }
     }
     defaultConfig {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
