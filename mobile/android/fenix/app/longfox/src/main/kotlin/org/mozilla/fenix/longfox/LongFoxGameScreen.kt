@@ -9,10 +9,10 @@ package org.mozilla.fenix.longfox
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,7 +42,7 @@ fun LongFoxGameScreen() {
     val onTap: (Offset) -> Unit = { offset ->
         gameState = gameState.onTap(offset)
     }
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Blue)
@@ -50,33 +50,38 @@ fun LongFoxGameScreen() {
             .pointerInput(Unit) {
                 detectTapGestures(onTap = onTap)
             },
+        contentAlignment = Alignment.Center
     ) {
-        val soundEffectsPlayer = SoundEffectsPlayer(LocalContext.current)
-        LaunchedEffect(gameState) {
-            while (!gameState.isGameOver) {
-                delay(160L)
-                val oldScore = gameState.score
-                gameState = gameState.moveFox()
-                val newScore = gameState.score
-                if (newScore > oldScore) {
-                    soundEffectsPlayer.playSound(R.raw.eatfood)
-                } else {
-                    // beep boop beep boop
-                    if (gameState.beepNext) {
-                        soundEffectsPlayer.playSound(R.raw.beep)
+        Column()
+        {
+            val soundEffectsPlayer = SoundEffectsPlayer(LocalContext.current)
+            LaunchedEffect(gameState) {
+                while (!gameState.isGameOver) {
+                    delay(160L)
+                    val oldScore = gameState.score
+                    gameState = gameState.moveFox()
+                    val newScore = gameState.score
+                    if (newScore > oldScore) {
+                        soundEffectsPlayer.playSound(R.raw.eatfood)
                     } else {
-                        soundEffectsPlayer.playSound(R.raw.boop)
+                        // beep boop beep boop
+                        if (gameState.beepNext) {
+                            soundEffectsPlayer.playSound(R.raw.beep)
+                        } else {
+                            soundEffectsPlayer.playSound(R.raw.boop)
+                        }
                     }
-                }
 
-                gameState = gameState.toggleBeepNext()
+                    gameState = gameState.toggleBeepNext()
+                }
+            }
+            if (gameState.isGameOver) {
+                soundEffectsPlayer.playSound(R.raw.sadwobble)
+                GameOverScreen(restartGame)
+            } else {
+                GameCanvas(gameState, onSize)
             }
         }
-        if (gameState.isGameOver) {
-            soundEffectsPlayer.playSound(R.raw.sadwobble)
-            GameOverScreen(restartGame)
-        }
-        GameCanvas(gameState, onSize)
     }
     Box(
         modifier = Modifier

@@ -35,7 +35,8 @@ data class GameState(
     val beepNext: Boolean = true,
 ) {
     val numCellsWide = 12
-    val cellSize = size.minDimension / numCellsWide
+    val numCellsTall = numCellsWide
+    val cellSize = (size.minDimension / numCellsWide).toInt().toFloat()
 
     val shouldersDirection: Direction = when {
         fox.size < 3 -> direction
@@ -70,15 +71,16 @@ data class GameState(
             copy(size = size, centre = centre)
         }
     }
+
     fun toPx(gridPoint: GridPoint): Point =
         Point((gridPoint.x * cellSize).toInt(), (gridPoint.y * cellSize).toInt())
 
     fun toGridPoint(x: Int, y: Int): GridPoint =
         GridPoint((x / cellSize).toInt(), (y / cellSize).toInt())
 
-    fun randomGridPoint(): GridPoint = toGridPoint(
-        Random.nextInt(size.width.toInt()),
-        Random.nextInt(size.height.toInt()),
+    fun randomGridPoint(): GridPoint = GridPoint(
+        Random.nextInt(numCellsWide),
+        Random.nextInt(numCellsTall),
     )
 
     fun moveFox(): GameState {
@@ -112,13 +114,9 @@ data class GameState(
     }
 
     private fun withinBounds(newHeadPos: Point): Boolean {
-        val width = size.width
-        val height = size.height
-        val left = (centre.x - width / 2).toInt()
-        val right = (centre.x + width / 2).toInt()
-        val top = (centre.y - height / 2).toInt()
-        val bottom = (centre.y + height / 2).toInt()
-        return newHeadPos.x in left..right && newHeadPos.y in top..bottom
+        val cellSizeInt = cellSize.toInt()
+        return newHeadPos.x in 0 until numCellsWide * cellSizeInt &&
+               newHeadPos.y in 0 until numCellsTall * cellSizeInt
     }
 
     fun onTap(offset: Offset): GameState {

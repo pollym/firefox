@@ -8,7 +8,8 @@ package org.mozilla.fenix.longfox
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -55,7 +56,8 @@ fun GameCanvas(state: GameState, onSize: (Size, Offset) -> Unit) {
     Canvas(
         modifier = Modifier
             .background(color = Color.Black)
-            .fillMaxSize()
+            .fillMaxWidth()
+            .aspectRatio(1f)
     ) {
         onSize(size, center)
         drawHead(state, kitHead, kitImageMargin)
