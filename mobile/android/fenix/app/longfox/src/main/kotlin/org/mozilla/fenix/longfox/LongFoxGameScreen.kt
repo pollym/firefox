@@ -9,7 +9,7 @@ package org.mozilla.fenix.longfox
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,53 +29,64 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import org.mozilla.fenix.longfox.GameState.Companion.CELL_SIZE_DP
+import org.mozilla.fenix.longfox.GameState.Companion.FRAME_INTERVAL_TIME_MS
 
 @Composable
 fun LongFoxGameScreen() {
-    var gameState by remember { mutableStateOf(GameState()) }
-    val restartGame = { gameState = GameState() }
-    val onSize: (Size, Offset) -> Unit = { size, offset -> gameState = gameState.onSized(size, offset) }
-    val onTap: (Offset) -> Unit = { offset ->
-        gameState = gameState.onTap(offset)
-    }
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Blue)
-            .padding(horizontal = 32.dp, vertical = 128.dp)
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = onTap)
-            },
-        contentAlignment = Alignment.Center
+            .background(Color.Blue),
     ) {
-        Column()
-        {
-            val soundEffectsPlayer = SoundEffectsPlayer(LocalContext.current)
-            LaunchedEffect(gameState) {
-                while (!gameState.isGameOver) {
-                    delay(160L)
-                    val oldScore = gameState.score
-                    gameState = gameState.moveFox()
-                    val newScore = gameState.score
-                    if (newScore > oldScore) {
-                        soundEffectsPlayer.playSound(R.raw.eatfood)
+        val numCells = (minOf(maxWidth, maxHeight).value / CELL_SIZE_DP).toInt()
+        var gameState by remember(numCells) { mutableStateOf(GameState(numCells = numCells)) }
+        val restartGame = { gameState = GameState(numCells = numCells) }
+        val onSize: (Size, Offset) -> Unit =
+            { size, offset -> gameState = gameState.onSized(size, offset) }
+        val density = LocalDensity.current.density
+        val canvasSizePx = CELL_SIZE_DP * numCells * density
+        val canvasOffsetXPx = (maxWidth.value * density - canvasSizePx) / 2f
+        val canvasOffsetYPx = (maxHeight.value * density - canvasSizePx) / 2f
+        val onTap by rememberUpdatedState { offset: Offset ->
+            gameState = gameState.onTap(
+                Offset(offset.x - canvasOffsetXPx, offset.y - canvasOffsetYPx)
+            )
+        }
+        val soundEffectsPlayer = SoundEffectsPlayer(LocalContext.current)
+        LaunchedEffect(gameState) {
+            while (!gameState.isGameOver) {
+                delay(FRAME_INTERVAL_TIME_MS)
+                val oldScore = gameState.score
+                gameState = gameState.moveFox()
+                val newScore = gameState.score
+                if (newScore > oldScore) {
+                    soundEffectsPlayer.playSound(R.raw.eatfood)
+                } else {
+                    // beep boop
+                    if (gameState.beepNext) {
+                        soundEffectsPlayer.playSound(R.raw.beep)
                     } else {
-                        // beep boop beep boop
-                        if (gameState.beepNext) {
-                            soundEffectsPlayer.playSound(R.raw.beep)
-                        } else {
-                            soundEffectsPlayer.playSound(R.raw.boop)
-                        }
+                        soundEffectsPlayer.playSound(R.raw.boop)
                     }
-
-                    gameState = gameState.toggleBeepNext()
                 }
+                gameState = gameState.toggleBeepNext()
             }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { onTap(it) })
+                },
+            contentAlignment = Alignment.Center,
+        ) {
             if (gameState.isGameOver) {
                 soundEffectsPlayer.playSound(R.raw.sadwobble)
                 GameOverScreen(restartGame)
@@ -82,19 +94,21 @@ fun LongFoxGameScreen() {
                 GameCanvas(gameState, onSize)
             }
         }
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp),
-        contentAlignment = Alignment.CenterEnd,
-    ) {
-        Text(
-            text = "Score: ${gameState.score}",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 32.sp,
-        )
+        if (!gameState.isGameOver) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(6.dp),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                Text(
+                    text = "Score: ${gameState.score}",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 32.sp,
+                )
+            }
+        }
     }
 }
 

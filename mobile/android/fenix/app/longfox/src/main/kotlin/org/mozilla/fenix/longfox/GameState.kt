@@ -33,8 +33,13 @@ data class GameState(
     val isGameOver: Boolean = false,
     val score: Int = 0,
     val beepNext: Boolean = true,
+    val numCells: Int = 12,
 ) {
-    val numCellsWide = 12
+    companion object {
+        const val CELL_SIZE_DP = 20f
+        const val FRAME_INTERVAL_TIME_MS = 100L
+    }
+    val numCellsWide = numCells
     val numCellsTall = numCellsWide
     val cellSize = (size.minDimension / numCellsWide).toInt().toFloat()
 

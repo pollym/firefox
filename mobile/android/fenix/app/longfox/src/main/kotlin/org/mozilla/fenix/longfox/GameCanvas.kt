@@ -8,8 +8,8 @@ package org.mozilla.fenix.longfox
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import org.mozilla.fenix.longfox.Direction.*
+import org.mozilla.fenix.longfox.GameState.Companion.CELL_SIZE_DP
 
 @Composable
 fun GameCanvas(state: GameState, onSize: (Size, Offset) -> Unit) {
@@ -56,8 +57,7 @@ fun GameCanvas(state: GameState, onSize: (Size, Offset) -> Unit) {
     Canvas(
         modifier = Modifier
             .background(color = Color.Black)
-            .fillMaxWidth()
-            .aspectRatio(1f)
+            .size((CELL_SIZE_DP * state.numCellsWide).dp)
     ) {
         onSize(size, center)
         drawHead(state, kitHead, kitImageMargin)
