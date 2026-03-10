@@ -6,7 +6,6 @@
 
 package org.mozilla.fenix.longfox
 
-import android.graphics.Point
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import org.mozilla.fenix.longfox.Direction.DOWN
@@ -26,7 +25,6 @@ data class GridPoint(val x: Int, val y: Int) {
 
 data class GameState(
     val size: Size = Size(0f, 0f),
-    val centre: Offset = Offset(0f, 0f),
     val fox: List<GridPoint> = listOf(GridPoint(5, 5), GridPoint(5, 4), GridPoint(5, 3), GridPoint(5, 2)),
     val food: GridPoint = GridPoint(8, 8),
     val direction: Direction = DOWN,
@@ -39,26 +37,22 @@ data class GameState(
         const val CELL_SIZE_DP = 20f
         const val FRAME_INTERVAL_TIME_MS = 100L
     }
+
     val numCellsWide = numCells
     val numCellsTall = numCellsWide
     val cellSize = (size.minDimension / numCellsWide).toInt().toFloat()
 
     val shouldersDirection: Direction = when {
         fox.size < 3 -> direction
-        else -> {
-            getDirectionBetweenPoints(fox[1], fox[2])
-        }
+        else -> getDirectionBetweenPoints(fox[1], fox[2])
     }
 
     val tailDirection: Direction = when {
         fox.size < 3 -> direction
-        else -> {
-            getDirectionBetweenPoints(fox[fox.size - 2], fox[fox.size - 3])
-        }
+        else -> getDirectionBetweenPoints(fox[fox.size - 2], fox[fox.size - 3])
     }
 
-    fun toggleBeepNext(): GameState =
-        copy(beepNext = !beepNext)
+    fun toggleBeepNext(): GameState = copy(beepNext = !beepNext)
 
     private fun getDirectionBetweenPoints(thisPoint: GridPoint, otherPoint: GridPoint): Direction {
         return when {
@@ -69,19 +63,9 @@ data class GameState(
         }
     }
 
-    fun onSized(size: Size, centre: Offset): GameState {
-        return if (this.size == size && this.centre == centre) {
-            this
-        } else {
-            copy(size = size, centre = centre)
-        }
+    fun onSized(size: Size): GameState {
+        return if (this.size == size) this else copy(size = size)
     }
-
-    fun toPx(gridPoint: GridPoint): Point =
-        Point((gridPoint.x * cellSize).toInt(), (gridPoint.y * cellSize).toInt())
-
-    fun toGridPoint(x: Int, y: Int): GridPoint =
-        GridPoint((x / cellSize).toInt(), (y / cellSize).toInt())
 
     fun randomGridPoint(): GridPoint = GridPoint(
         Random.nextInt(numCellsWide),
@@ -96,10 +80,9 @@ data class GameState(
             LEFT -> head.copy(x = head.x - 1)
             RIGHT -> head.copy(x = head.x + 1)
         }
-        val newHeadPos = toPx(newHead)
 
         val collidedWithSelf = newHead in fox.drop(1)
-        val collidedWithEdge = !withinBounds(newHeadPos)
+        val collidedWithEdge = !withinBounds(newHead)
         val collidedWithFood = newHead == food
         val isGameOver = collidedWithSelf || collidedWithEdge
 
@@ -118,18 +101,16 @@ data class GameState(
         }
     }
 
-    private fun withinBounds(newHeadPos: Point): Boolean {
-        val cellSizeInt = cellSize.toInt()
-        return newHeadPos.x in 0 until numCellsWide * cellSizeInt &&
-               newHeadPos.y in 0 until numCellsTall * cellSizeInt
-    }
+    private fun withinBounds(point: GridPoint): Boolean =
+        point.x in 0 until numCellsWide && point.y in 0 until numCellsTall
 
     fun onTap(offset: Offset): GameState {
         val (x, y) = offset
-        val snakeHeadPos = toPx(fox.first())
+        val headX = fox.first().x * cellSize
+        val headY = fox.first().y * cellSize
         val newDirection = when (direction) {
-            UP, DOWN -> if (x < snakeHeadPos.x) LEFT else RIGHT
-            LEFT, RIGHT -> if (y < snakeHeadPos.y) UP else DOWN
+            UP, DOWN -> if (x < headX) LEFT else RIGHT
+            LEFT, RIGHT -> if (y < headY) UP else DOWN
         }
         return copy(direction = newDirection)
     }

@@ -9,9 +9,9 @@ package org.mozilla.fenix.longfox
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
-import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.CornerRadius.Companion.Zero
@@ -28,105 +28,95 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import org.mozilla.fenix.longfox.Direction.*
 import org.mozilla.fenix.longfox.GameState.Companion.CELL_SIZE_DP
 
 @Composable
-fun GameCanvas(state: GameState, onSize: (Size, Offset) -> Unit) {
-    val kitHeadDrawable = ContextCompat.getDrawable(LocalContext.current, R.drawable.kit_head)
-    val kitTailDrawable = ContextCompat.getDrawable(LocalContext.current, R.drawable.kit_tail)
-    val kitImageMargin = 0  // might need this to make the head stand out more
-
+fun GameCanvas(state: GameState, onSize: (Size) -> Unit) {
+    val context = LocalContext.current
     val cellSize = state.cellSize.toInt()
-    val kitHead = if (cellSize > 0) {
-        kitHeadDrawable?.toBitmap(
-            cellSize + kitImageMargin, cellSize + kitImageMargin
-        )?.asImageBitmap()
-    } else null
 
-    val kitTail = if (cellSize > 0) {
-        kitTailDrawable?.toBitmap(
-            cellSize + kitImageMargin, cellSize + kitImageMargin
-        )?.asImageBitmap()
-    } else null
+    val kitHead = remember(cellSize) {
+        if (cellSize > 0) {
+            ContextCompat.getDrawable(context, R.drawable.kit_head)
+                ?.toBitmap(cellSize, cellSize)
+                ?.asImageBitmap()
+        } else null
+    }
 
-    val shouldersPath = Path()
-    val bottomPath = Path()
+    val kitTail = remember(cellSize) {
+        if (cellSize > 0) {
+            ContextCompat.getDrawable(context, R.drawable.kit_tail)
+                ?.toBitmap(cellSize, cellSize)
+                ?.asImageBitmap()
+        } else null
+    }
+
+    val shouldersPath = remember { Path() }
+    val bottomPath = remember { Path() }
+
     Canvas(
         modifier = Modifier
             .background(color = Color.Black)
             .size((CELL_SIZE_DP * state.numCellsWide).dp)
     ) {
-        onSize(size, center)
-        drawHead(state, kitHead, kitImageMargin)
+        onSize(size)
+        drawHead(state, kitHead)
         drawBody(state, shouldersPath, bottomPath)
         drawTail(state, kitTail)
         drawFood(state)
     }
 }
 
-fun DrawScope.drawHead(state: GameState, kitHeadBitmap: ImageBitmap?, margin: Int) {
+fun DrawScope.drawHead(state: GameState, kitHeadBitmap: ImageBitmap?) {
     if (kitHeadBitmap == null) return
     val head = state.fox.first()
-
-    val topLeft = Offset(
-        (head.x * state.cellSize) - margin, (head.y * state.cellSize) - margin
-    )
-
-    //rotating head is a bit Linda Blair
-//    val rotateAngle = when (state.direction) {
-//        UP -> 180F
-//        DOWN -> 0F
-//        LEFT -> 90F
-//        RIGHT -> 270F
-//    }
-//    val pivotPoint = Offset(topLeft.x + state.cellSize / 2, topLeft.y + state.cellSize / 2)
-//    rotate(rotateAngle, pivotPoint) {
     drawImage(
         image = kitHeadBitmap,
-        topLeft = topLeft,
+        topLeft = Offset(head.x * state.cellSize, head.y * state.cellSize),
     )
-//    }
 }
 
 fun DrawScope.drawBody(state: GameState, shouldersPath: Path, bottomPath: Path) {
     val brush = Brush.linearGradient(listOf(Color.Red, Color.Yellow))
     val snakeBody = state.fox.drop(1).dropLast(1)
-    val cornerRadiusPx = state.cellSize/2
+    val cornerRadiusPx = state.cellSize / 2
     val cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx)
     when (snakeBody.size) {
-         1 -> {
-             drawRoundRect(
-                 brush = brush,
-                 cornerRadius = cornerRadius,
-                 topLeft = Offset(snakeBody.first().x * state.cellSize, snakeBody.first().y * state.cellSize),
-                 size = Size(state.cellSize, state.cellSize)
-             )
-         }
+        1 -> {
+            drawRoundRect(
+                brush = brush,
+                cornerRadius = cornerRadius,
+                topLeft = Offset(snakeBody.first().x * state.cellSize, snakeBody.first().y * state.cellSize),
+                size = Size(state.cellSize, state.cellSize)
+            )
+        }
         else -> {
             val shoulders = snakeBody.first()
             shouldersPath.apply {
+                reset()
                 addRoundRect(
                     RoundRect(
                         rect = Rect(
                             offset = Offset(shoulders.x * state.cellSize, shoulders.y * state.cellSize),
                             size = Size(state.cellSize, state.cellSize)
                         ),
-                        topLeft = when(state.shouldersDirection) {
+                        topLeft = when (state.shouldersDirection) {
                             UP, LEFT -> cornerRadius
                             DOWN, RIGHT -> Zero
                         },
-                        topRight = when(state.shouldersDirection) {
+                        topRight = when (state.shouldersDirection) {
                             UP, RIGHT -> cornerRadius
                             DOWN, LEFT -> Zero
                         },
-                        bottomLeft = when(state.shouldersDirection) {
+                        bottomLeft = when (state.shouldersDirection) {
                             DOWN, LEFT -> cornerRadius
                             UP, RIGHT -> Zero
                         },
-                        bottomRight = when(state.shouldersDirection) {
+                        bottomRight = when (state.shouldersDirection) {
                             DOWN, RIGHT -> cornerRadius
                             UP, LEFT -> Zero
                         },
@@ -134,12 +124,6 @@ fun DrawScope.drawBody(state: GameState, shouldersPath: Path, bottomPath: Path) 
                 )
             }
             drawPath(shouldersPath, brush)
-//            drawRect(
-//                brush = brush,
-//                topLeft = Offset(shoulders.x * state.cellSize, shoulders.y * state.cellSize),
-//                size = Size(state.cellSize, state.cellSize)
-//            )
-
 
             snakeBody.drop(1).dropLast(1).forEach { (x, y) ->
                 drawRect(
@@ -150,32 +134,27 @@ fun DrawScope.drawBody(state: GameState, shouldersPath: Path, bottomPath: Path) 
             }
 
             val bottom = snakeBody.last()
-//            drawRect(
-//                brush = brush,
-//                topLeft = Offset(bottom.x * state.cellSize, bottom.y * state.cellSize),
-//                size = Size(state.cellSize, state.cellSize)
-//            )
-
             bottomPath.apply {
+                reset()
                 addRoundRect(
                     RoundRect(
                         rect = Rect(
                             offset = Offset(bottom.x * state.cellSize, bottom.y * state.cellSize),
                             size = Size(state.cellSize, state.cellSize)
                         ),
-                        topLeft = when(state.tailDirection) {
+                        topLeft = when (state.tailDirection) {
                             UP, LEFT -> cornerRadius
                             DOWN, RIGHT -> Zero
                         },
-                        topRight = when(state.tailDirection) {
+                        topRight = when (state.tailDirection) {
                             UP, RIGHT -> cornerRadius
                             DOWN, LEFT -> Zero
                         },
-                        bottomLeft = when(state.tailDirection) {
+                        bottomLeft = when (state.tailDirection) {
                             DOWN, LEFT -> cornerRadius
                             UP, RIGHT -> Zero
                         },
-                        bottomRight = when(state.tailDirection) {
+                        bottomRight = when (state.tailDirection) {
                             DOWN, RIGHT -> cornerRadius
                             UP, LEFT -> Zero
                         },
@@ -185,7 +164,6 @@ fun DrawScope.drawBody(state: GameState, shouldersPath: Path, bottomPath: Path) 
             drawPath(bottomPath, brush)
         }
     }
-
 }
 
 fun DrawScope.drawTail(state: GameState, kitTailBitmap: ImageBitmap?) {
@@ -197,7 +175,7 @@ fun DrawScope.drawTail(state: GameState, kitTailBitmap: ImageBitmap?) {
         LEFT -> 270F
         RIGHT -> 90F
     }
-    val topLeft = Offset((tail.x * state.cellSize), (tail.y * state.cellSize))
+    val topLeft = Offset(tail.x * state.cellSize, tail.y * state.cellSize)
     val pivotPoint = Offset(topLeft.x + state.cellSize / 2, topLeft.y + state.cellSize / 2)
     rotate(rotateAngle, pivotPoint) {
         drawImage(
@@ -220,6 +198,6 @@ fun DrawScope.drawFood(state: GameState) {
 fun GameCanvasPreview() {
     MaterialTheme {
         GameCanvas(
-            GameState(size = Size(600f, 1000f)), onSize = { _, _ -> })
+            GameState(size = Size(600f, 1000f)), onSize = { _ -> })
     }
 }

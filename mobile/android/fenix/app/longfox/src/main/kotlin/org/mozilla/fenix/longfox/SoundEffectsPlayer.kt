@@ -12,16 +12,21 @@ import androidx.annotation.RawRes
 
 class SoundEffectsPlayer(private val context: Context) {
 
-    private var mediaPlayer: MediaPlayer? = null
+    private val activePlayers = mutableSetOf<MediaPlayer>()
 
     fun playSound(@RawRes soundResId: Int) {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer.create(context, soundResId)
-        mediaPlayer?.start()
-        mediaPlayer?.setOnCompletionListener {
-            it.release()
-            mediaPlayer = null
+        MediaPlayer.create(context, soundResId)?.apply {
+            activePlayers.add(this)
+            start()
+            setOnCompletionListener {
+                it.release()
+                activePlayers.remove(it)
+            }
         }
+    }
+
+    fun release() {
+        activePlayers.forEach { it.stop(); it.release() }
+        activePlayers.clear()
     }
 }

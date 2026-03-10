@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,8 +49,7 @@ fun LongFoxGameScreen() {
         val numCells = (minOf(maxWidth, maxHeight).value / CELL_SIZE_DP).toInt()
         var gameState by remember(numCells) { mutableStateOf(GameState(numCells = numCells)) }
         val restartGame = { gameState = GameState(numCells = numCells) }
-        val onSize: (Size, Offset) -> Unit =
-            { size, offset -> gameState = gameState.onSized(size, offset) }
+        val onSize: (Size) -> Unit = { size -> gameState = gameState.onSized(size) }
         val density = LocalDensity.current.density
         val canvasSizePx = CELL_SIZE_DP * numCells * density
         val canvasOffsetXPx = (maxWidth.value * density - canvasSizePx) / 2f
@@ -59,7 +59,14 @@ fun LongFoxGameScreen() {
                 Offset(offset.x - canvasOffsetXPx, offset.y - canvasOffsetYPx)
             )
         }
-        val soundEffectsPlayer = SoundEffectsPlayer(LocalContext.current)
+        val context = LocalContext.current
+        val soundEffectsPlayer = remember(numCells) { SoundEffectsPlayer(context) }
+        DisposableEffect(soundEffectsPlayer) {
+            onDispose { soundEffectsPlayer.release() }
+        }
+        LaunchedEffect(gameState.isGameOver) {
+            if (gameState.isGameOver) soundEffectsPlayer.playSound(R.raw.sadwobble)
+        }
         LaunchedEffect(gameState) {
             while (!gameState.isGameOver) {
                 delay(FRAME_INTERVAL_TIME_MS)
@@ -88,7 +95,6 @@ fun LongFoxGameScreen() {
             contentAlignment = Alignment.Center,
         ) {
             if (gameState.isGameOver) {
-                soundEffectsPlayer.playSound(R.raw.sadwobble)
                 GameOverScreen(restartGame)
             } else {
                 GameCanvas(gameState, onSize)
