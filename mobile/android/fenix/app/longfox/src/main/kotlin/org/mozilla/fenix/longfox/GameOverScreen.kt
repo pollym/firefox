@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,7 +53,7 @@ fun GameOverScreen(restartGame: () -> Unit) {
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.firefox_with_clouds),
-                        contentDescription = "you died",
+                        contentDescription = stringResource(R.string.you_died_content_desc),
                     )
                 }
                 Spacer(modifier = Modifier.height(48.dp))
@@ -63,7 +64,7 @@ fun GameOverScreen(restartGame: () -> Unit) {
                     Text(
                         color = Color.White,
                         fontSize = 32.sp,
-                        text = "YOU DIED !!"
+                        text = stringResource(R.string.you_died)
                     )
                 }
             }
