@@ -6,6 +6,7 @@
 
 package org.mozilla.fenix.longfox
 
+import android.annotation.SuppressLint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import org.mozilla.fenix.longfox.Direction.DOWN
@@ -20,6 +21,7 @@ data class GridPoint(val x: Int, val y: Int) {
     fun isAbove(secondPoint: GridPoint): Boolean = y < secondPoint.y
     fun isBelow(secondPoint: GridPoint): Boolean = y > secondPoint.y
     fun isLeftOf(secondPoint: GridPoint): Boolean = x < secondPoint.x
+    @SuppressLint("Unused")
     fun isRightOf(secondPoint: GridPoint): Boolean = x > secondPoint.x
 }
 

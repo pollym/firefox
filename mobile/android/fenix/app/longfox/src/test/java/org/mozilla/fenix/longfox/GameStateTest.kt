@@ -14,6 +14,27 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * These tests set up an imaginary longfox game grid and manipulate its state.
+ * The grid is 100x100 px, with a cellSize of 10. So it's a 10x10 grid in game coords.
+ *
+ * This is to make the maths as easy as possible :)
+ *
+ * For the default state in `state()`, The fox starts at 5,5. Origin is top left.
+ * So it's like this:
+ *
+ *       0123456789
+ *      0
+ *      1
+ *      2
+ *      3     🟧
+ *      4     🟧
+ *      5     🦊
+ *      6
+ *      7
+ *      8
+ *      9
+ */
 class GameStateTest {
 
     @Test
@@ -48,7 +69,6 @@ class GameStateTest {
     }
 
     // --- moveFox: wall collisions ---
-    // NB we are on a 10 x 10 grid
 
     @Test
     fun `game is not over when fox moves to a perfectly reasonable place`() {
@@ -127,7 +147,7 @@ class GameStateTest {
                 GridPoint(4, 5),
                 GridPoint(4, 4),
                 GridPoint(3, 4),
-                GridPoint(3, 5), // loop back — new head will land on fox[1]
+                GridPoint(3, 5), // loop back — new head will land on tail
             ),
         )
         assertFalse(state.isGameOver)
@@ -183,13 +203,13 @@ class GameStateTest {
 
     @Test
     fun `tapping left of head while moving down turns fox left`() {
-        // cellSize = 20f, headX = 5 * 20 = 100
+        // cellSize = 10f, headX = 5 * 10 = 50
         val state =
             state(
-                direction = Direction.DOWN, 
+                direction = Direction.DOWN,
                 fox = listOf(GridPoint(5, 5), GridPoint(5, 4))
             ).onTap(
-                Offset(x = 50f, y = 200f)
+                Offset(x = 25f, y = 75f)
             )
         assertEquals(Direction.LEFT, state.direction)
     }
@@ -198,23 +218,23 @@ class GameStateTest {
     fun `tapping right of head while moving down turns fox right`() {
         val state =
             state(
-                direction = Direction.DOWN, 
+                direction = Direction.DOWN,
                 fox = listOf(GridPoint(5, 5), GridPoint(5, 4))
             ).onTap(
-                Offset(x = 150f, y = 200f)
+                Offset(x = 75f, y = 75f)
             )
         assertEquals(Direction.RIGHT, state.direction)
     }
 
     @Test
     fun `tapping above head while moving right turns fox up`() {
-        // headY = 5 * 20 = 100
+        // headY = 5 * 10 = 50
         val state =
             state(
                 direction = Direction.RIGHT,
                 fox = listOf(GridPoint(5, 5), GridPoint(4, 5))
             ).onTap(
-                Offset(x = 200f, y = 50f)
+                Offset(x = 75f, y = 25f)
             )
         assertEquals(Direction.UP, state.direction)
     }
@@ -226,7 +246,7 @@ class GameStateTest {
                 direction = Direction.RIGHT,
                 fox = listOf(GridPoint(5, 5), GridPoint(4, 5))
             ).onTap(
-                Offset(x = 200f, y = 150f)
+                Offset(x = 75f, y = 75f)
             )
         assertEquals(Direction.DOWN, state.direction)
     }
@@ -257,7 +277,7 @@ class GameStateTest {
         food: GridPoint = GridPoint(0, 0),
         numCells: Int = 10,
     ): GameState {
-        val cellSize = 20f
+        val cellSize = 10f
         return GameState(
             size = Size(numCells * cellSize, numCells * cellSize),
             fox = fox,
