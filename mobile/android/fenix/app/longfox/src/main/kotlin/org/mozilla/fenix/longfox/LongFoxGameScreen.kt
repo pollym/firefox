@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.mozilla.fenix.longfox.GameState.Companion.CELL_SIZE_DP
 import org.mozilla.fenix.longfox.GameState.Companion.FRAME_INTERVAL_TIME_MS
 
@@ -61,7 +63,9 @@ fun LongFoxGameScreen() {
             )
         }
         val context = LocalContext.current
+        val coroutineScope = rememberCoroutineScope()
         val soundEffectsPlayer = remember(numCells) { SoundEffectsPlayer(context) }
+        val longFoxDataStore = remember(context) { LongFoxDataStore(context) }
         DisposableEffect(soundEffectsPlayer) {
             onDispose { soundEffectsPlayer.release() }
         }
@@ -86,6 +90,7 @@ fun LongFoxGameScreen() {
                 }
                 gameState = gameState.toggleBeepNext()
             }
+            coroutineScope.launch { longFoxDataStore.saveIfHiscore(gameState.score) }
         }
         Box(
             modifier = Modifier
@@ -96,7 +101,12 @@ fun LongFoxGameScreen() {
             contentAlignment = Alignment.Center,
         ) {
             if (gameState.isGameOver) {
-                GameOverScreen(restartGame)
+//                GameOverScreen(restartGame)
+                NewGameScreen(
+                    state = gameState,
+                    longFoxDataStore = longFoxDataStore,
+                    startGame = restartGame
+                )
             } else {
                 GameCanvas(gameState, onSize)
             }

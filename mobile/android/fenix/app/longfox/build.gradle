@@ -39,6 +39,9 @@ dependencies {
     implementation libs.androidx.compose.ui
     implementation libs.androidx.compose.ui.tooling.preview
     implementation libs.androidx.compose.ui.graphics
+    implementation libs.androidx.datastore.preferences
+    implementation libs.androidx.datastore.preferences.core
+    implementation libs.androidx.datastore.core
     testImplementation libs.junit4
     androidTestImplementation libs.androidx.test.junit
     androidTestImplementation libs.androidx.test.espresso.core
