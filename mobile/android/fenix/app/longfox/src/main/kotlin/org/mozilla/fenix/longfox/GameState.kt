@@ -34,6 +34,7 @@ data class GameState(
     val score: Int = 0,
     val beepNext: Boolean = true,
     val numCells: Int = 12,
+    val demoMode: Boolean = false,
 ) {
     companion object {
         const val CELL_SIZE_DP = 20f

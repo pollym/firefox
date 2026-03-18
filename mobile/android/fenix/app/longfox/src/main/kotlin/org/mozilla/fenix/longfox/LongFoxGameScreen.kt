@@ -103,9 +103,9 @@ fun LongFoxGameScreen() {
             if (gameState.isGameOver) {
 //                GameOverScreen(restartGame)
                 NewGameScreen(
-                    state = gameState,
                     longFoxDataStore = longFoxDataStore,
-                    startGame = restartGame
+                    numCells = gameState.numCells,
+                    startGame = restartGame,
                 )
             } else {
                 GameCanvas(gameState, onSize)

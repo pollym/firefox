@@ -55,6 +55,14 @@ fun GameCanvas(state: GameState, onSize: (Size) -> Unit) {
         } else null
     }
 
+    val cookie = remember(cellSize) {
+        if (cellSize > 0) {
+            ContextCompat.getDrawable(context, R.drawable.cookie)
+                ?.toBitmap(cellSize, cellSize)
+                ?.asImageBitmap()
+        } else null
+    }
+
     val shouldersPath = remember { Path() }
     val bottomPath = remember { Path() }
 
@@ -67,7 +75,9 @@ fun GameCanvas(state: GameState, onSize: (Size) -> Unit) {
         drawHead(state, kitHead)
         drawBody(state, shouldersPath, bottomPath)
         drawTail(state, kitTail)
-        drawFood(state)
+        if (!state.demoMode) {
+            drawFood(state, cookie)
+        }
     }
 }
 
@@ -185,11 +195,11 @@ fun DrawScope.drawTail(state: GameState, kitTailBitmap: ImageBitmap?) {
     }
 }
 
-fun DrawScope.drawFood(state: GameState) {
-    drawRect(
-        color = Color.Green,
+fun DrawScope.drawFood(state: GameState, cookie: ImageBitmap?) {
+    if (cookie == null) return
+    drawImage(
+        image = cookie,
         topLeft = Offset(state.food.x * state.cellSize, state.food.y * state.cellSize),
-        size = Size(state.cellSize, state.cellSize)
     )
 }
 
