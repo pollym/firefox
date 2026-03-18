@@ -6,13 +6,12 @@
 
 package org.mozilla.fenix.longfox
 
-import android.graphics.Typeface.BOLD
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,14 +26,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.mozilla.fenix.longfox.GameState.Companion.CELL_SIZE_DP
 import org.mozilla.fenix.longfox.GameState.Companion.FRAME_INTERVAL_TIME_MS
 
@@ -48,7 +48,8 @@ fun NewGameScreen(
 
     val hiscore by longFoxDataStore.hiscoreFlow()
         .collectAsState(initial = 0, coroutineScope.coroutineContext)
-
+    val soundOn by longFoxDataStore.soundOnFlow()
+        .collectAsState(initial = false, coroutineScope.coroutineContext)
     var gameState by remember {
         mutableStateOf(
             GameState(
@@ -93,35 +94,34 @@ fun NewGameScreen(
                 text = "LONGFOX"
             )
             Text(
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 color = Color.Yellow,
                 text = "🍪 likes cookies 🍪"
             )
             Text(
-                modifier = Modifier.padding(top = 24.dp),
+                modifier = Modifier.padding(top = 8.dp),
                 fontSize = 16.sp,
+                fontStyle = FontStyle.Italic,
                 color = Color.Green,
-                text = "tap anywhere to play !!"
+                text = "tap to play !"
             )
             Text(
-                modifier = Modifier.padding(top = 24.dp),
+                modifier = Modifier.padding(top = 36.dp, bottom = 36.dp),
                 fontSize = 22.sp,
                 color = Color.Cyan,
                 text = "HISCORE: $hiscore"
             )
+            Text(
+                modifier = Modifier
+                    .border(width = 2.dp, Color.DarkGray)
+                    .padding(8.dp)
+                    .clickable { coroutineScope.launch { longFoxDataStore.toggleSoundOn() } },
+                fontSize = 16.sp,
+                color = if (soundOn) Color.White else Color.Gray,
+                text = if (soundOn) "🔈 sound on" else "🔇 sound off"
+            )
         }
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.Bottom,
-        ) {
-
-        }
-
     }
-
 }
 
 @Preview

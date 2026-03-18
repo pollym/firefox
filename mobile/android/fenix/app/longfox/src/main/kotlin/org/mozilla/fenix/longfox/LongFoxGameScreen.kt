@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,7 +51,7 @@ fun LongFoxGameScreen() {
             .background(Color.Blue),
     ) {
         val numCells = (minOf(maxWidth, maxHeight).value / CELL_SIZE_DP).toInt()
-        var gameState by remember(numCells) { mutableStateOf(GameState(numCells = numCells)) }
+        var gameState by remember(numCells) { mutableStateOf(GameState(numCells = numCells, isGameOver = true)) }
         val restartGame = { gameState = GameState(numCells = numCells) }
         val onSize: (Size) -> Unit = { size -> gameState = gameState.onSized(size) }
         val density = LocalDensity.current.density
@@ -64,8 +65,10 @@ fun LongFoxGameScreen() {
         }
         val context = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
-        val soundEffectsPlayer = remember(numCells) { SoundEffectsPlayer(context) }
         val longFoxDataStore = remember(context) { LongFoxDataStore(context) }
+        val soundOn by longFoxDataStore.soundOnFlow()
+            .collectAsState(initial = false, coroutineScope.coroutineContext)
+        val soundEffectsPlayer = remember(soundOn) { SoundEffectsPlayer(context, soundOn) }
         DisposableEffect(soundEffectsPlayer) {
             onDispose { soundEffectsPlayer.release() }
         }
