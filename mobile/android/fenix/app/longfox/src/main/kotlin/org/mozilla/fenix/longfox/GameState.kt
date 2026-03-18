@@ -104,6 +104,30 @@ data class GameState(
         }
     }
 
+    fun moveFoxDemo(): GameState {
+        val head = fox.first()
+
+        val newDirection = when {
+            head.y >= numCellsTall - 2 -> {
+                if (head.x < numCellsWide - 2) RIGHT else UP
+            }
+            head.y < 2 -> {
+                if (head.x >= 2) LEFT else DOWN
+            }
+            else -> direction
+        }
+
+        val newHead = when (newDirection) {
+            UP -> head.copy(y = head.y - 1)
+            DOWN -> head.copy(y = head.y + 1)
+            LEFT -> head.copy(x = head.x - 1)
+            RIGHT -> head.copy(x = head.x + 1)
+        }
+
+        val newFox = listOf(newHead) + fox.dropLast(1)
+        return copy(fox = newFox, direction = newDirection)
+    }
+
     private fun withinBounds(point: GridPoint): Boolean =
         point.x in 0 until numCellsWide && point.y in 0 until numCellsTall
 

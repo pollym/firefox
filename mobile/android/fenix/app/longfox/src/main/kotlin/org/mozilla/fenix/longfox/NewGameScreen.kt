@@ -6,10 +6,12 @@
 
 package org.mozilla.fenix.longfox
 
+import android.graphics.Typeface.BOLD
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,7 +53,13 @@ fun NewGameScreen(
         mutableStateOf(
             GameState(
                 numCells = numCells,
-                demoMode = true
+                demoMode = true,
+                fox = listOf(
+                    GridPoint(1, 5),
+                    GridPoint(1, 4),
+                    GridPoint(1, 3),
+                    GridPoint(1, 2)
+                )
             )
         )
     }
@@ -58,7 +67,7 @@ fun NewGameScreen(
     LaunchedEffect(gameState) {
         while (true) {
             delay(FRAME_INTERVAL_TIME_MS)
-            gameState = gameState.moveFox()
+            gameState = gameState.moveFoxDemo()
         }
     }
 
@@ -68,17 +77,37 @@ fun NewGameScreen(
             .background(Color.DarkGray)
             .clickable { startGame() },
     ) {
-//        GameCanvas(
-//            state = gameState, onSize = { size -> gameState = gameState.onSized(size) })
-        Row(
+        GameCanvas(
+            state = gameState,
+            onSize = { size -> gameState = gameState.onSized(size) }
+        )
+        Column(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xffff5500),
+                text = "LONGFOX"
+            )
+            Text(
+                fontSize = 16.sp,
+                color = Color.Yellow,
+                text = "🍪 likes cookies 🍪"
+            )
+            Text(
+                modifier = Modifier.padding(top = 24.dp),
                 fontSize = 16.sp,
                 color = Color.Green,
-                text = "tap anywhere to play !"
+                text = "tap anywhere to play !!"
+            )
+            Text(
+                modifier = Modifier.padding(top = 24.dp),
+                fontSize = 22.sp,
+                color = Color.Cyan,
+                text = "HISCORE: $hiscore"
             )
         }
         Row(
@@ -88,11 +117,7 @@ fun NewGameScreen(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.Bottom,
         ) {
-            Text(
-                fontSize = 22.sp,
-                color = Color.Yellow,
-                text = "HISCORE: $hiscore"
-            )
+
         }
 
     }
