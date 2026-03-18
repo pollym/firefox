@@ -20,4 +20,5 @@ interface PrivateBrowsingInteractor {
      * Called when a user clicks on the Private Mode button on the homescreen.
      */
     fun onPrivateModeButtonClicked(newMode: BrowsingMode)
+
 }

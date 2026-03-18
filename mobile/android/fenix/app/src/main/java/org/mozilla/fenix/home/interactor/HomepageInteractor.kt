@@ -40,4 +40,5 @@ interface HomepageInteractor :
     PrivateBrowsingInteractor,
     SearchSelectorInteractor,
     WallpaperInteractor,
-    SetupChecklistInteractor
+    SetupChecklistInteractor,
+    LogoInteractor

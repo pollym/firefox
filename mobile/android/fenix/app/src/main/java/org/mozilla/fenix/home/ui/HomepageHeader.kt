@@ -6,6 +6,8 @@ package org.mozilla.fenix.home.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,6 +54,7 @@ fun HomepageHeader(
     privateBrowsingButtonColor: Color,
     browsingMode: BrowsingMode,
     browsingModeChanged: (BrowsingMode) -> Unit,
+    onClickLogo: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -60,7 +63,7 @@ fun HomepageHeader(
             .padding(start = 16.dp, end = 16.dp, top = 18.dp, bottom = 32.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        WordmarkLogo()
+        WordmarkLogo(onClickLogo)
 
         WordmarkText(wordmarkTextColor)
 
@@ -75,7 +78,7 @@ fun HomepageHeader(
 }
 
 @Composable
-private fun WordmarkLogo() {
+private fun WordmarkLogo(onClickLogo: () -> Unit) {
     Image(
         modifier = Modifier
             .height(40.dp)
@@ -83,6 +86,7 @@ private fun WordmarkLogo() {
                 testTagsAsResourceId = true
                 testTag = HOMEPAGE_WORDMARK_LOGO
             }
+            .combinedClickable(onClick = {}, onLongClick = onClickLogo)
             .padding(end = 10.dp),
         painter = painterResource(getAttr(R.attr.fenixWordmarkLogo)),
         contentDescription = null,
@@ -159,6 +163,7 @@ private fun HomepageHeaderPreview(
                 ),
                 browsingMode = BrowsingMode.Normal,
                 browsingModeChanged = {},
+                onClickLogo = {}
             )
         }
     }

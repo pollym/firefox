@@ -138,6 +138,7 @@ internal fun Homepage(
                     privateBrowsingButtonColor = state.headerState.privateBrowsingButtonColor,
                     browsingMode = state.browsingMode,
                     browsingModeChanged = interactor::onPrivateModeButtonClicked,
+                    onClickLogo = interactor::onLogoClicked,
                 )
             } else {
                 Spacer(modifier = Modifier.height(16.dp))
