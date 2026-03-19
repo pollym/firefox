@@ -23,9 +23,9 @@ android {
 }
 
 dependencies {
-    implementation libs.androidx.core.ktx
+    implementation libs.androidx.activity.compose
     implementation libs.androidx.appcompat
-    implementation libs.google.material
+    implementation libs.androidx.core.ktx
     implementation platform(libs.androidx.compose.bom)
     implementation libs.androidx.compose.animation
     implementation libs.androidx.compose.foundation
@@ -42,6 +42,7 @@ dependencies {
     implementation libs.androidx.datastore.preferences
     implementation libs.androidx.datastore.preferences.core
     implementation libs.androidx.datastore.core
+    implementation libs.google.material
     testImplementation libs.junit4
     androidTestImplementation libs.androidx.test.junit
     androidTestImplementation libs.androidx.test.espresso.core

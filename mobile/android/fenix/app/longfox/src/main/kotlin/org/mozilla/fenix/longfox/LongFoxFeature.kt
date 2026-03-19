@@ -7,6 +7,7 @@
 package org.mozilla.fenix.longfox
 
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -21,7 +22,11 @@ class LongFoxFeature {
                     MaterialTheme {
                         LongFoxGameScreen()
                     }
-                }
+                    BackHandler {
+                        container.removeView(this)
+                        disposeComposition()
+                    }
+                 }
             },
         )
     }
