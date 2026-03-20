@@ -43,6 +43,10 @@ data class GameState(
     val numCells: Int = 12,
 ) {
 
+    companion object {
+        const val CELL_SIZE_DP = 20f
+    }
+
     val numCellsWide = numCells
     val numCellsTall = numCellsWide
     val cellSize = (size.minDimension / numCellsWide).toInt().toFloat()
