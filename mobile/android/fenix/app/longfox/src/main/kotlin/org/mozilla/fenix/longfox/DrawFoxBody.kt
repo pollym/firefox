@@ -32,6 +32,27 @@ fun DrawScope.drawBody(state: GameState, shouldersPath: Path, bottomPath: Path) 
     val foxBody = state.fox.drop(1).dropLast(1)
     val cornerRadiusPx = state.cellSize / 2
     val cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx)
+
+    fun roundTopLeft(direction: Direction): CornerRadius = when (direction) {
+        Direction.UP, Direction.LEFT -> cornerRadius
+        Direction.DOWN, Direction.RIGHT -> CornerRadius.Zero
+    }
+
+    fun roundTopRight(direction: Direction): CornerRadius = when (direction) {
+        Direction.UP, Direction.RIGHT -> cornerRadius
+        Direction.DOWN, Direction.LEFT -> CornerRadius.Zero
+    }
+
+    fun roundBottomLeft(direction: Direction): CornerRadius = when (direction) {
+        Direction.DOWN, Direction.LEFT -> cornerRadius
+        Direction.UP, Direction.RIGHT -> CornerRadius.Zero
+    }
+
+    fun roundBottomRight(direction: Direction): CornerRadius = when (direction) {
+        Direction.DOWN, Direction.RIGHT -> cornerRadius
+        Direction.UP, Direction.LEFT -> CornerRadius.Zero
+    }
+
     when (foxBody.size) {
         1 -> {
             drawRoundRect(
@@ -58,22 +79,10 @@ fun DrawScope.drawBody(state: GameState, shouldersPath: Path, bottomPath: Path) 
                             ),
                             size = Size(state.cellSize, state.cellSize),
                         ),
-                        topLeft = when (state.shouldersDirection) {
-                            Direction.UP, Direction.LEFT -> cornerRadius
-                            Direction.DOWN, Direction.RIGHT -> CornerRadius.Zero
-                        },
-                        topRight = when (state.shouldersDirection) {
-                            Direction.UP, Direction.RIGHT -> cornerRadius
-                            Direction.DOWN, Direction.LEFT -> CornerRadius.Zero
-                        },
-                        bottomLeft = when (state.shouldersDirection) {
-                            Direction.DOWN, Direction.LEFT -> cornerRadius
-                            Direction.UP, Direction.RIGHT -> CornerRadius.Zero
-                        },
-                        bottomRight = when (state.shouldersDirection) {
-                            Direction.DOWN, Direction.RIGHT -> cornerRadius
-                            Direction.UP, Direction.LEFT -> CornerRadius.Zero
-                        },
+                        topLeft = roundTopLeft(state.shouldersDirection),
+                        topRight = roundTopRight(state.shouldersDirection),
+                        bottomLeft = roundBottomLeft(state.shouldersDirection),
+                        bottomRight = roundBottomRight(state.shouldersDirection),
                     ),
                 )
             }
@@ -96,22 +105,10 @@ fun DrawScope.drawBody(state: GameState, shouldersPath: Path, bottomPath: Path) 
                             offset = Offset(bottom.x * state.cellSize, bottom.y * state.cellSize),
                             size = Size(state.cellSize, state.cellSize),
                         ),
-                        topLeft = when (state.tailDirection) {
-                            Direction.UP, Direction.LEFT -> cornerRadius
-                            Direction.DOWN, Direction.RIGHT -> CornerRadius.Zero
-                        },
-                        topRight = when (state.tailDirection) {
-                            Direction.UP, Direction.RIGHT -> cornerRadius
-                            Direction.DOWN, Direction.LEFT -> CornerRadius.Zero
-                        },
-                        bottomLeft = when (state.tailDirection) {
-                            Direction.DOWN, Direction.LEFT -> cornerRadius
-                            Direction.UP, Direction.RIGHT -> CornerRadius.Zero
-                        },
-                        bottomRight = when (state.tailDirection) {
-                            Direction.DOWN, Direction.RIGHT -> cornerRadius
-                            Direction.UP, Direction.LEFT -> CornerRadius.Zero
-                        },
+                        topLeft = roundTopLeft(state.tailDirection),
+                        topRight = roundTopRight(state.tailDirection),
+                        bottomLeft = roundBottomLeft(state.tailDirection),
+                        bottomRight = roundBottomRight(state.tailDirection),
                     ),
                 )
             }
