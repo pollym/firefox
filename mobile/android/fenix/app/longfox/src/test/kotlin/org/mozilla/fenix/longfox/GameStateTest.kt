@@ -154,6 +154,57 @@ class GameStateTest {
         assertTrue(state.moveFox().isGameOver)
     }
 
+    @Test
+    fun `game not over when fox head moves into space where tail used to be`() {
+        //before move (<- direction = left)
+        //
+        //⬛️1️⃣2️⃣3️⃣4️⃣5️⃣
+        //1️⃣⬛️⬛️⬛️⬛️⬛️
+        //2️⃣⬛️⬛️⬛️⬛️⬛️
+        //3️⃣⬛️⬛️⬛️⬛️⬛️
+        //4️⃣⬛️⬛️🟧🦊🟧
+        //5️⃣⬛️⬛️🟧⬛️🟧
+        //6️⃣⬛️⬛️🟧🟧🟧
+
+        //after move
+        //
+        //⬛️1️⃣2️⃣3️⃣4️⃣5️⃣
+        //1️⃣⬛️⬛️⬛️⬛️⬛️
+        //2️⃣⬛️⬛️⬛️⬛️⬛️
+        //3️⃣⬛️⬛️⬛️⬛️⬛️
+        //4️⃣⬛️⬛️🦊🟧🟧
+        //5️⃣⬛️⬛️🟧⬛️🟧
+        //6️⃣⬛️⬛️🟧🟧🟧
+
+       val initialState = state(
+            direction = Direction.LEFT,
+            fox = listOf(
+                GridPoint(4, 4),
+                GridPoint(5, 4),
+                GridPoint(5, 5),
+                GridPoint(5, 6),
+                GridPoint(4, 6),
+                GridPoint(3, 6),
+                GridPoint(3, 5),
+                GridPoint(3, 4),
+            ),
+        )
+        val expectedFoxStateAfterMove = listOf(
+            GridPoint(3, 4),
+            GridPoint(4, 4),
+            GridPoint(5, 4),
+            GridPoint(5, 5),
+            GridPoint(5, 6),
+            GridPoint(4, 6),
+            GridPoint(3, 6),
+            GridPoint(3, 5),
+        )
+        assertFalse(initialState.isGameOver)
+        val newState = initialState.moveFox()
+        assertEquals(expectedFoxStateAfterMove, newState.fox)
+        assertFalse(newState.isGameOver)
+    }
+
     // --- moveFox: eating food ---
 
     @Test
