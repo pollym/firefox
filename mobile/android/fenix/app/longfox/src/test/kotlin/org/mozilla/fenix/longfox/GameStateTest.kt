@@ -208,6 +208,92 @@ class GameStateTest {
     // --- moveFox: eating food ---
 
     @Test
+    fun `if you eat food then immediately crash into yourself you die`() {
+        // frame 1 (<- direction = left)
+        //
+        //⬛️1️⃣2️⃣3️⃣4️⃣5️⃣
+        //1️⃣⬛️⬛️⬛️⬛️⬛️
+        //2️⃣⬛️⬛️⬛️⬛️⬛️
+        //3️⃣⬛️⬛️🟧⬛️⬛️
+        //4️⃣⬛️⬛️🟧🍎🦊
+        //5️⃣⬛️⬛️🟧⬛️🟧
+        //6️⃣⬛️⬛️🟧🟧🟧
+        //
+        // frame 2 (<- direction = left)
+        // NB tail stays where it was
+        //
+        //⬛️1️⃣2️⃣3️⃣4️⃣5️⃣
+        //1️⃣⬛️⬛️⬛️⬛️⬛️
+        //2️⃣⬛️⬛️⬛️⬛️⬛️
+        //3️⃣⬛️⬛️🟧⬛️⬛️
+        //4️⃣⬛️⬛️🟧🦊🟧
+        //5️⃣⬛️⬛️🟧⬛️🟧
+        //6️⃣⬛️⬛️🟧🟧🟧
+        //
+        // frame 3: tail moves but head moves into tail. game over :(
+        //
+        //⬛️1️⃣2️⃣3️⃣4️⃣5️⃣
+        //1️⃣⬛️⬛️⬛️⬛️⬛️
+        //2️⃣⬛️⬛️⬛️⬛️⬛️
+        //3️⃣⬛️⬛️⬛️⬛️⬛️
+        //4️⃣⬛️⬛️💥🟧🟧
+        //5️⃣⬛️⬛️🟧⬛️🟧
+        //6️⃣⬛️⬛️🟧🟧🟧
+
+        val frame1state = state(
+            direction = Direction.LEFT,
+            fox = listOf(
+                GridPoint(5, 4),
+                GridPoint(5, 5),
+                GridPoint(5, 6),
+                GridPoint(4, 6),
+                GridPoint(3, 6),
+                GridPoint(3, 5),
+                GridPoint(3, 4),
+                GridPoint(3, 3),
+            ),
+            food = GridPoint(4, 4),
+        )
+        val expectedFrame2State = state(
+            direction = Direction.LEFT,
+            fox = listOf(
+                GridPoint(4, 4),    // 🦊 new head added one cell left
+                GridPoint(5, 4),
+                GridPoint(5, 5),
+                GridPoint(5, 6),
+                GridPoint(4, 6),
+                GridPoint(3, 6),
+                GridPoint(3, 5),
+                GridPoint(3, 4),
+                GridPoint(3, 3),    // tail remains in the same position
+            ),
+        )
+        // move the fox to eat the food. this is fine
+        val actualFrame2state: GameState = frame1state.moveFox()
+        assertFalse(actualFrame2state.isGameOver)
+        assertEquals(expectedFrame2State.fox, actualFrame2state.fox)
+
+        val expectedFrame3State = state(
+            direction = Direction.LEFT,
+            fox = listOf(
+                GridPoint(3, 4),    // 🦊 = 💥
+                GridPoint(4, 4),
+                GridPoint(5, 4),
+                GridPoint(5, 5),
+                GridPoint(5, 6),
+                GridPoint(4, 6),
+                GridPoint(3, 6),
+                GridPoint(3, 5),
+                GridPoint(3, 4),    // 💥
+            ),
+        )
+        // move the fox again into itself. this is game over
+        val actualFrame3state: GameState = actualFrame2state.moveFox()
+        assertTrue(actualFrame3state.isGameOver)
+        assertEquals(expectedFrame3State.fox, actualFrame3state.fox)
+    }
+
+    @Test
     fun `fox grows when eating food`() {
         val hungryFox = state(
             direction = Direction.DOWN,
