@@ -25,13 +25,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,9 +55,9 @@ fun NewGameScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val hiscore by longFoxDataStore.hiscoreFlow()
-        .collectAsState(initial = 0, coroutineScope.coroutineContext)
+        .collectAsState(initial = null, coroutineScope.coroutineContext)
     val soundOn by longFoxDataStore.soundOnFlow()
-        .collectAsState(initial = false, coroutineScope.coroutineContext)
+        .collectAsState(initial = null, coroutineScope.coroutineContext)
     var gameState by remember(initialGameState.numCells) {
         mutableStateOf(
             initialGameState.copy(
@@ -95,39 +95,47 @@ fun NewGameScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                fontFamily = LongFoxText.arcade,
                 color = Color(0xffff5500),
                 text = stringResource(R.string.longfox)
             )
             Text(
-                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 8.dp),
+                fontSize = 10.sp,
+                fontFamily = LongFoxText.arcade,
                 color = Color.Yellow,
                 text = stringResource(R.string.likes_cookies)
             )
             Text(
-                modifier = Modifier.padding(top = 8.dp),
-                fontSize = 16.sp,
+                modifier = Modifier.padding(top = 10.dp),
+                fontSize = 12.sp,
+                fontFamily = LongFoxText.arcade,
                 fontStyle = FontStyle.Italic,
                 color = Color.Green,
                 text = stringResource(R.string.tap_to_play)
             )
             Text(
-                modifier = Modifier.padding(top = 36.dp, bottom = 36.dp),
-                fontSize = 22.sp,
+                modifier = Modifier
+                    .alpha(if (hiscore != null) 1f else 0f)
+                    .padding(top = 36.dp, bottom = 36.dp),
+                fontSize = 16.sp,
+                fontFamily = LongFoxText.arcade,
                 color = Color.Cyan,
-                text = stringResource(R.string.hiscore, hiscore)
+                text = stringResource(R.string.hiscore, hiscore ?: 0)
             )
             Text(
                 modifier = Modifier
-                    .border(width = 2.dp, Color.DarkGray)
+                    .alpha(if (soundOn != null) 1f else 0f)
+                    .border(width = 2.dp, color = if (soundOn == true) Color.White else Color.Gray)
                     .padding(8.dp)
                     .clickable { coroutineScope.launch { longFoxDataStore.toggleSoundOn() } },
-                fontSize = 16.sp,
-                color = if (soundOn) Color.White else Color.Gray,
-                text = if (soundOn) stringResource(R.string.sound_on) else stringResource(R.string.sound_off)
+                fontFamily = LongFoxText.arcade,
+                fontSize = 14.sp,
+                color = if (soundOn == true) Color.White else Color.Gray,
+                text = if (soundOn == true) stringResource(R.string.sound_on) else stringResource(R.string.sound_off)
             )
-        }
+        } 
     }
 }
 
