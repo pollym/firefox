@@ -47,6 +47,7 @@ class IntentReceiverActivity : Activity() {
         // assumes it is not. If it's null, then we make a new one and open
         // the HomeActivity.
         val intent = intent?.let { Intent(it) } ?: Intent()
+        intent.setExtrasClassLoader(classLoader)
         intent.sanitize().stripUnwantedFlags()
 
         // DO NOT MOVE the app link intent launch type setting below the super.onCreate call
