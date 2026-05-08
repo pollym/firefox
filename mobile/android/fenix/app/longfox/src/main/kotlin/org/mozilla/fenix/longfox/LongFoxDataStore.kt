@@ -7,6 +7,7 @@
 package org.mozilla.fenix.longfox
 
 import android.content.Context
+import android.content.Intent
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -55,5 +56,22 @@ class LongFoxDataStore(private val context: Context) {
                 preferences[soundOnKey] = !(preferences[soundOnKey] ?: false)
             }
         }
+    }
+
+    /**
+     * Allow hiscore to be shared to other social apps.
+     *
+     * @param hiscore the highest score you have currently been able to manage
+     */
+    fun shareHiscore(hiscore: Int) {
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            val longestFox = "🦊${"🟧".repeat(hiscore)}"
+            val hiscoreString = context.getString(R.string.my_longest_fox_is, hiscore, longestFox)
+            putExtra(Intent.EXTRA_TEXT, hiscoreString)
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        context.startActivity(shareIntent, null)
     }
 }

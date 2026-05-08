@@ -18,4 +18,10 @@
     <string name="sound_off">🔇 sound off</string>
     <!-- Back button -->
     <string name="back">back</string>
+    <!-- Share hiscore action label. hiscore is an abbreviation for "Highest Score" -->
+    <string name="share_hiscore">Share hiscore</string>
+    <!-- The longest fox is your best game achievement so far (based on your highest score).
+    %1$d is a placeholder for the current highest score.
+    %2$s is a placeholder for a string representation of the longest fox. -->
+    <string name="my_longest_fox_is">My longest fox is %1$d! %2$s</string>
 </resources>

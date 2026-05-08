@@ -6,15 +6,21 @@
 
 package org.mozilla.fenix.longfox
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,6 +35,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -112,12 +119,28 @@ fun NewGameScreen(
                 color = Color.Green,
                 text = stringResource(R.string.tap_to_play)
             )
-            Text(
-                modifier = Modifier.padding(top = 36.dp, bottom = 36.dp),
-                fontSize = 22.sp,
-                color = Color.Cyan,
-                text = stringResource(R.string.hiscore, hiscore)
-            )
+            if (hiscore > 0) {
+                TextButton(
+                    modifier = Modifier
+                        .padding(top = 36.dp, bottom = 36.dp)
+                        .background(Color.Transparent),
+                    onClick = { longFoxDataStore.shareHiscore(hiscore) },
+                ) {
+                    Text(
+                        fontSize = 22.sp,
+                        color = Color.Cyan,
+                        text = stringResource(R.string.hiscore, hiscore)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Icon(
+                        painter = painterResource(R.drawable.outline_share_24),
+                        tint = Color.Cyan,
+                        contentDescription = stringResource(R.string.share_hiscore)
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.height(96.dp))
+            }
             Text(
                 modifier = Modifier
                     .border(width = 2.dp, Color.DarkGray)
@@ -137,7 +160,11 @@ fun NewGameScreenPreview() {
     val numCells = 18
     val canvasSizePx = CELL_SIZE_DP * numCells * LocalDensity.current.density
     NewGameScreen(
-        initialGameState = GameState(numCells = numCells, size = Size(canvasSizePx, canvasSizePx), isGameOver = true),
+        initialGameState = GameState(
+            numCells = numCells,
+            size = Size(canvasSizePx, canvasSizePx),
+            isGameOver = true
+        ),
         longFoxDataStore = LongFoxDataStore(LocalContext.current),
         startGame = {},
     )
