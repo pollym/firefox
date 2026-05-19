@@ -85,9 +85,11 @@ fun LongFoxGameScreen() {
         val context = LocalContext.current
         val coroutineScope = rememberCoroutineScope()
         val longFoxDataStore = remember(context) { LongFoxDataStore(context) }
+        val hiscore by longFoxDataStore.hiscoreFlow()
+            .collectAsState(initial = null, coroutineScope.coroutineContext)
         val soundOn by longFoxDataStore.soundOnFlow()
-            .collectAsState(initial = false, coroutineScope.coroutineContext)
-        val soundEffectsPlayer = remember(soundOn) { SoundEffectsPlayer(context, soundOn) }
+            .collectAsState(initial = null, coroutineScope.coroutineContext)
+        val soundEffectsPlayer = remember(soundOn) { SoundEffectsPlayer(context, soundOn == true) }
 
         DisposableEffect(soundEffectsPlayer) {
             onDispose { soundEffectsPlayer.release() }
@@ -150,8 +152,10 @@ fun LongFoxGameScreen() {
         ) {
             if (gameState.isGameOver) {
                 NewGameScreen(
-                    longFoxDataStore = longFoxDataStore,
                     initialGameState = gameState,
+                    hiscore = hiscore,
+                    soundOn = soundOn,
+                    onToggleSoundOn = { coroutineScope.launch { longFoxDataStore.toggleSoundOn() } },
                     startGame = restartGame,
                 )
             } else {
