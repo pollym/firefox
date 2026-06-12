@@ -229,6 +229,13 @@ internal fun Homepage(
                                 }
                             }
 
+                            val longfoxEntryPointShown = longfoxEnabled && showPrivacyReport
+                            LaunchedEffect(longfoxEntryPointShown) {
+                                if (longfoxEntryPointShown) {
+                                    interactor.onLongfoxEntryPointShown()
+                                }
+                            }
+
                             if (showTopSites) {
                                 TopSitesSection(
                                     topSites = topSites,
