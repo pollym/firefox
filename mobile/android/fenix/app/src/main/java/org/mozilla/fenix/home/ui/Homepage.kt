@@ -222,7 +222,7 @@ internal fun Homepage(
                             val appStore = components.appStore
                             LaunchedEffect(showLongfoxAnimation) {
                                 if (showLongfoxAnimation) {
-                                    settings.longfoxEntryPointShownCount++
+                                    settings.longfoxPeekAnimationShownCount++
                                     appStore.dispatch(
                                         AppAction.UpdateShowFoxPeekAnimation(false),
                                     )
