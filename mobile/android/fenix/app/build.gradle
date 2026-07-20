@@ -10,6 +10,7 @@ plugins {
     id 'org.mozilla.nimbus-gradle-plugin'
     id 'ApkSizePlugin'
     id 'jacoco'
+    id 'org.sonarqube' version '7.3.1.8318'
     alias(libs.plugins.androidx.safeargs)
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.kotlin.compose)
