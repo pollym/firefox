@@ -64,7 +64,9 @@ import org.mozilla.fenix.compose.snackbar.SnackbarState
 import org.mozilla.fenix.e2e.SystemInsetsPaddedFragment
 import org.mozilla.fenix.ext.application
 import org.mozilla.fenix.ext.components
+import org.mozilla.fenix.ext.getBottomToolbarHeight
 import org.mozilla.fenix.ext.getRectWithScreenLocation
+import org.mozilla.fenix.ext.getTopToolbarHeight
 import org.mozilla.fenix.ext.isGoogleSearchEngine
 import org.mozilla.fenix.ext.nav
 import org.mozilla.fenix.ext.navigateSafe
@@ -77,6 +79,8 @@ import org.mozilla.fenix.onboarding.OnboardingFragmentDirections
 import org.mozilla.fenix.onboarding.OnboardingReason
 import org.mozilla.fenix.onboarding.OnboardingTelemetryRecorder
 import org.mozilla.fenix.onboarding.continuous.ContinuousOnboardingFeature
+import org.mozilla.fenix.pdf.PdfToolsBinding
+import org.mozilla.fenix.pdf.PdfToolsIntegration
 import org.mozilla.fenix.settings.downloads.DownloadLocationManager
 import org.mozilla.fenix.shortcut.PwaOnboardingObserver
 import org.mozilla.fenix.summarization.SummarizationNavigator
@@ -94,6 +98,8 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler, SystemIns
     private val openInAppOnboardingObserver = ViewBoundFeatureWrapper<OpenInAppOnboardingObserver>()
     private val translationsBinding = ViewBoundFeatureWrapper<TranslationsBinding>()
     private val translationsBannerIntegration = ViewBoundFeatureWrapper<TranslationsBannerIntegration>()
+    private val pdfToolsBinding = ViewBoundFeatureWrapper<PdfToolsBinding>()
+    private val pdfToolsIntegration = ViewBoundFeatureWrapper<PdfToolsIntegration>()
     private val ipProtectionOnboardingPrompt = ViewBoundFeatureWrapper<IPProtectionOnboardingPrompt>()
     private val continuousOnboardingFeature = ViewBoundFeatureWrapper<ContinuousOnboardingFeature>()
     private var qrScanFenixFeature: ViewBoundFeatureWrapper<QrScanFenixFeature>? =
@@ -163,6 +169,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler, SystemIns
 
         initBrowserToolbarComposableUpdates(view)
         initTranslationsUpdates(context = context, rootView = view)
+        initPdfTools(context = context, rootView = view)
         initIPProtectionOnboarding(context, view)
         initContinuousOnboardingFeature()
 
@@ -314,6 +321,32 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler, SystemIns
                     onTranslationStatusUpdate = {},
                     onShowTranslationsDialog = ::openTranslationsDialogFromToolbar,
                     navController = findNavController(),
+                ),
+                owner = this,
+                view = rootView,
+            )
+        }
+    }
+
+    private fun initPdfTools(context: Context, rootView: View) {
+        if (context.components.settings.enablePdfTools) {
+            pdfToolsIntegration.set(
+                feature = PdfToolsIntegration(
+                    container = binding.browserLayout,
+                    topToolbarHeight = { getTopToolbarHeight() },
+                    bottomToolbarHeight = { getBottomToolbarHeight() },
+                ),
+                owner = this,
+                view = rootView,
+            )
+
+            pdfToolsBinding.set(
+                feature = PdfToolsBinding(
+                    browserStore = context.components.core.store,
+                    settings = context.components.settings,
+                    onPdfToolsVisibilityChanged = { isVisible ->
+                        pdfToolsIntegration.get()?.setVisible(isVisible)
+                    },
                 ),
                 owner = this,
                 view = rootView,
