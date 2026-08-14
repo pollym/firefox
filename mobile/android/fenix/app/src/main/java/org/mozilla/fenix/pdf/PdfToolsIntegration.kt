@@ -5,12 +5,17 @@
 package org.mozilla.fenix.pdf
 
 import android.view.Gravity
-import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.map
+import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.compose.base.theme.layout.AcornWindowSize
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import org.mozilla.fenix.pdf.ui.PdfTools
@@ -18,39 +23,23 @@ import org.mozilla.fenix.theme.FirefoxTheme
 
 /**
  * This integration is responsible for adding or removing PDF tools and properly anchoring it to the browser.
+ * The tools render themselves only while the selected tab is displaying a PDF.
  *
- * @param container The containing browser [ViewGroup] to add the PDF tools onto.
+ * @param container The containing browser [CoordinatorLayout] to add the PDF tools onto.
+ * @param browserStore The [BrowserStore] to observe the PDF status of the selected tab.
  * @param topToolbarHeight The top toolbar height on the browser.
  * @param bottomToolbarHeight The bottom toolbar height on the browser.
  */
 class PdfToolsIntegration(
-    private val container: ViewGroup,
+    private val container: CoordinatorLayout,
+    private val browserStore: BrowserStore,
     private val topToolbarHeight: () -> Int,
     private val bottomToolbarHeight: () -> Int,
 ) : LifecycleAwareFeature {
 
     private var pdfTools: ComposeView? = null
 
-    override fun start() = Unit
-
-    override fun stop() {
-        removePdfTools()
-    }
-
-    /**
-     * Controls the visibility of the PDF tools.
-     *
-     * @param isVisible If the PDF tools should be shown (e.g., the page content is a PDF).
-     */
-    fun setVisible(isVisible: Boolean) {
-        if (isVisible) {
-            addPdfTools()
-        } else {
-            removePdfTools()
-        }
-    }
-
-    private fun addPdfTools() {
+    override fun start() {
         if (pdfTools != null) {
             return
         }
@@ -69,7 +58,7 @@ class PdfToolsIntegration(
         container.addView(pdfTools)
     }
 
-    private fun removePdfTools() {
+    override fun stop() {
         container.removeView(pdfTools)
         pdfTools = null
     }
@@ -106,17 +95,42 @@ class PdfToolsIntegration(
         }
 
         FirefoxTheme {
-            PdfTools(
+            PdfToolsContent(
+                browserStore = browserStore,
                 isLargeWindow = isLargeWindow,
-                // Bug 2054910
-                onSignClick = {},
-                // Bug 2054916
-                onDownloadClick = {},
-                // Bug 2054917
-                onPrintClick = {},
-                // Bug 2054918
-                onShareClick = {},
             )
         }
+    }
+}
+
+/**
+ * Shows the [PdfTools] while the selected tab is displaying a PDF, and nothing otherwise.
+ *
+ * @param browserStore The [BrowserStore] to observe the PDF status of the selected tab.
+ * @param isLargeWindow Used to determine if the device should be treated as a tablet.
+ */
+@Composable
+internal fun PdfToolsContent(
+    browserStore: BrowserStore,
+    isLargeWindow: Boolean,
+) {
+    val isPdf by remember {
+        browserStore.stateFlow.map { it.selectedTab?.content?.isPdf == true }
+    }.collectAsStateWithLifecycle(
+        initialValue = browserStore.state.selectedTab?.content?.isPdf == true,
+    )
+
+    if (isPdf) {
+        PdfTools(
+            isLargeWindow = isLargeWindow,
+            // Bug 2054910
+            onSignClick = {},
+            // Bug 2054916
+            onDownloadClick = {},
+            // Bug 2054917
+            onPrintClick = {},
+            // Bug 2054918
+            onShareClick = {},
+        )
     }
 }
