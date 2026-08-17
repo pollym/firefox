@@ -7,9 +7,15 @@ package org.mozilla.fenix.pdf
 import android.view.Gravity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.test.core.app.ApplicationProvider
+import io.mockk.mockk
+import kotlinx.coroutines.test.TestScope
+import mozilla.components.browser.state.action.BrowserAction
+import mozilla.components.browser.state.action.EngineAction
+import mozilla.components.browser.state.engine.EngineMiddleware
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.createTab
 import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.support.test.middleware.CaptureActionsMiddleware
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,15 +26,21 @@ import org.robolectric.annotation.Config
 class PdfToolsIntegrationTest {
     private val topToolbarHeight = 100
     private val bottomToolbarHeight = 200
+    private val tabId = "1"
 
     private val container = CoordinatorLayout(ApplicationProvider.getApplicationContext())
 
+    private val captureActionsMiddleware = CaptureActionsMiddleware<BrowserState, BrowserAction>()
+
     private val browserStore =
         BrowserStore(
-            BrowserState(
-                tabs = listOf(createTab(url = "https://mozilla.org", id = "1")),
-                selectedTabId = "1",
-            )
+            initialState =
+                BrowserState(
+                    tabs = listOf(createTab(url = "https://mozilla.org", id = tabId)),
+                    selectedTabId = tabId,
+                ),
+            middleware =
+                listOf(captureActionsMiddleware) + EngineMiddleware.create(engine = mockk(), scope = TestScope()),
         )
 
     private fun integration() =
@@ -92,5 +104,14 @@ class PdfToolsIntegrationTest {
         assertEquals(Gravity.TOP, layoutParams.gravity)
         assertEquals(topToolbarHeight, layoutParams.topMargin)
         assertEquals(0, layoutParams.bottomMargin)
+    }
+
+    @Test
+    fun `WHEN download is activated THEN the selected tab is saved as a PDF`() {
+        integration().handleDownloadClick()
+
+        captureActionsMiddleware.assertFirstAction(EngineAction.SaveToPdfAction::class) {
+            assertEquals(tabId, it.tabId)
+        }
     }
 }
