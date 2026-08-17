@@ -64,7 +64,9 @@ import org.mozilla.fenix.compose.snackbar.SnackbarState
 import org.mozilla.fenix.e2e.SystemInsetsPaddedFragment
 import org.mozilla.fenix.ext.application
 import org.mozilla.fenix.ext.components
+import org.mozilla.fenix.ext.getBottomToolbarHeight
 import org.mozilla.fenix.ext.getRectWithScreenLocation
+import org.mozilla.fenix.ext.getTopToolbarHeight
 import org.mozilla.fenix.ext.isGoogleSearchEngine
 import org.mozilla.fenix.ext.nav
 import org.mozilla.fenix.ext.navigateSafe
@@ -77,6 +79,7 @@ import org.mozilla.fenix.onboarding.OnboardingFragmentDirections
 import org.mozilla.fenix.onboarding.OnboardingReason
 import org.mozilla.fenix.onboarding.OnboardingTelemetryRecorder
 import org.mozilla.fenix.onboarding.continuous.ContinuousOnboardingFeature
+import org.mozilla.fenix.pdf.PdfToolsIntegration
 import org.mozilla.fenix.settings.downloads.DownloadLocationManager
 import org.mozilla.fenix.summarization.SummarizationNavigator
 import org.mozilla.fenix.termsofuse.store.Surface
@@ -89,6 +92,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler, SystemIns
     private val openInAppOnboardingObserver = ViewBoundFeatureWrapper<OpenInAppOnboardingObserver>()
     private val translationsBinding = ViewBoundFeatureWrapper<TranslationsBinding>()
     private val translationsBannerIntegration = ViewBoundFeatureWrapper<TranslationsBannerIntegration>()
+    private val pdfToolsIntegration = ViewBoundFeatureWrapper<PdfToolsIntegration>()
     private val continuousOnboardingFeature = ViewBoundFeatureWrapper<ContinuousOnboardingFeature>()
     private var qrScanFenixFeature: ViewBoundFeatureWrapper<QrScanFenixFeature>? =
         ViewBoundFeatureWrapper<QrScanFenixFeature>()
@@ -158,6 +162,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler, SystemIns
 
         initBrowserToolbarComposableUpdates(view)
         initTranslationsUpdates(context = context, rootView = view)
+        initPdfTools(context = context, rootView = view)
         initContinuousOnboardingFeature()
 
         thumbnailsFeature.set(
@@ -316,6 +321,24 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler, SystemIns
                 view = rootView,
             )
         }
+    }
+
+    private fun initPdfTools(context: Context, rootView: View) {
+        if (!context.components.settings.enablePdfTools) {
+            return
+        }
+
+        pdfToolsIntegration.set(
+            feature =
+                PdfToolsIntegration(
+                    container = binding.browserLayout,
+                    browserStore = context.components.core.store,
+                    topToolbarHeight = { getTopToolbarHeight() },
+                    bottomToolbarHeight = { getBottomToolbarHeight() },
+                ),
+            owner = this,
+            view = rootView,
+        )
     }
 
     private fun initContinuousOnboardingFeature() {
