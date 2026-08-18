@@ -57,6 +57,7 @@ import org.mozilla.fenix.components.appstate.AppAction
 import org.mozilla.fenix.components.appstate.AppAction.SnackbarAction
 import org.mozilla.fenix.components.metrics.installSourcePackage
 import org.mozilla.fenix.components.share.isSystemShareSheetSupported
+import org.mozilla.fenix.components.toolbar.ToolbarPosition
 import org.mozilla.fenix.components.toolbar.gestures.ToolbarHorizontalGesturesHandler
 import org.mozilla.fenix.components.toolbar.gestures.ToolbarVerticalGesturesHandler
 import org.mozilla.fenix.compose.snackbar.Snackbar
@@ -64,9 +65,7 @@ import org.mozilla.fenix.compose.snackbar.SnackbarState
 import org.mozilla.fenix.e2e.SystemInsetsPaddedFragment
 import org.mozilla.fenix.ext.application
 import org.mozilla.fenix.ext.components
-import org.mozilla.fenix.ext.getBottomToolbarHeight
 import org.mozilla.fenix.ext.getRectWithScreenLocation
-import org.mozilla.fenix.ext.getTopToolbarHeight
 import org.mozilla.fenix.ext.isGoogleSearchEngine
 import org.mozilla.fenix.ext.nav
 import org.mozilla.fenix.ext.navigateSafe
@@ -324,7 +323,8 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler, SystemIns
     }
 
     private fun initPdfTools(context: Context, rootView: View) {
-        if (!context.components.settings.enablePdfTools) {
+        val settings = context.components.settings
+        if (!settings.enablePdfTools) {
             return
         }
 
@@ -333,8 +333,7 @@ class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler, SystemIns
                 PdfToolsIntegration(
                     container = binding.browserLayout,
                     browserStore = context.components.core.store,
-                    topToolbarHeight = { getTopToolbarHeight() },
-                    bottomToolbarHeight = { getBottomToolbarHeight() },
+                    isAddressBarAtBottom = settings.toolbarPosition == ToolbarPosition.BOTTOM,
                 ),
             owner = this,
             view = rootView,

@@ -4,13 +4,10 @@
 
 package org.mozilla.fenix.pdf
 
-import android.view.Gravity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -32,14 +29,12 @@ import org.mozilla.fenix.theme.FirefoxTheme
  *
  * @param container The containing browser [CoordinatorLayout] to add the PDF tools onto.
  * @param browserStore The [BrowserStore] to observe the PDF status of the selected tab.
- * @param topToolbarHeight The top toolbar height on the browser.
- * @param bottomToolbarHeight The bottom toolbar height on the browser.
+ * @param isAddressBarAtBottom Whether the address bar is at the bottom of the browser.
  */
 class PdfToolsIntegration(
     private val container: CoordinatorLayout,
     private val browserStore: BrowserStore,
-    private val topToolbarHeight: () -> Int,
-    private val bottomToolbarHeight: () -> Int,
+    private val isAddressBarAtBottom: Boolean,
 ) : LifecycleAwareFeature {
 
     private var pdfTools: ComposeView? = null
@@ -51,45 +46,23 @@ class PdfToolsIntegration(
 
         pdfTools =
             ComposeView(container.context).apply {
+                // The tools are positioned by their behavior, which insets them from the browser chrome.
                 layoutParams =
                     CoordinatorLayout.LayoutParams(
-                        CoordinatorLayout.LayoutParams.MATCH_PARENT,
-                        CoordinatorLayout.LayoutParams.WRAP_CONTENT,
-                    )
+                            CoordinatorLayout.LayoutParams.MATCH_PARENT,
+                            CoordinatorLayout.LayoutParams.WRAP_CONTENT,
+                        )
+                        .apply { behavior = PdfToolsBehavior(isAddressBarAtBottom = isAddressBarAtBottom) }
 
                 setContent { PdfToolsHost() }
             }
 
-        anchorTools(AcornWindowSize.isLargeWindow(container.context))
         container.addView(pdfTools)
     }
 
     override fun stop() {
         container.removeView(pdfTools)
         pdfTools = null
-    }
-
-    /**
-     * Anchors the PDF tools to the toolbar heights and adjusts when changed.
-     *
-     * @param isLargeWindow Used to determine if the device should be treated as a tablet.
-     */
-    private fun anchorTools(isLargeWindow: Boolean) {
-        val params = pdfTools?.layoutParams as? CoordinatorLayout.LayoutParams ?: return
-
-        if (isLargeWindow) {
-            // Tablet UI aligns to the top to form more of a toolbar.
-            params.gravity = Gravity.TOP
-            params.topMargin = topToolbarHeight()
-            params.bottomMargin = 0
-        } else {
-            // Phone UI aligns to the bottom to form a set of FABs.
-            params.gravity = Gravity.BOTTOM
-            params.topMargin = 0
-            params.bottomMargin = bottomToolbarHeight()
-        }
-
-        pdfTools?.layoutParams = params
     }
 
     /** Saves the PDF the selected tab is displaying to the device. */
@@ -102,16 +75,10 @@ class PdfToolsIntegration(
 
     @Composable
     private fun PdfToolsHost() {
-        val isLargeWindow = AcornWindowSize.isLargeWindow()
-        val configuration = LocalConfiguration.current
-        LaunchedEffect(configuration) {
-            anchorTools(isLargeWindow)
-        }
-
         FirefoxTheme {
             PdfToolsContent(
                 browserStore = browserStore,
-                isLargeWindow = isLargeWindow,
+                isLargeWindow = AcornWindowSize.isLargeWindow(),
                 onDownloadClick = ::handleDownloadClick,
             )
         }

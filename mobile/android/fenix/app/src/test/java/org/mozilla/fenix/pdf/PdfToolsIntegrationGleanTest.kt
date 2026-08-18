@@ -46,8 +46,7 @@ class PdfToolsIntegrationGleanTest {
         PdfToolsIntegration(
             container = container,
             browserStore = browserStore,
-            topToolbarHeight = { 0 },
-            bottomToolbarHeight = { 0 },
+            isAddressBarAtBottom = true,
         )
 
     @Test

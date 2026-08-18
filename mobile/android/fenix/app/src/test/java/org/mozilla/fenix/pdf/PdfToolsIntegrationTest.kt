@@ -4,7 +4,6 @@
 
 package org.mozilla.fenix.pdf
 
-import android.view.Gravity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.test.core.app.ApplicationProvider
 import io.mockk.mockk
@@ -17,15 +16,13 @@ import mozilla.components.browser.state.state.createTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.support.test.middleware.CaptureActionsMiddleware
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 class PdfToolsIntegrationTest {
-    private val topToolbarHeight = 100
-    private val bottomToolbarHeight = 200
     private val tabId = "1"
 
     private val container = CoordinatorLayout(ApplicationProvider.getApplicationContext())
@@ -43,12 +40,11 @@ class PdfToolsIntegrationTest {
                 listOf(captureActionsMiddleware) + EngineMiddleware.create(engine = mockk(), scope = TestScope()),
         )
 
-    private fun integration() =
+    private fun integration(isAddressBarAtBottom: Boolean = true) =
         PdfToolsIntegration(
             container = container,
             browserStore = browserStore,
-            topToolbarHeight = { topToolbarHeight },
-            bottomToolbarHeight = { bottomToolbarHeight },
+            isAddressBarAtBottom = isAddressBarAtBottom,
         )
 
     private val layoutParams: CoordinatorLayout.LayoutParams
@@ -87,23 +83,10 @@ class PdfToolsIntegrationTest {
     }
 
     @Test
-    @Config(qualifiers = "sw400dp")
-    fun `GIVEN a phone sized window WHEN the feature is started THEN the tools anchor to the bottom toolbar`() {
+    fun `WHEN the feature is started THEN the tools are positioned by their behavior`() {
         integration().start()
 
-        assertEquals(Gravity.BOTTOM, layoutParams.gravity)
-        assertEquals(bottomToolbarHeight, layoutParams.bottomMargin)
-        assertEquals(0, layoutParams.topMargin)
-    }
-
-    @Test
-    @Config(qualifiers = "sw800dp")
-    fun `GIVEN a tablet sized window WHEN the feature is started THEN the tools anchor to the top toolbar`() {
-        integration().start()
-
-        assertEquals(Gravity.TOP, layoutParams.gravity)
-        assertEquals(topToolbarHeight, layoutParams.topMargin)
-        assertEquals(0, layoutParams.bottomMargin)
+        assertTrue(layoutParams.behavior is PdfToolsBehavior)
     }
 
     @Test
