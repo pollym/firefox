@@ -1,0 +1,37 @@
+# Google Cloud Documentation: https://cloud.google.com/sdk/gcloud/reference/firebase/test/android/run
+# Flank Documentation: https://flank.github.io/flank/
+#
+# Same crawl as arm-robo-test.yml, but against the nightly build type, which is minified and
+# obfuscated. Paths here use the nightly applicationId (org.mozilla.fenix) rather than the debug
+# one, so the GeckoView config is actually picked up.
+gcloud:
+  results-bucket: fenix_test_artifacts
+  record-video: false
+  timeout: 10m
+  async: false
+
+  app: /app/path
+
+  auto-google-login: false
+  use-orchestrator: true
+  environment-variables:
+    clearPackageData: true
+  other-files:
+    /data/local/tmp/org.mozilla.fenix-geckoview-config.yaml: geckoview-configs/org.mozilla.fenix-geckoview-config.yaml
+
+  device:
+    - model: java
+      version: 30
+      locale: en_US
+    - model: m2q
+      version: 36
+      locale: en_US
+
+  type: robo
+  robo-script: robo-scripts/fenix-robo-script.json
+
+flank:
+  project: GOOGLE_PROJECT
+  num-test-runs: 1
+  output-style: compact
+  full-junit-result: true

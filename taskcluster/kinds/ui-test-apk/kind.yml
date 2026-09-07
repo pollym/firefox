@@ -308,6 +308,24 @@ tasks:
         treeherder:
             symbol: fenix-debug(robo-arm)
 
+    fenix-robo-arm-nightly:
+        attributes:
+            build-type: fenix-robo
+        task-context:
+            from-object:
+                app-name: fenix
+        description: Run Robo test against a minified, obfuscated nightly build
+        dependencies:
+            signed-apk-debug-apk: signing-apk-fenix-nightly-nobp
+        fetches:
+            signed-apk-debug-apk:
+                - artifact: target.arm64-v8a.apk
+                  extract: false
+        flank-config: fenix/arm-robo-test-nightly.yml
+        no-test-apk: true
+        treeherder:
+            symbol: fenix-nightly-nobp(robo-arm)
+
     fenix-tae-arm-debug:
         attributes:
             build-type: fenix-debug-firebase
