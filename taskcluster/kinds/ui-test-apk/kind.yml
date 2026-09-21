@@ -235,7 +235,7 @@ tasks:
         optimization:
             skip-unless-backstop: null
         run-on-projects: [autoland-only]
-        flank-config: fenix/arm-start-test.yml
+        flank-config: fenix/arm-nightly-full.yml
         treeherder:
             symbol: fenix-nightly(ui-test-arm-nightly)
 
