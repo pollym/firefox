@@ -12,9 +12,11 @@ import org.junit.Test
 import org.mozilla.fenix.R
 import org.mozilla.fenix.customannotations.Converted
 import org.mozilla.fenix.customannotations.SmokeTest
+import org.mozilla.fenix.helpers.AppAndSystemHelper.isDefaultPinnedShortcutsOnHomepage
 import org.mozilla.fenix.helpers.Constants.RETRY_COUNT
 import org.mozilla.fenix.helpers.Constants.TAG
-import org.mozilla.fenix.helpers.Constants.defaultTopSitesList
+import org.mozilla.fenix.helpers.Constants.defaultPinnedShortcutTitles
+import org.mozilla.fenix.helpers.Constants.sponsoredShortcutTitles
 import org.mozilla.fenix.helpers.DataGenerationHelper.generateRandomString
 import org.mozilla.fenix.helpers.DataGenerationHelper.getStringResource
 import org.mozilla.fenix.helpers.FenixTestRule
@@ -257,8 +259,9 @@ class TopSitesTest {
     fun verifyENLocalesDefaultTopSitesListTest() {
         homeScreen(composeTestRule) {
             verifyExistingTopSitesList()
-            defaultTopSitesList.values.forEach { value ->
-                verifyExistingTopSitesTabs(value)
+            sponsoredShortcutTitles.forEach { title -> verifyExistingTopSitesTabs(title) }
+            if (isDefaultPinnedShortcutsOnHomepage()) {
+                defaultPinnedShortcutTitles.forEach { title -> verifyExistingTopSitesTabs(title) }
             }
             verifyAddShortcutButtonExists()
         }

@@ -48,6 +48,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
+import kotlin.test.assertNotNull
 import mozilla.components.browser.menu.R as menuR
 import mozilla.components.compose.base.R as composeBaseR
 import mozilla.components.compose.browser.toolbar.concept.BrowserToolbarTestTags.ADDRESSBAR_URL_BOX
@@ -85,7 +86,6 @@ import org.mozilla.fenix.home.ui.HomepageTestTag.HOMEPAGE_WORDMARK_TEXT
 import org.mozilla.fenix.home.ui.HomepageTestTag.POCKET_STORIES
 import org.mozilla.fenix.home.ui.HomepageTestTag.PRIVATE_BROWSING_HOMEPAGE_BUTTON
 import org.mozilla.fenix.tabstray.TabsTrayTestTag
-import kotlin.test.assertNotNull
 
 /** Implementation of Robot Pattern for the home screen menu. */
 class HomeScreenRobot(private val composeTestRule: ComposeTestRule) {
@@ -267,11 +267,11 @@ class HomeScreenRobot(private val composeTestRule: ComposeTestRule) {
         val sponsoredShortcut = sponsoredShortcuts()[ordinal - 1]
         assertNotNull(
             sponsoredShortcut.findObject(By.res(TOP_SITE_CARD_FAVICON)),
-            "Sponsored shortcut #$ordinal has no favicon"
+            "Sponsored shortcut #$ordinal has no favicon",
         )
         assertNotNull(
             sponsoredShortcut.findObject(By.textContains(sponsoredShortcutTitle)),
-            "Sponsored shortcut #$ordinal is not titled $sponsoredShortcutTitle"
+            "Sponsored shortcut #$ordinal is not titled $sponsoredShortcutTitle",
         )
     }
 

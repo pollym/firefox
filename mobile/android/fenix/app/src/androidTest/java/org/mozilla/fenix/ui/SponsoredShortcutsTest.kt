@@ -10,9 +10,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mozilla.fenix.customannotations.SmokeTest
+import org.mozilla.fenix.helpers.AppAndSystemHelper.isDefaultPinnedShortcutsOnHomepage
 import org.mozilla.fenix.helpers.Constants.RETRY_COUNT
 import org.mozilla.fenix.helpers.Constants.TAG
-import org.mozilla.fenix.helpers.Constants.defaultTopSitesList
+import org.mozilla.fenix.helpers.Constants.defaultPinnedShortcutTitles
+import org.mozilla.fenix.helpers.Constants.sponsoredShortcutTitles
 import org.mozilla.fenix.helpers.DataGenerationHelper.getSponsoredShortcutTitle
 import org.mozilla.fenix.helpers.FenixTestRule
 import org.mozilla.fenix.helpers.HomeActivityIntentTestRule
@@ -71,8 +73,9 @@ class SponsoredShortcutsTest {
     fun verifySponsoredShortcutsListTest() {
         homeScreen(composeTestRule) {
                 verifyExistingTopSitesList()
-                defaultTopSitesList.values.forEach { value ->
-                    verifyExistingTopSitesTabs(value)
+                sponsoredShortcutTitles.forEach { title -> verifyExistingTopSitesTabs(title) }
+                if (isDefaultPinnedShortcutsOnHomepage()) {
+                    defaultPinnedShortcutTitles.forEach { title -> verifyExistingTopSitesTabs(title) }
                 }
                 verifyAddShortcutButtonExists()
             }
@@ -86,7 +89,9 @@ class SponsoredShortcutsTest {
             .goBack {}
             .goBack(composeTestRule) {
                 verifyNotExistingSponsoredTopSitesList()
-                verifyAddShortcutButtonExists()
+                if (isDefaultPinnedShortcutsOnHomepage()) {
+                    verifyAddShortcutButtonExists()
+                }
             }
     }
 
