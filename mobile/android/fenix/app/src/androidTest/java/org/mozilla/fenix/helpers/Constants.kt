@@ -41,8 +41,8 @@ object Constants {
             "DuckDuckGo" to "t=fpas",
         )
 
-    val firstSponsoredShortcutTitle by lazy { getSponsoredShortcutTitle(2) }
-    val secondSponsoredShortcutTitle by lazy { getSponsoredShortcutTitle(3) }
+    val firstSponsoredShortcutTitle by lazy { getSponsoredShortcutTitle(1) }
+    val secondSponsoredShortcutTitle by lazy { getSponsoredShortcutTitle(2) }
 
     // Expected for en-us defaults
     val defaultTopSitesList by lazy {

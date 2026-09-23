@@ -95,7 +95,7 @@ class SponsoredShortcutsTest {
     fun openSponsoredShortcutTest() {
         homeScreen(composeTestRule) {
                 verifyExistingTopSitesList()
-                sponsoredShortcutTitle = getSponsoredShortcutTitle(2)
+                sponsoredShortcutTitle = getSponsoredShortcutTitle(1)
             }
             .openTopSiteTabWithTitle(sponsoredShortcutTitle) {
                 verifyUrl(sponsoredShortcutTitle)
@@ -107,7 +107,7 @@ class SponsoredShortcutsTest {
     fun openSponsoredShortcutInPrivateTabTest() {
         homeScreen(composeTestRule) {
                 verifyExistingTopSitesList()
-                sponsoredShortcutTitle = getSponsoredShortcutTitle(2)
+                sponsoredShortcutTitle = getSponsoredShortcutTitle(1)
             }
             .openContextMenuOnTopSitesWithTitle(sponsoredShortcutTitle) {}
             .openTopSiteInPrivateTab {
@@ -120,7 +120,7 @@ class SponsoredShortcutsTest {
     fun openSponsorsAndYourPrivacyOptionTest() {
         homeScreen(composeTestRule) {
                 verifyExistingTopSitesList()
-                sponsoredShortcutTitle = getSponsoredShortcutTitle(2)
+                sponsoredShortcutTitle = getSponsoredShortcutTitle(1)
             }
             .openContextMenuOnTopSitesWithTitle(sponsoredShortcutTitle) {}
             .clickSponsorsAndPrivacyButton {
@@ -133,7 +133,7 @@ class SponsoredShortcutsTest {
     fun openSponsoredShortcutsSettingsOptionTest() {
         homeScreen(composeTestRule) {
                 verifyExistingTopSitesList()
-                sponsoredShortcutTitle = getSponsoredShortcutTitle(2)
+                sponsoredShortcutTitle = getSponsoredShortcutTitle(1)
             }
             .openContextMenuOnTopSitesWithTitle(sponsoredShortcutTitle) {}
             .clickSponsoredShortcutsSettingsButton {
@@ -146,11 +146,11 @@ class SponsoredShortcutsTest {
     fun verifySponsoredShortcutsDetailsTest() {
         homeScreen(composeTestRule) {
             verifyExistingTopSitesList()
-            sponsoredShortcutTitle = getSponsoredShortcutTitle(2)
-            sponsoredShortcutTitle2 = getSponsoredShortcutTitle(3)
+            sponsoredShortcutTitle = getSponsoredShortcutTitle(1)
+            sponsoredShortcutTitle2 = getSponsoredShortcutTitle(2)
 
-            verifySponsoredShortcutDetails(sponsoredShortcutTitle, 2)
-            verifySponsoredShortcutDetails(sponsoredShortcutTitle2, 3)
+            verifySponsoredShortcutDetails(sponsoredShortcutTitle, 1)
+            verifySponsoredShortcutDetails(sponsoredShortcutTitle2, 2)
         }
     }
 
@@ -165,11 +165,11 @@ class SponsoredShortcutsTest {
 
         homeScreen(composeTestRule) {
             verifyExistingTopSitesList()
-            sponsoredShortcutTitle = getSponsoredShortcutTitle(2)
-            sponsoredShortcutTitle2 = getSponsoredShortcutTitle(3)
+            sponsoredShortcutTitle = getSponsoredShortcutTitle(1)
+            sponsoredShortcutTitle2 = getSponsoredShortcutTitle(2)
 
-            verifySponsoredShortcutDetails(sponsoredShortcutTitle, 2)
-            verifySponsoredShortcutDetails(sponsoredShortcutTitle2, 3)
+            verifySponsoredShortcutDetails(sponsoredShortcutTitle, 1)
+            verifySponsoredShortcutDetails(sponsoredShortcutTitle2, 2)
         }
         navigationToolbar(composeTestRule) {}
             .enterURLAndEnterToBrowser(firstWebPage.url) {
@@ -213,7 +213,7 @@ class SponsoredShortcutsTest {
             }
             .clickAddToShortcutsButton {}
             .goToHomescreen {
-                verifySponsoredShortcutDetails(sponsoredShortcutTitle, 2)
+                verifySponsoredShortcutDetails(sponsoredShortcutTitle, 1)
                 verifySponsoredShortcutDoesNotExist(sponsoredShortcutTitle2, 3)
             }
     }
@@ -234,11 +234,11 @@ class SponsoredShortcutsTest {
         homeScreen(composeTestRule) {
             verifyExistingTopSitesList()
 
-            sponsoredShortcutTitle = getSponsoredShortcutTitle(2)
-            sponsoredShortcutTitle2 = getSponsoredShortcutTitle(3)
+            sponsoredShortcutTitle = getSponsoredShortcutTitle(1)
+            sponsoredShortcutTitle2 = getSponsoredShortcutTitle(2)
 
-            verifySponsoredShortcutDetails(sponsoredShortcutTitle, 2)
-            verifySponsoredShortcutDetails(sponsoredShortcutTitle2, 3)
+            verifySponsoredShortcutDetails(sponsoredShortcutTitle, 1)
+            verifySponsoredShortcutDetails(sponsoredShortcutTitle2, 2)
 
             MockBrowserDataHelper.addPinnedSite(
                 Pair(pagesList[0].title, pagesList[0].url.toString()),

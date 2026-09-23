@@ -59,11 +59,7 @@ class TopSitesTest {
                 homeScreen(composeTestRule) {}
                     .openThreeDotMenu {}
                     .clickSettingsButton {}
-                    .goBack(composeTestRule) {
-                        defaultTopSitesList.values.forEach { value ->
-                            verifyExistingTopSitesTabs(value)
-                        }
-                    }
+                    .goBack(composeTestRule) { verifyExistingTopSitesList() }
 
                 break
             } catch (e: Throwable) {
