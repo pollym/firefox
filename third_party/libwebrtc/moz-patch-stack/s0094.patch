@@ -327,7 +327,7 @@ index 589142b014..2ee80ded55 100644
      }
    }
 diff --git a/examples/BUILD.gn b/examples/BUILD.gn
-index 9c922f8b93..48eb2d09f0 100644
+index 03c73eeed1..0a9d628e74 100644
 --- a/examples/BUILD.gn
 +++ b/examples/BUILD.gn
 @@ -9,15 +9,15 @@
@@ -351,7 +351,7 @@ index 9c922f8b93..48eb2d09f0 100644
  }
  
  group("examples") {
-@@ -626,7 +626,7 @@ if (is_ios || (is_mac && target_cpu != "x86")) {
+@@ -627,7 +627,7 @@ if (is_ios || (is_mac && target_cpu != "x86")) {
            "../sdk:mediaconstraints_objc",
            "../sdk:peerconnectionfactory_base_objc",
            "../sdk:videocapture_objc",
@@ -360,7 +360,7 @@ index 9c922f8b93..48eb2d09f0 100644
            "//third_party/ocmock",
          ]
        }
-@@ -730,7 +730,7 @@ if (is_linux || is_chromeos || is_win) {
+@@ -731,7 +731,7 @@ if (is_linux || is_chromeos || is_win) {
          "peerconnection/client/main_wnd.cc",
          "peerconnection/client/main_wnd.h",
        ]
@@ -603,7 +603,7 @@ index 816450c7df..35feb1c5d0 100644
  
  if (rtc_build_libsrtp) {
 diff --git a/rtc_base/BUILD.gn b/rtc_base/BUILD.gn
-index 8c2eada523..8778447aa4 100644
+index 9bb80655c9..d914cf6d8c 100644
 --- a/rtc_base/BUILD.gn
 +++ b/rtc_base/BUILD.gn
 @@ -9,8 +9,8 @@
