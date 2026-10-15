@@ -292,10 +292,10 @@ index 483928339c..eab43d2068 100644
  
  rtc_library("audio") {
 diff --git a/common_audio/BUILD.gn b/common_audio/BUILD.gn
-index e2a677be25..e752548c71 100644
+index 95e7a33c42..9ce0739968 100644
 --- a/common_audio/BUILD.gn
 +++ b/common_audio/BUILD.gn
-@@ -276,7 +276,7 @@ if (rtc_build_with_neon) {
+@@ -280,7 +280,7 @@ if (rtc_build_with_neon) {
  
      if (target_cpu != "arm64") {
        # Enable compilation for the NEON instruction set.
@@ -304,7 +304,7 @@ index e2a677be25..e752548c71 100644
        cflags = [ "-mfpu=neon" ]
      }
  
-@@ -299,7 +299,7 @@ if (rtc_build_with_neon) {
+@@ -303,7 +303,7 @@ if (rtc_build_with_neon) {
  
      if (target_cpu != "arm64") {
        # Enable compilation for the NEON instruction set.
