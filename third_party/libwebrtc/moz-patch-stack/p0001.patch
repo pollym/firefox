@@ -44,10 +44,10 @@ Cr-Branched-From: 3225248425fe2b3cafe389465b94ebc24968d9ba-refs/heads/main@{#487
  7 files changed, 80 insertions(+), 5 deletions(-)
 
 diff --git a/pc/peer_connection.cc b/pc/peer_connection.cc
-index bf604d7878..ea49e5caf9 100644
+index 035f6b7f04..15a0e4e563 100644
 --- a/pc/peer_connection.cc
 +++ b/pc/peer_connection.cc
-@@ -3127,7 +3127,10 @@ bool PeerConnection::OnTransportChanged(
+@@ -3130,7 +3130,10 @@ bool PeerConnection::OnTransportChanged(
      for (const auto& transceiver :
           rtp_manager()->transceivers()->UnsafeList()) {
        auto internal = transceiver->internal();
