@@ -16,7 +16,7 @@ Mercurial Revision: https://hg.mozilla.org/mozilla-central/rev/4527c41ef71d7683c
  4 files changed, 21 insertions(+), 9 deletions(-)
 
 diff --git a/BUILD.gn b/BUILD.gn
-index 18dcd02ef5..d98b860a4d 100644
+index 674ba97110..ec28e93549 100644
 --- a/BUILD.gn
 +++ b/BUILD.gn
 @@ -542,6 +542,9 @@ if (!rtc_build_ssl) {
@@ -38,7 +38,7 @@ index 18dcd02ef5..d98b860a4d 100644
        ]
        # Added when we removed deps in other places to avoid building
 diff --git a/media/BUILD.gn b/media/BUILD.gn
-index ea259194be..cdf01260eb 100644
+index f06f5fd8e4..df11785619 100644
 --- a/media/BUILD.gn
 +++ b/media/BUILD.gn
 @@ -12,9 +12,7 @@ import("../webrtc.gni")

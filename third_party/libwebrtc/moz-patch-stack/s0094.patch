@@ -74,7 +74,7 @@ index 9962d2845d..485df8f5e1 100644
  # The python interpreter to use by default. On Windows, this will look
  # for python3.exe and python3.bat.
 diff --git a/BUILD.gn b/BUILD.gn
-index 247749e383..3e4433136d 100644
+index 84fec3fdf6..a473978050 100644
 --- a/BUILD.gn
 +++ b/BUILD.gn
 @@ -21,8 +21,8 @@
@@ -292,7 +292,7 @@ index f8ad63d421..d0b6306426 100644
  
  rtc_library("audio") {
 diff --git a/common_audio/BUILD.gn b/common_audio/BUILD.gn
-index e95cf4bada..ba0fa292db 100644
+index e2a677be25..e752548c71 100644
 --- a/common_audio/BUILD.gn
 +++ b/common_audio/BUILD.gn
 @@ -276,7 +276,7 @@ if (rtc_build_with_neon) {
@@ -428,7 +428,7 @@ index ce022a49c7..03505712ad 100644
  
  group("logging") {
 diff --git a/media/BUILD.gn b/media/BUILD.gn
-index 024c29b6c1..ea259194be 100644
+index 4c2ce548db..f06f5fd8e4 100644
 --- a/media/BUILD.gn
 +++ b/media/BUILD.gn
 @@ -6,7 +6,7 @@
