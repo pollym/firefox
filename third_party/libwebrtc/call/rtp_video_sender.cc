@@ -791,6 +791,7 @@ void RtpVideoSender::DeliverRtcp(std::span<const uint8_t> packet) {
 }
 
 void RtpVideoSender::OnNetworkAvailability(bool network_available) {
+  RTC_DCHECK_RUN_ON(&transport_checker_);
   for (const RtpStreamSender& stream : rtp_streams_) {
     stream.rtp_rtcp->SetRTCPStatus(network_available ? rtp_config_.rtcp_mode
                                                      : RtcpMode::kOff);
@@ -798,6 +799,7 @@ void RtpVideoSender::OnNetworkAvailability(bool network_available) {
 }
 
 std::map<uint32_t, RtpState> RtpVideoSender::GetRtpStates() const {
+  RTC_DCHECK_RUN_ON(&transport_checker_);
   std::map<uint32_t, RtpState> rtp_states;
 
   for (size_t i = 0; i < rtp_config_.ssrcs.size(); ++i) {
@@ -827,6 +829,7 @@ std::map<uint32_t, RtpState> RtpVideoSender::GetRtpStates() const {
 
 std::map<uint32_t, RtpPayloadState> RtpVideoSender::GetRtpPayloadStates()
     const {
+  RTC_DCHECK_RUN_ON(&transport_checker_);
   MutexLock lock(&mutex_);
   std::map<uint32_t, RtpPayloadState> payload_states;
   for (const auto& param : params_) {
@@ -838,6 +841,7 @@ std::map<uint32_t, RtpPayloadState> RtpVideoSender::GetRtpPayloadStates()
 
 void RtpVideoSender::OnBitrateUpdated(BitrateAllocationUpdate update,
                                       int framerate) {
+  RTC_DCHECK_RUN_ON(&transport_checker_);
   // Substract overhead from bitrate.
   MutexLock lock(&mutex_);
   if (transport_overhead_bytes_per_packet_ !=
@@ -925,10 +929,12 @@ void RtpVideoSender::OnBitrateUpdated(BitrateAllocationUpdate update,
 }
 
 uint32_t RtpVideoSender::GetPayloadBitrateBps() const {
+  RTC_DCHECK_RUN_ON(&transport_checker_);
   return encoder_target_rate_bps_;
 }
 
 uint32_t RtpVideoSender::GetProtectionBitrateBps() const {
+  RTC_DCHECK_RUN_ON(&transport_checker_);
   return protection_bitrate_bps_;
 }
 
@@ -978,8 +984,8 @@ void RtpVideoSender::SetFecAllowed(bool fec_allowed) {
 
 void RtpVideoSender::OnPacketFeedbackVector(
     std::vector<StreamPacketInfo> packet_feedback_vector) {
+  RTC_DCHECK_RUN_ON(&transport_checker_);
   if (fec_controller_->UseLossVectorMask()) {
-    MutexLock lock(&mutex_);
     for (const StreamPacketInfo& packet : packet_feedback_vector) {
       loss_mask_vector_.push_back(!packet.received);
     }
@@ -1037,11 +1043,13 @@ void RtpVideoSender::OnPacketFeedbackVector(
 void RtpVideoSender::SetEncodingData(size_t width,
                                      size_t height,
                                      size_t num_temporal_layers) {
+  RTC_DCHECK_RUN_ON(&transport_checker_);
   fec_controller_->SetEncodingData(width, height, num_temporal_layers,
                                    rtp_config_.max_packet_size);
 }
 
 void RtpVideoSender::SetCsrcs(std::span<const uint32_t> csrcs) {
+  RTC_DCHECK_RUN_ON(&transport_checker_);
   MutexLock lock(&mutex_);
   csrcs_ = LimitCsrcs(csrcs);
 }
