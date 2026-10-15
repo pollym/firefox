@@ -18,17 +18,17 @@ Mercurial Revision: https://hg.mozilla.org/mozilla-central/rev/d92a578327f524ec3
  4 files changed, 24 insertions(+), 7 deletions(-)
 
 diff --git a/call/rtp_video_sender.cc b/call/rtp_video_sender.cc
-index 26f323ce9d..4daf851957 100644
+index 6e74b590eb..60009e18a9 100644
 --- a/call/rtp_video_sender.cc
 +++ b/call/rtp_video_sender.cc
-@@ -522,6 +522,7 @@ void RtpVideoSender::SetModuleIsActive(bool sending,
+@@ -526,6 +526,7 @@ void RtpVideoSender::SetModuleIsActive(bool sending,
      return;
    }
  
 +  // Sends a kRtcpByeCode when going from true to false.
    rtp_module.SetSendingStatus(sending);
-   rtp_module.SetSendingMediaStatus(sending);
    if (sending) {
+     transport_->RegisterSendingRtpStream(rtp_module);
 diff --git a/modules/rtp_rtcp/source/rtcp_sender.cc b/modules/rtp_rtcp/source/rtcp_sender.cc
 index 825399a025..7c5c53698d 100644
 --- a/modules/rtp_rtcp/source/rtcp_sender.cc
