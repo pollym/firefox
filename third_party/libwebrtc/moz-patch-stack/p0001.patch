@@ -338,10 +338,10 @@ index 73985c3752..20634a977d 100644
  }  // namespace
  }  // namespace webrtc
 diff --git a/modules/rtp_rtcp/source/rtp_sender_video.cc b/modules/rtp_rtcp/source/rtp_sender_video.cc
-index 2db50be886..940496c1d0 100644
+index 42ef5eba04..73a369709a 100644
 --- a/modules/rtp_rtcp/source/rtp_sender_video.cc
 +++ b/modules/rtp_rtcp/source/rtp_sender_video.cc
-@@ -677,15 +677,21 @@ bool RTPSenderVideo::SendVideoFrame(int payload_type,
+@@ -680,15 +680,21 @@ bool RTPSenderVideo::SendVideoFrame(int payload_type,
  
    RTC_DCHECK_GE(single_packet->headers_size(), middle_packet->headers_size());
    limits.single_packet_reduction_len =
