@@ -74,7 +74,7 @@ index 9962d2845d..485df8f5e1 100644
  # The python interpreter to use by default. On Windows, this will look
  # for python3.exe and python3.bat.
 diff --git a/BUILD.gn b/BUILD.gn
-index b63a115cbc..f4021c372e 100644
+index 247749e383..3e4433136d 100644
 --- a/BUILD.gn
 +++ b/BUILD.gn
 @@ -21,8 +21,8 @@
@@ -108,7 +108,7 @@ index b63a115cbc..f4021c372e 100644
      defines = []
  
      deps = [
-@@ -864,7 +864,7 @@ rtc_static_library("dcsctp") {
+@@ -1049,7 +1049,7 @@ rtc_static_library("dcsctp") {
    visibility = [ "//:default" ]
    sources = []
    complete_static_lib = true
@@ -117,7 +117,7 @@ index b63a115cbc..f4021c372e 100644
    defines = []
    deps = [
      "net/dcsctp/public:factory",
-@@ -902,7 +902,7 @@ group("poison_default_neural_residual_echo_estimator") {
+@@ -1087,7 +1087,7 @@ group("poison_default_neural_residual_echo_estimator") {
  if (!build_with_chromium) {
    # Write debug logs to gn_logs.txt.
    # This is also required for Siso builds.
@@ -127,7 +127,7 @@ index b63a115cbc..f4021c372e 100644
              "Generated during 'gn gen' by //BUILD.gn.",
              "",
 diff --git a/api/BUILD.gn b/api/BUILD.gn
-index a14d250ff4..356570f0d1 100644
+index 45acbf8350..6157fcb21c 100644
 --- a/api/BUILD.gn
 +++ b/api/BUILD.gn
 @@ -8,8 +8,8 @@
@@ -142,7 +142,7 @@ index a14d250ff4..356570f0d1 100644
  
  rtc_source_set("call_api") {
 diff --git a/api/audio/test/BUILD.gn b/api/audio/test/BUILD.gn
-index edd3dcd701..c8cdec999b 100644
+index f57fd75de4..b3e18fc253 100644
 --- a/api/audio/test/BUILD.gn
 +++ b/api/audio/test/BUILD.gn
 @@ -8,8 +8,8 @@
@@ -217,7 +217,7 @@ index 9c3c438d43..2b087726f1 100644
  
  rtc_source_set("audio_encoder_g722_config") {
 diff --git a/api/audio_codecs/opus/BUILD.gn b/api/audio_codecs/opus/BUILD.gn
-index f256ef5686..f3737e5b70 100644
+index 335287e87f..027d724e6c 100644
 --- a/api/audio_codecs/opus/BUILD.gn
 +++ b/api/audio_codecs/opus/BUILD.gn
 @@ -8,8 +8,8 @@
@@ -232,7 +232,7 @@ index f256ef5686..f3737e5b70 100644
  
  rtc_library("audio_encoder_opus_config") {
 diff --git a/api/audio_codecs/test/BUILD.gn b/api/audio_codecs/test/BUILD.gn
-index 9b12fcdf59..b32274a9ab 100644
+index 183800df7d..0e45c62714 100644
 --- a/api/audio_codecs/test/BUILD.gn
 +++ b/api/audio_codecs/test/BUILD.gn
 @@ -8,8 +8,8 @@
@@ -247,7 +247,7 @@ index 9b12fcdf59..b32274a9ab 100644
  
  if (rtc_include_tests) {
 diff --git a/api/video/BUILD.gn b/api/video/BUILD.gn
-index 3c5916e09e..cab728bf1f 100644
+index 46371ce1a4..b494ca0450 100644
 --- a/api/video/BUILD.gn
 +++ b/api/video/BUILD.gn
 @@ -8,8 +8,8 @@
@@ -262,7 +262,7 @@ index 3c5916e09e..cab728bf1f 100644
  
  rtc_library("video_rtp_headers") {
 diff --git a/api/video_codecs/BUILD.gn b/api/video_codecs/BUILD.gn
-index 05ce8a8dc6..e040663131 100644
+index ed5849917f..e8b2fe5648 100644
 --- a/api/video_codecs/BUILD.gn
 +++ b/api/video_codecs/BUILD.gn
 @@ -8,8 +8,8 @@
@@ -413,7 +413,7 @@ index d2eabafb59..2f2834fb28 100644
      deps = [
        ":generated_jni",
 diff --git a/logging/BUILD.gn b/logging/BUILD.gn
-index a460cff3e6..6f8e15fb00 100644
+index ce022a49c7..03505712ad 100644
 --- a/logging/BUILD.gn
 +++ b/logging/BUILD.gn
 @@ -11,8 +11,8 @@ if (rtc_enable_protobuf) {
@@ -588,7 +588,7 @@ index 77787c0881..6d08cb2a64 100644
  import("../../webrtc.gni")
  
 diff --git a/pc/BUILD.gn b/pc/BUILD.gn
-index e1234b65b4..f968c7cb9e 100644
+index 780cad1082..2553f48318 100644
 --- a/pc/BUILD.gn
 +++ b/pc/BUILD.gn
 @@ -29,8 +29,8 @@
@@ -603,7 +603,7 @@ index e1234b65b4..f968c7cb9e 100644
  
  if (rtc_build_libsrtp) {
 diff --git a/rtc_base/BUILD.gn b/rtc_base/BUILD.gn
-index b5eaae5a56..e7f507d44e 100644
+index f45db9a49f..726c5396f7 100644
 --- a/rtc_base/BUILD.gn
 +++ b/rtc_base/BUILD.gn
 @@ -9,8 +9,8 @@
@@ -618,7 +618,7 @@ index b5eaae5a56..e7f507d44e 100644
  
  rtc_source_set("protobuf_utils") {
 diff --git a/rtc_base/memory/BUILD.gn b/rtc_base/memory/BUILD.gn
-index 9682dae9fe..4aede9e8ba 100644
+index 8f35b76be4..0a96462f71 100644
 --- a/rtc_base/memory/BUILD.gn
 +++ b/rtc_base/memory/BUILD.gn
 @@ -8,8 +8,8 @@
@@ -633,7 +633,7 @@ index 9682dae9fe..4aede9e8ba 100644
  
  rtc_library("aligned_malloc") {
 diff --git a/rtc_base/synchronization/BUILD.gn b/rtc_base/synchronization/BUILD.gn
-index 77efa54279..658830779d 100644
+index 7bad412472..a302e3e4cb 100644
 --- a/rtc_base/synchronization/BUILD.gn
 +++ b/rtc_base/synchronization/BUILD.gn
 @@ -8,8 +8,8 @@
@@ -648,7 +648,7 @@ index 77efa54279..658830779d 100644
  
  rtc_library("yield") {
 diff --git a/rtc_base/system/BUILD.gn b/rtc_base/system/BUILD.gn
-index af412f6890..51a0e6160c 100644
+index 9f9f1f7a0d..306229f87a 100644
 --- a/rtc_base/system/BUILD.gn
 +++ b/rtc_base/system/BUILD.gn
 @@ -8,8 +8,8 @@
@@ -678,7 +678,7 @@ index 1a9be46904..3520196b3b 100644
      output_extension = "so"
  
 diff --git a/sdk/BUILD.gn b/sdk/BUILD.gn
-index ac7adc4a26..0a95fbc105 100644
+index e532dbd893..b47c3b1555 100644
 --- a/sdk/BUILD.gn
 +++ b/sdk/BUILD.gn
 @@ -9,12 +9,12 @@
@@ -698,7 +698,7 @@ index ac7adc4a26..0a95fbc105 100644
  }
  
  rtc_library("media_constraints") {
-@@ -55,7 +55,7 @@ if (is_ios || is_mac) {
+@@ -56,7 +56,7 @@ if (is_ios || is_mac) {
      ]
  
      if (use_clang_coverage) {
@@ -707,7 +707,7 @@ index ac7adc4a26..0a95fbc105 100644
      }
    }
  
-@@ -1293,7 +1293,7 @@ if (is_ios || is_mac) {
+@@ -1294,7 +1294,7 @@ if (is_ios || is_mac) {
            }
  
            public_deps = [
@@ -780,7 +780,7 @@ index a90fb214c9..9129bb0a77 100644
    }
  }
 diff --git a/webrtc.gni b/webrtc.gni
-index b49696dfc5..8bad1568bd 100644
+index db7cdcf0d4..36f36a4dac 100644
 --- a/webrtc.gni
 +++ b/webrtc.gni
 @@ -5,12 +5,12 @@

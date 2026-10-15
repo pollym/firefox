@@ -18,7 +18,7 @@ Mercurial Revision: https://hg.mozilla.org/mozilla-central/rev/0300b32b7de70fb89
  5 files changed, 10 insertions(+), 3 deletions(-)
 
 diff --git a/BUILD.gn b/BUILD.gn
-index 8057851d25..de272d508a 100644
+index d06bb745be..da75241633 100644
 --- a/BUILD.gn
 +++ b/BUILD.gn
 @@ -274,6 +274,9 @@ config("common_inherited_config") {
@@ -74,7 +74,7 @@ index 20bf4afc44..697bedadb9 100644
  #endif  // defined(WEBRTC_POSIX)
  }
 diff --git a/webrtc.gni b/webrtc.gni
-index daaaeb754d..7a88b15bee 100644
+index e83fbb2a6c..2eeecd6dda 100644
 --- a/webrtc.gni
 +++ b/webrtc.gni
 @@ -347,7 +347,7 @@ rtc_opus_dir = "//third_party/opus"
