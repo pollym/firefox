@@ -521,10 +521,10 @@ index 72f2716e03..dc96455f99 100644
      x_display_->AddEventHandler(xfixes_event_base_ + XFixesCursorNotify, this);
  
 diff --git a/modules/desktop_capture/linux/x11/screen_capturer_x11.cc b/modules/desktop_capture/linux/x11/screen_capturer_x11.cc
-index 6088a3286b..089164ed65 100644
+index 06e6a9331a..4379265558 100644
 --- a/modules/desktop_capture/linux/x11/screen_capturer_x11.cc
 +++ b/modules/desktop_capture/linux/x11/screen_capturer_x11.cc
-@@ -311,7 +311,7 @@ bool ScreenCapturerX11::GetSourceList(SourceList* sources) {
+@@ -331,7 +331,7 @@ bool ScreenCapturerX11::GetSourceList(SourceList* sources) {
  
      // Note name is an X11 Atom used to id the monitor.
      sources->push_back(
