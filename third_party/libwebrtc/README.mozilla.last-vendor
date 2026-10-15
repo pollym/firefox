@@ -1,4 +1,4 @@
 # ./mach python dom/media/webrtc/third_party_build/loop-ff.py
-libwebrtc updated from /home/apehrson/firefox/firefox-hg/.moz-fast-forward/moz-libwebrtc commit mozpatches on 2026-10-15T09:29:42.208243+00:00.
+libwebrtc updated from /home/apehrson/firefox/firefox-hg/.moz-fast-forward/moz-libwebrtc commit mozpatches on 2026-10-15T09:30:30.306420+00:00.
 # base of lastest vendoring
-7c6b661c15
+1a16b16a89
