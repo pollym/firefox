@@ -253,6 +253,7 @@ void RTPSender::SetMaxRtpPacketSize(size_t max_packet_size) {
 }
 
 size_t RTPSender::MaxRtpPacketSize() const {
+  MutexLock lock(&send_mutex_);
   return max_packet_size_;
 }
 
