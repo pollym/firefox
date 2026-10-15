@@ -769,7 +769,7 @@ index 0b87d6d065..d69ae9420b 100644
  }  // namespace webrtc
  
 diff --git a/modules/rtp_rtcp/source/rtp_sender.cc b/modules/rtp_rtcp/source/rtp_sender.cc
-index d93d273aba..90e66cd87a 100644
+index a2d2960eab..85dd2341b2 100644
 --- a/modules/rtp_rtcp/source/rtp_sender.cc
 +++ b/modules/rtp_rtcp/source/rtp_sender.cc
 @@ -143,6 +143,10 @@ bool IsNonVolatile(RTPExtensionType type) {
