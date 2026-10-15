@@ -838,10 +838,10 @@ index 9af656832d..294daa4692 100644
      } else {
        cflags = [
 diff --git a/modules/desktop_capture/BUILD.gn b/modules/desktop_capture/BUILD.gn
-index 203ae52745..d1ba151a7b 100644
+index 5247ec01c5..0cfd6ef2d1 100644
 --- a/modules/desktop_capture/BUILD.gn
 +++ b/modules/desktop_capture/BUILD.gn
-@@ -664,37 +664,12 @@ rtc_library("desktop_capture") {
+@@ -678,37 +678,12 @@ rtc_library("desktop_capture") {
      ]
      deps += [ ":desktop_capture_objc" ]
    }
@@ -879,7 +879,7 @@ index 203ae52745..d1ba151a7b 100644
    }
  
    if (rtc_use_x11_extensions) {
-@@ -857,9 +832,7 @@ rtc_library("desktop_capture") {
+@@ -871,9 +846,7 @@ rtc_library("desktop_capture") {
      deps += [ "../../rtc_base:sanitizer" ]
    }
  
@@ -891,7 +891,7 @@ index 203ae52745..d1ba151a7b 100644
    if (use_desktop_capture_differ_sse2) {
      deps += [ ":desktop_capture_differ_sse2" ]
 diff --git a/modules/portal/BUILD.gn b/modules/portal/BUILD.gn
-index d9c53b9d23..d2ddaa3b38 100644
+index 7fa6ae078e..19b3b3e209 100644
 --- a/modules/portal/BUILD.gn
 +++ b/modules/portal/BUILD.gn
 @@ -11,6 +11,7 @@ import("//tools/generate_stubs/rules.gni")
@@ -915,7 +915,7 @@ index d9c53b9d23..d2ddaa3b38 100644
  
    rtc_library("portal") {
      sources = [
-@@ -129,5 +136,22 @@ if ((is_linux || is_chromeos) && rtc_use_pipewire) {
+@@ -130,5 +137,22 @@ if ((is_linux || is_chromeos) && rtc_use_pipewire) {
  
        deps += [ ":pipewire_stubs" ]
      }
