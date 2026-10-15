@@ -413,10 +413,10 @@ index 316e4365d9..4ff8b2d617 100644
  
  bool RtpExtension::IsSupportedForVideo(absl::string_view uri) {
 diff --git a/call/BUILD.gn b/call/BUILD.gn
-index 41ddd5aed2..c811c3080e 100644
+index 9147ea7d6d..a950a57217 100644
 --- a/call/BUILD.gn
 +++ b/call/BUILD.gn
-@@ -28,6 +28,7 @@ rtc_library("call_interfaces") {
+@@ -25,6 +25,7 @@ rtc_library("call_interfaces") {
    sources = [
      "audio_receive_stream.cc",
      "audio_receive_stream.h",
@@ -424,7 +424,7 @@ index 41ddd5aed2..c811c3080e 100644
      "audio_send_stream.h",
      "audio_state.cc",
      "audio_state.h",
-@@ -40,9 +41,6 @@ rtc_library("call_interfaces") {
+@@ -37,9 +38,6 @@ rtc_library("call_interfaces") {
      "syncable.cc",
      "syncable.h",
    ]
