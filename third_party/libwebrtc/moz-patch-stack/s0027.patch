@@ -470,10 +470,10 @@ index fda8e15021..cc2b831a16 100644
  if (rtc_include_tests) {
    rtc_source_set("test_feedback_generator_interface") {
 diff --git a/call/BUILD.gn b/call/BUILD.gn
-index df7e599a23..75b8bbadbc 100644
+index c811c3080e..ef78fb63a8 100644
 --- a/call/BUILD.gn
 +++ b/call/BUILD.gn
-@@ -51,7 +51,7 @@ rtc_library("call_interfaces") {
+@@ -55,7 +55,7 @@ rtc_library("call_interfaces") {
      "../api:rtp_headers",
      "../api:rtp_packet_info",
      "../api:rtp_parameters",
@@ -660,7 +660,7 @@ index 2e50236dd3..709299a0b5 100644
  
  rtc_library("rtc_audio_video") {
 diff --git a/media/base/media_channel.h b/media/base/media_channel.h
-index 18d5cefd74..6b86d209a2 100644
+index 8277010e1b..aa950b7679 100644
 --- a/media/base/media_channel.h
 +++ b/media/base/media_channel.h
 @@ -72,9 +72,6 @@ namespace webrtc {
