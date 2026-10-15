@@ -1272,7 +1272,7 @@ index c005db16dd..73d84a6854 100644
      "../api:sequence_checker",
      "../api/adaptation:resource_adaptation_api",
 diff --git a/webrtc.gni b/webrtc.gni
-index e7f842a427..97b1386839 100644
+index 10aa1021b0..92eb683a12 100644
 --- a/webrtc.gni
 +++ b/webrtc.gni
 @@ -39,6 +39,11 @@ if (is_mac) {
@@ -1362,7 +1362,7 @@ index e7f842a427..97b1386839 100644
  
    # Set this to true to enable the avx2 support in webrtc.
    # TODO: Make sure that AVX2 works also for non-clang compilers.
-@@ -330,6 +337,9 @@ declare_args() {
+@@ -335,6 +342,9 @@ declare_args() {
    rtc_enable_grpc = rtc_enable_protobuf && (is_linux || is_mac)
  }
  
@@ -1372,7 +1372,7 @@ index e7f842a427..97b1386839 100644
  # Make it possible to provide custom locations for some libraries (move these
  # up into declare_args should we need to actually use them for the GN build).
  rtc_libvpx_dir = "//third_party/libvpx"
-@@ -1266,7 +1276,7 @@ if (is_mac || is_ios) {
+@@ -1271,7 +1281,7 @@ if (is_mac || is_ios) {
    }
  }
  

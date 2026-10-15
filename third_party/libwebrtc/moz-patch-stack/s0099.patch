@@ -142,7 +142,7 @@ index 8778447aa4..714f89f9a1 100644
  rtc_library("ssl") {
  if (!build_with_mozilla) {
 diff --git a/webrtc.gni b/webrtc.gni
-index 3859445ca3..cf152e66af 100644
+index c8333f9d02..445fc6b27b 100644
 --- a/webrtc.gni
 +++ b/webrtc.gni
 @@ -116,7 +116,7 @@ declare_args() {
@@ -154,7 +154,7 @@ index 3859445ca3..cf152e66af 100644
  
    # Selects whether debug dumps for the audio processing module
    # should be generated.
-@@ -338,7 +338,7 @@ declare_args() {
+@@ -343,7 +343,7 @@ declare_args() {
  }
  
  # Enable liboam only on non-mozilla builds.
