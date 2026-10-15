@@ -31,7 +31,7 @@ index f8d5e58730..405a3d485c 100644
  }  // namespace
  
 diff --git a/audio/channel_receive.cc b/audio/channel_receive.cc
-index 1ed0d868df..b5e3a93812 100644
+index 68cf3b2aac..227b27b313 100644
 --- a/audio/channel_receive.cc
 +++ b/audio/channel_receive.cc
 @@ -121,7 +121,7 @@ std::unique_ptr<ModuleRtpRtcpImpl2> CreateRtpRtcpModule(
@@ -80,7 +80,7 @@ index 1ed0d868df..b5e3a93812 100644
        remote_ssrc_(remote_ssrc),
        on_frame_delivered_callback_(std::move(on_frame_delivered_callback)),
        neteq_(CreateNetEq(neteq_factory,
-@@ -1237,6 +1236,7 @@ std::unique_ptr<ChannelReceiveInterface> CreateChannelReceive(
+@@ -1240,6 +1239,7 @@ std::unique_ptr<ChannelReceiveInterface> CreateChannelReceive(
      absl::AnyInvocable<void(uint32_t ssrc) &&> on_first_packet,
      RtcpEventObserver* rtcp_event_observer,
      PacketRouter* absl_nonnull packet_router,
@@ -88,7 +88,7 @@ index 1ed0d868df..b5e3a93812 100644
      absl::AnyInvocable<void(const RtpPacketInfos&, Timestamp) const>
          on_frame_delivered_callback) {
    return std::make_unique<ChannelReceive>(
-@@ -1245,7 +1245,7 @@ std::unique_ptr<ChannelReceiveInterface> CreateChannelReceive(
+@@ -1248,7 +1248,7 @@ std::unique_ptr<ChannelReceiveInterface> CreateChannelReceive(
        jitter_buffer_min_delay_ms, enable_non_sender_rtt, decoder_factory,
        std::move(frame_decryptor), crypto_options, std::move(frame_transformer),
        std::move(on_first_packet), rtcp_event_observer, packet_router,
