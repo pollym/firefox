@@ -470,7 +470,7 @@ index fda8e15021..cc2b831a16 100644
  if (rtc_include_tests) {
    rtc_source_set("test_feedback_generator_interface") {
 diff --git a/call/BUILD.gn b/call/BUILD.gn
-index 7ddd9bfcdc..1600e071cb 100644
+index df7e599a23..75b8bbadbc 100644
 --- a/call/BUILD.gn
 +++ b/call/BUILD.gn
 @@ -51,7 +51,7 @@ rtc_library("call_interfaces") {
