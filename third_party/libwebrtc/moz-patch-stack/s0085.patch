@@ -52,10 +52,10 @@ index e88107f3a5..9d521e08c7 100644
    frame_info.rtp_timestamp = frame.RtpTimestamp();
    frame_info.decode_start = now;
 diff --git a/rtc_base/BUILD.gn b/rtc_base/BUILD.gn
-index 07dc2a83b7..9d614ac658 100644
+index b026c015b0..fe02e8b553 100644
 --- a/rtc_base/BUILD.gn
 +++ b/rtc_base/BUILD.gn
-@@ -234,6 +234,7 @@ rtc_library("event_tracer") {
+@@ -236,6 +236,7 @@ rtc_library("event_tracer") {
      "//third_party/abseil-cpp/absl/base:nullability",
      "//third_party/abseil-cpp/absl/strings:string_view",
    ]
@@ -63,7 +63,7 @@ index 07dc2a83b7..9d614ac658 100644
    all_dependent_configs = [ "//third_party/perfetto/gn:public_config" ]
    if (rtc_use_perfetto) {
      if (build_with_chromium) {
-@@ -248,6 +249,7 @@ rtc_library("event_tracer") {
+@@ -250,6 +251,7 @@ rtc_library("event_tracer") {
    } else {
      deps += [ "//third_party/perfetto/include/perfetto/tracing" ]
    }
