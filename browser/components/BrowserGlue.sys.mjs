@@ -798,23 +798,6 @@ BrowserGlue.prototype = {
     }
   },
 
-  _monitorWebcompatReporterPref() {
-    const PREF = "extensions.webcompat-reporter.enabled";
-    const ID = "webcompat-reporter@mozilla.org";
-    Services.prefs.addObserver(PREF, async () => {
-      let addon = await lazy.AddonManager.getAddonByID(ID);
-      if (!addon) {
-        return;
-      }
-      let enabled = Services.prefs.getBoolPref(PREF, false);
-      if (enabled && !addon.isActive) {
-        await addon.enable({ allowSystemAddons: true });
-      } else if (!enabled && addon.isActive) {
-        await addon.disable({ allowSystemAddons: true });
-      }
-    });
-  },
-
   // All initial windows have opened.
   _onWindowsRestored: function BG__onWindowsRestored() {
     if (this._windowsWereRestored) {
@@ -887,8 +870,6 @@ BrowserGlue.prototype = {
       this._lateTasksIdleObserver,
       LATE_TASKS_IDLE_TIME_SEC
     );
-
-    this._monitorWebcompatReporterPref();
 
     // Loading the MigrationUtils module does the work of registering the
     // migration wizard JSWindowActor pair. In case nothing else has done
