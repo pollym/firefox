@@ -13,7 +13,6 @@ support-files = [
   "multiple.ico",
   "quadrants-vp9.webm",
   "videoFrameFormatChecks.js",
-  "vp8-pixel-crop.webm",
 ]
 
 ["test_audioData_crossCompartment.html"]
@@ -61,11 +60,6 @@ scheme = "https"
 
 ["test_track_getNativeSizes.html"]
 scheme = "https"
-
-["test_videoFrame_croppedVideo.html"]
-skip-if = [
-  "os == 'win'", # in-content decoding cannot initialize gfx devices under win32k lockdown
-]
 
 ["test_videoFrame_mismatched_codedSize.html"]
 

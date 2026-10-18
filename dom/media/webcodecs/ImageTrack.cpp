@@ -103,15 +103,9 @@ void ImageTrack::OnDecodeFramesSuccess(
 
     mFramesTimestamp += f.mTimeout;
 
-    auto frame = VideoFrame::CreateFromImage(mParent, image, format, rect, size,
-                                             duration, timestamp, colorSpace);
-    if (frame.isErr()) {
-      MOZ_LOG_FMT(gWebCodecsLog, LogLevel::Error,
-                  "ImageTrack {} rejected a decoded frame: {}", fmt::ptr(this),
-                  frame.inspectErr().Description());
-      continue;
-    }
-    mDecodedFrames.AppendElement(frame.unwrap());
+    auto frame = MakeRefPtr<VideoFrame>(mParent, image, format, size, rect,
+                                        size, duration, timestamp, colorSpace);
+    mDecodedFrames.AppendElement(std::move(frame));
   }
 }
 
