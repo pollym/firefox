@@ -38,6 +38,7 @@ def WebglSuite(name):
 
 
 config = {
+    "virtualenv_modules": ["six==1.16.0"],
     "default_actions": [
         "clobber",
         "download-and-extract",

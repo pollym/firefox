@@ -41,6 +41,8 @@ def _is_harness_or_mozilla_entry(name):
 
 
 class WebPlatformTest(TestingMixin, MercurialScript, CodeCoverageMixin, AndroidMixin):
+    python_constraints = "requirements-marionette.txt"
+
     config_options = (
         [
             [

@@ -514,6 +514,11 @@ ARCHIVE_FILES = {
         {
             "source": buildconfig.topsrcdir,
             "base": "testing",
+            "pattern": "config/requirements-*.txt",
+        },
+        {
+            "source": buildconfig.topsrcdir,
+            "base": "testing",
             "pattern": "condprofile/**",
         },
         {
@@ -539,6 +544,24 @@ ARCHIVE_FILES = {
             "base": "testing/mozbase/mozlog",
             "pattern": "**",
             "dest": "condprofile/mozlog",
+        },
+        {
+            "source": buildconfig.topsrcdir,
+            "base": "testing/mozbase/mozversion",
+            "pattern": "**",
+            "dest": "condprofile/mozversion",
+        },
+        {
+            "source": buildconfig.topsrcdir,
+            "base": "testing/mozbase/mozsystemmonitor",
+            "pattern": "**",
+            "dest": "condprofile/mozsystemmonitor",
+        },
+        {
+            "source": buildconfig.topsrcdir,
+            "base": "python/mozterm",
+            "pattern": "**",
+            "dest": "condprofile/mozterm",
         },
         {
             "source": buildconfig.topsrcdir,
