@@ -989,6 +989,7 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
       try {
         let result = await lazy.Sanitizer.showUI(win, "clearSiteData", {
           closeWindowsWithHistory: true,
+          entryPoint: lazy.Sanitizer.DIALOG_ENTRY_POINTS.FIRE_BUTTON,
         });
         if (result != "accept") {
           this.recordFlowCompleted(aFlow, "cancelled", "dialog");

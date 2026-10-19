@@ -81,6 +81,28 @@ export var Sanitizer = {
   TIMESPAN_24HOURS: 6,
 
   /**
+   * What the user used to open the clear browsing data dialog, recorded as
+   * the entry_point of browser.sanitizer.dialog_opened and dialog_closed.
+   */
+  DIALOG_ENTRY_POINTS: Object.freeze({
+    SHORTCUT: "shortcut",
+    MENU_BAR: "menu_bar",
+    APP_MENU: "app_menu",
+    FIRE_BUTTON: "fire_button",
+    OTHER: "other",
+  }),
+
+  /**
+   * How the clear browsing data dialog closed, recorded as the outcome of
+   * browser.sanitizer.dialog_closed.
+   */
+  DIALOG_OUTCOMES: Object.freeze({
+    DELETED: "deleted",
+    CANCELLED: "cancelled",
+    DISMISSED: "dismissed",
+  }),
+
+  /**
    * Mapping time span constants to get total time in ms from the selected
    * time spans
    */
@@ -121,11 +143,17 @@ export var Sanitizer = {
    * @param {boolean} [options.closeWindowsWithHistory] - If the user chooses
    *        to clear history, also close every browser window and open a new
    *        one, as part of the same sanitization.
+   * @param {string} [options.entryPoint] - What the user used to open the
+   *        dialog, one of DIALOG_ENTRY_POINTS, recorded in its telemetry.
    * @returns {"accept" | "cancel"} - The selected dialog box option.
    *
    * @throws if parentWindow is undefined or doesn't have a gDialogBox.
    */
-  async showUI(parentWindow, mode, { closeWindowsWithHistory = false } = {}) {
+  async showUI(
+    parentWindow,
+    mode,
+    { closeWindowsWithHistory = false, entryPoint } = {}
+  ) {
     // Treat the hidden window as not being a parent window:
     if (
       parentWindow?.document.documentURI ==
@@ -142,6 +170,7 @@ export var Sanitizer = {
         inBrowserWindow: true,
         mode,
         closeWindowsWithHistory,
+        entryPoint,
         onAccept: () => deferred.resolve("accept"),
         onCancel: () => deferred.resolve("cancel"),
       });
@@ -155,6 +184,7 @@ export var Sanitizer = {
           needNativeUI: true,
           mode,
           closeWindowsWithHistory,
+          entryPoint,
           onAccept: () => deferred.resolve("accept"),
           onCancel: () => deferred.resolve("cancel"),
         }
