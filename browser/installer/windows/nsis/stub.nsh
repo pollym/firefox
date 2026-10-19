@@ -260,9 +260,6 @@ Var ArchToInstall
 
 !include "common.nsh"
 
-!ifdef MOZ_MAINTENANCE_SERVICE
-!insertmacro IsUserAdmin
-!endif
 
 !insertmacro CopyPostSigningData
 !insertmacro ElevateUAC
@@ -271,6 +268,7 @@ Var ArchToInstall
 !insertmacro GetParent
 !insertmacro GetSingleInstallPath
 !insertmacro InitHashAppModelId
+!insertmacro IsUserAdmin
 !insertmacro RemovePrecompleteEntries
 !insertmacro SetBrandNameVars
 !insertmacro ITBL3Create

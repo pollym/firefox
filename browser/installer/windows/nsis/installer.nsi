@@ -110,10 +110,6 @@ VIAddVersionKey "OriginalFilename" "setup.exe"
 ; Must be inserted before other macros that use logging
 !insertmacro _LoggingCommon
 
-!ifdef MOZ_MAINTENANCE_SERVICE
-!insertmacro IsUserAdmin
-!endif
-
 !insertmacro AddDisabledDDEHandlerValues
 !insertmacro ChangeMUIHeaderImage
 !insertmacro ChangeMUISidebarImage
@@ -129,6 +125,7 @@ VIAddVersionKey "OriginalFilename" "setup.exe"
 !insertmacro InitHashAppModelId
 !insertmacro IsHandlerForInstallDir
 !insertmacro IsPinnedToTaskBar
+!insertmacro IsUserAdmin
 !insertmacro LogDesktopShortcut
 !insertmacro LogQuickLaunchShortcut
 !insertmacro LogStartMenuShortcut
