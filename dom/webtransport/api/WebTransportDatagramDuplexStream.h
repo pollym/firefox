@@ -187,10 +187,14 @@ class WebTransportDatagramDuplexStream final : public nsISupports,
   void SetMaxDatagramSize(const uint64_t& aMaxDatagramSize) {
     mOutgoingMaxDataSize = aMaxDatagramSize;
   }
-  double GetIncomingMaxAge(ErrorResult& aRv) const { return mIncomingMaxAge; }
-  void SetIncomingMaxAge(double aMaxAge, ErrorResult& aRv);
-  double GetOutgoingMaxAge(ErrorResult& aRv) const { return mOutgoingMaxAge; }
-  void SetOutgoingMaxAge(double aMaxAge, ErrorResult& aRv);
+  Nullable<double> GetIncomingMaxAge(ErrorResult& aRv) const {
+    return mIncomingMaxAge;
+  }
+  void SetIncomingMaxAge(const Nullable<double>& aMaxAge, ErrorResult& aRv);
+  Nullable<double> GetOutgoingMaxAge(ErrorResult& aRv) const {
+    return mOutgoingMaxAge;
+  }
+  void SetOutgoingMaxAge(const Nullable<double>& aMaxAge, ErrorResult& aRv);
   uint32_t IncomingMaxBufferedDatagrams() const {
     return mIncomingMaxBufferedDatagrams;
   }
@@ -225,8 +229,9 @@ class WebTransportDatagramDuplexStream final : public nsISupports,
   nsTArray<RefPtr<WebTransportDatagramsWritable>> mAllWritables;
 
   // https://w3c.github.io/webtransport/#webtransportdatagramduplexstream-create
-  double mIncomingMaxAge = INFINITY;
-  double mOutgoingMaxAge = INFINITY;
+  // null means no maximum age (infinite)
+  Nullable<double> mIncomingMaxAge;
+  Nullable<double> mOutgoingMaxAge;
   // These are implementation-defined
   uint32_t mIncomingMaxBufferedDatagrams = 5;
   uint32_t mOutgoingMaxBufferedDatagrams = 5;
