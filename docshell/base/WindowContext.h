@@ -13,7 +13,6 @@
 #include "mozilla/dom/UserActivation.h"
 #include "nsDOMNavigationTiming.h"
 #include "nsILoadInfo.h"
-#include "nsIWebProgressListener.h"
 #include "nsWrapperCache.h"
 
 class nsIGlobalObject;
@@ -210,15 +209,6 @@ class WindowContext : public nsISupports, public nsWrapperCache {
   // These should be some of the nsIWebProgressListener 'HTTPS_ONLY_MODE' or
   // 'MIXED' state flags, and should only be called on the top window context.
   void AddSecurityState(uint32_t aStateFlags);
-
-  static constexpr uint32_t kValidSecurityStateFlags =
-      nsIWebProgressListener::STATE_LOADED_MIXED_DISPLAY_CONTENT |
-      nsIWebProgressListener::STATE_LOADED_MIXED_ACTIVE_CONTENT |
-      nsIWebProgressListener::STATE_BLOCKED_MIXED_DISPLAY_CONTENT |
-      nsIWebProgressListener::STATE_BLOCKED_MIXED_ACTIVE_CONTENT |
-      nsIWebProgressListener::STATE_HTTPS_ONLY_MODE_UPGRADED |
-      nsIWebProgressListener::STATE_HTTPS_ONLY_MODE_UPGRADE_FAILED |
-      nsIWebProgressListener::STATE_HTTPS_ONLY_MODE_UPGRADED_FIRST;
 
   UserActivation::State GetUserActivationState() const {
     return UserActivation::StateAndModifiers(
