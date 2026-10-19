@@ -53,6 +53,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
   ObliviousHTTP: "resource://gre/modules/ObliviousHTTP.sys.mjs",
   Region: "resource://gre/modules/Region.sys.mjs",
   NewTabContentPing: "resource://newtab/lib/NewTabContentPing.sys.mjs",
+  hasScoringFlag:
+    "resource://newtab/lib/SponsoredTopSitesScoreProvider/SponsoredTopSitesScoreProvider.mjs",
   NewTabUtils: "resource://gre/modules/NewTabUtils.sys.mjs",
   NimbusFeatures: "resource://nimbus/ExperimentAPI.sys.mjs",
   MozAdsReportReason:
@@ -408,7 +410,7 @@ export class TelemetryFeed {
     if (
       !this.privatePingEnabled ||
       !this.trainhopClickOnlyEnabled ||
-      this.sovEnabled()
+      this.isPlacesInfluenced()
     ) {
       this.gleanSessionType = GleanSessionType.PrivateGleanSession;
       return;
@@ -1190,10 +1192,12 @@ export class TelemetryFeed {
     );
   }
 
-  sovEnabled() {
+  isPlacesInfluenced() {
     const { values } = this.store?.getState()?.Prefs || {};
-    const trainhopSovEnabled = values?.trainhopConfig?.sov?.enabled;
-    return trainhopSovEnabled;
+    return (
+      !!values?.trainhopConfig?.sov?.enabled ||
+      lazy.hasScoringFlag(values?.adsBackendConfig)
+    );
   }
 
   frecencyBoostedHasExposure() {
@@ -1222,7 +1226,7 @@ export class TelemetryFeed {
         `${source}_${legacyTelemetryPosition}`
       ].add(1);
       if (session) {
-        if (this.sovEnabled()) {
+        if (this.isPlacesInfluenced()) {
           const eventData = {
             advertiser_name,
             is_sponsored: true,
@@ -1258,7 +1262,7 @@ export class TelemetryFeed {
         `${source}_${legacyTelemetryPosition}`
       ].add(1);
       if (session) {
-        if (this.sovEnabled()) {
+        if (this.isPlacesInfluenced()) {
           const eventData = {
             advertiser_name,
             is_sponsored: true,
@@ -2922,7 +2926,7 @@ export class TelemetryFeed {
       // Only log a topsites.dismiss telemetry event if the action came from TopSites section
       if (action.source === "TOP_SITES") {
         const { position, advertiser_name, isSponsoredTopSite } = datum;
-        if (this.sovEnabled() && isSponsoredTopSite) {
+        if (this.isPlacesInfluenced() && isSponsoredTopSite) {
           this.recordOrQueueEvent(
             "topSitesDismiss",
             {
@@ -2951,7 +2955,7 @@ export class TelemetryFeed {
     const { position, advertiser_name } = data;
 
     if (session) {
-      if (this.sovEnabled()) {
+      if (this.isPlacesInfluenced()) {
         if (this.privatePingEnabled) {
           this.newtabContentPing.recordEvent("topSitesShowPrivacyClick", {
             advertiser_name,
