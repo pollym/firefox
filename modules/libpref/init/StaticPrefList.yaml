@@ -10572,6 +10572,12 @@
 #endif
   mirror: always
 
+# Whether to disable JIT in all other processes
+- name: javascript.options.other_processes_disable_jit
+  type: bool
+  value: false
+  mirror: always
+
 #---------------------------------------------------------------------------
 # Prefs starting with "layers."
 #---------------------------------------------------------------------------
