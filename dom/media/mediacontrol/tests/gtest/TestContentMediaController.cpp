@@ -4,6 +4,7 @@
 
 #include "ContentMediaController.h"
 #include "gtest/gtest.h"
+#include "mozilla/dom/AudioSessionManager.h"
 #include "mozilla/dom/MediaSessionBinding.h"
 
 using namespace mozilla::dom;
@@ -27,7 +28,9 @@ class FakeContentReceiver final : public ContentMediaControlKeyReceiver {
 
   void ClearKeys() { mReceivedKeys.Clear(); }
 
-  void SuspendForInterrupt() override { mSuspended = true; }
+  void SuspendForInterrupt(AudioSessionInterruptKind aKind) override {
+    mSuspended = true;
+  }
   void ResumeFromInterrupt() override { mResumed = true; }
 
   bool mIsPlaying = false;

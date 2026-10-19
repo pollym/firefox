@@ -1018,8 +1018,8 @@ void AudioContext::SuspendFromMediaControl() {
   MEDIA_CONTROL_LOG("AudioContext {} SuspendFromMediaControl", fmt::ptr(this));
   // Track this as an interruption-owned suspend. The shared "stay suspended"
   // reads (ResumeInternal's guard and the autoplay implicit-start guard) test
-  // this flag too, so a media-control suspend sticks without overloading
-  // mSuspendedByContent, which now means "the page called suspend()" only.
+  // this flag too, so a media-control suspend sticks until it is resumed, or
+  // handed to the page by TransferSuspendToContent.
   mSuspendedByMediaControl = true;
   SuspendInternal(nullptr, AudioContextOperationFlags::SendStateChange);
 }
@@ -1044,6 +1044,22 @@ void AudioContext::ResumeFromMediaControl() {
   MEDIA_CONTROL_LOG("AudioContext {} ResumeFromMediaControl", fmt::ptr(this));
   mSuspendedByMediaControl = false;
   ResumeInternal();
+}
+
+void AudioContext::TransferSuspendToContent() {
+  MOZ_ASSERT(NS_IsMainThread());
+  MOZ_DIAGNOSTIC_ASSERT(!mIsOffline);
+  if (mIsShutDown || mCloseCalled) {
+    return;
+  }
+  MEDIA_CONTROL_LOG("AudioContext {} TransferSuspendToContent, transfer={}",
+                    fmt::ptr(this), mSuspendedByMediaControl);
+  if (!mSuspendedByMediaControl) {
+    return;
+  }
+  // The page now owns the suspend, so a window thaw does not restart it.
+  mSuspendedByMediaControl = false;
+  mSuspendedByContent = true;
 }
 
 void AudioContext::SuspendInternal(void* aPromise,
@@ -1118,7 +1134,7 @@ already_AddRefed<Promise> AudioContext::Resume(ErrorResult& aRv) {
 
   // IsAllowedToPlay() is false while the platform has interrupted the tab's
   // audio, so a resume() requested during the interruption is not started here;
-  // its promise stays parked above and is settled when the interruption ends.
+  // its promise stays parked above until the context next runs or is closed.
   const bool isAllowedToPlay = media::AutoplayPolicy::IsAllowedToPlay(*this);
   AUTOPLAY_LOG("Trying to resume AudioContext {}, IsAllowedToPlay={}",
                fmt::ptr(this), isAllowedToPlay);

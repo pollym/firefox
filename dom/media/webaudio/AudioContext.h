@@ -232,6 +232,9 @@ class AudioContext final : public DOMEventTargetHelper,
   // SuspendFromMediaControl by clearing the same suspended-by-content
   // bookkeeping and firing a statechange event.
   void ResumeFromMediaControl();
+  // Make a suspend media control caused count as one the page asked for,
+  // without resuming, so a page resume() can restart the context.
+  void TransferSuspendToContent();
   // Called on completion of offline rendering:
   void OfflineClose();
 
@@ -433,7 +436,8 @@ class AudioContext final : public DOMEventTargetHelper,
   // This flag stores the value of previous status of `allowed-to-start`.
   // true if offline.
   bool mWasAllowedToStart;
-  // Whether this AudioContext is suspended because the page called suspend().
+  // Whether this AudioContext is in a suspend the page owns: one it asked for
+  // with suspend(), or one handed to it after a permanent audio-focus loss.
   // Unused if offline.
   bool mSuspendedByContent;
   // Whether this AudioContext is suspended because the Window is suspended.
