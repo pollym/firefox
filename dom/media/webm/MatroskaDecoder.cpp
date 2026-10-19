@@ -56,6 +56,13 @@ nsTArray<UniquePtr<TrackInfo>> MatroskaDecoder::GetTracksInfo(
               "audio/vorbis"_ns, aType));
       continue;
     }
+    if (codec.EqualsLiteral("mp3") ||
+        codec.LowerCaseEqualsLiteral("mp4a.40.34")) {
+      tracks.AppendElement(
+          CreateTrackInfoWithMIMETypeAndContainerTypeExtraParameters(
+              "audio/mpeg"_ns, aType));
+      continue;
+    }
     // Video codecs
     if (IsAllowedH264Codec(codec)) {
       auto trackInfo =
@@ -140,6 +147,9 @@ bool MatroskaDecoder::IsSupportedType(const MediaContainerType& aContainerType,
     tracks.AppendElement(
         CreateTrackInfoWithMIMETypeAndContainerTypeExtraParameters(
             "audio/mp4a-latm"_ns, aContainerType));
+    tracks.AppendElement(
+        CreateTrackInfoWithMIMETypeAndContainerTypeExtraParameters(
+            "audio/mpeg"_ns, aContainerType));
     tracks.AppendElement(
         CreateTrackInfoWithMIMETypeAndContainerTypeExtraParameters(
             "audio/opus"_ns, aContainerType));

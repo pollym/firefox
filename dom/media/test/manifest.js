@@ -542,6 +542,12 @@ var gMKVtests = [
     type: 'video/matroska; codecs="av1"',
     duration: 1.0,
   },
+  // ffmpeg -f lavfi -i sine=frequency=1000:duration=1 -c:a libmp3lame output_mp3.mkv
+  {
+    name: "output_mp3.mkv",
+    type: 'audio/matroska; codecs="mp3"',
+    duration: 1.0,
+  },
 ];
 
 // HEVC file can only be tested on the gpu worker which has hardware decoder
@@ -615,12 +621,6 @@ var gUnsupportedMKVtests = [
   // ffmpeg -f lavfi -i sine=frequency=1000:duration=1 -c:a flac output_flac.mkv
   {
     name: "output_flac.mkv",
-    type: "audio/matroska",
-    duration: 1.0,
-  },
-  // ffmpeg -f lavfi -i sine=frequency=1000:duration=1 -c:a libmp3lame output_mp3.mkv
-  {
-    name: "output_mp3.mkv",
     type: "audio/matroska",
     duration: 1.0,
   },
