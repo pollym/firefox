@@ -1099,7 +1099,7 @@ if (PrivateBrowsingUtils.enabled) {
   });
 }
 
-if (Services.prefs.getBoolPref("browser.tabs.groups.alternateMenu", false)) {
+if (Services.prefs.getBoolPref("browser.toolbars.tab-groups.enabled", false)) {
   CustomizableWidgets.push({
     id: "tab-groups-button",
     type: "view",
