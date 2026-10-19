@@ -2343,6 +2343,7 @@ void ProfileBuffer::StreamPausedRangesToJSON(
 bool ProfileBuffer::DuplicateLastSample(ProfilerThreadId aThreadId,
                                         double aSampleTimeMs,
                                         Maybe<uint64_t>& aLastSample,
+                                        bool aLastSampleHasJitReturnAddrs,
                                         const RunningTimes& aRunningTimes) {
   if (!aLastSample) {
     return false;
@@ -2392,6 +2393,15 @@ bool ProfileBuffer::DuplicateLastSample(ProfilerThreadId aThreadId,
     mEntries.PutObjects(ProfileBufferEntry::Kind::SameSample);
 
     return true;
+  }
+
+  // The JS engine keeps the JitcodeGlobalTable entry for a JitReturnAddr alive,
+  // and distinguishes it from later code at the same address, by the position
+  // of the last sample that referenced it. A copy would reference the entry
+  // from a later position without the JS engine knowing about it, so take a
+  // new sample instead.
+  if (aLastSampleHasJitReturnAddrs) {
+    return false;
   }
 
   AUTO_PROFILER_STATS(DuplicateLastSample_copy);
