@@ -19,8 +19,6 @@ ChromeUtils.defineESModuleGetters(this, {
   GleanSessionType: "resource://newtab/lib/TelemetryFeed.sys.mjs",
   HomePage: "resource:///modules/HomePage.sys.mjs",
   isAdEligiblePositionSupported: "resource://newtab/lib/TelemetryFeed.sys.mjs",
-  isBrowserContextMenuClickSupported:
-    "resource://newtab/lib/TelemetryFeed.sys.mjs",
   NewTabContentPing: "resource://newtab/lib/NewTabContentPing.sys.mjs",
   NimbusFeatures: "resource://nimbus/ExperimentAPI.sys.mjs",
   sinon: "resource://testing-common/Sinon.sys.mjs",
@@ -2120,21 +2118,6 @@ add_task(async function test_isAdEligiblePositionSupported() {
     isAdEligiblePositionSupported("158.0a1"),
     "Should send on a newer host"
   );
-});
-
-add_task(async function test_isBrowserContextMenuClickSupported() {
-  info(
-    "background, and event_source on topsites.click, should only be sent on " +
-      "hosts whose schema has them"
-  );
-
-  Assert.ok(!isBrowserContextMenuClickSupported("159.0"), "Not on a 159 host");
-  Assert.ok(
-    isBrowserContextMenuClickSupported("160.0a1"),
-    "On the 160 nightly it landed in"
-  );
-  Assert.ok(isBrowserContextMenuClickSupported("160.0b4"), "On 160 beta");
-  Assert.ok(isBrowserContextMenuClickSupported("161.0a1"), "On a newer host");
 });
 
 add_task(
@@ -5696,42 +5679,6 @@ add_task(
   }
 );
 
-add_task(async function test_new_topsite_clicks_skipped_on_older_hosts() {
-  info(
-    "Top site clicks newtab did not record before should not be recorded " +
-      "on hosts that cannot tell them apart from plain clicks"
-  );
-
-  Services.fog.testResetFOG();
-  let sandbox = sinon.createSandbox();
-  let { instance, notify, cleanup } = withNavigationTargetFeed({
-    TopSites: { rows: [{ url: "https://example.com/" }] },
-  });
-  sandbox.stub(instance, "canRecordBrowserTopSiteClicks").get(() => false);
-  sandbox.stub(instance.sessions, "get").returns({ session_id: "decafc0ffee" });
-
-  notify("https://example.com/");
-  for (const event of ["OPEN_NEW_WINDOW", "OPEN_PRIVATE_WINDOW"]) {
-    instance.handleUserEvent(
-      actionCreators.UserEvent({
-        event,
-        source: "TOP_SITES",
-        action_position: 0,
-        value: {},
-      })
-    );
-  }
-
-  Assert.equal(
-    Glean.topsites.click.testGetValue(),
-    null,
-    "No top site click recorded"
-  );
-
-  sandbox.restore();
-  cleanup();
-});
-
 add_task(
   async function test_handleCreatedNavigationTarget_records_foreground_tab() {
     info(
@@ -5897,10 +5844,7 @@ add_task(
       clicks[0].extra.event_source,
       "BROWSER_CONTEXT_MENU_OR_MIDDLE_CLICK"
     );
-    Assert.equal(
-      clicks[0].extra.background,
-      isBrowserContextMenuClickSupported() ? String(false) : undefined
-    );
+    Assert.equal(clicks[0].extra.background, String(false));
     Assert.equal(clicks[0].extra.newtab_visit_id, sessionId);
     Assert.equal(
       clicks[0].extra.position,

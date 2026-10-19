@@ -78,17 +78,6 @@ export function isAdEligiblePositionSupported(
   return Services.vc.compare(version, "157.0a1") >= 0;
 }
 
-// @backward-compat { version 160 } background, and event_source on
-// topsites.click, were added as extra_keys in 160. glean-core drops the whole
-// event when it sees an unknown extra key, so below 160 background is omitted,
-// and the new top site clicks are not recorded at all: without event_source
-// they could not be told apart from plain clicks.
-export function isBrowserContextMenuClickSupported(
-  version = AppConstants.MOZ_APP_VERSION
-) {
-  return Services.vc.compare(version, "160.0a1") >= 0;
-}
-
 export const PREF_IMPRESSION_ID = "impressionId";
 export const TELEMETRY_PREF = "telemetry";
 export const PREF_UNIFIED_ADS_SPOCS_ENABLED = "unifiedAds.spocs.enabled";
@@ -562,10 +551,6 @@ export class TelemetryFeed {
     );
 
     return unifiedAdsSpocsEnabled && this.SHOW_SPONSORED_STORIES_ENABLED;
-  }
-
-  get canRecordBrowserTopSiteClicks() {
-    return isBrowserContextMenuClickSupported();
   }
 
   get canSendUnifiedAdsTilesCallbacks() {
@@ -1447,11 +1432,7 @@ export class TelemetryFeed {
       case "OPEN_NEW_WINDOW":
       case "OPEN_PRIVATE_WINDOW": {
         const { action_position, source, value } = action.data;
-        if (
-          source !== "TOP_SITES" ||
-          value?.card_type === "search" ||
-          !this.canRecordBrowserTopSiteClicks
-        ) {
+        if (source !== "TOP_SITES" || value?.card_type === "search") {
           break;
         }
         const row = this.store?.getState()?.TopSites?.rows?.[action_position];
@@ -1689,10 +1670,7 @@ export class TelemetryFeed {
               Glean.pocket.click.record({
                 ...this.redactNewTabPing(gleanData, is_sponsored),
                 newtab_visit_id: session.session_id,
-                ...(background !== undefined &&
-                isBrowserContextMenuClickSupported()
-                  ? { background }
-                  : {}),
+                ...(background !== undefined ? { background } : {}),
               });
             }
           );
@@ -3163,9 +3141,6 @@ export class TelemetryFeed {
     const rows = state?.TopSites?.rows ?? [];
     const position = rows.findIndex(row => row?.url === url);
     if (position !== -1) {
-      if (!this.canRecordBrowserTopSiteClicks) {
-        return;
-      }
       const row = rows[position];
       if (
         row.sponsored_position ||
