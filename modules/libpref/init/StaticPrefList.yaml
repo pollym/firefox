@@ -5004,6 +5004,14 @@
   value: 300000
   mirror: always
 
+# Record prefetch candidates but never issue the request, so a navigation can
+# be reported as one that would have been prefetched. Control branch of the
+# prefetch A/B experiment; not for general use.
+- name: dom.speculation_rules.prefetch.dry_run
+  type: RelaxedAtomicBool
+  value: false
+  mirror: always
+
 # When true, cross-origin prefetch URLs are rejected at StartPrefetch.
 # Keeps M1 same-origin only; set false in tests to exercise cross-origin
 # code paths without requiring Private Prefetch Proxy (PPP) support.

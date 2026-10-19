@@ -603,6 +603,14 @@ RefPtr<dom::PrefetchMatchPromise> DocumentLoadListener::TryActivateFromPrefetch(
     return nullptr;
   }
 
+  // This telemetry-only flag is recorded in both experiment branches,
+  // including when the prefetch was never fetched, so the control branch can
+  // be compared like for like.
+  if (sourceWGP->HasMatchingPrefetchCandidate(aURI)) {
+    nsCOMPtr<nsILoadInfo> loadInfo = mChannel->LoadInfo();
+    loadInfo->SetPrefetchCandidateMatched(true);
+  }
+
   if (dom::PrefetchRecordParent* rec =
           sourceWGP->FindMatchingPrefetchRecord(aURI)) {
     ActivateFromPrefetch(rec);

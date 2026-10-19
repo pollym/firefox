@@ -2335,6 +2335,19 @@ void Document::AccumulatePageLoadTelemetry() {
     }
   }
 
+  // A matching record is not enough; the disposition says it was really used.
+  if (isCacheHit &&
+      GetNavigationTiming()->WasActivatedFromNavigationalPrefetch()) {
+    mPageloadEventData.SetDocumentFeature(
+        performance::pageload_event::DocumentFeature::NAVIGATIONAL_PREFETCH);
+  }
+
+  nsCOMPtr<nsILoadInfo> loadInfo = GetChannel()->LoadInfo();
+  if (loadInfo->GetPrefetchCandidateMatched()) {
+    mPageloadEventData.SetDocumentFeature(
+        performance::pageload_event::NAVIGATIONAL_PREFETCH_ELIGIBLE);
+  }
+
   if (mScriptLoader) {
     mPageloadEventData.set_scriptFromNeckoText(
         mScriptLoader->GetLoadedFromNeckoAsText());
