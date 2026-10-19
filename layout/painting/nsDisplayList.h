@@ -5088,33 +5088,6 @@ class nsDisplayWrapper final : public nsDisplayWrapList {
 };
 
 /**
- * We call WrapDisplayList on the in-flow lists: BorderBackground(),
- * BlockBorderBackgrounds() and Content().
- * We call WrapDisplayItem on each item of Outlines(), PositionedDescendants(),
- * and Floats(). This is done to support special wrapping processing for frames
- * that may not be in-flow descendants of the current frame.
- */
-class nsDisplayItemWrapper {
- public:
-  // This is never instantiated directly (it has pure virtual methods), so no
-  // need to count constructors and destructors.
-
-  bool WrapBorderBackground() { return true; }
-  virtual nsDisplayItem* WrapList(nsDisplayListBuilder* aBuilder,
-                                  nsIFrame* aFrame, nsDisplayList* aList) = 0;
-  virtual nsDisplayItem* WrapItem(nsDisplayListBuilder* aBuilder,
-                                  nsDisplayItem* aItem) = 0;
-
-  nsresult WrapLists(nsDisplayListBuilder* aBuilder, nsIFrame* aFrame,
-                     const nsDisplayListSet& aIn, const nsDisplayListSet& aOut);
-  nsresult WrapListsInPlace(nsDisplayListBuilder* aBuilder, nsIFrame* aFrame,
-                            const nsDisplayListSet& aLists);
-
- protected:
-  nsDisplayItemWrapper() = default;
-};
-
-/**
  * The standard display item to paint a stacking context with translucency
  * set by the stacking context root frame's 'opacity' style.
  */
