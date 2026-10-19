@@ -3062,15 +3062,8 @@ void nsHttpChannel::ProcessAltService(nsHttpConnectionInfo* aTransConnInfo) {
   }
 
   OriginAttributes originAttributes;
-  // Regular principal in case we have a proxy.
-  if (proxyInfo &&
-      !StaticPrefs::privacy_partition_network_state_connection_with_proxy()) {
-    StoragePrincipalHelper::GetOriginAttributes(
-        this, originAttributes, StoragePrincipalHelper::eRegularPrincipal);
-  } else {
-    StoragePrincipalHelper::GetOriginAttributesForNetworkState(
-        this, originAttributes);
-  }
+  StoragePrincipalHelper::GetOriginAttributesForHttpConnection(
+      this, !!proxyInfo, originAttributes);
 
   AltSvcMapping::ProcessHeader(altSvc, scheme, originHost, originPort,
                                mUsername, mPrivateBrowsing, callbacks,
@@ -8176,15 +8169,8 @@ nsresult nsHttpChannel::BeginConnect() {
   SetGlobalPrivacyControl();
 
   OriginAttributes originAttributes;
-  // Regular principal in case we have a proxy.
-  if (proxyInfo &&
-      !StaticPrefs::privacy_partition_network_state_connection_with_proxy()) {
-    StoragePrincipalHelper::GetOriginAttributes(
-        this, originAttributes, StoragePrincipalHelper::eRegularPrincipal);
-  } else {
-    StoragePrincipalHelper::GetOriginAttributesForNetworkState(
-        this, originAttributes);
-  }
+  StoragePrincipalHelper::GetOriginAttributesForHttpConnection(
+      this, !!proxyInfo, originAttributes);
 
   // Adjust mCaps according to our request headers:
   //  - If "Connection: close" is set as a request header, then do not bother
