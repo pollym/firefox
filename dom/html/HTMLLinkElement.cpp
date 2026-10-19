@@ -28,6 +28,7 @@
 #include "nsAttrValueOrString.h"
 #include "nsContentUtils.h"
 #include "nsDOMTokenList.h"
+#include "nsEscape.h"
 #include "nsGenericHTMLElement.h"
 #include "nsGkAtoms.h"
 #include "nsIContentInlines.h"
@@ -101,6 +102,14 @@ nsresult HTMLLinkElement::BindToTree(BindContext& aContext, nsINode& aParent) {
     }
 
     LinkAdded();
+  }
+
+  // https://html.spec.whatwg.org/#link-type-expect
+  // Process the link when an expect internal resource link becomes
+  // browsing-context connected.
+  if (StaticPrefs::dom_element_blocking_enabled() && IsInComposedDoc() &&
+      RelContainsExpect()) {
+    ProcessInternalResourceLink();
   }
 
   return rv;
@@ -325,6 +334,24 @@ void HTMLLinkElement::AfterSetAttr(int32_t aNameSpaceID, nsAtom* aName,
     UnblockRenderingIfNotPotentiallyRenderBlocking();
   }
 
+  // https://html.spec.whatwg.org/#link-type-expect
+  // Re-process a link that is, or before this change was, an expect link.
+  // ProcessInternalResourceLink unblocks rendering for any other link.
+  if (aNameSpaceID == kNameSpaceID_None && IsInComposedDoc() &&
+      StaticPrefs::dom_element_blocking_enabled() &&
+      (aName == nsGkAtoms::rel || aName == nsGkAtoms::href ||
+       aName == nsGkAtoms::media || aName == nsGkAtoms::blocking)) {
+    bool wasExpect = false;
+    if (aName == nsGkAtoms::rel && aOldValue) {
+      nsAutoString oldRel;
+      aOldValue->ToString(oldRel);
+      wasExpect = ParseLinkTypes(oldRel) & eEXPECT;
+    }
+    if (wasExpect || RelContainsExpect()) {
+      ProcessInternalResourceLink();
+    }
+  }
+
   return nsGenericHTMLElement::AfterSetAttr(
       aNameSpaceID, aName, aValue, aOldValue, aSubjectPrincipal, aNotify);
 }
@@ -334,7 +361,7 @@ void HTMLLinkElement::AfterSetAttr(int32_t aNameSpaceID, nsAtom* aName,
   "preload", "prefetch", "dns-prefetch", "stylesheet", "next", "alternate", \
       "preconnect", "icon", "search", nullptr
 
-static const DOMTokenListSupportedToken sSupportedRelValueCombinations[][13] = {
+static const DOMTokenListSupportedToken sSupportedRelValueCombinations[][14] = {
     {SUPPORTED_REL_VALUES_BASE},
     {"manifest", SUPPORTED_REL_VALUES_BASE},
     {"modulepreload", SUPPORTED_REL_VALUES_BASE},
@@ -343,6 +370,16 @@ static const DOMTokenListSupportedToken sSupportedRelValueCombinations[][13] = {
     {"compression-dictionary", "manifest", SUPPORTED_REL_VALUES_BASE},
     {"compression-dictionary", "modulepreload", SUPPORTED_REL_VALUES_BASE},
     {"compression-dictionary", "modulepreload", "manifest",
+     SUPPORTED_REL_VALUES_BASE},
+    {"expect", SUPPORTED_REL_VALUES_BASE},
+    {"expect", "manifest", SUPPORTED_REL_VALUES_BASE},
+    {"expect", "modulepreload", SUPPORTED_REL_VALUES_BASE},
+    {"expect", "modulepreload", "manifest", SUPPORTED_REL_VALUES_BASE},
+    {"expect", "compression-dictionary", SUPPORTED_REL_VALUES_BASE},
+    {"expect", "compression-dictionary", "manifest", SUPPORTED_REL_VALUES_BASE},
+    {"expect", "compression-dictionary", "modulepreload",
+     SUPPORTED_REL_VALUES_BASE},
+    {"expect", "compression-dictionary", "modulepreload", "manifest",
      SUPPORTED_REL_VALUES_BASE}};
 #undef SUPPORTED_REL_VALUES_BASE
 
@@ -350,7 +387,8 @@ nsDOMTokenList* HTMLLinkElement::RelList() {
   if (!mRelList) {
     int index = (StaticPrefs::dom_manifest_enabled() ? 1 : 0) |
                 (StaticPrefs::network_modulepreload() ? 2 : 0) |
-                (StaticPrefs::network_http_dictionaries_enable() ? 4 : 0);
+                (StaticPrefs::network_http_dictionaries_enable() ? 4 : 0) |
+                (StaticPrefs::dom_element_blocking_enabled() ? 8 : 0);
 
     mRelList = new nsDOMTokenList(this, nsGkAtoms::rel,
                                   sSupportedRelValueCombinations[index]);
@@ -805,6 +843,123 @@ bool HTMLLinkElement::IsPotentiallyRenderBlocking() {
   }
 
   return IsCSSMimeTypeAttributeForLinkElement(*this);
+}
+
+bool HTMLLinkElement::RelContainsExpect() const {
+  nsAutoString rel;
+  GetAttr(nsGkAtoms::rel, rel);
+  return ParseLinkTypes(rel) & eEXPECT;
+}
+
+// https://html.spec.whatwg.org/#select-the-indicated-part, restricted to what
+// rel=expect needs. Returns the element whose id or <a name> is aRef, trying
+// the percent-decoded aRef if nothing matches.
+static Element* SelectIndicatedPart(Document* aDoc, nsAtom* aFragment,
+                                    nsAtom* aDecodedFragment) {
+  if (Element* el = nsContentUtils::GetTargetElement(
+          aDoc, nsDependentAtomString(aFragment))) {
+    return el;
+  }
+  if (aDecodedFragment) {
+    return nsContentUtils::GetTargetElement(
+        aDoc, nsDependentAtomString(aDecodedFragment));
+  }
+  return nullptr;
+}
+
+// Returns the percent-decoded aRef, or null if it is the same as aRef.
+static already_AddRefed<nsAtom> DecodeFragment(const nsACString& aRef) {
+  nsAutoCString decoded;
+  const nsACString& unescaped = NS_UnescapeURL(aRef, /* aFlags = */ 0, decoded);
+  if (unescaped.Equals(aRef)) {
+    return nullptr;
+  }
+  return NS_Atomize(NS_ConvertUTF8toUTF16(unescaped));
+}
+
+void HTMLLinkElement::UpdateExpectBlockingFragment(nsAtom* aFragment,
+                                                   nsAtom* aDecodedFragment) {
+  if (mBlockingExpectFragment == aFragment &&
+      mBlockingExpectDecodedFragment == aDecodedFragment) {
+    return;
+  }
+  Document* doc = OwnerDoc();
+  if (mBlockingExpectFragment) {
+    doc->RemoveExpectedInternalResourceTarget(mBlockingExpectFragment);
+  }
+  if (mBlockingExpectDecodedFragment) {
+    doc->RemoveExpectedInternalResourceTarget(mBlockingExpectDecodedFragment);
+  }
+  mBlockingExpectFragment = aFragment;
+  mBlockingExpectDecodedFragment = aDecodedFragment;
+  if (mBlockingExpectFragment) {
+    doc->AddExpectedInternalResourceTarget(mBlockingExpectFragment);
+  }
+  if (mBlockingExpectDecodedFragment) {
+    doc->AddExpectedInternalResourceTarget(mBlockingExpectDecodedFragment);
+  }
+}
+
+// https://html.spec.whatwg.org/#process-internal-resource-link
+void HTMLLinkElement::ProcessInternalResourceLink() {
+  if (!StaticPrefs::dom_element_blocking_enabled()) {
+    return;
+  }
+
+  // Step 1.
+  Document* doc = OwnerDoc();
+
+  // First the step 5 conditions that do not depend on the href. If one of them
+  // is false, step 6 unblocks rendering.
+  auto mediaMatches = [&] {
+    nsAutoString media;
+    if (!GetAttr(nsGkAtoms::media, media)) {
+      return true;
+    }
+    RefPtr<MediaList> mediaList =
+        MediaList::Create(NS_ConvertUTF16toUTF8(media));
+    return mediaList->Matches(*doc);
+  };
+  if (doc->GetReadyStateEnum() != Document::READYSTATE_LOADING ||
+      !IsInComposedDoc() || !RelContainsExpect() ||
+      !IsPotentiallyRenderBlocking() || !mediaMatches()) {
+    doc->UnblockRendering(*this);
+    return;
+  }
+
+  // Steps 2-3. The href must point to this document, ignoring the fragment.
+  nsCOMPtr<nsIURI> uri = GetURI();
+  nsIURI* docURI = doc->GetDocumentURI();
+  bool sameDocument = false;
+  if (!uri || !docURI ||
+      NS_FAILED(uri->EqualsExceptRef(docURI, &sameDocument)) || !sameDocument) {
+    doc->UnblockRendering(*this);
+    return;
+  }
+
+  // Step 4. For an empty fragment ("#"), the spec selects the top of the
+  // document, which is not an element, so step 5 blocks until parsing ends.
+  // Like Chromium, do not block for an empty or missing fragment.
+  nsAutoCString ref;
+  uri->GetRef(ref);
+  if (ref.IsEmpty()) {
+    doc->UnblockRendering(*this);
+    return;
+  }
+  RefPtr<nsAtom> fragment = NS_Atomize(NS_ConvertUTF8toUTF16(ref));
+  RefPtr<nsAtom> decodedFragment = DecodeFragment(ref);
+  Element* indicated = SelectIndicatedPart(doc, fragment, decodedFragment);
+
+  // Step 5. An element is on the parser's stack of open elements if the parser
+  // created it and has not popped it yet.
+  if (indicated && !indicated->HasFlag(ELEMENT_ON_PARSER_STACK)) {
+    // Step 6.
+    doc->UnblockRendering(*this);
+    return;
+  }
+  if (doc->BlockRendering(*this)) {
+    UpdateExpectBlockingFragment(fragment, decodedFragment);
+  }
 }
 
 nsresult HTMLLinkElement::CopyInnerTo(HTMLLinkElement* aDest) {

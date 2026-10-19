@@ -1114,6 +1114,23 @@ void nsHtml5TreeOperation::PreventScriptExecution(nsIContent* aNode) {
 
 void nsHtml5TreeOperation::DoneAddingChildren(nsIContent* aNode) {
   aNode->DoneAddingChildren(aNode->HasParserNotified());
+
+  // https://html.spec.whatwg.org/#process-internal-resource-links
+  // The parser has popped aNode.
+  aNode->UnsetFlags(ELEMENT_ON_PARSER_STACK);
+  // Only an element with an id or a name can be a rel=expect target.
+  if (!StaticPrefs::dom_element_blocking_enabled() ||
+      (!aNode->HasID() && !aNode->HasName())) {
+    return;
+  }
+  // rel=expect blocks only while the document is loading, and data documents
+  // never render.
+  Document* doc = aNode->OwnerDoc();
+  if (doc->IsLoadedAsData() ||
+      doc->GetReadyStateEnum() > Document::READYSTATE_LOADING) {
+    return;
+  }
+  doc->MaybeProcessInternalResourceLinksForElement(*aNode->AsElement());
 }
 
 void nsHtml5TreeOperation::DoneCreatingElement(nsIContent* aNode) {
@@ -1132,6 +1149,14 @@ void nsHtml5TreeOperation::MarkMalformedIfScript(nsIContent* aNode) {
   if (sele) {
     // Make sure to serialize this script correctly, for nice round tripping.
     sele->SetIsMalformed();
+  }
+}
+
+// The document parser pushes the elements it creates on its stack of open
+// elements. DoneAddingChildren unsets the flag when the parser pops them.
+static void MarkOnParserStack(nsIContent* aElement) {
+  if (aElement && StaticPrefs::dom_element_blocking_enabled()) {
+    aElement->SetFlags(ELEMENT_ON_PARSER_STACK);
   }
 }
 
@@ -1209,6 +1234,7 @@ nsresult nsHtml5TreeOperation::Perform(nsHtml5TreeOpExecutor* aBuilder,
       *target = CreateHTMLElement(name, attributes, aOperation.mFromNetwork,
                                   nodeInfoManager, mBuilder, creator,
                                   intendedParent, mozilla::Nothing());
+      MarkOnParserStack(*target);
       return NS_OK;
     }
 
@@ -1228,6 +1254,7 @@ nsresult nsHtml5TreeOperation::Perform(nsHtml5TreeOpExecutor* aBuilder,
 
       *target = CreateSVGElement(name, attributes, aOperation.mFromNetwork,
                                  nodeInfoManager, mBuilder, creator);
+      MarkOnParserStack(*target);
       return NS_OK;
     }
 
@@ -1246,6 +1273,7 @@ nsresult nsHtml5TreeOperation::Perform(nsHtml5TreeOpExecutor* aBuilder,
 
       *target =
           CreateMathMLElement(name, attributes, nodeInfoManager, mBuilder);
+      MarkOnParserStack(*target);
       return NS_OK;
     }
 
@@ -1389,8 +1417,7 @@ nsresult nsHtml5TreeOperation::Perform(nsHtml5TreeOpExecutor* aBuilder,
     }
 
     nsresult operator()(const opDoneAddingChildren& aOperation) {
-      nsIContent* node = *(aOperation.mElement);
-      node->DoneAddingChildren(node->HasParserNotified());
+      DoneAddingChildren(*(aOperation.mElement));
       return NS_OK;
     }
 

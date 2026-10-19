@@ -3099,6 +3099,15 @@ nsresult Element::BindToTree(BindContext& aContext, nsINode& aParent) {
     HandleShadowDOMRelatedInsertionSteps(hadParent);
   }
 
+  // https://html.spec.whatwg.org/#dom-trees
+  // An inserted element that is not on the parser's stack of open elements can
+  // be the target of a rel=expect link.
+  if ((HasID() || HasName()) && !HasFlag(ELEMENT_ON_PARSER_STACK) &&
+      !aContext.IsMove() && aContext.InUncomposedDoc() &&
+      StaticPrefs::dom_element_blocking_enabled()) {
+    aContext.OwnerDoc().MaybeProcessInternalResourceLinksForElement(*this);
+  }
+
   if (MayHaveStyle()) {
     // If MayHaveStyle() is true, we must be an nsStyledElement.
     static_cast<nsStyledElement*>(this)->ReparseStyleAttribute(
@@ -4357,6 +4366,13 @@ void Element::PostIdMaybeChange(const nsAttrValue* aValue) {
     AddToIdTable(aValue->GetAtomValue());
   } else {
     ClearHasID();
+  }
+
+  // https://html.spec.whatwg.org/#link-type-expect
+  // A changed id can change the target of a rel=expect link. Only an element in
+  // the document tree can be a target.
+  if (IsInUncomposedDoc() && StaticPrefs::dom_element_blocking_enabled()) {
+    OwnerDoc()->ProcessInternalResourceLinks();
   }
 }
 

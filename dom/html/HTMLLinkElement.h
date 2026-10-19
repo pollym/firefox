@@ -166,6 +166,20 @@ class HTMLLinkElement final : public nsGenericHTMLElement,
   nsDOMTokenList* Blocking();
   bool IsPotentiallyRenderBlocking() override;
 
+  // Whether this link's rel attribute contains the "expect" keyword.
+  // https://html.spec.whatwg.org/#link-type-expect
+  bool RelContainsExpect() const;
+  // https://html.spec.whatwg.org/#process-internal-resource-link
+  // Blocks or unblocks rendering depending on whether the element indicated by
+  // this rel=expect link's href has been parsed yet.
+  void ProcessInternalResourceLink();
+
+  // Updates the owner document's expected rel=expect target set as this link
+  // starts/stops blocking on a fragment (null means no longer blocking).
+  // aDecodedFragment is the percent-decoded aFragment, if it is different.
+  void UpdateExpectBlockingFragment(nsAtom* aFragment,
+                                    nsAtom* aDecodedFragment = nullptr);
+
   void NodeInfoChanged(Document* aOldDoc) final {
     mCachedURI = nullptr;
     nsGenericHTMLElement::NodeInfoChanged(aOldDoc);
@@ -216,6 +230,13 @@ class HTMLLinkElement final : public nsGenericHTMLElement,
   //
   // See https://github.com/whatwg/html/issues/3840#issuecomment-481034206.
   bool mExplicitlyEnabled = false;
+
+  // The fragment (id/name atom) this rel=expect link is currently blocking on,
+  // or null if it is not blocking. Mirrors an entry in the document's
+  // mExpectedInternalResourceTargets set.
+  RefPtr<nsAtom> mBlockingExpectFragment;
+  // The percent-decoded mBlockingExpectFragment, if it is different.
+  RefPtr<nsAtom> mBlockingExpectDecodedFragment;
 };
 
 }  // namespace dom

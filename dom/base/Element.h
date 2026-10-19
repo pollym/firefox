@@ -214,8 +214,12 @@ enum : uint32_t {
   // https://w3c.github.io/edit-context
   ELEMENT_HAS_EDIT_CONTEXT = ELEMENT_FLAG_BIT(10),
 
+  // Set while this element is on the HTML parser's stack of open elements.
+  // Used for rel=expect.
+  ELEMENT_ON_PARSER_STACK = ELEMENT_FLAG_BIT(11),
+
   // Remaining bits are for subclasses
-  ELEMENT_TYPE_SPECIFIC_BITS_OFFSET = NODE_TYPE_SPECIFIC_BITS_OFFSET + 11
+  ELEMENT_TYPE_SPECIFIC_BITS_OFFSET = NODE_TYPE_SPECIFIC_BITS_OFFSET + 12
 };
 
 #undef ELEMENT_FLAG_BIT

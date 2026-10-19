@@ -129,6 +129,11 @@ class ElementCreationOptionsOrString;
 }  // namespace mozilla
 #endif  // MOZILLA_INTERNAL_API
 
+namespace mozilla {
+template <unsigned KeySize, class T>
+class CountingBloomFilter;
+}  // namespace mozilla
+
 class InfallibleAllocPolicy;
 class JSObject;
 class JSTracer;
@@ -1773,13 +1778,31 @@ class Document : public nsINode,
   // https://html.spec.whatwg.org/#render-blocking-mechanism
   bool AllowsAddingRenderBlockingElements() const;
   bool IsRenderBlocked() const;
-  void BlockRendering(Element& aElement);
+  // Returns whether aElement blocks rendering after the call.
+  bool BlockRendering(Element& aElement);
   void UnblockRendering(Element& aElement);
   // Blocks rendering on aElement if it is potentially render-blocking.
   void MaybeBlockRendering(Element& aElement);
   // Permanently stops render-blocking for this document (timeout elapsed, or it
   // can no longer be render-blocked) and kicks layout.
   void StopRenderBlocking();
+
+  // https://html.spec.whatwg.org/#process-internal-resource-links
+  // Processes every rel=expect link that blocks rendering.
+  void ProcessInternalResourceLinks();
+  // Calls ProcessInternalResourceLinks when it is safe to run script. Use this
+  // during a DOM mutation: the target lookup uses getElementsByName(), and a
+  // cached list updates only when the mutation notifications run.
+  void ProcessInternalResourceLinksWhenSafe();
+
+  // Called when the HTML parser pops aElement off its stack of open elements,
+  // and when aElement is inserted while not on that stack. Processes the
+  // rel=expect links only if one waits for aElement's id or name.
+  void MaybeProcessInternalResourceLinksForElement(Element& aElement);
+
+  // Tracks the ids and names that blocking rel=expect links wait for.
+  void AddExpectedInternalResourceTarget(nsAtom* aFragment);
+  void RemoveExpectedInternalResourceTarget(nsAtom* aFragment);
 
  private:
   void StartLayoutAfterUnblocking();
@@ -6053,6 +6076,15 @@ class Document : public nsINode,
   nsTHashSet<RefPtr<Element>> mRenderBlockingElementSet;
   nsCOMPtr<nsITimer> mRenderBlockingTimer;
   bool mRenderBlockingStopped = false;
+
+  // The ids and names that blocking rel=expect links wait for, with the number
+  // of links that wait for each.
+  nsTHashMap<RefPtr<nsAtom>, uint32_t> mExpectedInternalResourceTargets;
+  // Bloom filter over mExpectedInternalResourceTargets. Allocated only when a
+  // rel=expect link blocks.
+  UniquePtr<mozilla::CountingBloomFilter<8, nsAtom>>
+      mExpectedInternalResourceTargetsBloom;
+  bool mProcessInternalResourceLinksPending = false;
 
  public:
   // Needs to be public because the bindings code pokes at it.
