@@ -23,7 +23,8 @@ class HTMLLinkElement final : public nsGenericHTMLElement,
                               public LinkStyle,
                               public SupportsDNSPrefetch {
  public:
-  explicit HTMLLinkElement(already_AddRefed<mozilla::dom::NodeInfo> aNodeInfo);
+  HTMLLinkElement(already_AddRefed<mozilla::dom::NodeInfo> aNodeInfo,
+                  FromParser aFromParser);
 
   // nsISupports
   NS_DECL_ISUPPORTS_INHERITED
@@ -206,6 +207,8 @@ class HTMLLinkElement final : public nsGenericHTMLElement,
 
   // The cached href attribute value.
   nsCOMPtr<nsIURI> mCachedURI;
+
+  FromParser mCreatedByParser;
 
   // The "explicitly enabled" flag. This flag is set whenever the `disabled`
   // attribute is explicitly unset, and makes alternate stylesheets not be

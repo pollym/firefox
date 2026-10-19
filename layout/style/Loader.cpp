@@ -32,6 +32,7 @@
 #include "mozilla/css/StreamLoader.h"
 #include "mozilla/dom/DocGroup.h"
 #include "mozilla/dom/Document.h"
+#include "mozilla/dom/Element.h"
 #include "mozilla/dom/FetchPriority.h"
 #include "mozilla/dom/MediaList.h"
 #include "mozilla/dom/SRICheck.h"
@@ -1579,6 +1580,14 @@ void Loader::AddPerformanceEntryForCachedSheet(SheetLoadData& aLoadData) {
 void Loader::NotifyObservers(SheetLoadData& aData, nsresult aStatus,
                              bool aCanFireEvents) {
   aData.mSheet->PropagateUseCountersTo(mDocument);
+
+  // https://html.spec.whatwg.org/#render-blocking-mechanism
+  // Unblock rendering once the sheet loads or fails.
+  if (nsINode* owner = aData.mSheet->GetOwnerNode();
+      mDocument && owner && owner->IsElement()) {
+    mDocument->UnblockRendering(*owner->AsElement());
+  }
+
   if (MaybePutIntoLoadsPerformed(aData) &&
       aData.mShouldEmulateNotificationsForCachedLoad) {
     NotifyObserversForCachedSheet(aData);

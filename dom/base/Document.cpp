@@ -2554,6 +2554,12 @@ Document::~Document() {
   mInDestructor = true;
   mInUnlinkOrDeletion = true;
 
+  // Cancel render-blocking timer
+  if (mRenderBlockingTimer) {
+    mRenderBlockingTimer->Cancel();
+    mRenderBlockingTimer = nullptr;
+  }
+
   mozilla::DropJSObjects(this);
 
   // Clear mObservers to keep it in sync with the mutationobserver list
@@ -2767,6 +2773,7 @@ NS_IMPL_CYCLE_COLLECTION_TRAVERSE_BEGIN_INTERNAL(Document)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mLazyLoadObserver)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mAutoSizeImageObserver)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mElementsObservedForLastRememberedSize)
+  NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mRenderBlockingElementSet)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mActiveEditContext)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mDOMImplementation)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mImageMaps)
@@ -2893,6 +2900,7 @@ NS_IMPL_CYCLE_COLLECTION_UNLINK_BEGIN(Document)
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mLazyLoadObserver)
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mAutoSizeImageObserver)
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mElementsObservedForLastRememberedSize);
+  NS_IMPL_CYCLE_COLLECTION_UNLINK(mRenderBlockingElementSet);
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mActiveEditContext)
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mFontFaceSet)
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mPreviouslyFocusedContent)
@@ -7879,6 +7887,10 @@ bool Document::IsRenderingSuppressed() const {
   if (mRenderingSuppressedForViewTransitions) {
     return true;
   }
+  // doc is render-blocked
+  if (IsRenderBlocked()) {
+    return true;
+  }
   // The user agent believes that updating the rendering of doc's node navigable
   // would have no visible effect.
   if (!IsEventHandlingEnabled() && !IsBeingUsedAsImage() && !mDisplayDocument &&
@@ -8173,6 +8185,14 @@ void Document::RemoveChildNode(nsIContent* aKid, bool aNotify,
   MOZ_ASSERT(mCachedRootElement != aKid,
              "Stale pointer in mCachedRootElement, after we tried to clear it "
              "(maybe somebody called GetRootElement() too early?)");
+
+  // This is intentional: stop render-blocking permanently. The parser does not
+  // add a body to a new root element, so the document would otherwise stay
+  // blocked until loading ends or the timeout. A render-blocking element added
+  // later does not block.
+  if (removingRoot && StaticPrefs::dom_element_blocking_enabled()) {
+    StopRenderBlocking();
+  }
 }
 
 void Document::AddStyleSheetToStyleSets(StyleSheet& aSheet) {
@@ -13421,8 +13441,20 @@ void Document::SetReadyStateInternal(ReadyState aReadyState,
   if (aUpdateTimingInformation && READYSTATE_LOADING == aReadyState) {
     SetLoadingOrRestoredFromBFCacheTimeStampToNow();
   }
+
+  if (aReadyState == READYSTATE_LOADING &&
+      AllowsAddingRenderBlockingElements()) {
+    EnsureRenderBlockingTimeoutTimer();
+  }
+
   NotifyLoading(mAncestorIsLoading, mReadyState, aReadyState);
+  const bool wasLoading = mReadyState == READYSTATE_LOADING;
   mReadyState = aReadyState;
+  // Leaving "loading" can end render blocking (IsRenderBlocked), which
+  // suppressed rendering; re-arm the rendering phases.
+  if (wasLoading && StaticPrefs::dom_element_blocking_enabled()) {
+    MaybeScheduleRendering();
+  }
   if (aUpdateTimingInformation && mTiming) {
     switch (aReadyState) {
       case READYSTATE_LOADING:
@@ -20012,6 +20044,126 @@ Document::ResolveInboundCrossDocumentViewTransition() {
 void Document::SetInboundViewTransitionParams(
     UniquePtr<ViewTransitionParams> aParams) {
   mInboundViewTransitionParams = std::move(aParams);
+}
+
+// https://html.spec.whatwg.org/#allows-adding-render-blocking-elements
+bool Document::AllowsAddingRenderBlockingElements() const {
+  if (!StaticPrefs::dom_element_blocking_enabled()) {
+    return false;
+  }
+
+  // The spec requires the content type to be exactly "text/html"; this is
+  // narrower than IsHTMLDocument(), which is also true for synthesized image,
+  // media and plain-text documents.
+  if (!GetContentTypeInternal().EqualsLiteral("text/html")) {
+    return false;
+  }
+
+  return !GetBody();
+}
+
+// https://html.spec.whatwg.org/#render-blocked
+bool Document::IsRenderBlocked() const {
+  // The second render-blocked condition (the timeout has not been exceeded) is
+  // tracked by mRenderBlockingStopped.
+  if (!StaticPrefs::dom_element_blocking_enabled() || mRenderBlockingStopped) {
+    return false;
+  }
+
+  // The spec does not check the ready state, so a document without a body is
+  // render-blocked until the timeout, also after parsing. Here a missing body
+  // blocks rendering only while parsing, so that a document renders when
+  // script removes the body or the root element.
+  return !mRenderBlockingElementSet.IsEmpty() ||
+         (AllowsAddingRenderBlockingElements() &&
+          mReadyState == READYSTATE_LOADING);
+}
+
+static void RenderBlockingTimeoutCallback(nsITimer* aTimer, void* aClosure) {
+  RefPtr<Document> doc = static_cast<Document*>(aClosure);
+  doc->StopRenderBlocking();
+}
+
+void Document::EnsureRenderBlockingTimeoutTimer() {
+  if (mRenderBlockingTimer || mRenderBlockingStopped) {
+    return;
+  }
+  NS_NewTimerWithFuncCallback(
+      getter_AddRefs(mRenderBlockingTimer), RenderBlockingTimeoutCallback, this,
+      StaticPrefs::dom_element_blocking_timeout_ms(), nsITimer::TYPE_ONE_SHOT,
+      "Document::RenderBlockingTimeout"_ns);
+}
+
+// https://html.spec.whatwg.org/#block-rendering
+void Document::BlockRendering(Element& aElement) {
+  if (!StaticPrefs::dom_element_blocking_enabled()) {
+    return;
+  }
+
+  if (AllowsAddingRenderBlockingElements()) {
+    mRenderBlockingElementSet.Insert(&aElement);
+    EnsureRenderBlockingTimeoutTimer();
+  }
+}
+
+void Document::MaybeBlockRendering(Element& aElement) {
+  if (AllowsAddingRenderBlockingElements() &&
+      aElement.IsPotentiallyRenderBlocking()) {
+    BlockRendering(aElement);
+  }
+}
+
+// https://html.spec.whatwg.org/#unblock-rendering
+void Document::UnblockRendering(Element& aElement) {
+  if (!StaticPrefs::dom_element_blocking_enabled()) {
+    return;
+  }
+
+  if (!mRenderBlockingElementSet.EnsureRemoved(&aElement)) {
+    return;
+  }
+
+  if (mRenderBlockingElementSet.IsEmpty()) {
+    StartLayoutAfterUnblocking();
+  }
+}
+
+void Document::StopRenderBlocking() {
+  if (mRenderBlockingStopped) {
+    return;
+  }
+  const bool wasRenderBlocked = IsRenderBlocked();
+  mRenderBlockingStopped = true;
+  mRenderBlockingElementSet.Clear();
+  if (mRenderBlockingTimer) {
+    mRenderBlockingTimer->Cancel();
+    mRenderBlockingTimer = nullptr;
+  }
+  if (wasRenderBlocked) {
+    // Only poke the content sink to start the deferred layout when rendering
+    // was actually blocked.
+    StartLayoutAfterUnblocking();
+  }
+}
+
+void Document::StartLayoutAfterUnblocking() {
+  // Rendering was suppressed while render-blocked (IsRenderingSuppressed), so
+  // nothing has been scheduled since. Re-arm all rendering phases.
+  MaybeScheduleRendering();
+
+  // Start layout if it was deferred while blocked. After parsing ends the
+  // parser is gone, but EndLoad keeps a weak reference to the sink for this.
+  nsCOMPtr<nsIContentSink> sink;
+  if (mParser) {
+    sink = mParser->GetContentSink();
+  } else {
+    sink = do_QueryReferent(mWeakSink);
+  }
+  if (nsCOMPtr<nsContentSink> contentSink = do_QueryInterface(sink)) {
+    nsContentUtils::AddScriptRunner(NS_NewRunnableFunction(
+        "Document::StartLayoutAfterUnblocking",
+        [contentSink] { contentSink->StartLayout(false); }));
+  }
 }
 
 Selection* Document::GetSelection(ErrorResult& aRv) {

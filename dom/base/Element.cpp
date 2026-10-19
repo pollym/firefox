@@ -1308,6 +1308,14 @@ void Element::LazyLoadingElementUnbindFromTree(UnbindContext& aContext) {
   observer->Unobserve(*this);
 }
 
+void Element::RenderBlockingElementUnbindFromTree(UnbindContext& aContext) {
+  if (!StaticPrefs::dom_element_blocking_enabled() ||
+      !aContext.WasInComposedDoc() || aContext.IsMove()) {
+    return;
+  }
+  aContext.OwnerDoc().UnblockRendering(*this);
+}
+
 namespace {
 // <https://html.spec.whatwg.org/multipage/urls-and-fetching.html#fetch-priority-attributes>.
 static constexpr nsAttrValue::EnumTableEntry kFetchPriorityEnumTable[] = {
@@ -6807,9 +6815,14 @@ bool Element::BlockingContainsRender() const {
   if (!attrValue || !StaticPrefs::dom_element_blocking_enabled()) {
     return false;
   }
-  MOZ_ASSERT(attrValue->Type() == nsAttrValue::eAtomArray,
-             "Checking blocking attribute on element that doesn't parse it?");
   return attrValue->Contains(nsGkAtoms::render, eIgnoreCase);
+}
+
+void Element::UnblockRenderingIfNotPotentiallyRenderBlocking() {
+  if (StaticPrefs::dom_element_blocking_enabled() &&
+      !IsPotentiallyRenderBlocking()) {
+    OwnerDoc()->UnblockRendering(*this);
+  }
 }
 
 static bool IsOffsetParent(nsIFrame* aFrame) {

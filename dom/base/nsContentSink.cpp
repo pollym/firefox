@@ -24,6 +24,7 @@
 #include "mozilla/StaticPrefs_dom.h"
 #include "mozilla/StaticPrefs_network.h"
 #include "mozilla/StoragePrincipalHelper.h"
+#include "mozilla/StyleSheet.h"
 #include "mozilla/css/Loader.h"
 #include "mozilla/dom/ContentChild.h"
 #include "mozilla/dom/Document.h"
@@ -75,6 +76,7 @@ NS_IMPL_CYCLE_COLLECTING_ADDREF(nsContentSink)
 NS_IMPL_CYCLE_COLLECTING_RELEASE(nsContentSink)
 
 NS_INTERFACE_MAP_BEGIN_CYCLE_COLLECTION(nsContentSink)
+  NS_INTERFACE_MAP_ENTRY_CONCRETE(nsContentSink)
   NS_INTERFACE_MAP_ENTRY(nsICSSLoaderObserver)
   NS_INTERFACE_MAP_ENTRY(nsISupportsWeakReference)
   NS_INTERFACE_MAP_ENTRY_AMBIGUOUS(nsISupports, nsICSSLoaderObserver)
@@ -172,6 +174,8 @@ nsContentSink::StyleSheetLoaded(StyleSheet* aSheet, bool aWasDeferred,
     // that if mDeferredLayoutStart is true, that means any subclass
     // StartLayout() stuff that needs to happen has already happened, so
     // we don't need to worry about it.
+    // While the document is still render-blocked this bails out, and
+    // Document::StartLayoutAfterUnblocking starts layout later.
     StartLayout(false);
 
     // Go ahead and try to scroll to our ref if we have one
@@ -554,8 +558,10 @@ void nsContentSink::StartLayout(bool aIgnorePendingSheets) {
   mDeferredLayoutStart = true;
 
   if (!aIgnorePendingSheets &&
-      (WaitForPendingSheets() || mDocument->HasPendingInitialTranslation())) {
-    // Bail out; we'll start layout when the sheets and l10n load
+      (WaitForPendingSheets() || mDocument->HasPendingInitialTranslation() ||
+       mDocument->IsRenderBlocked())) {
+    // Bail out; we'll start layout when the sheets and l10n load, or when
+    // render-blocking elements finish loading
     return;
   }
 

@@ -23,6 +23,7 @@
 #include "mozilla/dom/ModuleLoader.h"
 #include "mozilla/dom/ReferrerInfo.h"
 #include "mozilla/dom/ScriptLoader.h"
+#include "mozilla/dom/UnbindContext.h"
 #include "nsAttrValueInlines.h"
 #include "nsAttrValueOrString.h"
 #include "nsContentUtils.h"
@@ -41,13 +42,14 @@
 #include "nsUnicharUtils.h"
 #include "nsWindowSizes.h"
 
-NS_IMPL_NS_NEW_HTML_ELEMENT(Link)
+NS_IMPL_NS_NEW_HTML_ELEMENT_CHECK_PARSER(Link)
 
 namespace mozilla::dom {
 
 HTMLLinkElement::HTMLLinkElement(
-    already_AddRefed<mozilla::dom::NodeInfo> aNodeInfo)
-    : nsGenericHTMLElement(std::move(aNodeInfo)) {}
+    already_AddRefed<mozilla::dom::NodeInfo> aNodeInfo, FromParser aFromParser)
+    : nsGenericHTMLElement(std::move(aNodeInfo)),
+      mCreatedByParser(aFromParser) {}
 
 HTMLLinkElement::~HTMLLinkElement() { SupportsDNSPrefetch::Destroyed(*this); }
 
@@ -72,7 +74,7 @@ NS_IMPL_CYCLE_COLLECTION_UNLINK_END
 NS_IMPL_ISUPPORTS_CYCLE_COLLECTION_INHERITED_0(HTMLLinkElement,
                                                nsGenericHTMLElement)
 
-NS_IMPL_ELEMENT_CLONE(HTMLLinkElement)
+NS_IMPL_ELEMENT_CLONE(HTMLLinkElement, mozilla::dom::NOT_FROM_PARSER)
 
 bool HTMLLinkElement::Disabled() const {
   return GetBoolAttr(nsGkAtoms::disabled);
@@ -109,6 +111,8 @@ void HTMLLinkElement::LinkAdded() {
 }
 
 void HTMLLinkElement::UnbindFromTree(UnbindContext& aContext) {
+  RenderBlockingElementUnbindFromTree(aContext);
+
   CancelDNSPrefetch(*this);
   CancelPrefetchOrPreload();
 
@@ -313,6 +317,12 @@ void HTMLLinkElement::AfterSetAttr(int32_t aNameSpaceID, nsAtom* aName,
         UpdatePreload(aName, aValue, aOldValue);
       }
     }
+  }
+
+  if (aNameSpaceID == kNameSpaceID_None &&
+      (aName == nsGkAtoms::rel || aName == nsGkAtoms::type ||
+       aName == nsGkAtoms::blocking)) {
+    UnblockRenderingIfNotPotentiallyRenderBlocking();
   }
 
   return nsGenericHTMLElement::AfterSetAttr(
@@ -775,13 +785,26 @@ nsDOMTokenList* HTMLLinkElement::Blocking() {
 }
 
 bool HTMLLinkElement::IsPotentiallyRenderBlocking() {
-  return BlockingContainsRender();
+  if (BlockingContainsRender()) {
+    return true;
+  }
 
-  // TODO: handle implicitly potentially render blocking
   // https://html.spec.whatwg.org/#implicitly-potentially-render-blocking
   // The default type for resources given by the stylesheet keyword is text/css.
   // A link element of this type is implicitly potentially render-blocking if
   // the element was created by its node document's parser.
+  if (!IsFromDocumentParser(mCreatedByParser)) {
+    return false;
+  }
+
+  nsAutoString rel;
+  GetAttr(nsGkAtoms::rel, rel);
+  uint32_t linkTypes = ParseLinkTypes(rel);
+  if (!(linkTypes & eSTYLESHEET)) {
+    return false;
+  }
+
+  return IsCSSMimeTypeAttributeForLinkElement(*this);
 }
 
 nsresult HTMLLinkElement::CopyInnerTo(HTMLLinkElement* aDest) {

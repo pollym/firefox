@@ -1733,6 +1733,15 @@ class Element : public FragmentOrElement {
   virtual bool IsPotentiallyRenderBlocking() { return false; }
   bool BlockingContainsRender() const;
 
+  // Unblocks rendering on this element if it is no longer potentially
+  // render-blocking, for example after an attribute change.
+  void UnblockRenderingIfNotPotentiallyRenderBlocking();
+
+  // Unblocks rendering when the element becomes browsing-context disconnected,
+  // which an atomic move does not do.
+  // https://html.spec.whatwg.org/#render-blocking-mechanism
+  void RenderBlockingElementUnbindFromTree(UnbindContext&);
+
   // Shadow DOM v1
   enum class ShadowRootDeclarative : bool { No, Yes };
 
