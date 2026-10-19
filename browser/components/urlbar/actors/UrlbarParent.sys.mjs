@@ -141,6 +141,9 @@ export class UrlbarParent extends JSWindowActorParent {
       case "RecordZeroPrefix":
         controller.recordZeroPrefix(message.data.kind);
         break;
+      case "RecordCanonization":
+        controller.recordCanonization();
+        break;
       case "CheckKeywordURIFixup":
         controller.checkKeywordURIFixup(
           message.data.searchString,

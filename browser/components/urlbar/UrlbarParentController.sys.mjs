@@ -710,6 +710,19 @@ export class UrlbarParentController {
   }
 
   /**
+   * Counts a URL canonization, unless this input is in a private window.
+   */
+  recordCanonization() {
+    if (this.isPrivate) {
+      return;
+    }
+    lazy.UrlbarPrefs.set(
+      "canonizedURLCount",
+      lazy.UrlbarPrefs.get("canonizedURLCount") + 1
+    );
+  }
+
+  /**
    * Runs the single-word keyword URI fixup DNS check for a search picked in the
    * address bar. When a single word is turned directly into a search (bypassing
    * the docShell), this reproduces the docShell's DNS lookup that offers to

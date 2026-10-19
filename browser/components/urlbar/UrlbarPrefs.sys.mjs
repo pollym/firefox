@@ -101,6 +101,9 @@ const PREF_URLBAR_DEFAULTS = /** @type {PreferenceDefinition[]} */ ([
   // `urlMinPicks` into a use_count threshold.
   ["autoFill.adaptiveHistory.urlPicksAgeDays", 14],
 
+  // The number of times URL canonization has been used in non-private windows.
+  ["canonizedURLCount", 0],
+
   // Feature gate pref for clipboard suggestions in the urlbar.
   ["clipboard.featureGate", false],
 
