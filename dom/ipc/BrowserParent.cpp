@@ -4163,10 +4163,7 @@ mozilla::ipc::IPCResult BrowserParent::RecvVisitURI(
   }
   nsCOMPtr<IHistory> history = components::History::Service();
   if (history) {
-    // The container isn't sent by the content process, so it can't be forged.
-    (void)history->VisitURI(
-        widget, aURI, aLastVisitedURI, aFlags, aBrowserId,
-        mBrowsingContext->OriginAttributesRef().mUserContextId);
+    (void)history->VisitURI(widget, aURI, aLastVisitedURI, aFlags, aBrowserId);
   }
   return IPC_OK();
 }
