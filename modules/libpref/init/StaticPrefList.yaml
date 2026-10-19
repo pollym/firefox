@@ -11431,6 +11431,13 @@
   value: true
   mirror: always
 
+# Is support for ::-webkit-input-placeholder enabled?
+- name: layout.css.webkit-input-placeholder.enabled
+  type: RelaxedAtomicBool
+  value: true
+  mirror: always
+  rust: true
+
 # Is support for the progress() function enabled?
 # https://drafts.csswg.org/css-values-5/#progress
 - name: layout.css.progress-function.enabled
