@@ -3229,7 +3229,6 @@ fn enqueue_signal_semaphores_destruction(
     queue: &Arc<wgc::device::queue::Queue>,
     device: Arc<wgc::device::Device>,
     handles: &[VkSemaphoreHandle],
-    submission_errored: bool,
 ) {
     use ash::vk::Handle as _;
 
@@ -3242,10 +3241,12 @@ fn enqueue_signal_semaphores_destruction(
         .map(|handle| vk::Semaphore::from_raw(handle.0))
         .collect();
 
-    if submission_errored {
-        // Unregister the pending signals so that a later submission on this
-        // queue does not signal them. This is a no-op for any semaphore that a
-        // batch already consumed before `queue_submit` reported the failure.
+    // There may be some semaphores still left in the HAL queue if an error was
+    // encountered, and we must ensure they aren't signalled after destruction.
+    // Since attempting to remove a semaphore that was already consumed is a
+    // no-op, just ask the queue to remove all of the ones we know were part of
+    // the submission.
+    {
         let queue = queue.clone();
         let hal_queue =
             unsafe { queue.as_hal::<wgc::api::Vulkan>() }.expect("Vulkan backend queue on linux");
@@ -3298,12 +3299,9 @@ pub unsafe extern "C" fn wgpu_server_queue_submit(
     }
 
     #[cfg(target_os = "linux")]
-    enqueue_signal_semaphores_destruction(
-        &queue,
-        device.clone(),
-        unsafe { signal_semaphores.as_slice() },
-        !submission_succeeded,
-    );
+    enqueue_signal_semaphores_destruction(&queue, device.clone(), unsafe {
+        signal_semaphores.as_slice()
+    });
     #[cfg(not(target_os = "linux"))]
     let _ = signal_semaphores;
 
