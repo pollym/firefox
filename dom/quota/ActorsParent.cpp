@@ -2829,7 +2829,7 @@ void QuotaManager::InitQuotaForOrigin(
   // Origins loaded directly from the storage database are already
   // correct.  Callers pass an active reconciliation map for these, so
   // cacheRowMatches is true and no enqueue happens.
-  if (!cacheRowMatches &&
+  if (!aFullOriginMetadata.mIsPrivate && !cacheRowMatches &&
       (fullOriginMetadata.mDirty || !aCacheMap.IsActive()) &&
       aDirectoryExists && !mUsageModificationDisabled.load()) {
     originInfo->mMetadataDirty = true;
