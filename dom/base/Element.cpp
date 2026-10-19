@@ -1380,7 +1380,8 @@ void Element::RemoveFromIdTable() {
 }
 
 void Element::SetSlot(const nsAString& aName, ErrorResult& aError) {
-  aError = SetAttr(kNameSpaceID_None, nsGkAtoms::slot, aName, true);
+  aError = SetAttr(kNameSpaceID_None, nsGkAtoms::slot, aName, true,
+                   IsKnownNewAttr::No);
 }
 
 void Element::GetSlot(nsAString& aName) { GetAttr(nsGkAtoms::slot, aName); }
@@ -1812,7 +1813,7 @@ bool Element::ToggleAttribute(const nsAString& aName,
       return false;
     }
     aError = SetAttr(kNameSpaceID_None, nameAtom, u""_ns, aTriggeringPrincipal,
-                     true);
+                     true, IsKnownNewAttr::No);
     return true;
   }
   if (aForce.WasPassed() && aForce.Value()) {
@@ -3810,7 +3811,7 @@ nsresult Element::SetAndSwapAttr(mozilla::dom::NodeInfo* aName,
 
 nsresult Element::SetAttr(int32_t aNamespaceID, nsAtom* aName, nsAtom* aPrefix,
                           nsAtom* aValue, nsIPrincipal* aSubjectPrincipal,
-                          bool aNotify) {
+                          bool aNotify, IsKnownNewAttr aIsKnownNew) {
   // Keep this in sync with SetParsedAttr below and SetSingleClassFromParser
   // above.
   const nsDependentAtomString valueString(aValue);
@@ -3824,7 +3825,7 @@ nsresult Element::SetAttr(int32_t aNamespaceID, nsAtom* aName, nsAtom* aPrefix,
           attrValue.SetTo(aValue);
         }
       },
-      IsKnownNewAttr::No);
+      aIsKnownNew);
 }
 
 template <typename ParseFunc>
@@ -5942,7 +5943,7 @@ void Element::ClearEditContext() {
 
 nsresult Element::SetBoolAttr(nsAtom* aAttr, bool aValue) {
   if (aValue) {
-    return SetAttr(kNameSpaceID_None, aAttr, u""_ns, true);
+    return SetAttr(kNameSpaceID_None, aAttr, u""_ns, true, IsKnownNewAttr::No);
   }
 
   return UnsetAttr(kNameSpaceID_None, aAttr, true);
