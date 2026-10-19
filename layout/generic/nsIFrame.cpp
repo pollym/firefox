@@ -4414,10 +4414,9 @@ void nsIFrame::BuildDisplayListForChild(nsDisplayListBuilder* aBuilder,
   // frames that correspond to HTML link elements so that we can have active
   // links in saved PDF output. Note that the state of "within a link" is
   // set on the display-list builder, such that all descendants of the link
-  // element will generate display-list links.
-  // TODO: we should be able to optimize this so as to avoid creating links
-  // for the same destination that entirely overlap each other, which adds
-  // nothing useful to the final PDF.
+  // element will generate display-list links, except for descendants entirely
+  // covered by the link element's frame, since those would add nothing useful
+  // to the final PDF.
   Maybe<nsDisplayListBuilder::Linkifier> linkifier;
   if (aBuilder->IsForPrinting()) {
 #ifdef ACCESSIBILITY

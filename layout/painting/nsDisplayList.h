@@ -1746,6 +1746,7 @@ class nsDisplayListBuilder {
       if (mBuilderToReset) {
         mBuilderToReset->mLinkURI.Truncate(0);
         mBuilderToReset->mLinkDest.Truncate(0);
+        mBuilderToReset->mLinkReferenceFrame = nullptr;
       }
     }
 
@@ -1872,6 +1873,11 @@ class nsDisplayListBuilder {
   const ActiveScrolledRoot* mFilterASR;
   nsCString mLinkURI;   // URI of link currently being emitted, if any.
   nsCString mLinkDest;  // Local destination name of link, if any.
+  // Bounds of the frame for the link currently being emitted, relative to
+  // mLinkReferenceFrame.
+  nsRect mLinkBounds;
+  // Reference frame for mLinkBounds.
+  const nsIFrame* mLinkReferenceFrame = nullptr;
 
   // Optimized versions for non-retained display list.
   LayoutDeviceIntRegion mWindowDraggingRegion;

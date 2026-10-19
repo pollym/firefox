@@ -833,6 +833,11 @@ nsDisplayListBuilder::Linkifier::Linkifier(nsDisplayListBuilder* aBuilder,
     return;
   }
 
+  nsPoint offset;
+  aBuilder->mLinkReferenceFrame =
+      aBuilder->FindReferenceFrameFor(aFrame, &offset);
+  aBuilder->mLinkBounds = nsRect(offset, aFrame->GetSize());
+
   // Record that we need to reset the builder's state on destruction.
   mBuilderToReset = aBuilder;
 }
@@ -842,12 +847,25 @@ void nsDisplayListBuilder::Linkifier::MaybeAppendLink(
   // Note that we may generate a link here even if the constructor bailed out
   // without updating aBuilder->mLinkURI/Dest, because it may have been set by
   // an ancestor that was associated with a link element.
-  if (!aBuilder->mLinkURI.IsEmpty() || !aBuilder->mLinkDest.IsEmpty()) {
-    auto* link = MakeDisplayItem<nsDisplayLink>(
-        aBuilder, aFrame, aBuilder->mLinkDest.get(), aBuilder->mLinkURI.get(),
-        aFrame->GetRect());
-    mList->AppendToTop(link);
+  if (aBuilder->mLinkURI.IsEmpty() && aBuilder->mLinkDest.IsEmpty()) {
+    return;
   }
+  if (!mBuilderToReset) {
+    // mBuilderToReset is only set for the link element's frame, so this is a
+    // descendant of that frame. If it is entirely covered by that frame, a link
+    // for it would be redundant.
+    nsPoint offset;
+    const nsIFrame* referenceFrame =
+        aBuilder->FindReferenceFrameFor(aFrame, &offset);
+    if (referenceFrame == aBuilder->mLinkReferenceFrame &&
+        aBuilder->mLinkBounds.Contains(nsRect(offset, aFrame->GetSize()))) {
+      return;
+    }
+  }
+  auto* link = MakeDisplayItem<nsDisplayLink>(
+      aBuilder, aFrame, aBuilder->mLinkDest.get(), aBuilder->mLinkURI.get(),
+      aFrame->GetRect());
+  mList->AppendToTop(link);
 }
 
 uint32_t nsDisplayListBuilder::sPaintSequenceNumber(1);

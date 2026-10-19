@@ -458,12 +458,45 @@ addPdfStructTreeTest(
                 {
                   role: "Link",
                   children: [
+                    { role: "NonStruct", children: [{ content: [" ", "l"] }] },
+                    { annotation: "Link", url: "https://example.com/" },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ]
+);
+
+addPdfStructTreeTest(
+  "testLinkOverflow",
+  `
+<p>a <a href="https://example.com/">l<span style="display: inline-block; height: 100px;">m</span></a></p>
+  `,
+  [
+    {
+      role: "Root",
+      children: [
+        {
+          role: "Document",
+          children: [
+            {
+              role: "P",
+              children: [
+                { role: "NonStruct", children: [{ content: ["a"] }] },
+                {
+                  role: "Link",
+                  children: [
+                    { role: "NonStruct", children: [{ content: [" ", "l"] }] },
                     {
                       role: "NonStruct",
                       children: [
-                        { content: [" ", "l"] },
-                        // A link annotation is currently generated for every
-                        // descendant of a link, so there is a duplicate here.
+                        { role: "NonStruct", children: [{ content: ["m"] }] },
+                        // This extends outside the link element's frame, so it
+                        // needs its own link annotation.
                         { annotation: "Link", url: "https://example.com/" },
                       ],
                     },
