@@ -733,12 +733,9 @@ nsIContent* nsHtml5TreeOperation::CreateHTMLElement(
     // definition given registry, namespace, localName, and is."
     // https://html.spec.whatwg.org/#look-up-a-custom-element-definition
     // Step 1: "If registry is null, then return null."
-    RefPtr<CustomElementRegistry> registry =
-        customElementRegistry.isSome() ? customElementRegistry.value()
-                                       : document->GetCustomElementRegistry();
-    if (registry) {
-      customElementDefinition = registry->LookupCustomElementDefinition(
-          nodeInfo->NameAtom(), nodeInfo->NamespaceID(), typeAtom);
+    if (!(customElementRegistry.isSome() && !customElementRegistry.value())) {
+      customElementDefinition = nsContentUtils::LookupCustomElementDefinition(
+          document, nodeInfo->NameAtom(), nodeInfo->NamespaceID(), typeAtom);
     }
   }
 
