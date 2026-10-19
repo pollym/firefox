@@ -1024,12 +1024,12 @@ void AudioContext::SuspendFromMediaControl() {
   SuspendInternal(nullptr, AudioContextOperationFlags::SendStateChange);
 }
 
-void AudioContext::ResumeFromMediaControl() {
+bool AudioContext::ResumeFromMediaControl() {
   // Offline contexts never register a media-control listener, so this should
   // not be reachable for them.
   MOZ_DIAGNOSTIC_ASSERT(!mIsOffline);
   if (mIsShutDown || mCloseCalled) {
-    return;
+    return false;
   }
   // Only auto-resume a suspend that the interruption itself started. If the
   // page called suspend() (or resume()) while interrupted, it has taken over
@@ -1039,11 +1039,12 @@ void AudioContext::ResumeFromMediaControl() {
     MEDIA_CONTROL_LOG(
         "AudioContext {} ResumeFromMediaControl skipped: page owns the suspend",
         fmt::ptr(this));
-    return;
+    return false;
   }
   MEDIA_CONTROL_LOG("AudioContext {} ResumeFromMediaControl", fmt::ptr(this));
   mSuspendedByMediaControl = false;
   ResumeInternal();
+  return true;
 }
 
 void AudioContext::TransferSuspendToContent() {

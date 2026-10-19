@@ -389,8 +389,7 @@ class AudioDestinationNode::MediaSharedKeysListener final
   void SuspendForInterrupt(AudioSessionInterruptKind aKind) override {
     MOZ_ASSERT(NS_IsMainThread());
     AudioContext* ctx = mDestination.Context();
-    const bool willSuspend = ctx &&
-                             ctx->State() == AudioContextState::Running &&
+    const bool willSuspend = ctx && ctx->IsRunningOrResuming() &&
                              StaticPrefs::media_audioFocus_webaudio_enabled();
     MEDIA_CONTROL_LOG(
         "MediaSharedKeysListener {} SuspendForInterrupt {} in BC {}, "
@@ -415,13 +414,14 @@ class AudioDestinationNode::MediaSharedKeysListener final
   void ResumeFromInterrupt() override {
     MOZ_ASSERT(NS_IsMainThread());
     AudioContext* ctx = mDestination.Context();
-    const bool willResume = mSuspendedByInterrupt && ctx &&
-                            ctx->State() == AudioContextState::Suspended;
+    // The state can still read "running" while the interruption's suspend is
+    // pending, so it does not tell whether this interruption owns a suspend.
+    const bool resumed =
+        mSuspendedByInterrupt && ctx && ctx->ResumeFromMediaControl();
     MEDIA_CONTROL_LOG(
         "MediaSharedKeysListener {} ResumeFromInterrupt in BC {}, resume={}",
-        fmt::ptr(this), mBrowsingContextId, willResume);
-    if (willResume) {
-      ctx->ResumeFromMediaControl();
+        fmt::ptr(this), mBrowsingContextId, resumed);
+    if (resumed) {
       glean::media_audio_focus::resume_decision.Get("web_audio"_ns).Add(1);
     }
     mSuspendedByInterrupt = false;
