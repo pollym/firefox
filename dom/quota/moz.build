@@ -77,6 +77,7 @@ EXPORTS.mozilla.dom.quota += [
     "HashKeys.h",
     "InitializationTypes.h",
     "IPCStreamCipherStrategy.h",
+    "LockstoreStorageKeyProvider.h",
     "MozPromiseUtils.h",
     "NotifyUtils.h",
     "NotifyUtilsCommon.h",
@@ -144,6 +145,7 @@ UNIFIED_SOURCES += [
     "GroupInfo.cpp",
     "GroupInfoPair.cpp",
     "InitializationTypes.cpp",
+    "LockstoreStorageKeyProvider.cpp",
     "NormalOriginOperationBase.cpp",
     "NotifyUtils.cpp",
     "NotifyUtilsCommon.cpp",
@@ -205,6 +207,7 @@ FINAL_LIBRARY = "xul"
 LOCAL_INCLUDES += [
     "/caps",
     "/dom/fs/include",
+    "/security/lockstore",
 ]
 
 SOURCE_HEADERS += [
