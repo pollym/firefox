@@ -11716,8 +11716,10 @@ void nsDocShell::SaveLastVisit(nsIChannel* aChannel, nsIURI* aURI,
       visitURIFlags |= IHistory::SOURCE_IS_POST_RESPONSE;
     }
 
-    (void)history->VisitURI(aWidget, aURI, aPreviousURI, visitURIFlags,
-                            aBrowsingContext->BrowserId());
+    (void)history->VisitURI(
+        aWidget, aURI, aPreviousURI, visitURIFlags,
+        aBrowsingContext->BrowserId(),
+        aBrowsingContext->OriginAttributesRef().mUserContextId);
   }
 }
 
