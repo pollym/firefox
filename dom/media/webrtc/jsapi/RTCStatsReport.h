@@ -172,8 +172,8 @@ class RTCStatsReport final : public nsWrapperCache {
   // We cannot just declare this as SetRTCStats(RTCStats&), because the
   // conversion function that ToJSValue uses is non-virtual.
   template <typename T>
-  nsresult SetRTCStats(T&& aValue) {
-    static_assert(std::is_base_of_v<RTCStats, std::remove_cvref_t<T>>,
+  nsresult SetRTCStats(T& aValue) {
+    static_assert(std::is_base_of_v<RTCStats, T>,
                   "SetRTCStats is for setting RTCStats only");
 
     if (!aValue.mId.WasPassed()) {
@@ -187,7 +187,7 @@ class RTCStatsReport final : public nsWrapperCache {
                         "RTCStatsReport::SetRTCStats");
     JSContext* cx = aes.cx();
     JS::Rooted<JS::Value> val(cx);
-    if (!ToJSValue(cx, std::forward(aValue), &val)) {
+    if (!ToJSValue(cx, std::forward<T>(aValue), &val)) {
       return NS_ERROR_FAILURE;
     }
     JS::Rooted<JSObject*> jsObject(cx, &val.toObject());
