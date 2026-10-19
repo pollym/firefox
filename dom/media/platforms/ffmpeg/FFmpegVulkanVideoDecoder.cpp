@@ -913,7 +913,8 @@ static bool PhysicalDeviceHasVulkanVideoDecodeStack(
 #  ifdef XP_LINUX
 static bool NvidiaDrmModesetDisabled() {
   static std::once_flag sOnce;
-  static bool sDisabled = false;
+  static bool sDisabled = true;
+  // Set disabled to false only if nvidia_drm is loaded and not set to N/n/0.
   std::call_once(sOnce, [] {
     FILE* f = fopen("/sys/module/nvidia_drm/parameters/modeset", "r");
     if (f) {
@@ -1040,8 +1041,9 @@ bool FFmpegVideoDecoder<LIBAV_VER>::FFmpegVulkanVideoDecoder::
         if (p.vendorID == 0x10de) {
           FFMPEGV_LOG("Checking {}: nvidia_drm modeset status", p.deviceName);
           if (NvidiaDrmModesetDisabled()) {
-            FFMPEGV_LOG("Skipping {}: nvidia_drm modeset is disabled",
-                        p.deviceName);
+            FFMPEGV_LOG(
+                "Skipping {}: nvidia_drm modeset disabled or module not loaded",
+                p.deviceName);
             continue;
           }
         }
