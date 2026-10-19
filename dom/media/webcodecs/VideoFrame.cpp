@@ -682,6 +682,13 @@ static Result<Ok, nsCString> VerifyRectOffsetAlignment(
   return Ok();
 }
 
+static Maybe<VideoFrame::Format> ToInternalFormat(
+    const Maybe<VideoPixelFormat>& aFormat) {
+  return aFormat.map([](const VideoPixelFormat& aFormat) {
+    return VideoFrame::Format(aFormat);
+  });
+}
+
 // https://w3c.github.io/webcodecs/#videoframe-parse-visible-rect
 static Result<gfx::IntRect, MediaResult> ParseVisibleRect(
     const gfx::IntRect& aDefaultRect, const Maybe<gfx::IntRect>& aOverrideRect,
@@ -1153,10 +1160,7 @@ InitializeFrameWithResourceAndSize(nsIGlobalObject* aGlobal,
   MOZ_ASSERT(image);
 
   const Maybe<VideoPixelFormat> pixelFormat = GuessVideoPixelFormat(image);
-  Maybe<VideoFrame::Format> format =
-      pixelFormat.map([](const VideoPixelFormat& aFormat) {
-        return VideoFrame::Format(aFormat);
-      });
+  Maybe<VideoFrame::Format> format = ToInternalFormat(pixelFormat);
   if (format && aInit.mAlpha == AlphaOption::Discard) {
     format->MakeOpaque();
     // Keep the alpha data in image for now until it's being rendered.
@@ -1382,10 +1386,7 @@ Result<RefPtr<VideoFrame>, MediaResult> VideoFrame::CreateFromImage(
     const Maybe<VideoPixelFormat>& aFormat, gfx::IntRect aVisibleRect,
     gfx::IntSize aDisplaySize, const Maybe<uint64_t>& aDuration,
     int64_t aTimestamp, const VideoColorSpaceInternal& aColorSpace) {
-  Resource resource = MOZ_TRY(ValidateImage(
-      aImage, aFormat.map([](const VideoPixelFormat& aPixelFormat) {
-        return Format(aPixelFormat);
-      })));
+  Resource resource = MOZ_TRY(ValidateImage(aImage, ToInternalFormat(aFormat)));
   MOZ_TRY(ValidateVisibility(aVisibleRect, resource.mCodedSize)
               .mapErr([](const nsCString& aError) {
                 return MediaResult(NS_ERROR_INVALID_ARG, aError);
@@ -1666,10 +1667,7 @@ already_AddRefed<VideoFrame> VideoFrame::Constructor(
   }
 
   const Maybe<VideoPixelFormat> format = GuessVideoPixelFormat(image);
-  auto validated =
-      ValidateImage(image, format.map([](const VideoPixelFormat& aPixelFormat) {
-        return Format(aPixelFormat);
-      }));
+  auto validated = ValidateImage(image, ToInternalFormat(format));
   if (validated.isErr()) {
     aRv.ThrowTypeError(validated.unwrapErr().Message());
     return nullptr;
