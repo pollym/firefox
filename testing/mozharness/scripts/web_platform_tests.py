@@ -281,7 +281,7 @@ class WebPlatformTest(TestingMixin, MercurialScript, CodeCoverageMixin, AndroidM
                 "run-tests",
             ],
             require_config_file=require_config_file,
-            config={"require_test_zip": True},
+            config={"require_test_zip": True, "test_summary": True},
         )
 
         # Surely this should be in the superclass
@@ -397,7 +397,7 @@ class WebPlatformTest(TestingMixin, MercurialScript, CodeCoverageMixin, AndroidM
 
         mozinfo.find_and_update_from_json(dirs["abs_test_install_dir"])
 
-        raw_log_file, error_summary_file, test_summary_file = self.get_indexed_logs(
+        raw_log_file, error_summary_file = self.get_indexed_logs(
             dirs["abs_blob_upload_dir"], "wpt"
         )
 
@@ -406,7 +406,6 @@ class WebPlatformTest(TestingMixin, MercurialScript, CodeCoverageMixin, AndroidM
             "--log-wptreport=%s"
             % os.path.join(dirs["abs_blob_upload_dir"], "wptreport.json"),
             "--log-errorsummary=%s" % error_summary_file,
-            "--log-testsummary=%s" % test_summary_file,
             "--symbols-path=%s" % self.symbols_path,
             "--stackwalk-binary=%s" % self.query_minidump_stackwalk(),
             "--stackfix-dir=%s" % os.path.join(dirs["abs_test_install_dir"], "bin"),
@@ -730,6 +729,9 @@ class WebPlatformTest(TestingMixin, MercurialScript, CodeCoverageMixin, AndroidM
             log_compact=True,
             error_list=BaseErrorList + WptHarnessErrorList,
             allow_crashes=True,
+            test_summary_file=self.query_test_summary_file(
+                dirs["abs_blob_upload_dir"], self.config
+            ),
         )
 
         env = {"MINIDUMP_SAVE_PATH": dirs["abs_blob_upload_dir"]}
@@ -847,7 +849,7 @@ class WebPlatformTest(TestingMixin, MercurialScript, CodeCoverageMixin, AndroidM
                     env=final_env,
                 )
 
-                self.append_test_summary(dirs["abs_blob_upload_dir"])
+                parser.finish()
 
                 if self.per_test_coverage:
                     self.add_per_test_coverage_report(

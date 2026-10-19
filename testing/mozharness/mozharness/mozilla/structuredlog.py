@@ -35,6 +35,8 @@ class StructuredOutputParser(OutputParser):
             self.strict = True
 
         self.suite_category = kwargs.pop("suite_category", None)
+        # Path of the summary.jsonl to append test records to, or None.
+        self.test_summary_file = kwargs.pop("test_summary_file", None)
 
         tbpl_compact = kwargs.pop("log_compact", False)
         super().__init__(**kwargs)
@@ -42,6 +44,10 @@ class StructuredOutputParser(OutputParser):
 
         mozlog = self._get_mozlog_module()
         self.formatter = mozlog.formatters.TbplFormatter(compact=tbpl_compact)
+        self.test_summary_formatter = (
+            mozlog.formatters.TestSummaryFormatter() if self.test_summary_file else None
+        )
+        self._test_summary_fh = None
         self.handler = mozlog.handlers.StatusHandler()
         self.log_actions = mozlog.structuredlog.log_actions()
 
@@ -164,6 +170,25 @@ class StructuredOutputParser(OutputParser):
         if log_data is not None:
             self.log(log_data, level=level)
             self.update_levels(tbpl_level, level)
+        self._write_test_summary(data)
+
+    def _write_test_summary(self, data):
+        """Append the record to the summary file, if one was requested."""
+        if self.test_summary_formatter is None:
+            return
+        record = self.test_summary_formatter(data)
+        if record is None:
+            return
+        if self._test_summary_fh is None:
+            self._test_summary_fh = open(self.test_summary_file, "a", encoding="utf-8")
+        self._test_summary_fh.write(record)
+        self._test_summary_fh.flush()
+
+    def finish(self):
+        """Release per-run resources; call once the harness process has exited."""
+        if self._test_summary_fh is not None:
+            self._test_summary_fh.close()
+            self._test_summary_fh = None
 
     def _subtract_tuples(self, old, new):
         items = set(list(old.keys()) + list(new.keys()))
