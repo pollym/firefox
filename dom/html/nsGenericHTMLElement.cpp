@@ -1128,10 +1128,6 @@ bool nsGenericHTMLElement::ParseAttribute(int32_t aNamespaceID,
       return aResult.ParseIntValue(aValue);
     }
 
-    if (aAttribute == nsGkAtoms::referrerpolicy) {
-      return ParseReferrerAttribute(aValue, aResult);
-    }
-
     if (aAttribute == nsGkAtoms::name) {
       // Store name as an atom.  name="" means that the element has no name,
       // not that it has an empty string as the name.
