@@ -668,14 +668,7 @@ bool nsWindow::WidgetTypeSupportsNativeCompositing() {
   if (IsDragPopup()) {
     return false;
   }
-#if defined(NIGHTLY_BUILD)
-  // For testing purpose use layered native composition for popups
-  // on nightly. It uses rapid map/unmap sequences it may reveal
-  // hidden bugs in layered code.
-  return true;
-#else
   return WidgetTypeSupportsAcceleration();
-#endif
 }
 
 static bool IsPenEvent(GdkEvent* aEvent, bool* isEraser) {
