@@ -414,10 +414,9 @@ GetStructuredCloneReadInfoFromExternalBlob(
   Maybe<CipherKey> maybeKey;
 
   if (aFileManager.IsInPrivateBrowsingMode()) {
-    nsCString fileKeyId;
-    fileKeyId.AppendInt(file.FileInfo().Id());
-
-    maybeKey = aFileManager.MutableCipherKeyManagerRef().Get(fileKeyId);
+    QM_TRY_UNWRAP(maybeKey,
+                  aFileManager.MutableCipherKeyManagerRef().Get(
+                      aFileManager.CipherKeyIdForFile(file.FileInfo().Id())));
   }
 
   auto data = JSStructuredCloneData{JS::StructuredCloneScope::DifferentProcess};

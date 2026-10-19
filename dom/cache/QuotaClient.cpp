@@ -233,14 +233,16 @@ Result<UsageInfo, nsresult> CacheQuotaClient::InitOrigin(
   // XXX Ensure the -wel file is removed if the caches.sqlite doesn't exist.
   QM_TRY(OkIf(!!cachesSQLiteFile), UsageInfo{});
 
-  const auto maybeCipherKey = [this, &aOriginMetadata] {
-    Maybe<CipherKey> maybeCipherKey;
-    auto cipherKeyManager = GetOrCreateCipherKeyManager(aOriginMetadata);
-    if (cipherKeyManager) {
-      maybeCipherKey = Some(cipherKeyManager->Ensure());
-    }
-    return maybeCipherKey;
-  }();
+  QM_TRY_UNWRAP(
+      const auto maybeCipherKey,
+      ([this, &aOriginMetadata]() -> Result<Maybe<CipherKey>, nsresult> {
+        auto cipherKeyManager = GetOrCreateCipherKeyManager(aOriginMetadata);
+        if (cipherKeyManager) {
+          QM_TRY_UNWRAP(auto key, cipherKeyManager->Ensure("db"_ns));
+          return Some(key);
+        }
+        return Maybe<CipherKey>{};
+      }()));
 
   QM_TRY_INSPECT(
       const auto& paddingSize,
@@ -522,9 +524,11 @@ RefPtr<CipherKeyManager> CacheQuotaClient::GetOrCreateCipherKeyManager(
     return nullptr;
   }
 
+  // Ephemeral keys: randomly generated, never persisted.
   const auto& origin = aMetadata.mOrigin;
-  return mCipherKeyManagers.LookupOrInsertWith(
-      origin, [] { return new CipherKeyManager("CacheCipherKeyManager"); });
+  return mCipherKeyManagers.LookupOrInsertWith(origin, [] {
+    return CipherKeyManager::CreateEphemeral("CacheCipherKeyManager");
+  });
 }
 
 CacheQuotaClient::~CacheQuotaClient() {

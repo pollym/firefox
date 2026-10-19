@@ -3680,7 +3680,7 @@ class ObjectStoreAddOrPutRequestOp final : public NormalTransactionOp {
 #ifdef DEBUG
     const StructuredCloneFileBase::FileType mType;
 #endif
-    void EnsureCipherKey();
+    nsresult EnsureCipherKey();
     void AssertInvariants() const;
 
     StoredFileInfo(SafeRefPtr<DatabaseFileInfo> aFileInfo,
@@ -3706,9 +3706,10 @@ class ObjectStoreAddOrPutRequestOp final : public NormalTransactionOp {
     StoredFileInfo(StoredFileInfo&&) = default;
 #endif
 
-    static StoredFileInfo CreateForBlob(SafeRefPtr<DatabaseFileInfo> aFileInfo,
-                                        RefPtr<DatabaseFile> aFileActor);
-    static StoredFileInfo CreateForStructuredClone(
+    static mozilla::Result<StoredFileInfo, nsresult> CreateForBlob(
+        SafeRefPtr<DatabaseFileInfo> aFileInfo,
+        RefPtr<DatabaseFile> aFileActor);
+    static mozilla::Result<StoredFileInfo, nsresult> CreateForStructuredClone(
         SafeRefPtr<DatabaseFileInfo> aFileInfo,
         nsCOMPtr<nsIInputStream> aInputStream);
 
@@ -3811,19 +3812,19 @@ void ObjectStoreAddOrPutRequestOp::StoredFileInfo::AssertInvariants() const {
   }
 }
 
-void ObjectStoreAddOrPutRequestOp::StoredFileInfo::EnsureCipherKey() {
+nsresult ObjectStoreAddOrPutRequestOp::StoredFileInfo::EnsureCipherKey() {
   const auto& fileInfo = GetFileInfo();
   const auto& fileManager = fileInfo.Manager();
 
-  // No need to generate cipher keys if we are not in PBM
   if (!fileManager.IsInPrivateBrowsingMode()) {
-    return;
+    return NS_OK;
   }
 
-  nsCString keyId;
-  keyId.AppendInt(fileInfo.Id());
-
-  fileManager.MutableCipherKeyManagerRef().Ensure(keyId);
+  QM_TRY_UNWRAP(const auto key,
+                fileManager.MutableCipherKeyManagerRef().Ensure(
+                    fileManager.CipherKeyIdForFile(fileInfo.Id())));
+  (void)key;
+  return NS_OK;
 }
 
 ObjectStoreAddOrPutRequestOp::StoredFileInfo::StoredFileInfo(
@@ -3837,8 +3838,6 @@ ObjectStoreAddOrPutRequestOp::StoredFileInfo::StoredFileInfo(
 {
   AssertIsOnBackgroundThread();
   AssertInvariants();
-
-  EnsureCipherKey();
   MOZ_COUNT_CTOR(ObjectStoreAddOrPutRequestOp::StoredFileInfo);
 }
 
@@ -3854,22 +3853,24 @@ ObjectStoreAddOrPutRequestOp::StoredFileInfo::StoredFileInfo(
 {
   AssertIsOnBackgroundThread();
   AssertInvariants();
-
-  EnsureCipherKey();
   MOZ_COUNT_CTOR(ObjectStoreAddOrPutRequestOp::StoredFileInfo);
 }
 
-ObjectStoreAddOrPutRequestOp::StoredFileInfo
+mozilla::Result<ObjectStoreAddOrPutRequestOp::StoredFileInfo, nsresult>
 ObjectStoreAddOrPutRequestOp::StoredFileInfo::CreateForBlob(
     SafeRefPtr<DatabaseFileInfo> aFileInfo, RefPtr<DatabaseFile> aFileActor) {
-  return {std::move(aFileInfo), std::move(aFileActor)};
+  StoredFileInfo info{std::move(aFileInfo), std::move(aFileActor)};
+  QM_TRY(MOZ_TO_RESULT(info.EnsureCipherKey()));
+  return info;
 }
 
-ObjectStoreAddOrPutRequestOp::StoredFileInfo
+mozilla::Result<ObjectStoreAddOrPutRequestOp::StoredFileInfo, nsresult>
 ObjectStoreAddOrPutRequestOp::StoredFileInfo::CreateForStructuredClone(
     SafeRefPtr<DatabaseFileInfo> aFileInfo,
     nsCOMPtr<nsIInputStream> aInputStream) {
-  return {std::move(aFileInfo), std::move(aInputStream)};
+  StoredFileInfo info{std::move(aFileInfo), std::move(aInputStream)};
+  QM_TRY(MOZ_TO_RESULT(info.EnsureCipherKey()));
+  return info;
 }
 
 bool ObjectStoreAddOrPutRequestOp::StoredFileInfo::ShouldCompress() const {
@@ -5528,24 +5529,22 @@ class EncryptedFileBlobImpl final : public FileBlobImpl {
   const CipherKey mKey;
 };
 
-RefPtr<BlobImpl> CreateFileBlobImpl(const Database& aDatabase,
-                                    const nsCOMPtr<nsIFile>& aNativeFile,
-                                    const DatabaseFileInfo::IdType aId) {
+Result<RefPtr<BlobImpl>, nsresult> CreateFileBlobImpl(
+    const Database& aDatabase, const nsCOMPtr<nsIFile>& aNativeFile,
+    const DatabaseFileInfo::IdType aId) {
   if (aDatabase.IsInPrivateBrowsing()) {
-    nsCString keyId;
-    keyId.AppendInt(aId);
-
-    const auto& key =
-        aDatabase.GetFileManager().MutableCipherKeyManagerRef().Get(keyId);
-
-    MOZ_RELEASE_ASSERT(key.isSome());
-    return MakeRefPtr<EncryptedFileBlobImpl>(aNativeFile, aId, *key);
+    QM_TRY_UNWRAP(auto maybeKey,
+                  aDatabase.GetFileManager().MutableCipherKeyManagerRef().Get(
+                      aDatabase.GetFileManager().CipherKeyIdForFile(aId)));
+    QM_TRY(OkIf(maybeKey.isSome()), Err(NS_ERROR_FAILURE));
+    return RefPtr<BlobImpl>(
+        MakeRefPtr<EncryptedFileBlobImpl>(aNativeFile, aId, *maybeKey));
   }
 
   auto impl = MakeRefPtr<FileBlobImpl>(aNativeFile);
   impl->SetFileId(aId);
 
-  return impl;
+  return RefPtr<BlobImpl>(std::move(impl));
 }
 
 Result<nsTArray<SerializedStructuredCloneFile>, nsresult>
@@ -5596,8 +5595,11 @@ SerializeStructuredCloneFiles(const SafeRefPtr<Database>& aDatabase,
             [[fallthrough]];
 
           case StructuredCloneFileBase::eBlob: {
-            const auto impl = CreateFileBlobImpl(*aDatabase, nativeFile,
-                                                 file.FileInfo().Id());
+            QM_TRY_UNWRAP(const auto impl,
+                          CreateFileBlobImpl(*aDatabase, nativeFile,
+                                             file.FileInfo().Id()),
+                          Err(NS_ERROR_DOM_INDEXEDDB_UNKNOWN_ERR),
+                          IDB_REPORT_INTERNAL_ERR_LAMBDA);
 
             IPCBlob ipcBlob;
 
@@ -11873,10 +11875,11 @@ DatabaseFileManager::DatabaseFileManager(
       mDatabaseName(aDatabaseName),
       mDatabaseID(aDatabaseID),
       mDatabaseFilePath(aDatabaseFilePath),
-      mCipherKeyManager(
-          aIsInPrivateBrowsingMode
-              ? new IndexedDBCipherKeyManager("IndexedDBCipherKeyManager")
-              : nullptr),
+      // Ephemeral keys: randomly generated, never persisted.
+      mCipherKeyManager(aIsInPrivateBrowsingMode
+                            ? IndexedDBCipherKeyManager::CreateEphemeral(
+                                  "IndexedDBCipherKeyManager")
+                            : nullptr),
       mDatabaseVersion(0),
       mEnforcingQuota(aEnforcingQuota),
       mIsInPrivateBrowsingMode(aIsInPrivateBrowsingMode) {}
@@ -15693,10 +15696,12 @@ nsresult OpenDatabaseOp::DoDatabaseWork() {
         mDatabaseFilePath.ref(), mEnforcingQuota, mInPrivateBrowsing);
   }
 
-  Maybe<const CipherKey> maybeKey =
-      mInPrivateBrowsing
-          ? Some(fileManager->MutableCipherKeyManagerRef().Ensure())
-          : Nothing();
+  Maybe<CipherKey> maybeKey;
+  if (mInPrivateBrowsing) {
+    QM_TRY_UNWRAP(auto key, fileManager->MutableCipherKeyManagerRef().Ensure(
+                                fileManager->CipherKeyIdForDatabase()));
+    maybeKey = Some(key);
+  }
 
   MOZ_RELEASE_ASSERT(mInPrivateBrowsing == maybeKey.isSome());
 
@@ -16427,9 +16432,13 @@ void OpenDatabaseOp::EnsureDatabaseActor() {
     mMetadata = info->mMetadata.clonePtr();
   }
 
-  Maybe<const CipherKey> maybeKey =
-      mInPrivateBrowsing ? mFileManager->MutableCipherKeyManagerRef().Get()
-                         : Nothing();
+  Maybe<CipherKey> maybeKey;
+  if (mInPrivateBrowsing) {
+    QM_TRY_UNWRAP(maybeKey,
+                  mFileManager->MutableCipherKeyManagerRef().Get(
+                      mFileManager->CipherKeyIdForDatabase()),
+                  QM_VOID);
+  }
 
   MOZ_RELEASE_ASSERT(mInPrivateBrowsing == maybeKey.isSome());
 
@@ -16759,12 +16768,14 @@ nsresult DeleteDatabaseOp::LoadPreviousVersion(nsIFile& aDatabaseFile) {
         mDatabaseFilePath.ref(), mEnforcingQuota, mInPrivateBrowsing);
   }
 
-  const auto maybeKey =
-      mInPrivateBrowsing
-          ? Some(fileManager->MutableCipherKeyManagerRef().Ensure())
-          : Nothing();
+  Maybe<CipherKey> maybeKey;
+  if (fileManager->IsInPrivateBrowsingMode()) {
+    QM_TRY_UNWRAP(auto key, fileManager->MutableCipherKeyManagerRef().Ensure(
+                                fileManager->CipherKeyIdForDatabase()));
+    maybeKey = Some(key);
+  }
 
-  MOZ_RELEASE_ASSERT(mInPrivateBrowsing == maybeKey.isSome());
+  MOZ_RELEASE_ASSERT(!(mInPrivateBrowsing && maybeKey.isNothing()));
 
   // Pass -1 as the directoryLockId to disable quota checking, since we might
   // temporarily exceed quota before deleting the database.
@@ -19211,34 +19222,34 @@ bool ObjectStoreAddOrPutRequestOp::Init(TransactionBase& aTransaction) {
     mUniqueIndexTable.ref().MarkImmutable();
   }
 
-  QM_TRY_UNWRAP(
-      mStoredFileInfos,
-      TransformIntoNewArray(
-          mParams.fileAddInfos(),
-          [](const auto& fileAddInfo) {
-            MOZ_ASSERT(fileAddInfo.type() == StructuredCloneFileBase::eBlob ||
-                       fileAddInfo.type() ==
-                           StructuredCloneFileBase::eMutableFile);
+  if (!mStoredFileInfos.SetCapacity(mParams.fileAddInfos().Length(),
+                                    fallible)) {
+    return false;
+  }
+  for (const auto& fileAddInfo : mParams.fileAddInfos()) {
+    MOZ_ASSERT(fileAddInfo.type() == StructuredCloneFileBase::eBlob ||
+               fileAddInfo.type() == StructuredCloneFileBase::eMutableFile);
 
-            switch (fileAddInfo.type()) {
-              case StructuredCloneFileBase::eBlob: {
-                PBackgroundIDBDatabaseFileParent* file =
-                    fileAddInfo.file().AsParent();
-                MOZ_ASSERT(file);
+    switch (fileAddInfo.type()) {
+      case StructuredCloneFileBase::eBlob: {
+        PBackgroundIDBDatabaseFileParent* file = fileAddInfo.file().AsParent();
+        MOZ_ASSERT(file);
 
-                auto* const fileActor = static_cast<DatabaseFile*>(file);
-                MOZ_ASSERT(fileActor);
+        auto* const fileActor = static_cast<DatabaseFile*>(file);
+        MOZ_ASSERT(fileActor);
 
-                return StoredFileInfo::CreateForBlob(
-                    fileActor->GetFileInfoPtr(), fileActor);
-              }
+        QM_TRY_UNWRAP(auto info,
+                      StoredFileInfo::CreateForBlob(fileActor->GetFileInfoPtr(),
+                                                    fileActor),
+                      false);
+        mStoredFileInfos.AppendElement(std::move(info));
+        break;
+      }
 
-              default:
-                MOZ_CRASH("Should never get here!");
-            }
-          },
-          fallible),
-      false);
+      default:
+        MOZ_CRASH("Should never get here!");
+    }
+  }
 
   if (mDataOverThreshold) {
     auto fileInfo =
@@ -19247,9 +19258,13 @@ bool ObjectStoreAddOrPutRequestOp::Init(TransactionBase& aTransaction) {
       return false;
     }
 
-    mStoredFileInfos.EmplaceBack(StoredFileInfo::CreateForStructuredClone(
-        std::move(fileInfo),
-        MakeRefPtr<SCInputStream>(mParams.cloneInfo().data().data)));
+    QM_TRY_UNWRAP(
+        auto info,
+        StoredFileInfo::CreateForStructuredClone(
+            std::move(fileInfo),
+            MakeRefPtr<SCInputStream>(mParams.cloneInfo().data().data)),
+        false);
+    mStoredFileInfos.EmplaceBack(std::move(info));
   }
 
   return true;
@@ -19460,13 +19475,12 @@ nsresult ObjectStoreAddOrPutRequestOp::DoDatabaseWork(
           QM_TRY(OkIf(journalFile), NS_ERROR_DOM_INDEXEDDB_UNKNOWN_ERR,
                  IDB_REPORT_INTERNAL_ERR_LAMBDA);
 
-          nsCString fileKeyId;
-          fileKeyId.AppendInt(fileInfo.Id());
-
-          const auto maybeKey =
-              fileManager.IsInPrivateBrowsingMode()
-                  ? fileManager.MutableCipherKeyManagerRef().Get(fileKeyId)
-                  : Nothing();
+          Maybe<CipherKey> maybeKey;
+          if (fileManager.IsInPrivateBrowsingMode()) {
+            QM_TRY_UNWRAP(maybeKey,
+                          fileManager.MutableCipherKeyManagerRef().Get(
+                              fileManager.CipherKeyIdForFile(fileInfo.Id())));
+          }
 
           QM_TRY(MOZ_TO_RESULT(fileHelper->CreateFileFromStream(
                                    *file, *journalFile, *inputStream,

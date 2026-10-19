@@ -443,9 +443,18 @@ Context::QuotaInitRunnable::Run() {
       // Execute the provided initialization Action.  The Action must Resolve()
       // before returning.
 
-      mInitAction->RunOnTarget(
-          resolver.clonePtr(), mDirectoryMetadata, mData,
-          mCipherKeyManager ? Some(mCipherKeyManager->Ensure()) : Nothing{});
+      Maybe<CipherKey> maybeCipherKey;
+      if (mCipherKeyManager) {
+        auto keyResult = mCipherKeyManager->Ensure("db"_ns);
+        if (keyResult.isErr()) {
+          resolver->Resolve(keyResult.inspectErr());
+          break;
+        }
+        maybeCipherKey = Some(keyResult.unwrap());
+      }
+
+      mInitAction->RunOnTarget(resolver.clonePtr(), mDirectoryMetadata, mData,
+                               maybeCipherKey);
 
       MOZ_DIAGNOSTIC_ASSERT(resolver->Resolved());
 
@@ -674,9 +683,19 @@ Context::ActionRunnable::Run() {
       mExecutingRunOnTarget = true;
 
       mState = STATE_RUNNING;
-      mAction->RunOnTarget(
-          SafeRefPtrFromThis(), mDirectoryMetadata, mData,
-          mCipherKeyManager ? Some(mCipherKeyManager->Ensure()) : Nothing{});
+
+      Maybe<CipherKey> maybeCipherKey;
+      if (mCipherKeyManager) {
+        auto keyResult = mCipherKeyManager->Ensure("db"_ns);
+        if (keyResult.isErr()) {
+          Resolve(keyResult.inspectErr());
+          break;
+        }
+        maybeCipherKey = Some(keyResult.unwrap());
+      }
+
+      mAction->RunOnTarget(SafeRefPtrFromThis(), mDirectoryMetadata, mData,
+                           maybeCipherKey);
 
       mData = nullptr;
 

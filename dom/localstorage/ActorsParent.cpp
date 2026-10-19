@@ -6895,7 +6895,8 @@ nsresult PrepareDatastoreOp::DatabaseWork() {
       auto cipherKeyManager =
           lsClient->GetOrCreateCipherKeyManager(mOriginMetadata);
       MOZ_RELEASE_ASSERT(cipherKeyManager);
-      mMaybeCipherKey = Some(cipherKeyManager->Ensure());
+      QM_TRY_UNWRAP(auto key, cipherKeyManager->Ensure("db"_ns));
+      mMaybeCipherKey = Some(key);
     }
 
     const UsageInfo usageInfo = quotaManager->GetUsageForClient(
@@ -8317,9 +8318,11 @@ RefPtr<LSCipherKeyManager> QuotaClient::GetOrCreateCipherKeyManager(
     return nullptr;
   }
 
+  // Ephemeral keys: randomly generated, never persisted.
   const auto& origin = aOriginMetadata.mOrigin;
-  return IOThreadData()->mCipherKeyManagers.LookupOrInsertWith(
-      origin, [] { return new LSCipherKeyManager("LSCipherKeyManager"); });
+  return IOThreadData()->mCipherKeyManagers.LookupOrInsertWith(origin, [] {
+    return LSCipherKeyManager::CreateEphemeral("LSCipherKeyManager");
+  });
 }
 
 mozilla::dom::quota::Client::Type QuotaClient::GetType() {
@@ -8386,7 +8389,8 @@ Result<UsageInfo, nsresult> QuotaClient::InitOrigin(
   if (aOriginMetadata.mIsPrivate) {
     auto cipherKeyManager = GetOrCreateCipherKeyManager(aOriginMetadata);
     MOZ_RELEASE_ASSERT(cipherKeyManager);
-    maybeCipherKey = Some(cipherKeyManager->Ensure());
+    QM_TRY_UNWRAP(auto key, cipherKeyManager->Ensure("db"_ns));
+    maybeCipherKey = Some(key);
   }
 
   QM_TRY_INSPECT(
