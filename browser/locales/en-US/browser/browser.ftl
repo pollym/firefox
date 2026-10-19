@@ -1171,14 +1171,13 @@ qrcode-image =
 qrcode-close-button =
     .aria-label = Close
 
-# Variables:
-#  $shortcut (String): keyboard shortcut to save a copy of the page
+## Variables:
+##  $shortcut (String): keyboard shortcut to perform the action
+
 toolbar-button-save-page =
   .label = Save page
   .tooltiptext = Save this page ({ $shortcut })
 
-# Variables:
-#  $shortcut (String): keyboard shortcut to open a local file
 toolbar-button-open-file =
   .label = Open file
   .tooltiptext = Open a file ({ $shortcut })
@@ -1191,8 +1190,6 @@ toolbar-button-send-tab =
   .label = Send tab
   .tooltiptext = Send current tab to another device
 
-# Variables
-# $shortcut (string) - Keyboard shortcut to open a new private browsing window
 toolbar-button-new-private-window =
   .label = New private window
   .tooltiptext = Open a new private browsing window ({ $shortcut })
@@ -1204,6 +1201,52 @@ toolbar-button-share-tab =
 toolbar-button-tab-groups =
   .label = Tab groups
   .tooltiptext = Show your tab groups
+
+toolbar-button-history =
+  .label = History
+  .tooltiptext = Show your history ({ $shortcut })
+
+toolbar-button-find =
+  .label = Find
+  .tooltiptext = Find in this page ({ $shortcut })
+
+toolbar-button-developer =
+  .label = Developer
+  .tooltiptext = Open Web developer tools ({ $shortcut })
+
+toolbar-button-forget =
+  .label = Forget
+  .tooltiptext = Forget about some browsing history
+
+toolbar-zoom-controls =
+  .label = Zoom Controls
+  .title = Zoom controls
+
+toolbar-button-zoom-out =
+  .label = Zoom out
+  .tooltiptext = Zoom out ({ $shortcut })
+
+toolbar-button-zoom-reset-tooltip = Reset zoom level ({ $shortcut })
+
+toolbar-button-zoom-in =
+  .label = Zoom in
+  .tooltiptext = Zoom in ({ $shortcut })
+
+toolbar-edit-controls =
+  .label = Edit controls
+  .title = Edit controls
+
+toolbar-button-cut =
+  .label = Cut
+  .tooltiptext = Cut ({ $shortcut })
+
+toolbar-button-copy =
+  .label = Copy
+  .tooltiptext = Copy ({ $shortcut })
+
+toolbar-button-paste =
+  .label = Paste
+  .tooltiptext = Paste ({ $shortcut })
 
 ## EME notification panel
 
