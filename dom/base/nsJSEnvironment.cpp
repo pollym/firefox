@@ -7,6 +7,7 @@
 #include "mozilla/EventDispatcher.h"
 #include "mozilla/HoldDropJSObjects.h"
 #include "nsAtom.h"
+#include "nsCCUncollectableMarker.h"
 #include "nsCOMPtr.h"
 #include "nsCRT.h"
 #include "nsContentUtils.h"
@@ -1210,6 +1211,12 @@ void nsJSContext::BeginCycleCollectionCallback(CCReason aReason) {
 void nsJSContext::EndCycleCollectionCallback(
     const CycleCollectorResults& aResults) {
   MOZ_ASSERT(NS_IsMainThread());
+
+  // Unbinding is deferred until all garbage has been unlinked. During shutdown
+  // there is no later point at which to do it.
+  if (!nsCCUncollectableMarker::sGeneration) {
+    Element::ClearContentUnbinder();
+  }
 
   sScheduler->KillCCRunner();
 

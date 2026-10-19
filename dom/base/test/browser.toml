@@ -172,6 +172,8 @@ skip-if = [
 
 ["browser_promiseDocumentFlushed.js"]
 
+["browser_range_shadow_root_shutdown.js"]
+
 ["browser_refresh_content.js"]
 support-files = [
   "green.png",
