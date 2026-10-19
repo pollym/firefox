@@ -16,7 +16,10 @@
 namespace mozilla::dom::quota {
 
 // Abstract interface for per-origin cipher key storage.
-// The concrete implementation follows in a subsequent commit.
+//
+// The production implementation (LockstoreStorageKeyProvider) wraps the
+// lockstore service. Tests can mock this interface to avoid XPCOM service
+// dependencies.
 class CipherKeyStoreBackend {
  public:
   NS_INLINE_DECL_PURE_VIRTUAL_REFCOUNTING
