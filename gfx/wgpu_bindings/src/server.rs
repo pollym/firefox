@@ -3307,6 +3307,7 @@ pub unsafe extern "C" fn wgpu_server_queue_submit(
     #[cfg(not(target_os = "linux"))]
     let _ = signal_semaphores;
 
+    // NOTE: `0` means "no index to follow up with".
     submission_succeeded
         .then_some(submission_index)
         .unwrap_or(0)
