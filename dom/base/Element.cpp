@@ -3693,9 +3693,12 @@ bool Element::MaybeCheckSameAttrVal(int32_t aNamespaceID, const nsAtom* aName,
   if (aNotify) {
     BorrowedAttrInfo info(GetAttrInfo(aNamespaceID, aName));
     if (info.mValue) {
-      // Check whether the old value is the same as the new one.  Note that we
-      // only need to actually _get_ the old value if the element is a custom
-      // element (because it may have an attribute changed callback).
+      bool valueMatches = aValue.EqualsAsStrings(*info.mValue);
+      if (valueMatches && aPrefix == info.mName->GetPrefix()) {
+        return true;
+      }
+      // Only custom elements need an old-value snapshot for attribute
+      // callbacks.
       if (GetCustomElementData()) {
         // Need to store the old value.
         //
@@ -3705,10 +3708,6 @@ bool Element::MaybeCheckSameAttrVal(int32_t aNamespaceID, const nsAtom* aName,
         // should serialize the attribute value now to keep a snapshot.
         aOldValue.SetToSerialized(*info.mValue);
         *aOldValueSet = true;
-      }
-      bool valueMatches = aValue.EqualsAsStrings(*info.mValue);
-      if (valueMatches && aPrefix == info.mName->GetPrefix()) {
-        return true;
       }
       modification = true;
     }
@@ -4125,8 +4124,9 @@ nsresult Element::SetAttrAndNotify(
 
   // Copy aParsedValue for later use since it will be lost when we call
   // SetAndSwapAttr below
+  const bool callAfterSetAttr = aCallAfterSetAttr && aName->IsStatic();
   nsAttrValue valueForAfterSetAttr;
-  if (aCallAfterSetAttr || GetCustomElementData()) {
+  if (callAfterSetAttr || GetCustomElementData()) {
     valueForAfterSetAttr.SetTo(aParsedValue);
   }
 
@@ -4205,7 +4205,7 @@ nsresult Element::SetAttrAndNotify(
     }
   }
 
-  if (aCallAfterSetAttr && aName->IsStatic()) {
+  if (callAfterSetAttr) {
     AfterSetAttr(aNamespaceID, aName, &valueForAfterSetAttr, oldValue,
                  aSubjectPrincipal, aNotify);
 
