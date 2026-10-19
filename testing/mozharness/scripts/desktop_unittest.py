@@ -52,6 +52,8 @@ SUITE_INSTALL_EXTENSIONS = ["mochitest"]
 
 # DesktopUnittest {{{1
 class DesktopUnittest(TestingMixin, MercurialScript, MozbaseMixin, CodeCoverageMixin):
+    python_constraints = "requirements-marionette.txt"
+
     config_options = (
         [
             [
