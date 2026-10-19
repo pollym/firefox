@@ -2146,10 +2146,13 @@ nsresult PermissionManager::AddInternal(
       PermissionEntry oldPermissionEntry = entry->GetPermissions()[index];
       id = oldPermissionEntry.mID;
 
-      // If the type we want to remove is EXPIRE_POLICY, we need to reject
-      // attempts to change the permission.
-      if (entry->GetPermissions()[index].mExpireType == EXPIRE_POLICY) {
-        NS_WARNING("Attempting to remove EXPIRE_POLICY permission");
+      // EXPIRE_POLICY permissions can only be removed by a caller that passes
+      // EXPIRE_POLICY, which is what the enterprise policy engine does.
+      if (entry->GetPermissions()[index].mExpireType == EXPIRE_POLICY &&
+          aExpireType != EXPIRE_POLICY) {
+        NS_WARNING(
+            "Ignoring removal of EXPIRE_POLICY permission by a caller that "
+            "did not pass EXPIRE_POLICY");
         break;
       }
 
