@@ -154,12 +154,23 @@ class WebTransportDatagramDuplexStream final : public nsISupports,
 
   void SetChild(WebTransportChild* aChild);
 
-  // Settles every pending outgoing-datagram sink write promise on the default
-  // writable and every WebTransportDatagramsWritable this duplex stream has
-  // ever created via CreateWritable(), so none are left hanging when the
-  // connection tears down. Called from WebTransport::Cleanup(), which
-  // otherwise never touches datagrams at all.
+  // https://w3c.github.io/webtransport/#webtransport-cleanup step 11: empty
+  // every outgoing datagram writable's [[OutgoingDatagramsQueue]].
+  //
+  // The queued chunk's promise is also our WritableStream sink's write
+  // promise, which the spec leaves unsettled here; dropping it would wedge
+  // WritableStreamStartErroring(), which only finishes erroring -- and so
+  // only reaches CloseOrErrorWritables() below -- once no write is marked in
+  // flight. Resolving with undefined matches how sendDatagrams settles a
+  // datagram dropped without being sent (step 5.1.2.2).
   void Cleanup();
+
+  // https://w3c.github.io/webtransport/#webtransport-cleanup steps 16.5/17.7:
+  // close (aClean) or error (!aClean, with aErrorValue) every outgoing
+  // datagram writable -- the default one plus every one from
+  // createWritable(). Must run after Cleanup().
+  MOZ_CAN_RUN_SCRIPT void CloseOrErrorWritables(
+      JSContext* aCx, bool aClean, JS::Handle<JS::Value> aErrorValue);
 
   void NewDatagramReceived(nsTArray<uint8_t>&& aData,
                            const mozilla::TimeStamp& aTimeStamp);
@@ -209,6 +220,10 @@ class WebTransportDatagramDuplexStream final : public nsISupports,
 
  private:
   ~WebTransportDatagramDuplexStream() = default;
+
+  MOZ_CAN_RUN_SCRIPT static void CloseOrErrorWritable(
+      JSContext* aCx, WritableStream* aWritable, bool aClean,
+      JS::Handle<JS::Value> aErrorValue);
 
   nsCOMPtr<nsIGlobalObject> mGlobal;
   RefPtr<WebTransport> mWebTransport;

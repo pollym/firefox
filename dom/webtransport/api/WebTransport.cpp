@@ -1545,12 +1545,15 @@ void WebTransport::Cleanup(WebTransportError* aError,
   mIncomingBidirectionalAlgorithm = nullptr;
   mIncomingUnidirectionalAlgorithm = nullptr;
 
-  // Empty each outgoing datagram writable's [[OutgoingDatagramsQueue]].
+  // Empty each outgoing datagram writable's [[OutgoingDatagramsQueue]], then
+  // close (clean close) or error (failure) each writable itself, like the
+  // send/receive streams above.
   // TODO: Cleanup() also resolves each writable's withheld write promise,
   // which the current spec doesn't do; see
   // https://github.com/w3c/webtransport/pull/790.
-  if (mDatagrams) {
-    mDatagrams->Cleanup();
+  if (RefPtr<WebTransportDatagramDuplexStream> datagrams = mDatagrams) {
+    datagrams->Cleanup();
+    datagrams->CloseOrErrorWritables(cx, !!aCloseInfo, errorValue);
   }
 
   // We no longer block BFCache
