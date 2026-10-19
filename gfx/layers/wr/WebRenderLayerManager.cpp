@@ -197,7 +197,7 @@ void WebRenderLayerManager::GetBackendName(nsAString& name) {
   }
 }
 
-uint32_t WebRenderLayerManager::StartFrameTimeRecording(int32_t aBufferSize) {
+uint32_t WebRenderLayerManager::StartFrameTimeRecording(uint32_t aBufferSize) {
   CompositorBridgeChild* renderer = GetCompositorBridgeChild();
   if (renderer) {
     uint32_t startIndex;
