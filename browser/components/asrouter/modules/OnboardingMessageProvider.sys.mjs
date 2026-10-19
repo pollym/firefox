@@ -2448,42 +2448,16 @@ const BASE_MESSAGES = () => [
     template: "toast_notification",
     content: {
       title: {
-        string_id: "default-browser-guidance-notification-title",
+        string_id: "default-browser-guidance-notification-auto-trigger-title",
       },
       body: {
-        string_id:
-          "default-browser-guidance-notification-body-instruction-win11",
+        string_id: "default-browser-guidance-notification-auto-trigger-body",
       },
-      launch_action: {
-        type: "OPEN_URL",
-        data: {
-          args: "https://support.mozilla.org/1/firefox/%VERSION%/%OS%/%LOCALE%/win-set-firefox-default-browser",
-          where: "tabshifted",
-        },
-      },
+      image_url:
+        "chrome://browser/content/asrouter/assets/windows-guidance.gif",
+      reduced_motion_image_url:
+        "chrome://browser/content/asrouter/assets/windows-guidance-static.svg",
       requireInteraction: true,
-      actions: [
-        {
-          action: "info-page",
-          title: {
-            string_id: "default-browser-guidance-notification-info-page",
-          },
-          launch_action: {
-            type: "OPEN_URL",
-            data: {
-              args: "https://support.mozilla.org/1/firefox/%VERSION%/%OS%/%LOCALE%/win-set-firefox-default-browser",
-              where: "tabshifted",
-            },
-          },
-        },
-        {
-          action: "dismiss",
-          title: {
-            string_id: "default-browser-guidance-notification-dismiss",
-          },
-          windowsSystemActivationType: true,
-        },
-      ],
       tag: "set-default-guidance-notification",
     },
     // Both Windows 10 and 11 return `os.windowsVersion == 10.0`. We limit to
