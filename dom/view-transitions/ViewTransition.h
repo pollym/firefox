@@ -27,10 +27,11 @@ class ErrorResult;
 struct Keyframe;
 struct PseudoStyleRequest;
 struct StyleLockedDeclarationBlock;
+class WindowRenderer;
 
 namespace layers {
 class RenderRootStateManager;
-}
+}  // namespace layers
 
 namespace wr {
 struct ImageKey;
@@ -123,6 +124,11 @@ class ViewTransition final : public nsISupports, public nsWrapperCache {
       Document&, TypeList&&);
 
   bool IsOutboundCrossDocument() const { return mIsOutboundCrossDocument; }
+
+  // Moves old-state snapshots from another WebRender bridge to the bridge of
+  // aRenderer. Does nothing if aRenderer does not use WebRender.
+  static void AdoptOldSnapshots(WindowRenderer* aRenderer,
+                                ViewTransitionNamedElements& aNamedElements);
 
   [[nodiscard]] MOZ_CAN_RUN_SCRIPT UniquePtr<ViewTransitionParams>
   CaptureOldStateForCrossDocument();

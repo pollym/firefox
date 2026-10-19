@@ -968,7 +968,7 @@ class nsDocShell final : public nsDocLoader,
   BeginDeferredOutboundCrossDocumentViewTransition(
       const mozilla::dom::SessionHistoryInfo* aPageSwapTargetInfo,
       mozilla::dom::NavigationType aNavigationType,
-      std::function<void()>&& aProceed);
+      uint64_t aSnapshotTargetTabId, std::function<void()>&& aProceed);
 
   nsresult Dispatch(already_AddRefed<nsIRunnable> aRunnable);
 

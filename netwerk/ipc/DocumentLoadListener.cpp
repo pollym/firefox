@@ -3270,9 +3270,12 @@ bool DocumentLoadListener::MaybeBeginOutboundViewTransition() {
     targetInfo.emplace(mLoadingSessionHistoryInfo->mInfo);
   }
   RefPtr<DocumentLoadListener> self = this;
+  // There is no snapshot target tab (TabId 0), because the new document does
+  // not exist yet. ViewTransition::CreateCrossDocument moves the snapshots to
+  // its bridge if needed.
   contentParent
       ->SendBeginOutboundCrossDocumentViewTransition(
-          browsingContext, targetInfo, *navigationType)
+          browsingContext, targetInfo, *navigationType, TabId(0))
       ->Then(GetMainThreadSerialEventTarget(), __func__,
              [self](const ContentParent::
                         BeginOutboundCrossDocumentViewTransitionPromise::

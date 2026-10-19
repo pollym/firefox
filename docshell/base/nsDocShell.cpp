@@ -1347,7 +1347,7 @@ void nsDocShell::MaybeFirePageSwapOnDeactivate(
 
 void nsDocShell::BeginDeferredOutboundCrossDocumentViewTransition(
     const mozilla::dom::SessionHistoryInfo* aPageSwapTargetInfo,
-    mozilla::dom::NavigationType aNavigationType,
+    mozilla::dom::NavigationType aNavigationType, uint64_t aSnapshotTargetTabId,
     std::function<void()>&& aProceed) {
   if (!StaticPrefs::dom_viewTransitions_cross_document_enabled() ||
       !mBrowsingContext || !mDocumentViewer) {
@@ -1402,9 +1402,22 @@ void nsDocShell::BeginDeferredOutboundCrossDocumentViewTransition(
   const uint64_t browserId = mBrowsingContext->BrowserId();
   RefPtr<nsDocShell> self = this;
   outboundVT->BeginDeferredOutboundCapture(
-      [proceed = std::move(aProceed), isTop, browserId,
+      [proceed = std::move(aProceed), isTop, browserId, aSnapshotTargetTabId,
        self](UniquePtr<ViewTransitionParams>&& aParams) {
         if (aParams) {
+          if (aSnapshotTargetTabId) {
+            // The new document, restored from BFCache, draws through that
+            // tab's WebRender bridge. Move the snapshots there while this
+            // document's bridge still exists.
+            if (RefPtr<BrowserChild> target = BrowserChild::FindBrowserChild(
+                    TabId(aSnapshotTargetTabId))) {
+              widget::PuppetWidget* puppet = target->WebWidget();
+              if (puppet && puppet->HasWindowRenderer()) {
+                ViewTransition::AdoptOldSnapshots(puppet->GetWindowRenderer(),
+                                                  aParams->namedElements);
+              }
+            }
+          }
           if (isTop) {
             // Top-level: route via the browser id so the params survive the
             // BrowsingContext replacement that a BFCache/process switch causes.

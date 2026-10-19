@@ -4700,7 +4700,7 @@ mozilla::ipc::IPCResult
 ContentChild::RecvBeginOutboundCrossDocumentViewTransition(
     const MaybeDiscarded<BrowsingContext>& aContext,
     const Maybe<SessionHistoryInfo>& aPageSwapTargetInfo,
-    const NavigationType& aNavigationType,
+    const NavigationType& aNavigationType, const TabId& aSnapshotTargetTab,
     BeginOutboundCrossDocumentViewTransitionResolver&& aResolver) {
   if (aContext.IsNullOrDiscarded()) {
     aResolver(true);
@@ -4719,6 +4719,7 @@ ContentChild::RecvBeginOutboundCrossDocumentViewTransition(
 
   docShell->BeginDeferredOutboundCrossDocumentViewTransition(
       aPageSwapTargetInfo.ptrOr(nullptr), aNavigationType,
+      uint64_t(aSnapshotTargetTab),
       [resolver = std::move(aResolver)] { resolver(true); });
 
   return IPC_OK();

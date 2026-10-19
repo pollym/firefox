@@ -1080,10 +1080,13 @@ child:
     // Fires pageswap with an outbound view transition in the old document and
     // captures its state in the next rendering update. The reply comes after
     // the capture, or right away if there is nothing to capture.
+    // aSnapshotTargetTab is the tab of a document restored from BFCache that
+    // takes the snapshots, or 0.
     async BeginOutboundCrossDocumentViewTransition(
         MaybeDiscardedBrowsingContext aContext,
         SessionHistoryInfo? aPageSwapTargetInfo,
-        NavigationType aNavigationType) returns (bool unused);
+        NavigationType aNavigationType,
+        TabId aSnapshotTargetTab) returns (bool unused);
     async ReactivateDocuments(MaybeDiscardedBrowsingContext aContext,
                               SessionHistoryInfo? aReactivatedEntry,
                               SessionHistoryInfo[] aNewSHEs,

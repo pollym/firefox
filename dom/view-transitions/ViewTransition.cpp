@@ -126,6 +126,8 @@ struct OldSnapshotData {
   nsRect mSnapshotRect;
   RefPtr<layers::RenderRootStateManager> mManager;
   bool mUsed = false;
+  // Whether AdoptOldSnapshots moved the snapshot to another bridge.
+  bool mAdopted = false;
 
   OldSnapshotData() = default;
 
@@ -137,9 +139,9 @@ struct OldSnapshotData {
   void EnsureKey(layers::RenderRootStateManager* aManager,
                  wr::IpcResourceUpdateQueue& aResources) {
     if (mImageKey != kNoKey) {
-      // The manager may differ from the one that created the key: a cross-doc
-      // inbound transition reuses the old document's snapshot, whose image
-      // lives in the (shared) compositor.
+      // A cross-document inbound transition reuses the old document's
+      // snapshot. Its key belongs to this document's bridge once
+      // AdoptOldSnapshots has run.
       return;
     }
     mManager = aManager;
@@ -152,6 +154,13 @@ struct OldSnapshotData {
       wr::SnapshotImageKey key = {mImageKey};
       if (mUsed) {
         mManager->AddSnapshotImageKeyForDiscard(key);
+      } else if (mAdopted) {
+        // The manager of an adopted snapshot can belong to a tab that stays
+        // in BFCache and does not paint. No display list uses the snapshot,
+        // so delete it now.
+        if (!mManager->IsDestroyed() && mManager->WrBridge()) {
+          mManager->AsyncResourceUpdates().DeleteSnapshotImage(key);
+        }
       } else {
         mManager->AddUnusedSnapshotImageKeyForDiscard(key);
       }
@@ -304,7 +313,52 @@ already_AddRefed<ViewTransition> ViewTransition::CreateCrossDocument(
   // Step 13. Set phase to update-callback-called.
   vt->mPhase = Phase::UpdateCallbackCalled;
 
+  // If the old document entered BFCache, the snapshots belong to its WebRender
+  // bridge. Move them to the bridge of this document. For a document restored
+  // from BFCache, nsDocShell::BeginDeferredOutboundCrossDocumentViewTransition
+  // moved them already.
+  if (PresShell* ps = aDocument.GetPresShell()) {
+    AdoptOldSnapshots(ps->GetWindowRenderer(), vt->mNamedElements);
+  }
+
   return vt.forget();
+}
+
+/* static */
+void ViewTransition::AdoptOldSnapshots(
+    WindowRenderer* aRenderer, ViewTransitionNamedElements& aNamedElements) {
+  layers::WebRenderLayerManager* wrManager =
+      aRenderer ? aRenderer->AsWebRender() : nullptr;
+  if (!wrManager) {
+    return;
+  }
+  // A WebRender display list can only reference image keys of its own
+  // bridge's id namespace.
+  layers::WebRenderBridgeChild* bridge = wrManager->WrBridge();
+  if (!bridge) {
+    return;
+  }
+  layers::RenderRootStateManager* manager =
+      wrManager->GetRenderRootStateManager();
+  wr::IpcResourceUpdateQueue resources(bridge);
+  for (auto& entry : aNamedElements) {
+    OldSnapshotData& snapshot = entry.GetData()->mOldState.mSnapshot;
+    if (snapshot.mImageKey == kNoKey ||
+        bridge->MatchesNamespace(snapshot.mImageKey)) {
+      continue;
+    }
+    wr::ImageKey newKey = bridge->GetNextImageKey();
+    VT_LOG("ViewTransition::AdoptOldSnapshots(%s): %s -> %s\n",
+           nsAtomCString(entry.GetKey()).get(),
+           ToString(snapshot.mImageKey).c_str(), ToString(newKey).c_str());
+    resources.AdoptSnapshotImage(wr::SnapshotImageKey{snapshot.mImageKey},
+                                 wr::SnapshotImageKey{newKey});
+    snapshot.mImageKey = newKey;
+    // The image now belongs to this bridge; discard it through this manager.
+    snapshot.mManager = manager;
+    snapshot.mAdopted = true;
+  }
+  manager->UpdateResources(resources);
 }
 
 /* static */

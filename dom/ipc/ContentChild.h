@@ -792,7 +792,7 @@ class ContentChild final : public PContentChild,
   mozilla::ipc::IPCResult RecvBeginOutboundCrossDocumentViewTransition(
       const MaybeDiscarded<BrowsingContext>& aContext,
       const Maybe<SessionHistoryInfo>& aPageSwapTargetInfo,
-      const NavigationType& aNavigationType,
+      const NavigationType& aNavigationType, const TabId& aSnapshotTargetTab,
       BeginOutboundCrossDocumentViewTransitionResolver&& aResolver);
   MOZ_CAN_RUN_SCRIPT_BOUNDARY
   mozilla::ipc::IPCResult RecvReactivateDocuments(
