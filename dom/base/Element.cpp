@@ -2058,7 +2058,6 @@ void Element::SetAttributeDevtoolsNS(const nsAString& aNamespaceURI,
 void Element::RemoveAttributeNS(const nsAString& aNamespaceURI,
                                 const nsAString& aLocalName,
                                 ErrorResult& aError) {
-  RefPtr<nsAtom> name = NS_AtomizeMainThread(aLocalName);
   int32_t nsid = nsNameSpaceManager::GetInstance()->GetNameSpaceID(
       aNamespaceURI, nsContentUtils::IsChromeDoc(OwnerDoc()));
 
@@ -2069,6 +2068,7 @@ void Element::RemoveAttributeNS(const nsAString& aNamespaceURI,
     return;
   }
 
+  RefPtr<nsAtom> name = NS_AtomizeMainThread(aLocalName);
   aError = UnsetAttr(nsid, name, true);
 }
 
