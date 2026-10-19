@@ -1731,8 +1731,9 @@ browser.sanitizer:
         type: string
         description: >
           What the user used to open the dialog: "shortcut", "menu_bar",
-          "app_menu", "fire_button", or "other" for entry points that don't
-          report one.
+          "app_menu", "quick_action", "address_bar_suggestion",
+          "sidebar_history", "settings_history", "settings_site_data",
+          "fire_button", or "other" for entry points that don't report one.
     bugs:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=2081506
     data_reviews:
