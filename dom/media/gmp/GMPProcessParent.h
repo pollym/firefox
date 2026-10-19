@@ -24,8 +24,6 @@ class GMPProcessParent final : public mozilla::ipc::GeckoChildProcessHost {
   // after timeoutMs, this method will return false.
   bool Launch(int32_t aTimeoutMs);
 
-  void Delete(nsCOMPtr<nsIRunnable> aCallback = nullptr);
-
   bool CanShutdown() override { return true; }
   const std::string& GetPluginFilePath() { return mGMPPath; }
   bool UseXPCOM() const { return mUseXpcom; }
@@ -57,10 +55,7 @@ class GMPProcessParent final : public mozilla::ipc::GeckoChildProcessHost {
  private:
   ~GMPProcessParent();
 
-  void DoDelete();
-
   std::string mGMPPath;
-  nsCOMPtr<nsIRunnable> mDeletedCallback;
 
   // Whether or not XPCOM is enabled in the GMP process.
   bool mUseXpcom;
