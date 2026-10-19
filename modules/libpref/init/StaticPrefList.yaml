@@ -5647,12 +5647,6 @@
   mirror: always
   rust: true
 
-- name: dom.text_fragments.enabled
-  type: RelaxedAtomicBool
-  value: true
-  mirror: always
-  rust: true
-
 - name: dom.text_fragments.create_text_fragment.timeout_seconds
   type: uint32_t
   value: 5

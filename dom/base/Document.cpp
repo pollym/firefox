@@ -4337,13 +4337,6 @@ static PermissionsPolicy* GetPermissionsPolicyFromElement(Element* aElement) {
 }
 
 nsresult Document::InitDocPolicy(nsIChannel* aChannel) {
-  // We only use document policy to implement the text fragments spec, so leave
-  // everything at the default value if it isn't enabled. This includes the
-  // behavior for element fragments.
-  if (!StaticPrefs::dom_text_fragments_enabled()) {
-    return NS_OK;
-  }
-
   nsCOMPtr<nsIHttpChannel> httpChannel;
   nsresult rv = GetHttpChannelHelper(aChannel, getter_AddRefs(httpChannel));
   if (NS_WARN_IF(NS_FAILED(rv))) {
