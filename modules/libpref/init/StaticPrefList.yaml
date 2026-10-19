@@ -4758,6 +4758,13 @@
   value: 25
   mirror: always
 
+# When true, newly initialized origins get at-rest encryption (not just
+# private browsing). Existing origins keep their encryption state.
+- name: dom.quotaManager.encryption.enabled
+  type: RelaxedAtomicBool
+  value: false
+  mirror: always
+
 # Use to control to dump CheckedUnsafePtr creation stack and assignment stacks.
 - name: dom.checkedUnsafePtr.dumpStacks.enabled
   type: RelaxedAtomicBool
