@@ -732,13 +732,20 @@ class Perftest(metaclass=ABCMeta):
         # let's start it!
         self.playback.start()
 
+    def _get_source_path_mappings(self):
+        if not self.benchmark:
+            return None
+        return [self.benchmark.get_source_path_mapping()]
+
     def _init_gecko_profiling(self, test):
         LOG.info("initializing gecko profiler")
         upload_dir = os.getenv("MOZ_UPLOAD_DIR")
         if not upload_dir:
             LOG.critical("Profiling ignored because MOZ_UPLOAD_DIR was not set")
         else:
-            self.gecko_profiler = GeckoProfile(upload_dir, self.config, test)
+            self.gecko_profiler = GeckoProfile(
+                upload_dir, self.config, test, self._get_source_path_mappings()
+            )
 
     def _init_etw_profiling(self, test):
         LOG.info("initializing ETW profiler")
@@ -751,7 +758,9 @@ class Perftest(metaclass=ABCMeta):
         if not upload_dir:
             LOG.critical("ETW Profiling ignored because MOZ_UPLOAD_DIR was not set")
         else:
-            self.etw_profiler = ETWProfile(upload_dir, self.config, test)
+            self.etw_profiler = ETWProfile(
+                upload_dir, self.config, test, self._get_source_path_mappings()
+            )
 
     def _init_samply_profiling(self, test):
         LOG.info("initializing Samply profiler")
@@ -762,7 +771,9 @@ class Perftest(metaclass=ABCMeta):
         if not upload_dir:
             LOG.critical("Samply profiling ignored because MOZ_UPLOAD_DIR was not set")
         else:
-            self.samply_profiler = SamplyProfile(upload_dir, self.config, test)
+            self.samply_profiler = SamplyProfile(
+                upload_dir, self.config, test, self._get_source_path_mappings()
+            )
 
     def _init_chrome_trace(self, test):
         LOG.info("initializing Chrome Trace handler")
@@ -790,7 +801,9 @@ class Perftest(metaclass=ABCMeta):
         if not upload_dir:
             LOG.critical("Perf profiling ignored because MOZ_UPLOAD_DIR was not set")
         else:
-            self.perf_profiler = PerfProfile(upload_dir, self.config, test)
+            self.perf_profiler = PerfProfile(
+                upload_dir, self.config, test, self._get_source_path_mappings()
+            )
 
     def disable_non_local_connections(self):
         # For Firefox we need to set MOZ_DISABLE_NONLOCAL_CONNECTIONS=1 env var before startup
