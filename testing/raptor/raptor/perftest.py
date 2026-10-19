@@ -40,8 +40,6 @@ from cmdline import (
     SAFARI_APPS,
     TRACE_APPS,
 )
-from condprof.client import ProfileNotFoundError, get_profile
-from condprof.util import download_file, get_current_platform
 from etw_profile import ETWProfile
 from gecko_profile import GeckoProfile
 from logger.logger import RaptorLogger
@@ -355,6 +353,11 @@ class Perftest(metaclass=ABCMeta):
     def get_conditioned_profile(self, binary=None):
         """Downloads a platform-specific conditioned profile, using the
         condprofile client API; returns a self.conditioned_profile_dir"""
+        # Late import: condprof pulls in arsenic and aiohttp, which runs
+        # without a conditioned profile never use.
+        from condprof.client import ProfileNotFoundError, get_profile
+        from condprof.util import get_current_platform
+
         if self.conditioned_profile_dir:
             # We already have a directory, so provide a copy that
             # will get deleted after it's done with
@@ -472,6 +475,8 @@ class Perftest(metaclass=ABCMeta):
         ]
         if not install_extensions:
             return
+
+        from condprof.util import download_file
 
         # Sideloaded extensions are disabled by default; these prefs make them
         # install and enable on startup (mirrors the condprof webext customization).
