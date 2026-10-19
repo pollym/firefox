@@ -700,7 +700,7 @@ WebRenderCommandsResult SVGGeometryFrame::CreateWebRenderCommands(
     const mozilla::layers::StackingContextHelper& aSc,
     mozilla::layers::RenderRootStateManager* aManager,
     nsDisplayListBuilder* aDisplayListBuilder, DisplaySVGGeometry* aItem,
-    bool aDryRun, bool aAxisAligned) {
+    bool aDryRun) {
   MOZ_ASSERT(StyleVisibility()->IsVisible());
 
   SVGGeometryElement* element = static_cast<SVGGeometryElement*>(GetContent());
@@ -716,7 +716,7 @@ WebRenderCommandsResult SVGGeometryFrame::CreateWebRenderCommands(
   // cached images; under a rotation or a skew their edges come out blurry, so
   // only plain rect fills are drawn in that case.
   const bool axisAligned =
-      aAxisAligned && !aSc.GetInheritedTransform().HasNonAxisAlignedTransform();
+      !aSc.GetInheritedTransform().HasNonAxisAlignedTransform();
 
   if (!shape.IsRect()) {
     if (!StaticPrefs::gfx_webrender_svg_shapes_ellipses()) {

@@ -110,7 +110,7 @@ class SVGGeometryFrame final : public nsIFrame, public ISVGDisplayableFrame {
       const mozilla::layers::StackingContextHelper& aSc,
       mozilla::layers::RenderRootStateManager* aManager,
       nsDisplayListBuilder* aDisplayListBuilder, DisplaySVGGeometry* aItem,
-      bool aDryRun, bool aAxisAligned = true);
+      bool aDryRun);
   // Whether shape-rendering asks for no anti-aliasing.
   bool HasCrispEdges() const;
   // Whether the WebRender primitives for this shape should be anti-aliased.
@@ -145,14 +145,11 @@ class DisplaySVGGeometry final : public DisplaySVGItem {
 
   // Whether this part of the SVG should be natively handled by webrender,
   // potentially becoming an "active layer" inside a blob image.
-  // aAxisAligned is false when a transform between aSc and the item rotates or
-  // skews it.
   bool ShouldBeActive(mozilla::wr::DisplayListBuilder& aBuilder,
                       mozilla::wr::IpcResourceUpdateQueue& aResources,
                       const mozilla::layers::StackingContextHelper& aSc,
                       mozilla::layers::RenderRootStateManager* aManager,
-                      nsDisplayListBuilder* aDisplayListBuilder,
-                      bool aAxisAligned) {
+                      nsDisplayListBuilder* aDisplayListBuilder) {
     // We delegate this question to the parent frame to take advantage of
     // the SVGGeometryFrame inheritance hierarchy which provides actual
     // implementation details. The dryRun flag prevents serious side-effects.
@@ -160,7 +157,7 @@ class DisplaySVGGeometry final : public DisplaySVGItem {
     return frame
         ->CreateWebRenderCommands(aBuilder, aResources, aSc, aManager,
                                   aDisplayListBuilder, this,
-                                  /*aDryRun=*/true, aAxisAligned)
+                                  /*aDryRun=*/true)
         .isOk();
   }
 

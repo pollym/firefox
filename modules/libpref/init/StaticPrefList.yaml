@@ -8447,6 +8447,12 @@
   value: false
   mirror: always
 
+# <image> elements can be drawn with WebRender under a non-uniform scale.
+- name: gfx.webrender.svg-images.non-uniform-scale
+  type: RelaxedAtomicBool
+  value: false
+  mirror: always
+
 - name: gfx.webrender.svg-shapes
   type: RelaxedAtomicBool
   value: true
