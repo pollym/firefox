@@ -236,7 +236,8 @@ Result<UsageInfo, nsresult> CacheQuotaClient::InitOrigin(
   QM_TRY_UNWRAP(
       const auto maybeCipherKey,
       ([this, &aOriginMetadata]() -> Result<Maybe<CipherKey>, nsresult> {
-        auto cipherKeyManager = GetOrCreateCipherKeyManager(aOriginMetadata);
+        QM_TRY_UNWRAP(auto cipherKeyManager,
+                      GetOrCreateCipherKeyManager(aOriginMetadata));
         if (cipherKeyManager) {
           QM_TRY_UNWRAP(auto key, cipherKeyManager->Ensure("db"_ns));
           return Some(key);
@@ -515,20 +516,32 @@ nsresult CacheQuotaClient::WipePaddingFileInternal(
   return NS_OK;
 }
 
-RefPtr<CipherKeyManager> CacheQuotaClient::GetOrCreateCipherKeyManager(
+Result<RefPtr<CipherKeyManager>, nsresult>
+CacheQuotaClient::GetOrCreateCipherKeyManager(
     const PrincipalMetadata& aMetadata) {
   AssertIsOnIOThread();
 
-  auto privateOrigin = aMetadata.mIsPrivate;
-  if (!privateOrigin) {
-    return nullptr;
+  const auto& origin = aMetadata.mOrigin;
+  if (aMetadata.mIsPrivate) {
+    return RefPtr<CipherKeyManager>(
+        mCipherKeyManagers.LookupOrInsertWith(origin, [&] {
+          return CipherKeyManager::CreateEphemeral("CacheCipherKeyManager");
+        }));
   }
 
-  // Ephemeral keys: randomly generated, never persisted.
-  const auto& origin = aMetadata.mOrigin;
-  return mCipherKeyManagers.LookupOrInsertWith(origin, [] {
-    return CipherKeyManager::CreateEphemeral("CacheCipherKeyManager");
-  });
+  if (!aMetadata.mIsEncrypted) {
+    return RefPtr<CipherKeyManager>(nullptr);
+  }
+
+  if (auto entry = mCipherKeyManagers.Lookup(origin)) {
+    return RefPtr<CipherKeyManager>(entry.Data());
+  }
+
+  QM_TRY_UNWRAP(auto cipherKeyManager,
+                quota::QuotaManager::Get()->GetOrCreateCipherKeyManager(
+                    origin, quota::Client::DOMCACHE));
+  mCipherKeyManagers.InsertOrUpdate(origin, cipherKeyManager);
+  return cipherKeyManager;
 }
 
 CacheQuotaClient::~CacheQuotaClient() {

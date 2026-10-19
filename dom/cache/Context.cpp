@@ -411,11 +411,21 @@ Context::QuotaInitRunnable::Run() {
                       quotaManager->GetOrCreateTemporaryOriginDirectory(
                           *mDirectoryMetadata));
 
+        // An origin keeps the encryption state it was created with, so the
+        // flag persisted for the origin takes precedence over the current
+        // pref. QuotaManager only learns that flag while initializing the
+        // origin, which happened just above. mDirectoryMetadata is built in
+        // STATE_CREATE_QUOTA_MANAGER before any of that, so it cannot be
+        // filled in there.
+        mDirectoryMetadata->mIsEncrypted =
+            quotaManager->IsOriginEncrypted(*mDirectoryMetadata);
+
         auto* cacheQuotaClient = CacheQuotaClient::Get();
         MOZ_DIAGNOSTIC_ASSERT(cacheQuotaClient);
 
-        mCipherKeyManager =
-            cacheQuotaClient->GetOrCreateCipherKeyManager(*mDirectoryMetadata);
+        QM_TRY_UNWRAP(
+            mCipherKeyManager,
+            cacheQuotaClient->GetOrCreateCipherKeyManager(*mDirectoryMetadata));
 
         SleepIfEnabled(
             StaticPrefs::dom_cache_databaseInitialization_pauseOnIOThreadMs());

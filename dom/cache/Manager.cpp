@@ -72,7 +72,7 @@ Result<Maybe<CipherKey>, nsresult> GetOrCreateCipherKey(
   const auto& maybeMetadata = aContext->MaybeCacheDirectoryMetadataRef();
   MOZ_DIAGNOSTIC_ASSERT(maybeMetadata);
 
-  if (!maybeMetadata->mIsPrivate) {
+  if (!maybeMetadata->ShouldEncrypt()) {
     return Maybe<CipherKey>(Nothing());
   }
 

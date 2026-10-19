@@ -29,6 +29,7 @@ struct PrincipalMetadata {
   nsCString mOrigin;
   nsCString mStorageOrigin;
   bool mIsPrivate = false;
+  bool mIsEncrypted = false;
 
   // These explicit constructors exist to prevent accidental aggregate
   // initialization which could for example initialize mSuffix as group and
@@ -36,14 +37,18 @@ struct PrincipalMetadata {
   PrincipalMetadata() = default;
 
   PrincipalMetadata(nsCString aSuffix, nsCString aGroup, nsCString aOrigin,
-                    nsCString aStorageOrigin, bool aIsPrivate)
+                    nsCString aStorageOrigin, bool aIsPrivate,
+                    bool aIsEncrypted = false)
       : mSuffix{std::move(aSuffix)},
         mGroup{std::move(aGroup)},
         mOrigin{std::move(aOrigin)},
         mStorageOrigin{std::move(aStorageOrigin)},
-        mIsPrivate{aIsPrivate} {
+        mIsPrivate{aIsPrivate},
+        mIsEncrypted{aIsEncrypted} {
     AssertInvariants();
   }
+
+  bool ShouldEncrypt() const { return mIsPrivate || mIsEncrypted; }
 
   void AssertInvariants() const {
     MOZ_ASSERT(!StringBeginsWith(mOrigin, kUUIDOriginScheme));
@@ -60,7 +65,8 @@ struct PrincipalMetadata {
     return mSuffix == aOther.mSuffix && mGroup == aOther.mGroup &&
            mOrigin == aOther.mOrigin &&
            mStorageOrigin == aOther.mStorageOrigin &&
-           mIsPrivate == aOther.mIsPrivate;
+           mIsPrivate == aOther.mIsPrivate &&
+           mIsEncrypted == aOther.mIsEncrypted;
   }
 };
 
@@ -71,10 +77,10 @@ struct OriginMetadata : public PrincipalMetadata {
 
   OriginMetadata(nsCString aSuffix, nsCString aGroup, nsCString aOrigin,
                  nsCString aStorageOrigin, bool aIsPrivate,
-                 PersistenceType aPersistenceType)
+                 PersistenceType aPersistenceType, bool aIsEncrypted = false)
       : PrincipalMetadata(std::move(aSuffix), std::move(aGroup),
                           std::move(aOrigin), std::move(aStorageOrigin),
-                          aIsPrivate),
+                          aIsPrivate, aIsEncrypted),
         mPersistenceType(aPersistenceType) {}
 
   OriginMetadata(PrincipalMetadata aPrincipalMetadata,

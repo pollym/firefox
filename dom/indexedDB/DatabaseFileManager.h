@@ -8,6 +8,7 @@
 #include "FileInfoManager.h"
 #include "IndexedDBCipherKeyManager.h"
 #include "mozilla/InitializedOnce.h"
+#include "mozilla/Result.h"
 #include "mozilla/dom/FlippedOnce.h"
 #include "mozilla/dom/quota/CommonMetadata.h"
 #include "mozilla/dom/quota/PersistenceType.h"
@@ -66,12 +67,17 @@ class DatabaseFileManager final
 
   static Result<quota::FileUsageType, nsresult> GetUsage(nsIFile* aDirectory);
 
+  static Result<RefPtr<IndexedDBCipherKeyManager>, nsresult>
+  CreateCipherKeyManager(const quota::OriginMetadata& aOriginMetadata,
+                         bool aIsInPrivateBrowsingMode);
+
   DatabaseFileManager(PersistenceType aPersistenceType,
                       const quota::OriginMetadata& aOriginMetadata,
                       const nsAString& aDatabaseName,
                       const nsCString& aDatabaseID,
                       const nsAString& aDatabaseFilePath, bool aEnforcingQuota,
-                      bool aIsInPrivateBrowsingMode);
+                      bool aIsInPrivateBrowsingMode,
+                      RefPtr<IndexedDBCipherKeyManager> aCipherKeyManager);
 
   PersistenceType Type() const { return mPersistenceType; }
 
@@ -91,9 +97,10 @@ class DatabaseFileManager final
 
   void UpdateDatabaseVersion(uint64_t aDatabaseVersion);
 
+  // True in private browsing mode and for origins with at-rest encryption.
+  bool UsesEncryption() const { return !!mCipherKeyManager; }
+
   IndexedDBCipherKeyManager& MutableCipherKeyManagerRef() const {
-    // Cipher key manager is present in private browsing mode or when
-    // QuotaManager storage encryption is enabled for all origins.
     MOZ_ASSERT(mCipherKeyManager);
 
     return *mCipherKeyManager;

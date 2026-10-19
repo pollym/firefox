@@ -2330,7 +2330,7 @@ class Database final : public PBackgroundIDBDatabaseParent,
 
   const Maybe<const CipherKey>& MaybeKeyRef() const {
     // This can be called on any thread, as it is const.
-    MOZ_ASSERT(mKey.isSome() == mInPrivateBrowsing);
+    MOZ_ASSERT(mKey.isSome() == GetFileManager().UsesEncryption());
     return mKey;
   }
 
@@ -3816,7 +3816,7 @@ nsresult ObjectStoreAddOrPutRequestOp::StoredFileInfo::EnsureCipherKey() {
   const auto& fileInfo = GetFileInfo();
   const auto& fileManager = fileInfo.Manager();
 
-  if (!fileManager.IsInPrivateBrowsingMode()) {
+  if (!fileManager.UsesEncryption()) {
     return NS_OK;
   }
 
@@ -5532,7 +5532,7 @@ class EncryptedFileBlobImpl final : public FileBlobImpl {
 Result<RefPtr<BlobImpl>, nsresult> CreateFileBlobImpl(
     const Database& aDatabase, const nsCOMPtr<nsIFile>& aNativeFile,
     const DatabaseFileInfo::IdType aId) {
-  if (aDatabase.IsInPrivateBrowsing()) {
+  if (aDatabase.GetFileManager().UsesEncryption()) {
     QM_TRY_UNWRAP(auto maybeKey,
                   aDatabase.GetFileManager().MutableCipherKeyManagerRef().Get(
                       aDatabase.GetFileManager().CipherKeyIdForFile(aId)));
@@ -11869,20 +11869,36 @@ DatabaseFileManager::DatabaseFileManager(
     const quota::OriginMetadata& aOriginMetadata,
     const nsAString& aDatabaseName, const nsCString& aDatabaseID,
     const nsAString& aDatabaseFilePath, bool aEnforcingQuota,
-    bool aIsInPrivateBrowsingMode)
+    bool aIsInPrivateBrowsingMode,
+    RefPtr<IndexedDBCipherKeyManager> aCipherKeyManager)
     : mPersistenceType(aPersistenceType),
       mOriginMetadata(aOriginMetadata),
       mDatabaseName(aDatabaseName),
       mDatabaseID(aDatabaseID),
       mDatabaseFilePath(aDatabaseFilePath),
-      // Ephemeral keys: randomly generated, never persisted.
-      mCipherKeyManager(aIsInPrivateBrowsingMode
-                            ? IndexedDBCipherKeyManager::CreateEphemeral(
-                                  "IndexedDBCipherKeyManager")
-                            : nullptr),
+      mCipherKeyManager(std::move(aCipherKeyManager)),
       mDatabaseVersion(0),
       mEnforcingQuota(aEnforcingQuota),
       mIsInPrivateBrowsingMode(aIsInPrivateBrowsingMode) {}
+
+// static
+Result<RefPtr<IndexedDBCipherKeyManager>, nsresult>
+DatabaseFileManager::CreateCipherKeyManager(
+    const quota::OriginMetadata& aOriginMetadata,
+    bool aIsInPrivateBrowsingMode) {
+  if (aIsInPrivateBrowsingMode) {
+    return RefPtr<IndexedDBCipherKeyManager>(
+        IndexedDBCipherKeyManager::CreateEphemeral(
+            "IndexedDBCipherKeyManager"));
+  }
+  auto* quotaManager = quota::QuotaManager::Get();
+  MOZ_ASSERT(quotaManager);
+  if (quotaManager->IsOriginEncrypted(aOriginMetadata)) {
+    return quotaManager->GetOrCreateCipherKeyManager(aOriginMetadata.mOrigin,
+                                                     quota::Client::IDB);
+  }
+  return RefPtr<IndexedDBCipherKeyManager>(nullptr);
+}
 
 uint64_t DatabaseFileManager::DatabaseVersion() const {
   AssertIsOnIOThread();
@@ -15691,19 +15707,21 @@ nsresult OpenDatabaseOp::DoDatabaseWork() {
       persistenceType, mOriginMetadata.mOrigin, databaseName);
 
   if (!fileManager) {
+    QM_TRY_UNWRAP(auto cipherKeyManager,
+                  DatabaseFileManager::CreateCipherKeyManager(
+                      mOriginMetadata, mInPrivateBrowsing));
     fileManager = MakeSafeRefPtr<DatabaseFileManager>(
         persistenceType, mOriginMetadata, databaseName, mDatabaseId.ref(),
-        mDatabaseFilePath.ref(), mEnforcingQuota, mInPrivateBrowsing);
+        mDatabaseFilePath.ref(), mEnforcingQuota, mInPrivateBrowsing,
+        std::move(cipherKeyManager));
   }
 
   Maybe<CipherKey> maybeKey;
-  if (mInPrivateBrowsing) {
+  if (fileManager->UsesEncryption()) {
     QM_TRY_UNWRAP(auto key, fileManager->MutableCipherKeyManagerRef().Ensure(
                                 fileManager->CipherKeyIdForDatabase()));
     maybeKey = Some(key);
   }
-
-  MOZ_RELEASE_ASSERT(mInPrivateBrowsing == maybeKey.isSome());
 
   QM_TRY_UNWRAP(
       NotNull<nsCOMPtr<mozIStorageConnection>> connection,
@@ -16433,14 +16451,13 @@ void OpenDatabaseOp::EnsureDatabaseActor() {
   }
 
   Maybe<CipherKey> maybeKey;
-  if (mInPrivateBrowsing) {
-    QM_TRY_UNWRAP(maybeKey,
-                  mFileManager->MutableCipherKeyManagerRef().Get(
+  if (mFileManager->UsesEncryption()) {
+    QM_TRY_UNWRAP(auto key,
+                  mFileManager->MutableCipherKeyManagerRef().Ensure(
                       mFileManager->CipherKeyIdForDatabase()),
                   QM_VOID);
+    maybeKey = Some(key);
   }
-
-  MOZ_RELEASE_ASSERT(mInPrivateBrowsing == maybeKey.isSome());
 
   const bool directoryLockInvalidated = mDirectoryLockHandle->Invalidated();
 
@@ -16763,13 +16780,17 @@ nsresult DeleteDatabaseOp::LoadPreviousVersion(nsIFile& aDatabaseFile) {
       persistenceType, mOriginMetadata.mOrigin, databaseName);
 
   if (!fileManager) {
+    QM_TRY_UNWRAP(auto cipherKeyManager,
+                  DatabaseFileManager::CreateCipherKeyManager(
+                      mOriginMetadata, mInPrivateBrowsing));
     fileManager = MakeSafeRefPtr<DatabaseFileManager>(
         persistenceType, mOriginMetadata, databaseName, mDatabaseId.ref(),
-        mDatabaseFilePath.ref(), mEnforcingQuota, mInPrivateBrowsing);
+        mDatabaseFilePath.ref(), mEnforcingQuota, mInPrivateBrowsing,
+        std::move(cipherKeyManager));
   }
 
   Maybe<CipherKey> maybeKey;
-  if (fileManager->IsInPrivateBrowsingMode()) {
+  if (fileManager->UsesEncryption()) {
     QM_TRY_UNWRAP(auto key, fileManager->MutableCipherKeyManagerRef().Ensure(
                                 fileManager->CipherKeyIdForDatabase()));
     maybeKey = Some(key);
@@ -19476,10 +19497,11 @@ nsresult ObjectStoreAddOrPutRequestOp::DoDatabaseWork(
                  IDB_REPORT_INTERNAL_ERR_LAMBDA);
 
           Maybe<CipherKey> maybeKey;
-          if (fileManager.IsInPrivateBrowsingMode()) {
-            QM_TRY_UNWRAP(maybeKey,
-                          fileManager.MutableCipherKeyManagerRef().Get(
+          if (fileManager.UsesEncryption()) {
+            QM_TRY_UNWRAP(auto key,
+                          fileManager.MutableCipherKeyManagerRef().Ensure(
                               fileManager.CipherKeyIdForFile(fileInfo.Id())));
+            maybeKey = Some(key);
           }
 
           QM_TRY(MOZ_TO_RESULT(fileHelper->CreateFileFromStream(
