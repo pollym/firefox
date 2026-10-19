@@ -508,10 +508,12 @@ class AndroidHardwareTest(
                     )
                     parser.formatter = ref_formatter.ReftestFormatter()
 
-                self.run_command(final_cmd, cwd=cwd, env=env, output_parser=parser)
-                parser.finish()
-                tbpl_status, log_level, summary = parser.evaluate_parser(0, summary)
-                parser.append_tinderboxprint_line(self.test_suite)
+                try:
+                    self.run_command(final_cmd, cwd=cwd, env=env, output_parser=parser)
+                    tbpl_status, log_level, summary = parser.evaluate_parser(0, summary)
+                    parser.append_tinderboxprint_line(self.test_suite)
+                finally:
+                    parser.finish()
 
                 self.info("##### %s log ends" % self.test_suite)
 
