@@ -3816,6 +3816,13 @@
   value: true
   mirror: always
 
+# Whether or not loading system principal chrome:// documents within a content
+# process is allowed. Only enabled during reftests.
+- name: dom.ipc.validatePrincipal.testing.allowContentSystemDocuments
+  type: bool
+  value: false
+  mirror: always
+
 # If this is true, any JS actor with safeForUntrustedWebProcess set to false
 # won't be allowed in a process that can hold web content.
 - name: dom.jsipc.check_safeForUntrustedWebProcess

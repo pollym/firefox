@@ -2740,23 +2740,10 @@ void DocumentLoadListener::TriggerRedirectToRealChannel(
     // BrowserParent::RecvNewWindowGlobal.
     EnumSet<ValidatePrincipalOptions> validationOptions = {
         ValidatePrincipalOptions::AllowNotLoadedOrigin};
-    if (xpc::IsInAutomation()) {
-      // Automation-Only: chrome://reftest/** + blank subframes
-      bool isChromeReftest = false;
-      if (docURI->SchemeIs("chrome")) {
-        nsAutoCString host;
-        docURI->GetHost(host);
-        isChromeReftest = host.EqualsLiteral("reftest");
-      }
-
-      if (isChromeReftest ||
-          (NS_IsAboutBlank(docURI) && GetParentWindowContext() &&
-           GetParentWindowContext()->Manager()->Manager() == contentParent &&
-           GetParentWindowContext()
-               ->DocumentPrincipal()
-               ->IsSystemPrincipal())) {
-        validationOptions += ValidatePrincipalOptions::AlwaysAllowSystem;
-      }
+    if (StaticPrefs::
+            dom_ipc_validatePrincipal_testing_allowContentSystemDocuments() &&
+        xpc::IsInAutomation()) {
+      validationOptions += ValidatePrincipalOptions::AlwaysAllowSystem;
     }
     if (!contentParent->ValidatePrincipal(unsandboxedPrincipal,
                                           validationOptions)) {
