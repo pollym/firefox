@@ -45,6 +45,12 @@ support-files = [
 
 ["test_extensionsettings_install_without_url.js"]
 
+["test_extensionsettings_private_browsing.js"]
+
+["test_extensionsettings_runtime_blocked_hosts.js"]
+
+["test_extensionsettings_update_url.js"]
+
 ["test_import_enterprise_roots.js"]
 
 ["test_local_network_access.js"]
