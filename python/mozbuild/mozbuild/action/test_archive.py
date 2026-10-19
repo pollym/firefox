@@ -55,7 +55,16 @@ TEST_HARNESS_BINS = [
 
 TEST_HARNESS_DLLS = ["crashinjectdll", "mozglue", "msvcp*", "vcruntime*"]
 
-TRAIN_HOP_DLLS = ["xul", "nss3", "nssutil3", "gkcodecs", "lgpllibs", "mozinference"]
+TRAIN_HOP_DLLS = [
+    "xul",
+    "nss3",
+    "nssutil3",
+    # Only exists as a separate library where MOZ_FOLD_LIBS is unset (Linux).
+    "mozsqlite3",
+    "gkcodecs",
+    "lgpllibs",
+    "mozinference",
+]
 
 GMP_TEST_PLUGIN_DIRS = ["gmp-fake/**", "gmp-fakeopenh264/**"]
 
