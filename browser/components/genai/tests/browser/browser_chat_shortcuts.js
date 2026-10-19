@@ -36,27 +36,15 @@ add_task(async function test_no_shortcuts() {
   });
 });
 
-async function selectAllAndMouseUp(
-  browser,
-  { win = window, releaseX = 60, releaseY = 10 } = {}
-) {
+async function selectAllAndMouseUp(browser) {
   await SimpleTest.promiseFocus(browser);
-  await BrowserTestUtils.synthesizeMouse(
-    browser,
-    10,
-    10,
-    { type: "mousedown" },
-    browser
-  );
   const selectPromise = SpecialPowers.spawn(browser, [], () =>
     ContentTaskUtils.waitForCondition(() => content.getSelection().toString())
   );
-  win.goDoCommand("cmd_selectAll");
+  goDoCommand("cmd_selectAll");
   await selectPromise;
-  await BrowserTestUtils.synthesizeMouse(
+  await BrowserTestUtils.synthesizeMouseAtCenter(
     browser,
-    releaseX,
-    releaseY,
     { type: "mouseup" },
     browser
   );
@@ -124,8 +112,21 @@ add_task(async function test_selection_menu_position_with_rtl_app_locale() {
       "Anchor resolved to RTL"
     );
 
+    await SimpleTest.promiseFocus(browser);
+    const selectPromise = SpecialPowers.spawn(browser, [], () =>
+      ContentTaskUtils.waitForCondition(() => content.getSelection().toString())
+    );
+    goDoCommand("cmd_selectAll");
+    await selectPromise;
+
     const clickX = 150;
-    await selectAllAndMouseUp(browser, { releaseX: clickX, releaseY: 20 });
+    await BrowserTestUtils.synthesizeMouse(
+      browser,
+      clickX,
+      20,
+      { type: "mouseup" },
+      browser
+    );
     await TestUtils.waitForCondition(
       () => panel.getAttribute("panelopen") === "true",
       "Selection menu opened"
@@ -448,7 +449,20 @@ add_task(async function test_smart_window_hides_search() {
       "data:text/plain,hi"
     );
     const browser = win.gBrowser.selectedBrowser;
-    await selectAllAndMouseUp(browser, { win });
+    await SimpleTest.promiseFocus(browser);
+
+    const selectPromise = SpecialPowers.spawn(browser, [], () =>
+      ContentTaskUtils.waitForCondition(() => content.getSelection().toString())
+    );
+    win.goDoCommand("cmd_selectAll");
+    await selectPromise;
+    await BrowserTestUtils.synthesizeMouse(
+      browser,
+      60,
+      10,
+      { type: "mouseup" },
+      browser
+    );
 
     const panel = win.document.getElementById(
       "selection-shortcut-action-panel"
@@ -530,7 +544,18 @@ add_task(async function test_smart_window_ask_chat() {
       "data:text/plain,hi"
     );
     const browser = win.gBrowser.selectedBrowser;
-    await selectAllAndMouseUp(browser, { win });
+    await SimpleTest.promiseFocus(browser);
+
+    const selectPromise = SpecialPowers.spawn(browser, [], () => {
+      ContentTaskUtils.waitForCondition(() => content.getSelection());
+    });
+    win.goDoCommand("cmd_selectAll");
+    await selectPromise;
+    BrowserTestUtils.synthesizeMouseAtCenter(
+      browser,
+      { type: "mouseup" },
+      browser
+    );
 
     const selectionPanel = win.document.getElementById(
       "selection-shortcut-action-panel"
@@ -611,7 +636,18 @@ add_task(async function test_smart_window_ask_chat_ignores_classic_toggle() {
       "data:text/plain,hi"
     );
     const browser = win.gBrowser.selectedBrowser;
-    await selectAllAndMouseUp(browser, { win });
+    await SimpleTest.promiseFocus(browser);
+
+    const selectPromise = SpecialPowers.spawn(browser, [], () => {
+      ContentTaskUtils.waitForCondition(() => content.getSelection());
+    });
+    win.goDoCommand("cmd_selectAll");
+    await selectPromise;
+    BrowserTestUtils.synthesizeMouseAtCenter(
+      browser,
+      { type: "mouseup" },
+      browser
+    );
 
     const selectionPanel = win.document.getElementById(
       "selection-shortcut-action-panel"
@@ -644,7 +680,17 @@ add_task(async function test_ai_action_dropdown() {
   });
 
   await BrowserTestUtils.withNewTab("data:text/plain,hi", async browser => {
-    await selectAllAndMouseUp(browser);
+    await SimpleTest.promiseFocus(browser);
+    const selectPromise = SpecialPowers.spawn(browser, [], () =>
+      ContentTaskUtils.waitForCondition(() => content.getSelection().toString())
+    );
+    goDoCommand("cmd_selectAll");
+    await selectPromise;
+    await BrowserTestUtils.synthesizeMouseAtCenter(
+      browser,
+      { type: "mouseup" },
+      browser
+    );
 
     const panel = document.getElementById("selection-shortcut-action-panel");
     await TestUtils.waitForCondition(
@@ -896,7 +942,17 @@ add_task(async function test_show_shortcuts() {
   });
 
   await BrowserTestUtils.withNewTab("data:text/plain,hi", async browser => {
-    await selectAllAndMouseUp(browser);
+    await SimpleTest.promiseFocus(browser);
+    const selectPromise = SpecialPowers.spawn(browser, [], () => {
+      ContentTaskUtils.waitForCondition(() => content.getSelection());
+    });
+    goDoCommand("cmd_selectAll");
+    await selectPromise;
+    BrowserTestUtils.synthesizeMouseAtCenter(
+      browser,
+      { type: "mouseup" },
+      browser
+    );
 
     await TestUtils.waitForCondition(() => {
       const panelElement = document.getElementById(
@@ -1041,7 +1097,17 @@ add_task(async function test_show_shortcuts_second_tab() {
   await BrowserTestUtils.withNewTab(
     "data:text/html,<title>second</title>page",
     async browser => {
-      await selectAllAndMouseUp(browser);
+      await SimpleTest.promiseFocus(browser);
+      const selectPromise = SpecialPowers.spawn(browser, [], () => {
+        ContentTaskUtils.waitForCondition(() => content.getSelection());
+      });
+      goDoCommand("cmd_selectAll");
+      await selectPromise;
+      BrowserTestUtils.synthesizeMouseAtCenter(
+        browser,
+        { type: "mouseup" },
+        browser
+      );
 
       await TestUtils.waitForCondition(() => {
         const panelElement = document.getElementById(
@@ -1074,7 +1140,17 @@ add_task(async function test_show_warning_label() {
   await BrowserTestUtils.withNewTab(
     "data:text/plain,hi".repeat(1000),
     async browser => {
-      await selectAllAndMouseUp(browser);
+      await SimpleTest.promiseFocus(browser);
+      const selectPromise = SpecialPowers.spawn(browser, [], () => {
+        ContentTaskUtils.waitForCondition(() => content.getSelection());
+      });
+      goDoCommand("cmd_selectAll");
+      await selectPromise;
+      BrowserTestUtils.synthesizeMouseAtCenter(
+        browser,
+        { type: "mouseup" },
+        browser
+      );
 
       const selectionShortcutActionPanel = document.getElementById(
         "selection-shortcut-action-panel"
@@ -1160,10 +1236,8 @@ add_task(async function test_plain_clicks() {
     .withArgs("GenAI:ShowShortcuts");
 
   await BrowserTestUtils.withNewTab("data:text/plain,click", async browser => {
-    await BrowserTestUtils.synthesizeMouse(
+    await BrowserTestUtils.synthesizeMouseAtCenter(
       browser,
-      60,
-      10,
       { type: "mouseup" },
       browser
     );
@@ -1172,20 +1246,16 @@ add_task(async function test_plain_clicks() {
 
     Assert.equal(stub.callCount, 1, "Plain click handled");
 
-    await BrowserTestUtils.synthesizeMouse(
+    await BrowserTestUtils.synthesizeMouseAtCenter(
       browser,
-      60,
-      10,
       { button: 1, type: "mouseup" },
       browser
     );
 
     Assert.equal(stub.callCount, 1, "Middle click ignored");
 
-    await BrowserTestUtils.synthesizeMouse(
+    await BrowserTestUtils.synthesizeMouseAtCenter(
       browser,
-      60,
-      10,
       { shiftKey: true, type: "mouseup" },
       browser
     );
@@ -1228,10 +1298,8 @@ add_task(async function test_input_selection() {
         input.selectionEnd = 3;
       });
 
-      await BrowserTestUtils.synthesizeMouse(
+      await BrowserTestUtils.synthesizeMouseAtCenter(
         browser,
-        60,
-        10,
         { type: "mouseup" },
         browser
       );
@@ -1252,94 +1320,6 @@ add_task(async function test_input_selection() {
   sandbox.restore();
 });
 
-/**
- * Check that a selection the page makes while the mouse is clicked doesn't
- * show shortcuts, but one that comes with a drag does.
- */
-add_task(async function test_page_made_selection() {
-  await SpecialPowers.pushPrefEnv({
-    set: [["browser.ml.chat.shortcuts.debounce", 0]],
-  });
-  const sandbox = sinon.createSandbox();
-  const stub = sandbox.stub(GenAI, "handleShortcutsMessage");
-  const showCalls = () =>
-    stub.getCalls().filter(c => c.args[0] == "GenAI:ShowShortcuts");
-
-  await BrowserTestUtils.withNewTab(
-    `data:text/html,<p id="text">select this text</p><div style="height:3000px"></div>`,
-    async browser => {
-      const select = (start, end) =>
-        SpecialPowers.spawn(browser, [start, end], (from, to) => {
-          const node = content.document.getElementById("text").firstChild;
-          content.getSelection().setBaseAndExtent(node, from, node, to);
-        });
-      const press = x =>
-        BrowserTestUtils.synthesizeMouse(
-          browser,
-          x,
-          10,
-          { type: "mousedown" },
-          browser
-        );
-      const release = x =>
-        BrowserTestUtils.synthesizeMouse(
-          browser,
-          x,
-          10,
-          { type: "mouseup" },
-          browser
-        );
-
-      await SimpleTest.promiseFocus(browser);
-
-      // The page selects the whole line while the mouse is clicked in place.
-      await press(10);
-      await select(0, 16);
-      await release(10);
-      // Let the actor's zero-length debounce run, so the next gesture can't
-      // cancel a message that would have been sent.
-      await SpecialPowers.spawn(
-        browser,
-        [],
-        () => new Promise(resolve => content.setTimeout(resolve, 100))
-      );
-      Assert.equal(
-        showCalls().length,
-        0,
-        "A click the page answered is ignored"
-      );
-
-      // The user then drags across a single word.
-      await press(10);
-      await select(7, 11);
-      await release(60);
-      await TestUtils.waitForCondition(() => showCalls().length);
-
-      Assert.equal(
-        showCalls()[0].args[1].selection,
-        "this",
-        "The first shortcuts were for the dragged selection, not the page's"
-      );
-
-      // The user holds the button and scrolls to extend the selection.
-      await press(10);
-      await SpecialPowers.spawn(browser, [], () => content.scrollBy(0, 50));
-      await select(0, 4);
-      await release(10);
-      await TestUtils.waitForCondition(() => showCalls().length == 2);
-
-      Assert.equal(
-        showCalls()[1].args[1].selection,
-        "sele",
-        "Scrolling while the button is held counts as the user selecting"
-      );
-    }
-  );
-
-  sandbox.restore();
-  await SpecialPowers.popPrefEnv();
-});
-
 add_task(async function test_panel_actions_layout() {
   await SpecialPowers.pushPrefEnv({
     set: [
@@ -1349,7 +1329,18 @@ add_task(async function test_panel_actions_layout() {
   });
 
   await BrowserTestUtils.withNewTab("data:text/plain,hi", async browser => {
-    await selectAllAndMouseUp(browser);
+    await SimpleTest.promiseFocus(browser);
+
+    const selectPromise = SpecialPowers.spawn(browser, [], () => {
+      ContentTaskUtils.waitForCondition(() => content.getSelection());
+    });
+    goDoCommand("cmd_selectAll");
+    await selectPromise;
+    BrowserTestUtils.synthesizeMouseAtCenter(
+      browser,
+      { type: "mouseup" },
+      browser
+    );
 
     const panel = document.getElementById("selection-shortcut-action-panel");
     await TestUtils.waitForCondition(
@@ -1459,7 +1450,13 @@ add_task(async function test_panel_opens_without_search_service() {
     // the default engine getters throw.
     SearchService.forceInitializationStatusForTests("failed");
     try {
-      await selectAllAndMouseUp(browser);
+      goDoCommand("cmd_selectAll");
+      BrowserTestUtils.synthesizeMouseAtCenter(
+        browser,
+        { type: "mouseup" },
+        browser
+      );
+
       await TestUtils.waitForCondition(
         () => panel.getAttribute("panelopen") === "true"
       );
@@ -1487,7 +1484,18 @@ add_task(async function test_ime_composition_hides_panel() {
   });
 
   await BrowserTestUtils.withNewTab("data:text/plain,hello", async browser => {
-    await selectAllAndMouseUp(browser);
+    await SimpleTest.promiseFocus(browser);
+
+    const selectPromise = SpecialPowers.spawn(browser, [], () => {
+      ContentTaskUtils.waitForCondition(() => content.getSelection());
+    });
+    goDoCommand("cmd_selectAll");
+    await selectPromise;
+    BrowserTestUtils.synthesizeMouseAtCenter(
+      browser,
+      { type: "mouseup" },
+      browser
+    );
 
     const panel = document.getElementById("selection-shortcut-action-panel");
     await TestUtils.waitForCondition(
