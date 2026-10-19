@@ -80,6 +80,8 @@ function isEmptyObject(obj) {
 }
 
 export function EnterprisePoliciesManager() {
+  // Promises of the async policy callbacks run so far.
+  this._pendingCallbacks = [];
   Services.obs.addObserver(this, "profile-after-change", true);
   Services.obs.addObserver(this, "final-ui-startup", true);
   Services.obs.addObserver(this, "sessionstore-windows-restored", true);
@@ -339,8 +341,10 @@ EnterprisePoliciesManager.prototype = {
         // An async callback rejects long after it returned, so its failure
         // can only be recorded when it happens.
         if (typeof result?.then == "function") {
-          result.then(null, ex =>
-            this._reportCallbackFailure(policyName, timing, ex)
+          this._pendingCallbacks.push(
+            result.then(null, ex =>
+              this._reportCallbackFailure(policyName, timing, ex)
+            )
           );
         }
       } catch (ex) {
@@ -378,6 +382,7 @@ EnterprisePoliciesManager.prototype = {
     for (let timing of Object.keys(this._callbacks)) {
       this._callbacks[timing] = [];
     }
+    this._pendingCallbacks = [];
 
     // Simulate the startup process. This step-by-step is a bit ugly but it
     // tries to emulate the same behavior as of a normal startup.
@@ -392,6 +397,7 @@ EnterprisePoliciesManager.prototype = {
     await notifyTopicOnIdle("profile-after-change");
     await notifyTopicOnIdle("final-ui-startup");
     await notifyTopicOnIdle("sessionstore-windows-restored");
+    await Promise.all(this._pendingCallbacks);
     await notifyTopicOnIdle("distribution-customization-complete");
   },
 
