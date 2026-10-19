@@ -184,6 +184,19 @@ standalone:
             extra-options:
                 - "--restart-between-tests"
 
+geckoview-no-fission:
+    description: "{description} without fission enabled"
+    component: "GeckoView::General"
+    expiration: "2027-03-01"
+    when:
+        <<: *gv_e10s_filter
+    suffix: "nofis"
+    mozinfo: "fission"
+    merge:
+        mozharness:
+            extra-options:
+                - "--disable-fission"
+
 geckoview-fission-isolate-high-value:
     description: "{description} with fission enabled and isolation strategy isolateHighValue"
     component: "GeckoView::General"
