@@ -569,10 +569,9 @@ nsNavBookmarks::RemoveItem(int64_t aItemId, uint16_t aSource) {
     NS_ENSURE_ARG(childCount == 0);
   }
 
-  mozStorageTransaction transaction(mDB->MainConn(), false);
-
-  // XXX Handle the error, bug 1696133.
-  (void)NS_WARN_IF(NS_FAILED(transaction.Start()));
+  int64_t tagsRootId = mDB->GetTagsFolderId();
+  bool isTagging =
+      bookmark.parentId == tagsRootId || bookmark.grandParentId == tagsRootId;
 
   nsCOMPtr<mozIStorageStatement> stmt =
       mDB->GetStatement("DELETE FROM moz_bookmarks WHERE id = :item_id");
@@ -603,21 +602,20 @@ nsNavBookmarks::RemoveItem(int64_t aItemId, uint16_t aSource) {
                            bookmark.lastModified);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  // Mark all affected separators as changed
-  rv = AdjustSeparatorsSyncCounter(bookmark.parentId, bookmark.position,
-                                   syncChangeDelta);
-  NS_ENSURE_SUCCESS(rv, rv);
+  if (!isTagging) {
+    // Tag folders contain no separators.
+    // Mark all affected separators as changed
+    rv = AdjustSeparatorsSyncCounter(bookmark.parentId, bookmark.position,
+                                     syncChangeDelta);
+    NS_ENSURE_SUCCESS(rv, rv);
+  }
 
-  int64_t tagsRootId = mDB->GetTagsFolderId();
   if (bookmark.grandParentId == tagsRootId) {
     // If we're removing a tag, increment the change counter for all bookmarks
     // with the URI.
     rv = AddSyncChangesForBookmarksWithURL(bookmark.url, syncChangeDelta);
     NS_ENSURE_SUCCESS(rv, rv);
   }
-
-  rv = transaction.Commit();
-  NS_ENSURE_SUCCESS(rv, rv);
 
   nsCOMPtr<nsIURI> uri;
   if (bookmark.type == TYPE_BOOKMARK) {
@@ -644,8 +642,7 @@ nsNavBookmarks::RemoveItem(int64_t aItemId, uint16_t aSource) {
   bookmarkRef->mGuid.Assign(bookmark.guid);
   bookmarkRef->mParentGuid.Assign(bookmark.parentGuid);
   bookmarkRef->mSource = aSource;
-  bookmarkRef->mIsTagging =
-      bookmark.parentId == tagsRootId || bookmark.grandParentId == tagsRootId;
+  bookmarkRef->mIsTagging = isTagging;
   bookmarkRef->mIsDescendantRemoval = false;
   bool success = !!notifications.AppendElement(bookmarkRef.forget(), fallible);
   MOZ_RELEASE_ASSERT(success);
