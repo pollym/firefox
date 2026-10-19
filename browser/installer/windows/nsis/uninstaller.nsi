@@ -40,11 +40,13 @@ ManifestDPIAware true
 ; prevents compiling of the reg write logging.
 !define NO_LOG
 
+!ifdef MOZ_MAINTENANCE_SERVICE
 !define MaintUninstallKey \
  "Software\Microsoft\Windows\CurrentVersion\Uninstall\MozillaMaintenanceService"
+Var MaintCertKey
+!endif
 
 Var TmpVal
-Var MaintCertKey
 Var ShouldOpenSurvey
 Var ShouldSendPing
 Var InstalledVersion
@@ -86,6 +88,10 @@ Var RegHive
 VIAddVersionKey "FileDescription" "${BrandShortName} Helper"
 VIAddVersionKey "OriginalFilename" "helper.exe"
 
+!ifdef MOZ_MAINTENANCE_SERVICE
+!insertmacro IsUserAdmin
+!endif
+
 !insertmacro AddDisabledDDEHandlerValues
 !insertmacro CleanVirtualStore
 !insertmacro ElevateUAC
@@ -94,7 +100,6 @@ VIAddVersionKey "OriginalFilename" "helper.exe"
 !insertmacro InitHashAppModelId
 !insertmacro IsHandlerForInstallDir
 !insertmacro IsPinnedToTaskBar
-!insertmacro IsUserAdmin
 !insertmacro LogDesktopShortcut
 !insertmacro LogQuickLaunchShortcut
 !insertmacro LogStartMenuShortcut
@@ -222,6 +227,7 @@ Function un.Survey
   StrCpy $ShouldOpenSurvey "1"
 FunctionEnd
 
+!ifdef MOZ_MAINTENANCE_SERVICE
 ; This function is used to uninstall the maintenance service if the
 ; application currently being uninstalled is the last application to use the
 ; maintenance service.
@@ -282,6 +288,7 @@ Function un.UninstallServiceIfNotUsed
   Pop $1
   Pop $0
 FunctionEnd
+!endif
 
 Function un.LaunchAppForRefresh
   Push $0
