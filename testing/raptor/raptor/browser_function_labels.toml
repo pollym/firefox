@@ -619,7 +619,7 @@ funcPrefixes = [
 [[labels]]
 name = "Intersection observers"
 funcPrefixes = [
-  "nsRefreshDriver::UpdateIntersectionObservations",
+  "mozilla::dom::Document::UpdateIntersections", # https://share.firefox.dev/4dL9UBm
   "blink::LocalFrameView::RunIntersectionObserverSteps",
   "WebCore::IntersectionObserver::updateObservations",
 ]
