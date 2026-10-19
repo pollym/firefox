@@ -748,16 +748,6 @@ privatebrowsing-inc-origin-init:
             extra-options:
                 - "--setpref=browser.privatebrowsing.autostart=true"
 
-no-nova:
-    description: "{description} with Nova disabled"
-    component: "Firefox::Theme"
-    expiration: "2026-12-31"
-    suffix: "no-nv"
-    merge:
-        mozharness:
-            extra-options:
-                - "--setpref=browser.nova.enabled=false"
-
 urlbar-ipc:
     description: "{description} with the urlbar actor message-passing path forced on"
     component: "Firefox::Address Bar"
