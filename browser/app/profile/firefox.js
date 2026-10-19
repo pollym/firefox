@@ -1195,7 +1195,11 @@ pref("browser.tabs.hoverPreview.showThumbnails", true);
 
 pref("browser.tabs.groups.enabled", true);
 pref("browser.tabs.groups.hoverPreview.enabled", true);
+#ifdef NIGHTLY_BUILD
+pref("browser.tabs.groups.alternateMenu", true);
+#else
 pref("browser.tabs.groups.alternateMenu", false);
+#endif
 // Bug 2052293: temporarily disabled while tab groups move away from the list all tabs menu.
 pref("browser.tabs.groups.onboardingCallouts.enabled", false);
 // Number of times the "Tab group saved" confirmation hint has been shown
