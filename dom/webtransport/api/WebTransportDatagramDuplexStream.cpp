@@ -22,7 +22,9 @@ namespace mozilla::dom {
 
 NS_IMPL_CYCLE_COLLECTION_WRAPPERCACHE(WebTransportDatagramDuplexStream, mGlobal,
                                       mReadable, mWritable, mWebTransport,
-                                      mIncomingAlgorithms, mOutgoingAlgorithms)
+                                      mIncomingAlgorithms, mOutgoingAlgorithms,
+                                      mCreatedWritables, mAllWritables,
+                                      mWritableDatagramMap)
 // mIncomingDatagramsQueue can't participate in a cycle
 NS_IMPL_CYCLE_COLLECTING_ADDREF(WebTransportDatagramDuplexStream)
 NS_IMPL_CYCLE_COLLECTING_RELEASE(WebTransportDatagramDuplexStream)
@@ -70,6 +72,14 @@ void WebTransportDatagramDuplexStream::Init(bool aUseByteStream,
     return;
   }
   LOG(("Created datagram streams"));
+}
+
+void WebTransportDatagramDuplexStream::SetChild(WebTransportChild* aChild) {
+  mOutgoingAlgorithms->SetChild(aChild);
+  for (auto& writable : mCreatedWritables) {
+    writable->SetChild(aChild);
+  }
+  mCreatedWritables.Clear();
 }
 
 void WebTransportDatagramDuplexStream::SetIncomingMaxAge(double aMaxAge,
@@ -167,6 +177,13 @@ WebTransportDatagramDuplexStream::CreateWritable(
                                             aRv);
   if (aRv.Failed()) {
     return nullptr;
+  }
+
+  mAllWritables.AppendElement(writableStream);
+  // If the session is not yet connected, register for SetChild() to flush
+  // this writable's queued datagrams once it connects.
+  if (!writableStream->IsConnected()) {
+    mCreatedWritables.AppendElement(writableStream);
   }
 
   return writableStream.forget();
@@ -354,10 +371,25 @@ void IncomingDatagramStreamAlgorithms::NotifyDatagramAvailable() {
   }
 }
 
+// nsTArray<QueuedDatagram>'s generic cycle-collection support (nsTArray.h)
+// needs these to reach mPromise; declared friend in QueuedDatagram's
+// enclosing class since the type itself is private.
+void ImplCycleCollectionTraverse(
+    nsCycleCollectionTraversalCallback& aCallback,
+    OutgoingDatagramStreamAlgorithms::QueuedDatagram& aField, const char* aName,
+    uint32_t aFlags) {
+  ImplCycleCollectionTraverse(aCallback, aField.mPromise, aName, aFlags);
+}
+
+void ImplCycleCollectionUnlink(
+    OutgoingDatagramStreamAlgorithms::QueuedDatagram& aField) {
+  ImplCycleCollectionUnlink(aField.mPromise);
+}
+
 NS_IMPL_CYCLE_COLLECTION_INHERITED(OutgoingDatagramStreamAlgorithms,
                                    UnderlyingSinkAlgorithmsWrapper, mDatagrams,
-                                   mSendGroup, mWaitConnectPromise,
-                                   mPendingDatagramPromises)
+                                   mSendGroup, mOwnerWritable,
+                                   mWaitConnectQueue, mPendingDatagramPromises)
 
 NS_INTERFACE_MAP_BEGIN_CYCLE_COLLECTION(OutgoingDatagramStreamAlgorithms)
 NS_INTERFACE_MAP_END_INHERITING(UnderlyingSinkAlgorithmsWrapper)
@@ -399,14 +431,41 @@ already_AddRefed<Promise> OutgoingDatagramStreamAlgorithms::WriteCallbackImpl(
   RefPtr<Promise> promise =
       Promise::CreateInfallible(mDatagrams->GetParentObject());
 
-  // Assign unique datagram ID
-  uint64_t datagramId = mNextDatagramId++;
-
-  // Store promise in map - it will be resolved when parent sends DatagramReady
-  mPendingDatagramPromises.InsertOrUpdate(datagramId, promise);
+  // Assign unique datagram ID from the shared counter on the duplex stream
+  uint64_t datagramId = mDatagrams->mNextDatagramId++;
 
   // mChild is set when we move to Connected
   if (mChild) {
+    // Step 7: Let chunk be (bytes, timestamp, promise).
+    // Step 8: Enqueue chunk to writable.[[OutgoingDatagramsQueue]].
+    //
+    // Not in spec: the promise is always tracked in mPendingDatagramPromises
+    // so OnDatagramReady()/Cleanup() can find and settle it later.
+    mPendingDatagramPromises.InsertOrUpdate(datagramId, promise);
+    // Step 9: If the length of writable.[[OutgoingDatagramsQueue]] is less
+    // than datagrams.[[OutgoingMaxBufferedDatagrams]], then resolve promise
+    // with undefined.
+    //
+    // Not in spec: [[OutgoingDatagramsQueue]] lives in the parent, so the
+    // count of tracked promises stands in for its length.
+    if (mPendingDatagramPromises.Count() <
+        mDatagrams->mOutgoingMaxBufferedDatagrams) {
+      // Below outgoingMaxBufferedDatagrams: resolve immediately.
+      promise->MaybeResolveWithUndefined();
+    } else {
+      // At or above outgoingMaxBufferedDatagrams: withhold the promise so the
+      // WritableStream applies backpressure. Resolved later by
+      // OnDatagramReady() once the datagram is sent or dropped.
+    }
+
+    // Register for DatagramReady routing. mOwnerWritable is null for the
+    // default writable exposed via `.writable` (it isn't wrapped in its own
+    // WebTransportDatagramsWritable), so this registers a null entry for it.
+    // Every outstanding datagram id is always present in the map, so
+    // OnDatagramReady can treat a missing entry as a bug rather than
+    // silently guessing it belongs to the default writable.
+    mDatagrams->mWritableDatagramMap.InsertOrUpdate(datagramId, mOwnerWritable);
+
     // We pass along the datagram to the parent with its ID.
     // The OutgoingDatagramsQueue lives in parent/neqo, and steps 6-9 are
     // implemented there. Parent will send DatagramReady when appropriate.
@@ -425,7 +484,9 @@ already_AddRefed<Promise> OutgoingDatagramStreamAlgorithms::WriteCallbackImpl(
         [self = RefPtr{this},
          datagramId](mozilla::ipc::ResponseRejectReason&&) {
           LOG(("Datagram IPC failed for id=%" PRIu64, datagramId));
-          // IPC failed - remove from pending map and resolve on failure
+          // IPC failed - remove from pending maps and resolve promise
+          // immediately
+          self->mDatagrams->mWritableDatagramMap.Remove(datagramId);
           if (Maybe<RefPtr<Promise>> promise =
                   self->mPendingDatagramPromises.Extract(datagramId)) {
             (*promise)->MaybeResolveWithUndefined();
@@ -434,12 +495,10 @@ already_AddRefed<Promise> OutgoingDatagramStreamAlgorithms::WriteCallbackImpl(
   } else {
     LOG(("Queuing datagram id=%" PRIu64 " for connect", datagramId));
     // Queue locally until we can send it.
-    // We should be guaranteed that we don't get called again until the
-    // promise is resolved.
-    MOZ_ASSERT(mWaitConnect == nullptr);
-    mWaitConnect = std::make_unique<DatagramEntry>(std::move(data), now);
-    mWaitConnectPromise = promise;
-    mWaitConnectDatagramId = datagramId;
+    // Multiple datagrams can be queued if they arrive before connection.
+    mWaitConnectQueue.AppendElement(QueuedDatagram(
+        datagramId, std::make_unique<DatagramEntry>(std::move(data), now),
+        promise));
   }
 
   // Step 10: return promise
@@ -448,32 +507,62 @@ already_AddRefed<Promise> OutgoingDatagramStreamAlgorithms::WriteCallbackImpl(
 
 // XXX should we allow datagrams to be sent before connect?  Check IETF spec
 void OutgoingDatagramStreamAlgorithms::SetChild(WebTransportChild* aChild) {
-  LOG(("Setting child in datagrams"));
+  LOG(("Setting child in datagrams, %zu queued datagrams",
+       mWaitConnectQueue.Length()));
   mChild = aChild;
-  if (mWaitConnect) {
-    uint64_t sendGroupId = mSendGroup ? mSendGroup->GetGroupId() : 0;
-    LOG(("Sending queued datagram id=%" PRIu64 ", sendGroup = %" PRIu64
-         ", sendOrder = %" PRId64,
-         mWaitConnectDatagramId, sendGroupId, mSendOrder));
+  // Send all queued datagrams
+  for (auto& queued : mWaitConnectQueue) {
     // Add promise to pending map so OnDatagramReady can resolve it
-    mPendingDatagramPromises.InsertOrUpdate(mWaitConnectDatagramId,
-                                            mWaitConnectPromise);
+    mPendingDatagramPromises.InsertOrUpdate(queued.mDatagramId,
+                                            queued.mPromise);
+
+    // See the identical registration in WriteCallbackImpl.
+    mDatagrams->mWritableDatagramMap.InsertOrUpdate(queued.mDatagramId,
+                                                    mOwnerWritable);
+
+    uint64_t sendGroupId = mSendGroup ? mSendGroup->GetGroupId() : 0;
+    uint64_t datagramId = queued.mDatagramId;
     mChild->SendOutgoingDatagram(
-        mWaitConnectDatagramId, mWaitConnect->mBuffer, mWaitConnect->mTimeStamp,
+        datagramId, queued.mEntry->mBuffer, queued.mEntry->mTimeStamp,
         sendGroupId, mSendOrder,
         [](nsresult&&) { LOG_VERBOSE(("Early Datagram IPC succeeded")); },
         [self = RefPtr{this},
-         id = mWaitConnectDatagramId](mozilla::ipc::ResponseRejectReason&&) {
-          LOG(("Early Datagram IPC failed for id=%" PRIu64, id));
-          // Remove from pending map and resolve on failure
+         datagramId](mozilla::ipc::ResponseRejectReason&&) {
+          LOG(("Early Datagram IPC failed for id=%" PRIu64, datagramId));
+          // Remove from pending maps and resolve on failure
+          self->mDatagrams->mWritableDatagramMap.Remove(datagramId);
           if (Maybe<RefPtr<Promise>> promise =
-                  self->mPendingDatagramPromises.Extract(id)) {
+                  self->mPendingDatagramPromises.Extract(datagramId)) {
             (*promise)->MaybeResolveWithUndefined();
           }
         });
-    mWaitConnectPromise = nullptr;
-    mWaitConnect.reset(nullptr);
-    mWaitConnectDatagramId = 0;
+  }
+  mWaitConnectQueue.Clear();
+}
+
+void WebTransportDatagramDuplexStream::OnDatagramReady(uint64_t aDatagramId) {
+  Maybe<RefPtr<WebTransportDatagramsWritable>> entry =
+      mWritableDatagramMap.Extract(aDatagramId);
+  if (!entry) {
+    // A missing entry means DatagramReady arrived for an id that was never
+    // registered or already completed. Expected right after Cleanup()
+    // (mChild can outlive it, e.g. after a remote close), a bug otherwise.
+    MOZ_ASSERT(
+        mCleanedUp,
+        "OnDatagramReady for unregistered/already-completed datagram id");
+    return;
+  }
+  RefPtr<WebTransportDatagramsWritable> writable = entry.extract();
+  if (writable) {
+    writable->OnDatagramReady(aDatagramId);
+  } else {
+    // Not in spec: the default writable exposed via our legacy `.writable`
+    // attribute, which the current spec has removed from
+    // WebTransportDatagramDuplexStream entirely (datagrams are only sent
+    // via createWritable()-created writables now). It isn't wrapped in a
+    // WebTransportDatagramsWritable object, so it registers a null entry
+    // above instead of an owner.
+    mOutgoingAlgorithms->OnDatagramReady(aDatagramId);
   }
 }
 
@@ -500,6 +589,26 @@ void OutgoingDatagramStreamAlgorithms::UpdateQueueParams(
   } else {
     LOG(("UpdateQueueParams called but child not set yet"));
   }
+}
+
+void OutgoingDatagramStreamAlgorithms::Cleanup() {
+  for (const auto& promise : mPendingDatagramPromises.Values()) {
+    promise->MaybeResolveWithUndefined();
+  }
+  mPendingDatagramPromises.Clear();
+  for (auto& queued : mWaitConnectQueue) {
+    queued.mPromise->MaybeResolveWithUndefined();
+  }
+  mWaitConnectQueue.Clear();
+}
+
+void WebTransportDatagramDuplexStream::Cleanup() {
+  mOutgoingAlgorithms->Cleanup();
+  for (const auto& writable : mAllWritables) {
+    writable->Cleanup();
+  }
+  mWritableDatagramMap.Clear();
+  mCleanedUp = true;
 }
 
 }  // namespace mozilla::dom

@@ -78,6 +78,10 @@ class OutgoingDatagramStreamAlgorithms final
   }
   void SetSendOrder(int64_t aSendOrder) { mSendOrder = aSendOrder; }
 
+  void SetOwnerWritable(WebTransportDatagramsWritable* aWritable) {
+    mOwnerWritable = aWritable;
+  }
+
   // Streams algorithms
 
   already_AddRefed<Promise> WriteCallbackImpl(
@@ -91,23 +95,46 @@ class OutgoingDatagramStreamAlgorithms final
   // Send queue parameter updates to parent
   void UpdateQueueParams(uint32_t aMaxBufferedDatagrams, double aMaxAge);
 
+  // Resolves this writable's withheld write promise, if any, so the
+  // WritableStream is not left waiting on it once the session is torn down.
+  // See WebTransportDatagramDuplexStream::Cleanup().
+  void Cleanup();
+
  private:
   ~OutgoingDatagramStreamAlgorithms() override = default;
 
+  struct QueuedDatagram {
+    uint64_t mDatagramId;
+    UniquePtr<DatagramEntry> mEntry;
+    RefPtr<Promise> mPromise;
+
+    QueuedDatagram(uint64_t aId, UniquePtr<DatagramEntry>&& aEntry,
+                   RefPtr<Promise> aPromise)
+        : mDatagramId(aId),
+          mEntry(std::move(aEntry)),
+          mPromise(std::move(aPromise)) {}
+  };
+
+  // So nsTArray<QueuedDatagram>'s generic cycle-collection support (see
+  // nsTArray.h) can reach mPromise via the overloads below, which need to
+  // name the otherwise-private QueuedDatagram type.
+  friend void ImplCycleCollectionTraverse(nsCycleCollectionTraversalCallback&,
+                                          QueuedDatagram&, const char*,
+                                          uint32_t);
+  friend void ImplCycleCollectionUnlink(QueuedDatagram&);
+
   RefPtr<WebTransportDatagramDuplexStream> mDatagrams;
   RefPtr<WebTransportChild> mChild;
-  // only used for datagrams sent before Ready
-  UniquePtr<DatagramEntry> mWaitConnect;
-  RefPtr<Promise> mWaitConnectPromise;
+  RefPtr<WebTransportDatagramsWritable> mOwnerWritable;
+  // Queue for datagrams sent before connection is ready
+  nsTArray<QueuedDatagram> mWaitConnectQueue;
 
   // Send group and order for this writable stream (null/0 for default)
   RefPtr<WebTransportSendGroup> mSendGroup;
   int64_t mSendOrder;
-  uint64_t mWaitConnectDatagramId = 0;
 
   // Pending promises tracked by datagram ID
   nsTHashMap<nsUint64HashKey, RefPtr<Promise>> mPendingDatagramPromises;
-  uint64_t mNextDatagramId = 1;
 };
 
 class WebTransportDatagramDuplexStream final : public nsISupports,
@@ -125,17 +152,20 @@ class WebTransportDatagramDuplexStream final : public nsISupports,
   NS_DECL_CYCLE_COLLECTING_ISUPPORTS_FINAL
   NS_DECL_CYCLE_COLLECTION_WRAPPERCACHE_CLASS(WebTransportDatagramDuplexStream)
 
-  void SetChild(WebTransportChild* aChild) {
-    mOutgoingAlgorithms->SetChild(aChild);
-  }
+  void SetChild(WebTransportChild* aChild);
+
+  // Settles every pending outgoing-datagram sink write promise on the default
+  // writable and every WebTransportDatagramsWritable this duplex stream has
+  // ever created via CreateWritable(), so none are left hanging when the
+  // connection tears down. Called from WebTransport::Cleanup(), which
+  // otherwise never touches datagrams at all.
+  void Cleanup();
 
   void NewDatagramReceived(nsTArray<uint8_t>&& aData,
                            const mozilla::TimeStamp& aTimeStamp);
 
   // Called when parent notifies that a datagram is ready
-  void OnDatagramReady(uint64_t aDatagramId) {
-    mOutgoingAlgorithms->OnDatagramReady(aDatagramId);
-  }
+  void OnDatagramReady(uint64_t aDatagramId);
 
   // WebIDL Boilerplate
   nsIGlobalObject* GetParentObject() const;
@@ -182,6 +212,17 @@ class WebTransportDatagramDuplexStream final : public nsISupports,
   RefPtr<WritableStream> mWritable;
   RefPtr<IncomingDatagramStreamAlgorithms> mIncomingAlgorithms;
   RefPtr<OutgoingDatagramStreamAlgorithms> mOutgoingAlgorithms;
+  // WebTransportDatagramsWritable objects from CreateWritable() calls made
+  // before the session connected, waiting for SetChild() to flush their
+  // queued datagrams.
+  nsTArray<RefPtr<WebTransportDatagramsWritable>> mCreatedWritables;
+  // Every WebTransportDatagramsWritable this duplex stream has ever created
+  // via CreateWritable(), for the lifetime of the stream. The default
+  // writable exposed via `.writable` isn't wrapped in a
+  // WebTransportDatagramsWritable object, so it's tracked separately via
+  // mOutgoingAlgorithms instead. Unlike mCreatedWritables, never cleared, so
+  // Cleanup() can always reach all of them.
+  nsTArray<RefPtr<WebTransportDatagramsWritable>> mAllWritables;
 
   // https://w3c.github.io/webtransport/#webtransportdatagramduplexstream-create
   double mIncomingMaxAge = INFINITY;
@@ -193,6 +234,19 @@ class WebTransportDatagramDuplexStream final : public nsISupports,
 
   mozilla::Queue<UniquePtr<DatagramEntry>, 32> mIncomingDatagramsQueue;
   uint64_t mDroppedIncoming = 0;
+
+  // Datagram ID counter shared across all OutgoingDatagramStreamAlgorithms
+  // instances created by this duplex stream (scoped to this duplex stream,
+  // not global across duplex streams).
+  uint64_t mNextDatagramId = 1;
+  // Maps datagram IDs from created writables to the owning writable for routing
+  nsTHashMap<nsUint64HashKey, RefPtr<WebTransportDatagramsWritable>>
+      mWritableDatagramMap;
+  // Set by Cleanup(); lets OnDatagramReady() distinguish a late,
+  // already-expected notification (mChild can stay alive past Cleanup(),
+  // e.g. after a remote close, so a DatagramReady already in flight can
+  // still arrive) from a genuine unregistered/duplicate-id bug.
+  bool mCleanedUp = false;
 
  public:
   uint64_t GetDroppedIncoming() const { return mDroppedIncoming; }

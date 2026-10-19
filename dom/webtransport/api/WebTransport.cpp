@@ -1545,6 +1545,14 @@ void WebTransport::Cleanup(WebTransportError* aError,
   mIncomingBidirectionalAlgorithm = nullptr;
   mIncomingUnidirectionalAlgorithm = nullptr;
 
+  // Empty each outgoing datagram writable's [[OutgoingDatagramsQueue]].
+  // TODO: Cleanup() also resolves each writable's withheld write promise,
+  // which the current spec doesn't do; see
+  // https://github.com/w3c/webtransport/pull/790.
+  if (mDatagrams) {
+    mDatagrams->Cleanup();
+  }
+
   // We no longer block BFCache
   NotifyToWindow(false);
 }
