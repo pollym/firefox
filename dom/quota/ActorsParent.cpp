@@ -2791,10 +2791,11 @@ void QuotaManager::InitQuotaForOrigin(
       fullOriginMetadata.mGroup);
 
   auto originInfo = MakeRefPtr<OriginInfo>(
-      groupInfo, fullOriginMetadata.mOrigin, fullOriginMetadata.mStorageOrigin,
-      fullOriginMetadata.mIsPrivate, fullOriginMetadata.mClientUsages,
-      fullOriginMetadata.mOriginUsage, fullOriginMetadata.mLastAccessTime,
-      fullOriginMetadata.mLastMaintenanceDate, fullOriginMetadata.mPersisted,
+      groupInfo, aFullOriginMetadata.mOrigin,
+      aFullOriginMetadata.mStorageOrigin, aFullOriginMetadata.mIsPrivate,
+      aFullOriginMetadata.mIsEncrypted, aFullOriginMetadata.mClientUsages,
+      aFullOriginMetadata.mOriginUsage, aFullOriginMetadata.mLastAccessTime,
+      aFullOriginMetadata.mLastMaintenanceDate, aFullOriginMetadata.mPersisted,
       aDirectoryExists);
 
   // A full directory scan is always performed before InitQuotaForOrigin
@@ -3669,8 +3670,19 @@ Nullable<bool> QuotaManager::OriginPersisted(
 }
 
 bool QuotaManager::IsOriginEncrypted(const OriginMetadata& aOriginMetadata) {
-  return aOriginMetadata.mPersistenceType != PERSISTENCE_TYPE_PERSISTENT &&
-         mStorageEncryptionEnabled;
+  if (aOriginMetadata.mPersistenceType == PERSISTENCE_TYPE_PERSISTENT) {
+    return false;
+  }
+
+  MutexAutoLock lock(mQuotaMutex);
+
+  RefPtr<OriginInfo> originInfo =
+      LockedGetOriginInfo(aOriginMetadata.mPersistenceType, aOriginMetadata);
+  if (originInfo) {
+    return originInfo->IsEncrypted();
+  }
+
+  return mStorageEncryptionEnabled;
 }
 
 void QuotaManager::PersistOrigin(const OriginMetadata& aOriginMetadata) {
@@ -3932,10 +3944,7 @@ Result<FullOriginMetadata, nsresult> ReadFullOriginMetadataFromMetadataV2File(
 
   FullOriginMetadata fullOriginMetadata;
 
-  QM_TRY_INSPECT(const OriginStateMetadata& originStateMetadata,
-                 ReadDirectoryMetadataHeader(*binaryStream));
-
-  static_cast<OriginStateMetadata&>(fullOriginMetadata) = originStateMetadata;
+  QM_TRY(ReadDirectoryMetadataHeader(*binaryStream, fullOriginMetadata));
 
   // Legacy field, previously used for suffix. This value is no longer used,
   // but still read and discarded to preserve compatibility with older builds
@@ -4196,8 +4205,6 @@ Result<FullOriginMetadata, nsresult> QuotaManager::LoadFullOriginMetadata(
 
   QM_TRY(
       UpdateFullOriginMetadataPrincipalProperties(*this, fullOriginMetadata));
-
-  fullOriginMetadata.mIsEncrypted = IsOriginEncrypted(fullOriginMetadata);
 
   QM_TRY_INSPECT(const bool& groupUpdated,
                  MaybeUpdateGroupForOrigin(fullOriginMetadata));
@@ -7856,7 +7863,8 @@ nsresult QuotaManager::FlagOriginInfoAsDirtyOnDisk(
   auto sharedState = std::make_shared<SharedState>();
 
   RefPtr<OriginInfo> originInfo = aProofOfLock.GetOriginInfo();
-  uint32_t metadataFlags = aStateMetadata.ToMetadataFlags();
+  uint32_t metadataFlags =
+      aStateMetadata.ToMetadataFlags(originInfo->IsEncrypted());
   int64_t lastAccessTime = aStateMetadata.mLastAccessTime;
   nsCOMPtr<nsIRunnable> runnable = NS_NewRunnableFunction(
       "QuotaManager::FlagOriginInfoAsDirtyOnDisk",
