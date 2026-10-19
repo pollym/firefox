@@ -356,8 +356,9 @@ smart_window:
     type: event
     description: |
       about:smartpage finishes looking up a generated page. The outcome is
-      the status the page shows. The font extra is only whether the heading
-      face was installed before that.
+      the status the page shows. The event is sent after the component
+      renders, without waiting for the font. The font extra records
+      whether the heading face was installed at that point.
     bugs:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=2069135
     data_reviews:
@@ -374,9 +375,9 @@ smart_window:
       font:
         type: string
         description: >
-          Heading font install, recorded beside outcome: "ready" when
-          the face was added, "unavailable" when no font bytes were sent,
-          "error" when installing the face failed.
+          Heading font status at render: "ready" when the face was
+          added, "unavailable" when it has not been added yet,
+          "error" when installing the face already failed.
 
   aitab_link_click:
     type: event
