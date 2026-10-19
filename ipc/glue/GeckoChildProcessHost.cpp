@@ -83,9 +83,12 @@
 #  include "mozilla/SandboxLaunch.h"
 #endif
 
+#ifdef XP_MACOSX
+#  include "nsMacUtilsImpl.h"
+#endif
+
 #if defined(XP_MACOSX) && defined(MOZ_SANDBOX)
 #  include "GMPProcessParent.h"
-#  include "nsMacUtilsImpl.h"
 #  include "mozilla/gfx/GPUProcessHost.h"
 #endif
 
