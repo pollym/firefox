@@ -592,13 +592,8 @@ class ContentUnbinder : public Runnable {
   static void Append(nsIContent* aSubtreeRoot) {
     if (!sContentUnbinder) {
       sContentUnbinder = new ContentUnbinder();
-      // During shutdown an idle runnable isn't guaranteed to run before the
-      // final cycle collections, so the unbinder is flushed at the end of each
-      // collection instead; UnbindAll() takes ownership then.
-      if (nsCCUncollectableMarker::sGeneration) {
-        nsCOMPtr<nsIRunnable> e = sContentUnbinder;
-        NS_DispatchToCurrentThreadQueue(e.forget(), EventQueuePriority::Idle);
-      }
+      nsCOMPtr<nsIRunnable> e = sContentUnbinder;
+      NS_DispatchToCurrentThreadQueue(e.forget(), EventQueuePriority::Idle);
     }
 
     if (sContentUnbinder->mLast->mSubtreeRoots.Length() >=
@@ -630,7 +625,7 @@ NS_IMPL_CYCLE_COLLECTION_UNLINK_BEGIN(FragmentOrElement)
   nsIContent::Unlink(tmp);
 
   // Unlink child content (and unbind our subtree).
-  if (tmp->UnoptimizableCCNode()) {
+  if (tmp->UnoptimizableCCNode() || !nsCCUncollectableMarker::sGeneration) {
     // Don't allow script to run while we're unbinding everything.
     nsAutoScriptBlocker scriptBlocker;
     BatchRemovalState state{};
