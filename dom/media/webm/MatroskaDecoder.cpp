@@ -63,6 +63,12 @@ nsTArray<UniquePtr<TrackInfo>> MatroskaDecoder::GetTracksInfo(
               "audio/mpeg"_ns, aType));
       continue;
     }
+    if (codec.EqualsLiteral("flac") || codec.LowerCaseEqualsLiteral("flac")) {
+      tracks.AppendElement(
+          CreateTrackInfoWithMIMETypeAndContainerTypeExtraParameters(
+              "audio/flac"_ns, aType));
+      continue;
+    }
     // Video codecs
     if (IsAllowedH264Codec(codec)) {
       auto trackInfo =
@@ -150,6 +156,9 @@ bool MatroskaDecoder::IsSupportedType(const MediaContainerType& aContainerType,
     tracks.AppendElement(
         CreateTrackInfoWithMIMETypeAndContainerTypeExtraParameters(
             "audio/mpeg"_ns, aContainerType));
+    tracks.AppendElement(
+        CreateTrackInfoWithMIMETypeAndContainerTypeExtraParameters(
+            "audio/flac"_ns, aContainerType));
     tracks.AppendElement(
         CreateTrackInfoWithMIMETypeAndContainerTypeExtraParameters(
             "audio/opus"_ns, aContainerType));

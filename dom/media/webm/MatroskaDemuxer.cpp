@@ -216,6 +216,13 @@ nsresult MatroskaDemuxer::SetContainerAudioCodecInfo(
           AudioCodecSpecificVariant{std::move(mp3CodecSpecificData)};
       break;
     }
+    case NESTEGG_CODEC_FLAC: {
+      mInfo.mAudio.mMimeType = "audio/flac";
+      FlacCodecSpecificData flacCodecSpecificData{};
+      mInfo.mAudio.mCodecSpecificConfig =
+          AudioCodecSpecificVariant{std::move(flacCodecSpecificData)};
+      break;
+    }
     default:
       return WebMDemuxer::SetContainerAudioCodecInfo(aContext, aParams);
   }
