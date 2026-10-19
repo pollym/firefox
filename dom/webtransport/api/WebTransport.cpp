@@ -174,6 +174,10 @@ void WebTransport::NewDatagramReceived(nsTArray<uint8_t>&& aData,
   mDatagrams->NewDatagramReceived(std::move(aData), aTimeStamp);
 }
 
+void WebTransport::OnDatagramReady(uint64_t aDatagramId) {
+  mDatagrams->OnDatagramReady(aDatagramId);
+}
+
 // WebIDL Boilerplate
 
 nsIGlobalObject* WebTransport::GetParentObject() const { return mGlobal; }

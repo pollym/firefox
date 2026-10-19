@@ -102,6 +102,10 @@ void WebTransportDatagramDuplexStream::SetOutgoingMaxAge(double aMaxAge,
   }
   // Step 3
   mOutgoingMaxAge = aMaxAge;
+
+  // Send updated parameters to parent/neqo
+  mOutgoingAlgorithms->UpdateQueueParams(mOutgoingMaxBufferedDatagrams,
+                                         mOutgoingMaxAge);
 }
 
 void WebTransportDatagramDuplexStream::SetIncomingMaxBufferedDatagrams(
@@ -114,6 +118,10 @@ void WebTransportDatagramDuplexStream::SetOutgoingMaxBufferedDatagrams(
     uint32_t aValue) {
   // https://w3c.github.io/webtransport/#dom-webtransportdatagramduplexstream-outgoingmaxbuffereddatagrams
   mOutgoingMaxBufferedDatagrams = std::max(aValue, 1u);
+
+  // Send updated parameters to parent/neqo
+  mOutgoingAlgorithms->UpdateQueueParams(mOutgoingMaxBufferedDatagrams,
+                                         mOutgoingMaxAge);
 }
 
 already_AddRefed<WebTransportDatagramsWritable>
@@ -348,7 +356,8 @@ void IncomingDatagramStreamAlgorithms::NotifyDatagramAvailable() {
 
 NS_IMPL_CYCLE_COLLECTION_INHERITED(OutgoingDatagramStreamAlgorithms,
                                    UnderlyingSinkAlgorithmsWrapper, mDatagrams,
-                                   mSendGroup, mWaitConnectPromise)
+                                   mSendGroup, mWaitConnectPromise,
+                                   mPendingDatagramPromises)
 
 NS_INTERFACE_MAP_BEGIN_CYCLE_COLLECTION(OutgoingDatagramStreamAlgorithms)
 NS_INTERFACE_MAP_END_INHERITING(UnderlyingSinkAlgorithmsWrapper)
@@ -390,35 +399,47 @@ already_AddRefed<Promise> OutgoingDatagramStreamAlgorithms::WriteCallbackImpl(
   RefPtr<Promise> promise =
       Promise::CreateInfallible(mDatagrams->GetParentObject());
 
+  // Assign unique datagram ID
+  uint64_t datagramId = mNextDatagramId++;
+
+  // Store promise in map - it will be resolved when parent sends DatagramReady
+  mPendingDatagramPromises.InsertOrUpdate(datagramId, promise);
+
   // mChild is set when we move to Connected
   if (mChild) {
-    // We pass along the datagram to the parent immediately.
-    // The OutgoingDatagramsQueue lives there, and steps 6-9 generally are
-    // implemented there
-    LOG(("Sending Datagram, size = %zu", data.Length()));
+    // We pass along the datagram to the parent with its ID.
+    // The OutgoingDatagramsQueue lives in parent/neqo, and steps 6-9 are
+    // implemented there. Parent will send DatagramReady when appropriate.
+    LOG(("Sending Datagram id=%" PRIu64 ", size = %zu", datagramId,
+         data.Length()));
     uint64_t sendGroupId = mSendGroup ? mSendGroup->GetGroupId() : 0;
+    LOG(("Sending Datagram id=%" PRIu64 ", size = %zu, sendGroup = %" PRIu64
+         ", sendOrder = %" PRId64,
+         datagramId, data.Length(), sendGroupId, mSendOrder));
     mChild->SendOutgoingDatagram(
-        std::move(data), now, sendGroupId, mSendOrder,
-        [promise](nsresult&&) {
-          // XXX result
-          LOG(("Datagram was sent"));
-          promise->MaybeResolveWithUndefined();
+        datagramId, std::move(data), now, sendGroupId, mSendOrder,
+        [](nsresult&&) {
+          // IPC succeeded - actual promise resolution happens via DatagramReady
+          LOG(("Datagram IPC succeeded"));
         },
-        [promise](mozilla::ipc::ResponseRejectReason&&) {
-          LOG(("Datagram failed"));
-          // there's no description in the spec of rejecting if a datagram
-          // can't be sent; to the contrary, it says we should resolve with
-          // undefined if we throw the datagram away
-          promise->MaybeResolveWithUndefined();
+        [self = RefPtr{this},
+         datagramId](mozilla::ipc::ResponseRejectReason&&) {
+          LOG(("Datagram IPC failed for id=%" PRIu64, datagramId));
+          // IPC failed - remove from pending map and resolve on failure
+          if (Maybe<RefPtr<Promise>> promise =
+                  self->mPendingDatagramPromises.Extract(datagramId)) {
+            (*promise)->MaybeResolveWithUndefined();
+          }
         });
   } else {
-    LOG(("Queuing datagram for connect"));
+    LOG(("Queuing datagram id=%" PRIu64 " for connect", datagramId));
     // Queue locally until we can send it.
     // We should be guaranteed that we don't get called again until the
     // promise is resolved.
     MOZ_ASSERT(mWaitConnect == nullptr);
     mWaitConnect = std::make_unique<DatagramEntry>(std::move(data), now);
     mWaitConnectPromise = promise;
+    mWaitConnectDatagramId = datagramId;
   }
 
   // Step 10: return promise
@@ -431,22 +452,53 @@ void OutgoingDatagramStreamAlgorithms::SetChild(WebTransportChild* aChild) {
   mChild = aChild;
   if (mWaitConnect) {
     uint64_t sendGroupId = mSendGroup ? mSendGroup->GetGroupId() : 0;
-    LOG(("Sending queued datagram sendGroup = %" PRIu64
+    LOG(("Sending queued datagram id=%" PRIu64 ", sendGroup = %" PRIu64
          ", sendOrder = %" PRId64,
-         sendGroupId, mSendOrder));
+         mWaitConnectDatagramId, sendGroupId, mSendOrder));
+    // Add promise to pending map so OnDatagramReady can resolve it
+    mPendingDatagramPromises.InsertOrUpdate(mWaitConnectDatagramId,
+                                            mWaitConnectPromise);
     mChild->SendOutgoingDatagram(
-        mWaitConnect->mBuffer, mWaitConnect->mTimeStamp, sendGroupId,
-        mSendOrder,
-        [promise = mWaitConnectPromise](nsresult&&) {
-          LOG_VERBOSE(("Early Datagram was sent"));
-          promise->MaybeResolveWithUndefined();
-        },
-        [promise = mWaitConnectPromise](mozilla::ipc::ResponseRejectReason&&) {
-          LOG(("Early Datagram failed"));
-          promise->MaybeResolveWithUndefined();
+        mWaitConnectDatagramId, mWaitConnect->mBuffer, mWaitConnect->mTimeStamp,
+        sendGroupId, mSendOrder,
+        [](nsresult&&) { LOG_VERBOSE(("Early Datagram IPC succeeded")); },
+        [self = RefPtr{this},
+         id = mWaitConnectDatagramId](mozilla::ipc::ResponseRejectReason&&) {
+          LOG(("Early Datagram IPC failed for id=%" PRIu64, id));
+          // Remove from pending map and resolve on failure
+          if (Maybe<RefPtr<Promise>> promise =
+                  self->mPendingDatagramPromises.Extract(id)) {
+            (*promise)->MaybeResolveWithUndefined();
+          }
         });
     mWaitConnectPromise = nullptr;
     mWaitConnect.reset(nullptr);
+    mWaitConnectDatagramId = 0;
+  }
+}
+
+void OutgoingDatagramStreamAlgorithms::OnDatagramReady(uint64_t aDatagramId) {
+  LOG(("OnDatagramReady for id=%" PRIu64, aDatagramId));
+
+  if (Maybe<RefPtr<Promise>> promise =
+          mPendingDatagramPromises.Extract(aDatagramId)) {
+    LOG(("Resolving promise for datagram id=%" PRIu64, aDatagramId));
+    (*promise)->MaybeResolveWithUndefined();
+  } else {
+    LOG(("Warning: No pending promise found for datagram id=%" PRIu64,
+         aDatagramId));
+  }
+}
+
+void OutgoingDatagramStreamAlgorithms::UpdateQueueParams(
+    uint32_t aMaxBufferedDatagrams, double aMaxAge) {
+  if (mChild) {
+    LOG(("Sending UpdateDatagramQueueParams: maxBufferedDatagrams=%" PRIu32
+         ", maxAge=%f",
+         aMaxBufferedDatagrams, aMaxAge));
+    mChild->SendUpdateDatagramQueueParams(aMaxBufferedDatagrams, aMaxAge);
+  } else {
+    LOG(("UpdateQueueParams called but child not set yet"));
   }
 }
 
