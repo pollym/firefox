@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #ifndef GMPProcessParent_h
-#define GMPProcessParent_h 1
+#define GMPProcessParent_h
 
 #include "base/basictypes.h"
 #include "base/file_path.h"
