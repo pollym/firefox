@@ -4138,7 +4138,7 @@ HTMLEditor::InsertOrReplaceTextWithTransaction(
   MOZ_ASSERT_IF(aData.ReplaceLength(), aPointToInsert.IsInTextNode());
 
   Result<InsertTextResult, nsresult> insertTextResultOrError =
-      !aData.ReplaceLength()
+      !aData.ReplaceLength() || NS_WARN_IF(!aPointToInsert.IsInTextNode())
           ? InsertTextWithTransaction(aData.mNormalizedString, aPointToInsert,
                                       InsertTextTo::SpecifiedPoint, aPurpose)
           : ReplaceTextWithTransaction(
