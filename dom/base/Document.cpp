@@ -1587,6 +1587,8 @@ Document::Document(const char* aContentType,
       mHasPolicyWithRequireTrustedTypesForDirective(false),
       mClipboardCopyTriggered(false),
       mHasBeenRevealed(false),
+      mSentMayHaveViewTransitionOptIn(false),
+      mOutboundViewTransitionOptInDirty(false),
       mAutoSizesEnabled(StaticPrefs::dom_image_sizes_auto_enabled()),
       mWasFocusedElementRemoved(false),
       mHasScopedCustomElementRegistry(false),
@@ -8232,6 +8234,8 @@ void Document::ApplicableStylesChanged(bool aKnownInShadowTree) {
     pc->MarkCounterStylesDirty();
     pc->MarkFontFeatureValuesDirty();
     pc->MarkFontPaletteValuesDirty();
+    // Only document style sheets can contain the @view-transition rule.
+    OutboundViewTransitionRulesChanged();
   }
   pc->RestyleManager()->NextRestyleIsForCSSRuleChanges();
 }
@@ -13179,6 +13183,10 @@ void Document::OnPageHide(bool aPersisted, EventTarget* aDispatchStartTarget,
   }
 
   if (!inFrameLoaderSwap) {
+    // Skip the active view transition now that the document is hidden, after
+    // pagehide. Do not wait for the task that UpdateVisibilityState queues, so
+    // that the skip happens before the document goes into the BFCache.
+    MaybeSkipActiveViewTransition(SkipTransitionReason::DocumentHidden);
     UpdateVisibilityState();
 
     // Submitted here rather than from Destroy(): by teardown the parent process
@@ -17787,6 +17795,25 @@ void Document::UpdateVisibilityState(DispatchVisibilityChange aDispatchEvent) {
         NewRunnableMethod("MaybeSkipTransitionAfterVisibilityChange", this,
                           &Document::MaybeSkipTransitionAfterVisibilityChange));
   }
+  // https://drafts.csswg.org/css-view-transitions-2/#page-visibility-change-steps
+  // Step 1.3. Set document's inbound view transition params to null.
+  // Do this only when the document becomes hidden. A document that is restored
+  // from BFCache becomes visible before its reveal, and it needs its params.
+  // TODO: The spec does this in the task that step 1 queues.
+  if (!visible) {
+    mInboundViewTransitionParams = nullptr;
+    // Also drop the params that this unrevealed document did not take yet.
+    // An initial about:blank never takes params, so it must not drop them.
+    if (!mHasBeenRevealed && !IsInitialDocument() &&
+        StaticPrefs::dom_viewTransitions_cross_document_enabled()) {
+      if (nsDocShell* ds = nsDocShell::Cast(GetDocShell())) {
+        ds->TakePendingInboundViewTransitionParams();
+      }
+      if (BrowsingContext* bc = GetBrowsingContext(); bc && bc->IsTop()) {
+        ClearCrossDocViewTransitionParams(bc->BrowserId());
+      }
+    }
+  }
 
   NotifyActivityChanged();
   if (visible) {
@@ -17846,6 +17873,8 @@ void Document::Reveal() {
   // Step 2
   mHasBeenRevealed = true;
 
+  UpdateOutboundViewTransitionOptIn();
+
   if (!StaticPrefs::dom_viewTransitions_cross_document_enabled()) {
     return;
   }
@@ -17853,6 +17882,32 @@ void Document::Reveal() {
   RefPtr<nsGlobalWindowInner> win = nsGlobalWindowInner::Cast(GetInnerWindow());
   if (!win) {
     return;
+  }
+
+  // Take the params that the old document in this docshell captured.
+  if (!mInboundViewTransitionParams) {
+    if (nsDocShell* ds = nsDocShell::Cast(GetDocShell())) {
+      mInboundViewTransitionParams =
+          ds->TakePendingInboundViewTransitionParams();
+    }
+  }
+
+  // If the old top-level document entered BFCache, this document is in another
+  // BrowsingContext with the same browser id.
+  if (!mInboundViewTransitionParams) {
+    if (BrowsingContext* bc = GetBrowsingContext(); bc && bc->IsTop()) {
+      mInboundViewTransitionParams =
+          TakeCrossDocViewTransitionParams(bc->BrowserId());
+    }
+  }
+
+  // Use only params that a same-origin document captured, since cross-site
+  // documents can share a content process.
+  if (mInboundViewTransitionParams &&
+      (!mInboundViewTransitionParams->producerPrincipal ||
+       !NodePrincipal()->Equals(
+           mInboundViewTransitionParams->producerPrincipal))) {
+    mInboundViewTransitionParams = nullptr;
   }
 
   // Step 3, Let transition be the result of resolving inbound cross-document
@@ -17871,6 +17926,7 @@ void Document::Reveal() {
 
   // Step 5, If transition is not null, then: Activate transition.
   if (vt.isSome()) {
+    FlushPendingNotifications(FlushType::Layout);
     nsAutoMicroTask mt;
     vt.ref()->Activate();
   }
@@ -20010,14 +20066,60 @@ Maybe<nsTArray<RefPtr<nsAtom>>> Document::ResolveViewTransitionRule() {
   return Some(std::move(types));
 }
 
+void Document::UpdateOutboundViewTransitionOptIn() {
+  // Reveal() sends the first state, so skip the stylesheets that load before
+  // it.
+  if (!mHasBeenRevealed ||
+      !StaticPrefs::dom_viewTransitions_cross_document_enabled()) {
+    return;
+  }
+  mOutboundViewTransitionOptInDirty = false;
+  RefPtr<StyleViewTransitionRule> rule =
+      EnsureStyleSet().GetLastViewTransitionRule();
+  const bool mayHave = rule && Servo_ViewTransitionRule_GetNavigationDescriptor(
+                                   rule) == StyleNavigationType::Auto;
+  if (mayHave == mSentMayHaveViewTransitionOptIn) {
+    return;
+  }
+  mSentMayHaveViewTransitionOptIn = mayHave;
+  if (WindowGlobalChild* wgc = GetWindowGlobalChild()) {
+    wgc->SendSetMayHaveViewTransitionOptIn(mayHave);
+  }
+}
+
+void Document::MaybeUpdateOutboundViewTransitionOptIn() {
+  if (mOutboundViewTransitionOptInDirty) {
+    UpdateOutboundViewTransitionOptIn();
+  }
+}
+
+void Document::OutboundViewTransitionRulesChanged() {
+  if (mHasBeenRevealed &&
+      StaticPrefs::dom_viewTransitions_cross_document_enabled()) {
+    mOutboundViewTransitionOptInDirty = true;
+  }
+}
+
+void Document::StylistUpdated() {
+  // The stylist is up to date, so reading the rules is cheap now.
+  MaybeUpdateOutboundViewTransitionOptIn();
+}
+
 Maybe<RefPtr<ViewTransition>>
 Document::ResolveInboundCrossDocumentViewTransition() {
   // Step 1, 2. Assert fully active and revealed.
-  MOZ_ASSERT(IsFullyActive());
+  // Reveal() may run for a document that is not fully active, so return early
+  // rather than asserting.
+  if (!IsFullyActive()) {
+    // Nothing uses the params after the reveal.
+    mInboundViewTransitionParams = nullptr;
+    return Nothing();
+  }
   MOZ_ASSERT(mHasBeenRevealed);
 
-  // TODO Step 3. Update opt-in state for outbound transitions.
-  // XXX Maybe we don't need that flag and can just check the rule directly.
+  // Step 3. Update the opt-in state for outbound transitions. Gecko checks
+  // this state in SetupOutboundCrossDocumentViewTransition when the navigation
+  // starts.
 
   // Step 4. Let inboundViewTransitionParams be document's inbound params.
   // Step 6. Set document's inbound params to null.
@@ -20046,6 +20148,12 @@ Document::ResolveInboundCrossDocumentViewTransition() {
   mActiveViewTransition = ViewTransition::CreateCrossDocument(
       *this, std::move(inboundParams), resolvedRule.extract());
 
+  // Enable :active-view-transition so that its styles apply during the
+  // transition.
+  if (auto* root = GetRootElement()) {
+    root->AddStates(ElementState::ACTIVE_VIEW_TRANSITION);
+  }
+
   // Step 15. Return transition.
   return Some(mActiveViewTransition);
 }
@@ -20053,6 +20161,89 @@ Document::ResolveInboundCrossDocumentViewTransition() {
 void Document::SetInboundViewTransitionParams(
     UniquePtr<ViewTransitionParams> aParams) {
   mInboundViewTransitionParams = std::move(aParams);
+}
+
+// The captured params by browser id. See StashCrossDocViewTransitionParams.
+using CrossDocVTParamsMap =
+    nsTHashMap<uint64_t, UniquePtr<ViewTransitionParams>>;
+static StaticAutoPtr<CrossDocVTParamsMap> sCrossDocVTParams;
+
+void Document::StashCrossDocViewTransitionParams(
+    uint64_t aBrowserId, UniquePtr<ViewTransitionParams> aParams) {
+  if (!aParams) {
+    return;
+  }
+  if (!sCrossDocVTParams) {
+    sCrossDocVTParams = new CrossDocVTParamsMap();
+    ClearOnShutdown(&sCrossDocVTParams);
+  }
+  sCrossDocVTParams->InsertOrUpdate(aBrowserId, std::move(aParams));
+}
+
+UniquePtr<ViewTransitionParams> Document::TakeCrossDocViewTransitionParams(
+    uint64_t aBrowserId) {
+  if (!sCrossDocVTParams) {
+    return nullptr;
+  }
+  Maybe<UniquePtr<ViewTransitionParams>> extracted =
+      sCrossDocVTParams->Extract(aBrowserId);
+  return extracted ? std::move(*extracted) : nullptr;
+}
+
+void Document::ClearCrossDocViewTransitionParams(
+    uint64_t aBrowserId, Maybe<uint64_t> aProducerBrowsingContextId) {
+  if (!sCrossDocVTParams) {
+    return;
+  }
+  if (aProducerBrowsingContextId) {
+    auto entry = sCrossDocVTParams->Lookup(aBrowserId);
+    if (!entry ||
+        (*entry)->producerBrowsingContextId != *aProducerBrowsingContextId) {
+      return;
+    }
+  }
+  sCrossDocVTParams->Remove(aBrowserId);
+}
+
+already_AddRefed<ViewTransition>
+Document::SetupOutboundCrossDocumentViewTransition() {
+  // https://drafts.csswg.org/css-view-transitions-2/#setup-cross-document-view-transition
+  if (!StaticPrefs::dom_viewTransitions_cross_document_enabled()) {
+    return nullptr;
+  }
+
+  // "can initiate outbound view transition": this document must have been
+  // revealed and its @view-transition rule must opt in.
+  if (!mHasBeenRevealed) {
+    return nullptr;
+  }
+
+  // Step 3-4: Resolve the @view-transition rule. If it resolves to "skip
+  // transition", this document cannot initiate an outbound transition.
+  auto resolvedRule = ResolveViewTransitionRule();
+  if (resolvedRule.isNothing()) {
+    return nullptr;
+  }
+
+  // Step 5: If there's already an active view transition, skip it.
+  if (mActiveViewTransition) {
+    RefPtr<ViewTransition> active = mActiveViewTransition;
+    active->SkipTransition(SkipTransitionReason::ClobberedActiveTransition);
+  }
+
+  // Steps 6-9: Create the outbound transition with the resolved active types
+  // and make it this document's active view transition.
+  RefPtr<ViewTransition> vt = ViewTransition::CreateOutboundCrossDocument(
+      *this, resolvedRule.extract());
+  mActiveViewTransition = vt;
+
+  // Enable :active-view-transition so that its styles apply during the
+  // transition.
+  if (auto* root = GetRootElement()) {
+    root->AddStates(ElementState::ACTIVE_VIEW_TRANSITION);
+  }
+
+  return vt.forget();
 }
 
 // https://html.spec.whatwg.org/#allows-adding-render-blocking-elements

@@ -784,13 +784,27 @@ class ContentChild final : public PContentChild,
       const uint32_t aStopFlags);
 
   mozilla::ipc::IPCResult RecvDeactivateDocuments(
-      const MaybeDiscarded<BrowsingContext>& aContext);
+      const MaybeDiscarded<BrowsingContext>& aContext,
+      const Maybe<SessionHistoryInfo>& aPageSwapTargetInfo,
+      const NavigationType& aNavigationType, const bool aForUnload);
+
+  MOZ_CAN_RUN_SCRIPT_BOUNDARY
+  mozilla::ipc::IPCResult RecvBeginOutboundCrossDocumentViewTransition(
+      const MaybeDiscarded<BrowsingContext>& aContext,
+      const Maybe<SessionHistoryInfo>& aPageSwapTargetInfo,
+      const NavigationType& aNavigationType,
+      BeginOutboundCrossDocumentViewTransitionResolver&& aResolver);
   MOZ_CAN_RUN_SCRIPT_BOUNDARY
   mozilla::ipc::IPCResult RecvReactivateDocuments(
       const MaybeDiscarded<BrowsingContext>& aContext,
       const Maybe<SessionHistoryInfo>& aReactivatedEntry,
       const nsTArray<SessionHistoryInfo>& aNewSHEs,
       const Maybe<PreviousSessionHistoryInfo>& aPreviousEntryForActivation);
+  MOZ_CAN_RUN_SCRIPT_BOUNDARY
+  mozilla::ipc::IPCResult RecvFirePageSwap(
+      const MaybeDiscarded<BrowsingContext>& aContext,
+      const Maybe<SessionHistoryInfo>& aPageSwapTargetInfo,
+      const NavigationType& aNavigationType);
 
   mozilla::ipc::IPCResult RecvRawMessage(const JSActorMessageMeta& aMeta,
                                          JSIPCValue&& aData,

@@ -4325,9 +4325,40 @@ class Document : public nsINode,
 
   void SetInboundViewTransitionParams(UniquePtr<ViewTransitionParams> aParams);
 
+  // Stores the captured params by browser id, for the new document to take at
+  // its reveal. Used when the old top-level document enters BFCache, since the
+  // new document is then in another BrowsingContext with the same browser id.
+  static void StashCrossDocViewTransitionParams(
+      uint64_t aBrowserId, UniquePtr<ViewTransitionParams> aParams);
+  static UniquePtr<ViewTransitionParams> TakeCrossDocViewTransitionParams(
+      uint64_t aBrowserId);
+  // Drops the params of a navigation that did not reach the reveal. If
+  // aProducerBrowsingContextId is set, drops only the params that the
+  // BrowsingContext with that id captured.
+  static void ClearCrossDocViewTransitionParams(
+      uint64_t aBrowserId,
+      Maybe<uint64_t> aProducerBrowsingContextId = Nothing());
+
   // Returns some ViewTransition or Nothing if skip transition.
   // https://drafts.csswg.org/css-view-transitions-2/#resolve-inbound-cross-document-view-transition
   Maybe<RefPtr<ViewTransition>> ResolveInboundCrossDocumentViewTransition();
+
+  // https://drafts.csswg.org/css-view-transitions-2/#setup-cross-document-view-transition
+  already_AddRefed<ViewTransition> SetupOutboundCrossDocumentViewTransition();
+
+  // Tells the parent whether the document has a @view-transition rule with
+  // navigation: auto. Called at the reveal. Does nothing before the reveal.
+  void UpdateOutboundViewTransitionOptIn();
+  // Calls UpdateOutboundViewTransitionOptIn if the rules may have changed
+  // since the last update. Called after a stylist update and before a
+  // navigation away from this document.
+  void MaybeUpdateOutboundViewTransitionOptIn();
+  // Marks that the rules may have changed. This does not read the rules,
+  // because that updates the stylist, which is expensive and not safe in the
+  // middle of a style sheet or media change.
+  void OutboundViewTransitionRulesChanged();
+  // Called when the stylist of this document has been updated.
+  void StylistUpdated();
 
   // Getter for PermissionDelegateHandler. Performs lazy initialization.
   PermissionDelegateHandler* GetPermissionDelegateHandler();
@@ -5474,6 +5505,13 @@ class Document : public nsINode,
 
   // https://html.spec.whatwg.org/#has-been-revealed
   bool mHasBeenRevealed : 1;
+
+  // Last value sent to the parent via SetMayHaveViewTransitionOptIn, so we only
+  // send on change. See UpdateOutboundViewTransitionOptIn.
+  bool mSentMayHaveViewTransitionOptIn : 1;
+  // Whether the rules may have changed since UpdateOutboundViewTransitionOptIn
+  // last ran.
+  bool mOutboundViewTransitionOptInDirty : 1;
 
   // Cached value of dom.image.sizes_auto.enabled
   const bool mAutoSizesEnabled : 1;
