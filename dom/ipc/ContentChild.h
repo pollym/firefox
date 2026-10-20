@@ -955,7 +955,9 @@ class ContentChild final : public PContentChild,
   // See `BrowsingContext::mEpochs` for an explanation of this field.
   uint64_t mBrowsingContextFieldEpoch = 0;
 
-  hal::ProcessPriority mProcessPriority = hal::PROCESS_PRIORITY_UNKNOWN;
+  // Atomic because the profiler reads it from another thread.
+  Atomic<hal::ProcessPriority, Relaxed> mProcessPriority{
+      hal::PROCESS_PRIORITY_UNKNOWN};
 
   // Session created when the process priority is FOREGROUND to ensure high
   // priority scheduling of important threads. (Currently main thread and style
