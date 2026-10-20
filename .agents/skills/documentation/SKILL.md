@@ -252,7 +252,8 @@ running jsdoc over the source. The comment then has more than one reader, and
 they do not agree: descriptions render as reStructuredText, not Markdown, and
 jsdoc rejects some TypeScript type spellings that tsc accepts. Read
 `references/js-api-references.md` before writing or fixing a doc comment in
-one of those directories.
+one of those directories, adding a file to `js_source_paths`, or chasing a
+generated page that is missing a member or aborts the build.
 
 **A JSDoc failure anywhere aborts every build.** `conf.py` hands sphinx-js the
 whole `js_source_paths` list whatever directory `./mach doc` was pointed at, so
@@ -269,7 +270,8 @@ succeeding says nothing about the diagram, and every failure in it is invisible
 until the built page is open in a browser. A block that starts with `zenuml`
 draws a ZenUML sequence diagram. `tools/moztreedocs/docs/mermaid-integration.md`
 describes the directive and how a diagram renders. Read `references/mermaid.md`
-before adding or changing a diagram.
+before adding or changing a diagram, replacing a diagram image, or checking how
+one rendered.
 
 ## Best Practices
 
