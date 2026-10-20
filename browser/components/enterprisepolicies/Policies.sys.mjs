@@ -1325,6 +1325,8 @@ export var Policies = {
     },
   },
 
+  DisableMacOSUserPolicies: {},
+
   DisableMasterPasswordCreation: {
     onBeforeUIStartup(manager, param) {
       if (param) {
