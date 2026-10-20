@@ -3881,6 +3881,11 @@ pref("toolkit.rust-components.logging.internal-level", "Warn");
 // Settings Redesign 2025 prefs
 pref("browser.settings-redesign.enabled", true);
 
+// Gates the in-progress Notifications sub-page and its entry card in
+// Permissions and data. Not part of the settings-redesign section scheme, since
+// those are all enabled by browser.settings-redesign.enabled being true.
+pref("browser.preferences.notifications-section.enabled", false);
+
 // A preference that will be locked to reflect whether this build has support
 // for XDG Config Home handling. Mostly used to be able to keep tests around
 // in case of a backout of the feature
