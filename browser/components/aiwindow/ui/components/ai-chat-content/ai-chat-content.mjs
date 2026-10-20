@@ -30,13 +30,12 @@ import "chrome://browser/content/aiwindow/components/kit-mention.mjs";
 // eslint-disable-next-line import/no-unassigned-import
 import "chrome://browser/content/aiwindow/components/agent-monitor-item.mjs";
 // eslint-disable-next-line import/no-unassigned-import
-import "chrome://browser/content/aiwindow/components/aitab-tool-ui.mjs";
-// eslint-disable-next-line import/no-unassigned-import
 import "chrome://global/content/elements/moz-textarea.mjs";
 import {
   dispatchClientError,
   installClientErrorListeners,
 } from "chrome://browser/content/aiwindow/modules/ClientErrorTelemetry.mjs";
+import { STATE_CHOOSE } from "chrome://browser/content/aiwindow/components/aitab-tool-ui.mjs";
 
 /**
  * @typedef {import("chrome://browser/content/aiwindow/components/ai-action-confirmation.mjs").TabSelectionData} TabSelectionData
@@ -1452,7 +1451,7 @@ export class AIChatContent extends MozLitElement {
 
   #renderAITab(msg) {
     return html`<aitab-tool-ui
-      .state=${msg.toolUIData.properties?.state ?? "choose"}
+      .state=${msg.toolUIData.properties?.state ?? STATE_CHOOSE}
       .title=${msg.toolUIData.properties?.title ?? ""}
       .viewerURL=${msg.toolUIData.properties?.viewerURL ?? ""}
       @aitab-open-request=${event =>
