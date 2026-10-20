@@ -6,6 +6,7 @@
 
 #include "irregexp/imported/regexp-interpreter.h"
 
+#include <bit>
 #include <limits>
 
 #include "irregexp/imported/regexp-bytecodes-inl.h"
@@ -205,7 +206,7 @@ IrregexpInterpreter::Result ThrowStackOverflow(Isolate* isolate,
   CHECK(call_origin == RegExp::CallOrigin::kFromRuntime);
   // We abort interpreter execution after the stack overflow is thrown, and thus
   // allow allocation here despite the outer DisallowGarbageCollectionScope.
-  [[maybe_unused]] AllowGarbageCollection yes_gc;
+  AllowGarbageCollection yes_gc;
   isolate->StackOverflow();
   return IrregexpInterpreter::EXCEPTION;
 }
@@ -282,7 +283,7 @@ IrregexpInterpreter::Result HandleInterrupts(
           String::IsOneByteRepresentationUnderneath(*subject_string_out);
       Tagged<Object> result;
       {
-        [[maybe_unused]] AllowGarbageCollection yes_gc;
+        AllowGarbageCollection yes_gc;
         result = isolate->stack_guard()->HandleInterrupts();
       }
       if (IsExceptionHole(result)) {
@@ -503,7 +504,7 @@ IrregexpInterpreter::Result RawMatch(
   // filled with kBreaks, indicating an invalid operation. This way using
   // kBytecodeMask guarantees no OOB access to the dispatch table.
   constexpr int kPaddedBytecodeCount =
-      base::bits::RoundUpToPowerOfTwo32(Bytecodes::kCount);
+      std::bit_ceil<uint32_t>(Bytecodes::kCount);
   constexpr int kBytecodeMask = kPaddedBytecodeCount - 1;
   static_assert(std::numeric_limits<uint8_t>::max() >= kBytecodeMask);
 
