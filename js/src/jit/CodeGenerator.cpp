@@ -7190,6 +7190,9 @@ void JitRuntime::generateIonGenericCallBoundFunction(MacroAssembler& masm,
                           &BoundFunctionObject::class_, scratch, calleeReg,
                           vmCall);
 
+  // Note: we don't enter the bound function's realm because bound functions
+  // don't have an associated realm in the spec.
+
   Address targetSlot(calleeReg, BoundFunctionObject::offsetOfTargetSlot());
   Address flagsSlot(calleeReg, BoundFunctionObject::offsetOfFlagsSlot());
   Address thisSlot(calleeReg, BoundFunctionObject::offsetOfBoundThisSlot());

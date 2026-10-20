@@ -14196,8 +14196,14 @@ AttachDecision CallIRGenerator::tryAttachCallHook(HandleObject calleeObj) {
   // Ensure the callee's class matches the one in this stub.
   writer.guardAnyClass(calleeObjId, calleeObj->getClass());
 
-  if (isConstructing && calleeObj->is<BoundFunctionObject>()) {
-    writer.guardBoundFunctionIsConstructor(calleeObjId);
+  if (calleeObj->is<BoundFunctionObject>()) {
+    if (isConstructing) {
+      writer.guardBoundFunctionIsConstructor(calleeObjId);
+    }
+
+    // Bound functions don't have an associated realm in the spec, so we
+    // shouldn't switch realms.
+    flags.setIsSameRealm();
   }
 
   writer.callClassHook(calleeObjId, argcId, hook, flags, ClampFixedArgc(argc_));
