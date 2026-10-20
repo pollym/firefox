@@ -1836,11 +1836,8 @@ const BASE_MESSAGES = () => [
           force_hide_steps_indicator: true,
           content: {
             position: "center",
-            background: "var(--color-violet-desaturated-70)",
             zap_border: true,
             zap_shadow: true,
-            zap_border_gradient:
-              "linear-gradient(95.54deg, #B89CFF 20.68%, #764EDD 79.34%)",
             screen_style: {
               width: "639px",
             },
@@ -2003,7 +2000,6 @@ const BASE_MESSAGES = () => [
                 minHeight: "24px",
                 minWidth: "revert",
                 lineHeight: "100%",
-                color: "var(--link-color, #EADDFF)",
               },
               action: {
                 type: "OPEN_URL",
