@@ -4013,6 +4013,7 @@ nsContentUtils::InternalContentPolicyTypeToExternal(nsContentPolicyType aType) {
       return ExtContentPolicy::TYPE_FETCH;
 
     case nsIContentPolicy::TYPE_INTERNAL_EXTERNAL_RESOURCE:
+    case nsIContentPolicy::TYPE_INTERNAL_SPECULATION_RULES:
       return ExtContentPolicy::TYPE_OTHER;
 
     case nsIContentPolicy::TYPE_INTERNAL_JSON_PRELOAD:

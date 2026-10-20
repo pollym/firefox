@@ -36,6 +36,7 @@
 #include "mozilla/dom/SRILogHelper.h"
 #include "mozilla/dom/ScriptLoader.h"
 #include "mozilla/dom/ServiceWorkerDescriptor.h"
+#include "mozilla/dom/SpeculationRules.h"
 #include "mozilla/net/HttpBaseChannel.h"
 #include "mozilla/net/NeckoChannelParams.h"
 #include "nsAtom.h"
@@ -211,8 +212,9 @@ nsresult nsContentSink::ProcessHTTPHeaders(nsIChannel* aChannel) {
     mDocument->SetEarlyHints(std::move(earlyHints));
   }
 
-  // Note that the only header we care about is the "link" header, since we
-  // have all the infrastructure for kicking off stylesheet loads.
+  // Note that the only headers we care about are the "link" header, since we
+  // have all the infrastructure for kicking off stylesheet loads, and the
+  // "Speculation-Rules" header for top-level documents.
 
   nsAutoCString linkHeader;
 
@@ -232,6 +234,21 @@ nsresult nsContentSink::ProcessHTTPHeaders(nsIChannel* aChannel) {
     rv = NS_DispatchToCurrentThread(mProcessLinkHeaderEvent.get());
     if (NS_FAILED(rv)) {
       mProcessLinkHeaderEvent.Forget();
+    }
+  }
+
+  // https://html.spec.whatwg.org/#initialise-the-document-object
+  // Step 20. If navigationParams's navigable is a top-level traversable, then
+  // process the `Speculation-Rules` header given document and
+  // navigationParams's response.
+  if (StaticPrefs::dom_speculation_rules_enabled() && mDocShell &&
+      mDocShell->GetBrowsingContext()->IsTop()) {
+    nsAutoCString speculationRulesHeader;
+    rv = httpchannel->GetResponseHeader("Speculation-Rules"_ns,
+                                        speculationRulesHeader);
+    if (NS_SUCCEEDED(rv) && !speculationRulesHeader.IsEmpty()) {
+      mDocument->SpeculationRules().ProcessSpeculationRulesHeader(
+          speculationRulesHeader);
     }
   }
 
