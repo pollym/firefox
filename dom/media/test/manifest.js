@@ -554,6 +554,12 @@ var gMKVtests = [
     type: 'audio/matroska; codecs="flac"',
     duration: 1.0,
   },
+  // ffmpeg -f lavfi -i sine=frequency=1000:duration=1 -c:a pcm_s16le output_pcm.mkv
+  {
+    name: "output_pcm.mkv",
+    type: 'audio/matroska; codecs="pcm"',
+    duration: 1.0,
+  },
 ];
 
 // HEVC file can only be tested on the gpu worker which has hardware decoder
@@ -621,16 +627,6 @@ gMKVtests.push(
     duration: 0.1,
   }
 );
-
-// The following files should be added to gMKVtests once they are supported.
-var gUnsupportedMKVtests = [
-  // ffmpeg -f lavfi -i sine=frequency=1000:duration=1 -c:a pcm_s16le output_pcm.mkv
-  {
-    name: "output_pcm.mkv",
-    type: "audio/matroska",
-    duration: 1.0,
-  },
-];
 
 // AAC files with different sample rates. We add these here as some are added
 // conditionally.
