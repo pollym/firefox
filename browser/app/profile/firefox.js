@@ -2431,7 +2431,7 @@ pref("browser.smartwindow.memoriesLogLevel", "Warn");
 // Gates resume-activity ("pick up where you left off") starter generation.
 pref("browser.smartwindow.resumeActivity.enabled", true);
 // TODO Bug 2067871: remove once journey store is available.
-pref("browser.smartwindow.resumeCards.enabled", false);
+pref("browser.smartwindow.resumeCards.enabled", true);
 pref("browser.smartwindow.firstrun.autoAdvanceMS", 3000);
 pref("browser.smartwindow.firstrun.hasCompleted", false);
 pref("browser.smartwindow.showThemesNotice", true);
