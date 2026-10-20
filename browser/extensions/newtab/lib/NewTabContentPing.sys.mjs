@@ -405,13 +405,6 @@ export class NewTabContentPing {
       dwell_id,
       ...result
     } = eventDataDict;
-    // @backward-compat { version 157 } layout_name was added as an extra_key to
-    // the newtab_content impression/click events in 157. A train-hopped XPI can
-    // run on older platform builds whose schema lacks it, which would throw a
-    // Glean error, so drop it below 157.
-    if (Services.vc.compare(AppConstants.MOZ_APP_VERSION, "157.0a1") < 0) {
-      delete result.layout_name;
-    }
     // @backward-compat { version 158 } variant_id and source_section_id were
     // added as extra_keys to the newtab_content impression/click events in 158.
     // A train-hopped XPI can run on older platform builds whose schema lacks
