@@ -6178,35 +6178,8 @@ enum class AliasKindRaw : uint8_t {
       }
       ComponentSortIndex exp = *maybeExp;
 
-      ComponentItem newAlias = instance.desc().match(
-          [&](const CoreInstanceDescFromModule&) {
-            return ComponentItem::alias(ComponentAliasKind::CoreExport, sort,
-                                        instanceIndex, exp.index);
-          },
-          [&](const ComponentInlineExports& inlineExports) {
-            // If you alias an export of an inline-export instance, then you can
-            // just turn the alias into an outer alias of the original thing and
-            // call it a day. This saves some unnecessary indirection, prevents
-            // terrible chains of aliases, and also ensures that we never have
-            // to build index spaces for inline-export instances.
-            //
-            // TODO(wasm-cm): In principle you could also do this analysis on
-            // normal modules. If a module simply re-exports an item, the same
-            // trick could be performed.
-            ComponentSortIndex original = inlineExports.resolveOriginal(exp);
-            ComponentItem originalItem = c->resolveSortIndex(original);
-            if (originalItem.isOuterAlias()) {
-              // Never let an outer alias point at an outer alias; always just
-              // point it at the original item.
-              MOZ_ASSERT(
-                  !c->resolveSortIndex(originalItem.outerAliasSortIndex())
-                       .isOuterAlias());
-              return originalItem;
-            } else {
-              return ComponentItem::alias(ComponentAliasKind::Outer,
-                                          original.sort, 0, original.index);
-            }
-          });
+      ComponentItem newAlias = ComponentItem::alias(
+          ComponentAliasKind::CoreExport, sort, instanceIndex, exp.index);
 
       ComponentSortIndex newAliasSortIndex;
       switch (sort) {
@@ -6291,8 +6264,7 @@ enum class AliasKindRaw : uint8_t {
           return d.failf("invalid alias sort 0x%02x", uint8_t(sort));
       }
 
-      if (newAlias.aliasKind() == ComponentAliasKind::CoreExport &&
-          !c->saveExportNameForAlias(newAliasSortIndex,
+      if (!c->saveExportNameForAlias(newAliasSortIndex,
                                      std::move(exportName))) {
         return false;
       }
