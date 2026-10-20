@@ -11,7 +11,7 @@ export default {
   argTypes: {
     state: {
       control: "select",
-      options: ["creating", "choose", "complete"],
+      options: ["choose", "complete"],
     },
     title: { control: "text" },
     viewerURL: { control: "text" },
@@ -22,7 +22,6 @@ export default {
       handles: ["aitab-open-request"],
     },
     fluent: `
-smartwindow-aitab-creating = Creating a page…
 smartwindow-aitab-open-current =
     .label = Open here
 smartwindow-aitab-open-new =
@@ -42,14 +41,6 @@ const Template = ({ state, title, viewerURL, completeStateOpen }) => html`
     ></aitab-tool-ui>
   </div>
 `;
-
-export const Creating = Template.bind({});
-Creating.args = {
-  state: "creating",
-  title: "",
-  viewerURL: "",
-  completeStateOpen: true,
-};
 
 export const Choose = Template.bind({});
 Choose.args = {

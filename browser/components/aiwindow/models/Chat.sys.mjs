@@ -27,7 +27,6 @@ import {
   GET_SKILL,
 } from "moz-src:///browser/components/aiwindow/models/Tools.sys.mjs";
 import { runSearchTheWeb } from "moz-src:///browser/components/aiwindow/models/search/SearchWorkflow.sys.mjs";
-import { UI_TYPES } from "moz-src:///browser/components/aiwindow/ui/modules/ToolUI.sys.mjs";
 
 import { expandUrlTokensInToolParams } from "moz-src:///browser/components/aiwindow/models/ChatUtils.sys.mjs";
 import { runLLMaJTelemetry } from "moz-src:///browser/components/aiwindow/models/TelemetryUtils.sys.mjs";
@@ -172,9 +171,8 @@ const FEATURE_GATED_HANDLERS = new Map([
  */
 
 /**
- * Tool entrypoint for generate_aitab. Manages the AITab status
- * card updates as tool call starts generating AITab and finishes
- * generating the AITab.
+ * Tool entrypoint for generate_aitab. Attaches the AITab options
+ * after the page has been generated and saved.
  *
  * @param {object} params
  * @param {string[]} [params.url_list] - List of URLs to use to generate the AITab
@@ -194,14 +192,6 @@ async function runGenerateAiTab(
   _mode,
   toolCallId
 ) {
-  if (toolCallId) {
-    conversation.addUIToolToCurrentMessage(
-      toolCallId,
-      { uiType: UI_TYPES.AITAB, properties: { state: "creating" } },
-      { emitComplete: false }
-    );
-  }
-
   const { success, toolResult, uiData } = await toolFns.createAITab(
     params,
     conversation,
@@ -217,10 +207,10 @@ async function runGenerateAiTab(
 
 /**
  * Slow tools that surface the action log's pending row before their handler
- * resolves (not the same as feature-gating). Only list tools whose action log
- * row is body-independent, since the pending row uses a placeholder body.
+ * resolves (not the same as feature-gating). Pending rows use a placeholder
+ * body, so tools with body-dependent labels must provide a pendingLabel.
  */
-const TOOLS_WITH_PENDING_ACTION_LOG = new Set([SEARCH_THE_WEB]);
+const TOOLS_WITH_PENDING_ACTION_LOG = new Set([SEARCH_THE_WEB, GENERATE_AITAB]);
 
 /**
  * Splits a tool result into the reply the tool is writing for the user, if any,
@@ -778,15 +768,6 @@ Object.assign(Chat, {
             content.name = toolName;
           }
           conversation.updateToolCallMessage(pendingToolMessage, content);
-        } finally {
-          if (toolName === GENERATE_AITAB && !aiTabSucceeded) {
-            const message = conversation.messages.findLast(
-              m => m.toolUIData?.toolCallId === id
-            );
-            if (message) {
-              await conversation.updateToolUI(message, {}, null);
-            }
-          }
         }
 
         // A failed search returns an error-bearing result rather than

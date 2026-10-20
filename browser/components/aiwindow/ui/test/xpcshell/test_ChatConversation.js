@@ -889,7 +889,7 @@ add_task(function test_renderState_includes_empty_message_with_tool_ui() {
   const message = conversation.addAssistantMessage("text", "");
   conversation.addUIToolToCurrentMessage(
     "aitab-call",
-    { uiType: "aitab", properties: { state: "creating" } },
+    { uiType: "aitab", properties: { state: "choose" } },
     { emitComplete: false }
   );
 
@@ -2017,7 +2017,7 @@ add_task(function test_addUIToolToCurrentMessage_can_defer_completion() {
 
   conversation.addUIToolToCurrentMessage(
     "aitab-call",
-    { uiType: "aitab", properties: { state: "creating" } },
+    { uiType: "aitab", properties: { state: "choose" } },
     { emitComplete: false }
   );
 

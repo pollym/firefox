@@ -1452,7 +1452,7 @@ export class AIChatContent extends MozLitElement {
 
   #renderAITab(msg) {
     return html`<aitab-tool-ui
-      .state=${msg.toolUIData.properties?.state ?? "creating"}
+      .state=${msg.toolUIData.properties?.state ?? "choose"}
       .title=${msg.toolUIData.properties?.title ?? ""}
       .viewerURL=${msg.toolUIData.properties?.viewerURL ?? ""}
       @aitab-open-request=${event =>
@@ -2011,10 +2011,6 @@ export class AIChatContent extends MozLitElement {
       lastItem?.type === "message" &&
       lastItem.msg?.role === "assistant" &&
       !!lastItem.msg?.body;
-    const aiTabCreating =
-      lastItem?.type === "message" &&
-      lastItem.msg?.toolUIData?.uiType === UI_TYPES.AITAB &&
-      lastItem.msg.toolUIData.properties?.state === "creating";
     return html`
       <link
         rel="stylesheet"
@@ -2024,9 +2020,7 @@ export class AIChatContent extends MozLitElement {
         <div class="chat-inner-wrapper">
           ${this.#renderMessages(renderItems)}
           ${this.#renderFollowUpSuggestions()}
-          ${this.#renderLoader(
-            actionLogInProgress || replyStreaming || aiTabCreating
-          )}
+          ${this.#renderLoader(actionLogInProgress || replyStreaming)}
           ${this.#renderError()}
         </div>
       </div>
