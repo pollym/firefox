@@ -1653,10 +1653,7 @@ newtab:
       space:
         description: >
           The space navigated to. One of stories, widgets or activity in the
-          spaces-buttons-top, spaces-buttons-bottom, spaces-floating-arrows,
-          spaces-preview-kit, spaces-preview-illustrated and
-          spaces-preview-cards variants, or a
-          thematic space id configured via Nimbus in spaces-thematic-v1.
+          V1 spaces variants, or a thematic space id configured via Nimbus.
         type: string
       previous_space:
         description: >
@@ -1667,8 +1664,9 @@ newtab:
           Which control was used: tab (the segmented control), keyboard (arrow
           keys on the segmented control), swipe (horizontal wheel, shift plus
           wheel, or a touch drag), arrow (the edge arrows in
-          spaces-floating-arrows) or preview_tab (a tab, in the
-          spaces-preview variants or a thematic config with the preview on).
+          spaces-floating-arrows), preview_tab (a tab, in the spaces-preview
+          variants or a thematic config with the preview on) or peek (the
+          neighbouring space's preview in spaces-peek).
         type: string
     send_in_pings:
       - newtab
