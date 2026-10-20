@@ -55,6 +55,13 @@ const AITAB_RECORDS = [
   },
 ];
 
+let STATE_CHOOSE, STATE_COMPLETE;
+
+add_setup(async function importAITabStates() {
+  ({ STATE_CHOOSE, STATE_COMPLETE } =
+    await import("chrome://browser/content/aiwindow/components/aitab-tool-ui.mjs"));
+});
+
 async function startAITabGeneration(win, mockEngine) {
   const browser = win.gBrowser.selectedBrowser;
   await typeInSmartbar(browser, "Create a page about Lisbon hotels");
@@ -146,7 +153,7 @@ function waitForAITabCardState(browser, state) {
 async function clickAITabAction(win, mockEngine, buttonIndex) {
   const generationRequest = await startAITabGeneration(win, mockEngine);
   generationRequest.respond(JSON.stringify(SURFACE));
-  await waitForAITabCardState(win.gBrowser.selectedBrowser, "choose");
+  await waitForAITabCardState(win.gBrowser.selectedBrowser, STATE_CHOOSE);
 
   return SpecialPowers.spawn(
     win.gBrowser.selectedBrowser,
@@ -255,7 +262,7 @@ describe("AITab ToolUI", () => {
     generationRequest.respond(JSON.stringify(SURFACE));
     const ready = await waitForAITabCardState(
       win.gBrowser.selectedBrowser,
-      "choose"
+      STATE_CHOOSE
     );
     Assert.equal(ready.title, "Lisbon hotels");
     Assert.equal(ready.buttonCount, 2);
@@ -382,7 +389,7 @@ describe("AITab ToolUI", () => {
       const generationRequest = await startAITabGeneration(win, mockEngine);
       generationRequest.respond(JSON.stringify(SURFACE));
       chatTab = win.gBrowser.selectedTab;
-      await waitForAITabCardState(chatTab.linkedBrowser, "choose");
+      await waitForAITabCardState(chatTab.linkedBrowser, STATE_CHOOSE);
       const conversation = AIWindow.getActiveConversation(win);
       const [page] = await AITabStore.getAITabPagesByConvId(conversation.id);
       viewerURL = `about:smartpage?page=${page.slug}`;
@@ -439,7 +446,7 @@ describe("AITab ToolUI", () => {
       const pageTab = await opened;
 
       await BrowserTestUtils.switchTab(win.gBrowser, chatTab);
-      await waitForAITabCardState(chatTab.linkedBrowser, "complete");
+      await waitForAITabCardState(chatTab.linkedBrowser, STATE_COMPLETE);
       BrowserTestUtils.removeTab(pageTab);
 
       const reopened = BrowserTestUtils.waitForNewTab(
@@ -467,7 +474,7 @@ describe("AITab ToolUI", () => {
       const pageTab = await opened;
 
       await BrowserTestUtils.switchTab(win.gBrowser, chatTab);
-      await waitForAITabCardState(chatTab.linkedBrowser, "complete");
+      await waitForAITabCardState(chatTab.linkedBrowser, STATE_COMPLETE);
       const selected = BrowserTestUtils.waitForEvent(
         win.gBrowser.tabContainer,
         "TabSelect",
@@ -496,7 +503,7 @@ describe("AITab ToolUI", () => {
     const generationRequest = await startAITabGeneration(win, mockEngine);
     generationRequest.respond(JSON.stringify(SURFACE));
     const chatTab = win.gBrowser.selectedTab;
-    await waitForAITabCardState(chatTab.linkedBrowser, "choose");
+    await waitForAITabCardState(chatTab.linkedBrowser, STATE_CHOOSE);
     const initialTabCount = win.gBrowser.tabs.length;
 
     await SpecialPowers.spawn(chatTab.linkedBrowser, [], async () => {
@@ -515,7 +522,8 @@ describe("AITab ToolUI", () => {
     );
     const newTab = win.gBrowser.selectedTab;
     win.gBrowser.selectedTab = chatTab;
-    await waitForAITabCardState(chatTab.linkedBrowser, "complete");
+
+    await waitForAITabCardState(chatTab.linkedBrowser, STATE_COMPLETE);
     const opened = Glean.smartWindow.aitabOpen.testGetValue();
     Assert.equal(
       opened?.length,
@@ -523,7 +531,7 @@ describe("AITab ToolUI", () => {
       "Opening the page from the card is recorded"
     );
     Assert.equal(opened[0].extra.open_target, "new");
-    Assert.equal(opened[0].extra.card_state, "choose");
+    Assert.equal(opened[0].extra.card_state, STATE_CHOOSE);
     Assert.ok(opened[0].extra.chat_id, "The open shares the chat id");
 
     const selected = BrowserTestUtils.waitForEvent(
@@ -540,7 +548,7 @@ describe("AITab ToolUI", () => {
       2,
       "A later open from the finished card is recorded"
     );
-    Assert.equal(revisited[1].extra.card_state, "complete");
+    Assert.equal(revisited[1].extra.card_state, STATE_COMPLETE);
     Assert.equal(revisited[1].extra.open_target, "new");
     BrowserTestUtils.removeTab(newTab);
   });

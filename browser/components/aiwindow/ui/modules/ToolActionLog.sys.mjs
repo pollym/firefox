@@ -11,6 +11,7 @@ import {
   GET_NAVIGATION_INFO,
   SEARCH_THE_WEB,
   GENERATE_AITAB,
+  isAITabModification,
 } from "moz-src:///browser/components/aiwindow/models/Tools.sys.mjs";
 
 export const ACTION_LOG_UI_TYPE = "action-log";
@@ -65,12 +66,25 @@ const TOOL_ACTION_LOG_CONFIG = new Map([
   [
     GENERATE_AITAB,
     {
-      label: body => ({
-        l10nId: body?.aiTab
-          ? "smartwindow-aitab-created-an-aitab"
-          : "smartwindow-aitab-creating-an-aitab-failed",
+      label: (body, args) => {
+        if (!body?.page) {
+          return {
+            l10nId: isAITabModification(args?.modify_slug)
+              ? "smartwindow-aitab-updating-an-aitab-failed"
+              : "smartwindow-aitab-creating-an-aitab-failed",
+          };
+        }
+        return {
+          l10nId: isAITabModification(args?.modify_slug)
+            ? "smartwindow-aitab-updated-an-aitab"
+            : "smartwindow-aitab-created-an-aitab",
+        };
+      },
+      pendingLabel: args => ({
+        l10nId: isAITabModification(args?.modify_slug)
+          ? "smartwindow-aitab-updating"
+          : "smartwindow-aitab-creating",
       }),
-      pendingLabel: { l10nId: "smartwindow-aitab-creating" },
     },
   ],
   [
@@ -156,22 +170,26 @@ function resolveSupportUrl(supportPage) {
  * @param {string} toolName
  * @param {object} [body] - tool result body. A `pending` body means the tool
  *   is still running, so the in-progress label is used for the row.
+ * @param {object} [args] - parsed tool call arguments
  * @returns {{ show: boolean, label: ActionLogLabel | null, pendingLabel: ActionLogLabel | null, link: ActionLogLabelLink | null }}
  */
-export function getActionLogConfigForTool(toolName, body) {
+export function getActionLogConfigForTool(toolName, body, args) {
   const cfg = TOOL_ACTION_LOG_CONFIG.get(toolName);
   if (!cfg) {
     return { show: false, label: null, pendingLabel: null, link: null };
   }
   const completedLabel =
-    typeof cfg.label === "function" ? cfg.label(body) : cfg.label;
+    typeof cfg.label === "function" ? cfg.label(body, args) : cfg.label;
   const link = cfg.link
     ? {
         l10nName: cfg.link.l10nName,
         href: resolveSupportUrl(cfg.link.supportPage),
       }
     : null;
-  let pendingLabel = cfg.pendingLabel ?? null;
+  let pendingLabel =
+    typeof cfg.pendingLabel === "function"
+      ? cfg.pendingLabel(args)
+      : (cfg.pendingLabel ?? null);
   if (pendingLabel && link) {
     pendingLabel = { ...pendingLabel, link };
   }

@@ -379,6 +379,27 @@ function logConversationStream(turn, action, data = null, extraText = "") {
   }
 }
 
+/** @typedef {{modify_slug: string | undefined}} AITabToolUIArgs */
+/** @typedef {AITabToolUIArgs | undefined} ToolUIArgs */
+
+/**
+ * Gets the necessary ToolUI args for a particular ToolUI
+ * so it can add the args to the tool message
+ *
+ * @param {string} toolName
+ * @param {object} toolParams
+ *
+ * @returns {ToolUIArgs}
+ */
+function getToolUIArgs(toolName, toolParams) {
+  switch (toolName) {
+    case GENERATE_AITAB:
+      return { modify_slug: toolParams.modify_slug };
+    default:
+      return undefined;
+  }
+}
+
 Object.assign(Chat, {
   lastUsage: null,
 
@@ -687,12 +708,14 @@ Object.assign(Chat, {
         // Emit the tool message up front with a `pending`-marked placeholder
         // body so the action log renders its pending row while the slow work
         // runs; the real result is reconciled into the same row below.
+        const toolUIArgs = getToolUIArgs(toolName, toolParams);
         let pendingToolMessage = null;
         if (TOOLS_WITH_PENDING_ACTION_LOG.has(toolName)) {
           pendingToolMessage = conversation.addToolCallMessage({
             tool_call_id: id,
             body: { pending: true },
             name: toolName,
+            args: toolUIArgs,
           });
         }
 
@@ -749,6 +772,7 @@ Object.assign(Chat, {
             tool_call_id: id,
             body: split.toolBody,
             name: toolName,
+            args: toolUIArgs,
           };
           conversation.updateToolCallMessage(pendingToolMessage, content);
         } catch (error) {
@@ -763,7 +787,7 @@ Object.assign(Chat, {
           // Only carry `name` (which drives the action-log card) when we
           // already showed a pending row, so it resolves. Otherwise a failed
           // call renders nothing, as before.
-          const content = { tool_call_id: id, body: result };
+          const content = { tool_call_id: id, body: result, args: toolUIArgs };
           if (pendingToolMessage) {
             content.name = toolName;
           }

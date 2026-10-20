@@ -517,13 +517,19 @@ aitab-page-delete-dialog-confirm =
 aitab-page-footer-brand = { -smart-window-brand-name }
 
 smartwindow-aitab-creating = Creating your { -smart-page-brand-name }
+smartwindow-aitab-updating = Updating your { -smart-page-brand-name }
+smartwindow-aitab-creating-an-aitab-failed = Tried to create { -smart-page-brand-name }, but couldn’t
+smartwindow-aitab-updating-an-aitab-failed =  Tried to update { -smart-page-brand-name }, but couldn’t
+
 # "Open here" opens aitab url in the current tab
 smartwindow-aitab-open-current =
     .label = Open here
 # "Open in new tab" opens a new browser tab with the AITab url in it
 smartwindow-aitab-open-new =
     .label = Open in new tab
-smartwindow-aitab-created-an-aitab = Created a { -smart-page-brand-name }
+
+smartwindow-aitab-created-an-aitab = Created { -smart-page-brand-name }
+smartwindow-aitab-updated-an-aitab = Updated { -smart-page-brand-name }
 smartwindow-aitab-empty-chat-message = Want to make changes to your { -smart-page-brand-name }? Ask in the chat to add or remove content.
 
 ## "Pick up where you left off" cards for resuming browsing or chat journeys.
