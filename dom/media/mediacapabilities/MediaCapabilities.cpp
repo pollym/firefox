@@ -6,14 +6,17 @@
 
 #include <utility>
 
+#include "AOMDecoder.h"
 #include "AllocationPolicy.h"
 #include "DecoderTraits.h"
+#include "H265.h"
 #include "MP4Decoder.h"
 #include "MediaCapabilitiesValidation.h"
 #include "MediaInfo.h"
 #include "MediaRecorder.h"
 #include "PDMFactorySupport.h"
 #include "VPXDecoder.h"
+#include "VideoUtils.h"
 #include "WindowRenderer.h"
 #include "mozilla/CheckedInt.h"
 #include "mozilla/ClearOnShutdown.h"
@@ -958,6 +961,83 @@ static MediaCapabilitiesDecodingInfo CreateVideoDecodingInfo(
   return info;
 }
 
+// Lowest AV1 seq_level_idx whose MaxPicSize fits aImage. Falls back to
+// "maximum parameters" when no defined level fits or the size overflows.
+static uint8_t AV1SeqLevelIdxForImage(const gfx::IntSize& aImage) {
+  // 31 imposes no level constraints, for sizes larger than any defined level.
+  constexpr uint8_t kMaxParameters = 31;
+  const CheckedInt<uint32_t> pixels =
+      CheckedInt<uint32_t>(aImage.width) * CheckedInt<uint32_t>(aImage.height);
+  if (!pixels.isValid()) {
+    return kMaxParameters;
+  }
+  struct Level {
+    uint32_t mMaxPicSize;
+    uint8_t mSeqLevelIdx;
+  };
+  // Rows are levels 2.0, 2.1, 3.0, 3.1, 4.0, 5.0, 6.0.
+  static constexpr Level kLevels[] = {
+      {147456, 0},  {278784, 1},   {665856, 4},   {1065024, 5},
+      {2359296, 8}, {8912896, 12}, {35651584, 16}};
+  for (const auto& level : kLevels) {
+    if (pixels.value() <= level.mMaxPicSize) {
+      return level.mSeqLevelIdx;
+    }
+  }
+  return kMaxParameters;
+}
+
+// Derive the decoder configuration a codec string leaves out: a common default
+// for VP8, VP9 and AV1, and for HEVC the profile, tier and level that the
+// string does carry.
+static void MaybeSynthesizeCodecConfig(VideoInfo* aInfo,
+                                       const MediaContainerType& aContainer) {
+  if (aInfo->mExtraData && !aInfo->mExtraData->IsEmpty()) {
+    return;
+  }
+  if (VPXDecoder::IsVPX(aInfo->mMimeType)) {
+    // The string carries no profile, so assume the common VP8/VP9 case.
+    VPXDecoder::VPXStreamInfo info;
+    info.mProfile = 0;
+    info.mBitDepth = 8;
+    RefPtr<MediaByteBuffer> extraData = new MediaByteBuffer();
+    VPXDecoder::GetVPCCBox(extraData, info);
+    aInfo->mExtraData = std::move(extraData);
+    LOG("Synthesized default config for profile-less {}",
+        aInfo->mMimeType.get());
+  } else if (AOMDecoder::IsAV1(aInfo->mMimeType)) {
+    // The string carries no profile, so assume the common AV1 case.
+    AOMDecoder::AV1SequenceInfo info;
+    info.mImage = aInfo->mImage;
+    info.mProfile = 0;
+    info.mBitDepth = 8;
+    AOMDecoder::OperatingPoint op;
+    op.mLevel = AV1SeqLevelIdxForImage(aInfo->mImage);
+    info.mOperatingPoints.AppendElement(op);
+    RefPtr<MediaByteBuffer> extraData = new MediaByteBuffer();
+    bool hasSeqHdr = false;
+    AOMDecoder::WriteAV1CBox(info, extraData, hasSeqHdr);
+    aInfo->mExtraData = std::move(extraData);
+    LOG("Synthesized default config for profile-less {} (seq_level_idx={})",
+        aInfo->mMimeType.get(), static_cast<unsigned>(op.mLevel));
+  } else if (MP4Decoder::IsHEVC(aInfo->mMimeType)) {
+    // The track exists only because one of the codecs parsed as HEVC, so the
+    // loop always finds it.
+    for (const auto& codec : aContainer.ExtendedType().Codecs().Range()) {
+      H265CodecDetails details;
+      if (!ExtractH265CodecDetails(codec, &details)) {
+        continue;
+      }
+      aInfo->mExtraData = H265::CreateExtraData(details, aInfo->mImage);
+      LOG("Synthesized config for {} (profile_idc={}, level_idc={})",
+          aInfo->mMimeType.get(),
+          static_cast<unsigned>(details.general_profile_idc),
+          static_cast<unsigned>(details.general_level_idc));
+      break;
+    }
+  }
+}
+
 void MediaCapabilities::CreateNonWebRTCDecodingInfo(
     const MediaDecodingConfiguration& aConfiguration, Promise* aPromise,
     Maybe<MediaContainerType> aVideoContainer,
@@ -984,6 +1064,8 @@ void MediaCapabilities::CreateNonWebRTCDecodingInfo(
       aPromise->MaybeRejectWithTypeError("Invalid VideoConfiguration");
       return;
     }
+    MaybeSynthesizeCodecConfig(videoTracks[0]->GetAsVideoInfo(),
+                               *aVideoContainer);
     tracks.AppendElements(std::move(videoTracks));
   }
   if (aConfiguration.mAudio.WasPassed()) {
