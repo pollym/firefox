@@ -5,22 +5,23 @@
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
-  AsyncShutdown: "resource://gre/modules/AsyncShutdown.sys.mjs",
-  AdsClient: "resource://newtab/lib/AdsClient.sys.mjs",
   _AdsClient: "resource://newtab/lib/AdsClient.sys.mjs",
-  TestUtils: "resource://testing-common/TestUtils.sys.mjs",
+  AdsClient: "resource://newtab/lib/AdsClient.sys.mjs",
+  AsyncShutdown: "resource://gre/modules/AsyncShutdown.sys.mjs",
+  MozAdsEnvironment:
+    "moz-src:///toolkit/components/uniffi-bindgen-gecko-js/components/generated/RustAdsClient.sys.mjs",
   sinon: "resource://testing-common/Sinon.sys.mjs",
+  TestUtils: "resource://testing-common/TestUtils.sys.mjs",
 });
 
+const PREF_ENDPOINT = "browser.newtabpage.activity-stream.unifiedAds.endpoint";
 const PREF_UNIFIED_ADS_ADSCLIENT_ENABLED = "unifiedAds.adsClient.enabled";
 const PREF_BLOCKED_LIST = "unifiedAds.blockedAds";
 
 let gSandbox;
 add_setup(() => {
   gSandbox = lazy.sinon.createSandbox();
-  registerCleanupFunction(() => {
-    gSandbox.restore();
-  });
+  registerCleanupFunction(() => gSandbox.restore());
 });
 
 add_setup(function test_setup_fog() {
@@ -162,6 +163,37 @@ add_task(async function test_getClient_opensCacheDatabase() {
     await IOUtils.exists(adsClient.cacheConfig.dbPath),
     "Building the client opened the SQLite HTTP cache in the profile"
   );
+});
+
+add_task(function test_environment_getter() {
+  registerCleanupFunction(() => Services.prefs.clearUserPref(PREF_ENDPOINT));
+
+  const adsClient = new lazy._AdsClient();
+
+  Assert.ok(
+    adsClient.environment instanceof lazy.MozAdsEnvironment.Prod,
+    "Default endpoint maps to Prod"
+  );
+
+  Services.prefs.setStringPref(PREF_ENDPOINT, "https://ads.allizom.org/");
+  Assert.ok(
+    adsClient.environment instanceof lazy.MozAdsEnvironment.Staging,
+    "Staging endpoint maps to Staging"
+  );
+
+  const customUrl = "https://example.com/";
+  Services.prefs.setStringPref(PREF_ENDPOINT, customUrl);
+  Assert.ok(
+    adsClient.environment instanceof lazy.MozAdsEnvironment.Custom,
+    "Other endpoints map to Custom"
+  );
+  Assert.equal(
+    adsClient.environment.v0,
+    customUrl,
+    "Custom carries the endpoint"
+  );
+
+  Assert.ok(adsClient.getClient(), "getClient builds with a Custom endpoint");
 });
 
 add_task(function test_buildTelemetry_recordsToGlean() {
