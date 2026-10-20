@@ -173,7 +173,6 @@
 #include "nsIDOMXULMenuListElement.h"
 #include "nsIDOMXULMultSelectCntrlEl.h"
 #include "nsIDOMXULRadioGroupElement.h"
-#include "nsIDOMXULRelatedElement.h"
 #include "nsIDOMXULSelectCntrlEl.h"
 #include "nsIDOMXULSelectCntrlItemEl.h"
 #include "nsIDocShell.h"
@@ -6355,12 +6354,6 @@ Element::AsXULMultiSelectControl() {
 
 already_AddRefed<nsIDOMXULRadioGroupElement> Element::AsXULRadioGroup() {
   nsCOMPtr<nsIDOMXULRadioGroupElement> value;
-  GetCustomInterface(getter_AddRefs(value));
-  return value.forget();
-}
-
-already_AddRefed<nsIDOMXULRelatedElement> Element::AsXULRelated() {
-  nsCOMPtr<nsIDOMXULRelatedElement> value;
   GetCustomInterface(getter_AddRefs(value));
   return value.forget();
 }

@@ -487,7 +487,7 @@
     }
 
     /**
-     * nsIDOMXULRelatedElement
+     * Get the tab associated with the given panel.
      */
     getRelatedElement(aTabPanelElm) {
       if (!aTabPanelElm) {
@@ -644,9 +644,6 @@
     }
   }
 
-  MozXULElement.implementCustomInterface(MozTabpanels, [
-    Ci.nsIDOMXULRelatedElement,
-  ]);
   customElements.define("tabpanels", MozTabpanels);
 
   MozElements.MozTab = class MozTab extends MozElements.BaseText {
@@ -1089,7 +1086,7 @@
     }
 
     /**
-     * nsIDOMXULRelatedElement
+     * Get the panel associated with the given tab.
      */
     getRelatedElement(aTabElm) {
       if (!aTabElm) {
@@ -1307,7 +1304,6 @@
 
   MozXULElement.implementCustomInterface(TabsBase, [
     Ci.nsIDOMXULSelectControlElement,
-    Ci.nsIDOMXULRelatedElement,
   ]);
 
   MozElements.TabsBase = TabsBase;
