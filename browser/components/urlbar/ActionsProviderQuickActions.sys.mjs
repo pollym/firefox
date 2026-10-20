@@ -52,12 +52,7 @@ class ProviderQuickActions extends ActionsProvider {
     return "ActionsProviderQuickActions";
   }
 
-  /**
-   * @param {UrlbarQueryContext} queryContext
-   * @param {UrlbarParentController} _controller
-   * @returns {boolean}
-   */
-  isActive(queryContext, _controller) {
+  isActive(queryContext) {
     return (
       queryContext.sapName == "urlbar" &&
       lazy.UrlbarPrefs.get(ENABLED_PREF) &&
@@ -68,12 +63,7 @@ class ProviderQuickActions extends ActionsProvider {
     );
   }
 
-  /**
-   * @param {UrlbarQueryContext} queryContext
-   * @param {UrlbarParentController} _controller
-   * @returns {Promise<ActionsResult[]>}
-   */
-  async queryActions(queryContext, _controller) {
+  async queryActions(queryContext) {
     let input = queryContext.trimmedLowerCaseSearchString;
     let results = await this.getActions({ input });
 
