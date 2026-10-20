@@ -10,6 +10,7 @@ import {
   GET_USER_MEMORIES,
   GET_NAVIGATION_INFO,
   SEARCH_THE_WEB,
+  GENERATE_AITAB,
 } from "moz-src:///browser/components/aiwindow/models/Tools.sys.mjs";
 
 export const ACTION_LOG_UI_TYPE = "action-log";
@@ -61,6 +62,17 @@ function urlListChips(items, getLabel) {
  * @type {Map<string, { show: boolean, label: ActionLogLabel, pendingLabel: ActionLogLabel }>}
  */
 const TOOL_ACTION_LOG_CONFIG = new Map([
+  [
+    GENERATE_AITAB,
+    {
+      label: body => ({
+        l10nId: body?.aiTab
+          ? "smartwindow-aitab-created-an-aitab"
+          : "smartwindow-aitab-creating-an-aitab-failed",
+      }),
+      pendingLabel: { l10nId: "smartwindow-aitab-creating" },
+    },
+  ],
   [
     GET_OPEN_TABS,
     {

@@ -108,6 +108,34 @@ async function readAITabCard(browser) {
   });
 }
 
+async function readAITabActionLog(browser) {
+  const chatBrowser = await getAichatBrowser(browser);
+  return SpecialPowers.spawn(chatBrowser, [], async () => {
+    const chatContent = content.document.querySelector("ai-chat-content");
+    const log = chatContent.shadowRoot.querySelector("ai-action-result");
+    if (!log) {
+      return null;
+    }
+    const logElement = log.wrappedJSObject || log;
+    await logElement.updateComplete;
+    return {
+      isLoading: logElement.isLoading,
+      rowLabels: logElement.rows.map(row => row.labelL10nId),
+      hasCard: !!chatContent.shadowRoot.querySelector("aitab-tool-ui"),
+      hasSpinner: !!chatContent.shadowRoot.querySelector(
+        "chat-assistant-loader"
+      ),
+    };
+  });
+}
+
+function waitForAITabActionLog(browser, label) {
+  return TestUtils.waitForCondition(async () => {
+    const log = await readAITabActionLog(browser);
+    return log?.rowLabels.includes(label) ? log : false;
+  }, `Wait for the AITab action log row ${label}`);
+}
+
 function waitForAITabCardState(browser, state) {
   return TestUtils.waitForCondition(async () => {
     const card = await readAITabCard(browser);
@@ -197,12 +225,15 @@ describe("AITab ToolUI", () => {
     await SpecialPowers.popPrefEnv();
   });
 
-  it("shows the progress state while the page is being created", async () => {
+  it("shows an action log while the page is being created", async () => {
     await startAITabGeneration(win, mockEngine);
-    const loading = await waitForAITabCardState(
+    const loading = await waitForAITabActionLog(
       win.gBrowser.selectedBrowser,
-      "creating"
+      "smartwindow-aitab-creating"
     );
+    Assert.ok(loading.isLoading, "The action log is loading");
+    Assert.ok(!loading.hasCard, "The AITab card waits for generation");
+    Assert.deepEqual(loading.rowLabels, ["smartwindow-aitab-creating"]);
     Assert.ok(!loading.hasSpinner, "The loading UI suppresses the spinner");
   });
 
@@ -228,6 +259,17 @@ describe("AITab ToolUI", () => {
     );
     Assert.equal(ready.title, "Lisbon hotels");
     Assert.equal(ready.buttonCount, 2);
+
+    const completed = await waitForAITabActionLog(
+      win.gBrowser.selectedBrowser,
+      "smartwindow-aitab-created-an-aitab"
+    );
+    Assert.ok(!completed.isLoading, "The action log has completed");
+    Assert.deepEqual(
+      completed.rowLabels,
+      ["smartwindow-aitab-created-an-aitab"],
+      "The completed result replaces the pending row"
+    );
 
     await TestUtils.waitForCondition(
       () => conversation.securityProperties.untrustedInput,
@@ -266,14 +308,14 @@ describe("AITab ToolUI", () => {
       generationRequest = await startAITabGeneration(win, mockEngine);
       browser = win.gBrowser.selectedBrowser;
       conversation = AIWindow.getActiveConversation(win);
-      await waitForAITabCardState(browser, "creating");
+      await waitForAITabActionLog(browser, "smartwindow-aitab-creating");
     });
 
     afterEach(() => {
       sandbox.restore();
     });
 
-    it("removes the creating card and retains the generation error", async () => {
+    it("updates the action log and retains the generation error", async () => {
       await checkFailure(
         "invalid JSON",
         "The page could not be created: the model did not return valid JSON. " +
@@ -282,7 +324,7 @@ describe("AITab ToolUI", () => {
       );
     });
 
-    it("removes the creating card and retains the persistence error", async () => {
+    it("updates the action log and retains the persistence error", async () => {
       // stub create to fake a disk space error
       sandbox
         .stub(AITabStore, "create")
@@ -307,11 +349,20 @@ describe("AITab ToolUI", () => {
         !conversation.messages.some(
           message => message.toolUIData?.toolCallId === "aitab-call"
         ),
-        "The failed tool's UI data is cleared"
+        "The failed tool has no AITab UI data"
+      );
+      const failed = await waitForAITabActionLog(
+        browser,
+        "smartwindow-aitab-creating-an-aitab-failed"
+      );
+      Assert.deepEqual(
+        failed.rowLabels,
+        ["smartwindow-aitab-creating-an-aitab-failed"],
+        "The failure replaces the pending row"
       );
       await TestUtils.waitForCondition(
         async () => (await readAITabCard(browser)) === null,
-        "The creating card is removed from the chat"
+        "The failed generation shows no AITab card"
       );
 
       followUp.respond({

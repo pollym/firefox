@@ -8,8 +8,7 @@ import { MozLitElement } from "chrome://global/content/lit-utils.mjs";
 import "chrome://global/content/elements/moz-button.mjs";
 
 /**
- * Renders AITab creation progress state and options for
- * user to choose where to open the AITab.
+ * Renders options for opening a generated AITab and its completed state.
  */
 export class AITabToolUI extends MozLitElement {
   static properties = {
@@ -21,7 +20,7 @@ export class AITabToolUI extends MozLitElement {
 
   constructor() {
     super();
-    this.state = "creating";
+    this.state = "choose";
     this.title = "";
     this.viewerURL = "";
     this.completeStateOpen = true;
@@ -52,14 +51,6 @@ export class AITabToolUI extends MozLitElement {
         detail: { openTarget },
       })
     );
-  }
-
-  #renderCreating() {
-    return html`<p
-      class="status"
-      role="status"
-      data-l10n-id="smartwindow-aitab-creating"
-    ></p>`;
   }
 
   #renderChoose() {
@@ -134,9 +125,6 @@ export class AITabToolUI extends MozLitElement {
 
   #renderState() {
     switch (this.state) {
-      case "creating":
-        return this.#renderCreating();
-
       case "choose":
         return this.#renderChoose();
 
