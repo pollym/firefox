@@ -43,7 +43,13 @@ export class DevToolsSettings extends MozLitElement {
   }
 
   render() {
-    return inventory.map(section => this.#renderSection(section));
+    return html`
+      <link
+        rel="stylesheet"
+        href="resource://devtools/client/settings/components/devtools-settings.css"
+      />
+      ${inventory.map(section => this.#renderSection(section))}
+    `;
   }
 }
 
