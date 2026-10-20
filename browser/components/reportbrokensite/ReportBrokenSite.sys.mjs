@@ -842,6 +842,10 @@ export var ReportBrokenSite = new (class ReportBrokenSite {
       return;
     }
 
+    for (const sendButton of state.sendButtons) {
+      sendButton.disabled = true;
+    }
+
     const multiview = target.closest("panelmultiview");
     this.#recordGleanEvent("send", {
       sent_with_blocked_trackers: state.shouldSendBlockedTrackers,
@@ -853,6 +857,10 @@ export var ReportBrokenSite = new (class ReportBrokenSite {
 
     multiview.showSubView("report-broken-site-popup-reportSentView");
     state.reset();
+
+    for (const sendButton of state.sendButtons) {
+      sendButton.disabled = false;
+    }
   }
 
   #learnMoreLinkHandler({ target }) {
