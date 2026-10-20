@@ -1365,10 +1365,16 @@ MediaCapabilities::CheckVideoDecodingInfo(
                 TrackingId trackingId(TrackingId::Source::MediaCapabilities,
                                       sTrackingIdCounter++,
                                       TrackingId::TrackAcrossProcesses::Yes);
+                const CreateDecoderParams::OptionSet options{
+                    CreateDecoderParams::Option::Default,
+                    CreateDecoderParams::Option::AssertCanInstantiate};
                 CreateDecoderParams params{
-                    *config, compositor,
+                    *config,
+                    compositor,
                     CreateDecoderParams::VideoFrameRate(frameRate),
-                    TrackInfo::kVideoTrack, Some(std::move(trackingId))};
+                    TrackInfo::kVideoTrack,
+                    Some(std::move(trackingId)),
+                    options};
                 // We want to ensure that all decoder's queries are occurring
                 // only once at a time as it can quickly exhaust the system
                 // resources otherwise.
