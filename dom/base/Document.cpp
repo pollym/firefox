@@ -22046,7 +22046,8 @@ already_AddRefed<Document> Document::ParseHTMLUnsafe(
   aError = nsContentUtils::ParseDocumentHTML(
       *compliantString, doc,
       /* aScriptingEnabledForNoscriptParsing */ false,
-      sanitizeWhileParsing ? sanitizer.get() : nullptr, /* aSafe */ false);
+      sanitizeWhileParsing ? sanitizer.get() : nullptr,
+      nsContentUtils::SanitizerMode::Unsafe);
   if (aError.Failed()) {
     return nullptr;
   }
@@ -22096,7 +22097,8 @@ already_AddRefed<Document> Document::ParseHTML(GlobalObject& aGlobal,
   // <noscript> content is parsed as markup.
   aError = nsContentUtils::ParseDocumentHTML(
       aHTML, doc, /* aScriptingEnabledForNoscriptParsing */ false,
-      sanitizeWhileParsing ? sanitizer.get() : nullptr, /* aSafe */ true);
+      sanitizeWhileParsing ? sanitizer.get() : nullptr,
+      nsContentUtils::SanitizerMode::Safe);
   if (aError.Failed()) {
     return nullptr;
   }
