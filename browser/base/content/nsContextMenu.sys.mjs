@@ -2887,13 +2887,13 @@ export class nsContextMenu {
 
     if (!menuItemPrivate.hidden) {
       let otherEngine = engineName != privateEngineName;
-      let accessKey = "contextMenuPrivateSearch.accesskey";
+      let accessKey = "contextMenuPrivateSearch2.accesskey";
       if (otherEngine) {
         menuItemPrivate.label = gNavigatorBundle.getFormattedString(
           "contextMenuPrivateSearchOtherEngine",
           [privateEngineName]
         );
-        accessKey = "contextMenuPrivateSearchOtherEngine.accesskey";
+        accessKey = "contextMenuPrivateSearchOtherEngine2.accesskey";
       } else {
         menuItemPrivate.label = gNavigatorBundle.getString(
           "contextMenuPrivateSearch"
