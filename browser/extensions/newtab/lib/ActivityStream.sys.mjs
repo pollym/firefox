@@ -799,6 +799,14 @@ export const PREFS_CONFIG = new Map([
     },
   ],
   [
+    "unifiedAds.tiles.ohttpImages.enabled",
+    {
+      title:
+        "Use OHTTP when requesting sponsored top sites tile images from MARS",
+      value: false,
+    },
+  ],
+  [
     "unifiedAds.spocs.enabled",
     {
       title:
