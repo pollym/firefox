@@ -90,12 +90,8 @@ ImageListener::OnStartRequest(nsIRequest* request) {
 
   if (!imgDoc->mObservingImageLoader) {
     NS_ENSURE_TRUE(imgDoc->mImageContent, NS_ERROR_UNEXPECTED);
-    imgDoc->mObservingImageLoader = true;
     imgDoc->mImageContent->AddNativeObserver(imgDoc);
-    // Image status that may have gotten replayed, in AddNativeObserver may run
-    // script and destroy the document.
-    NS_ENSURE_TRUE(mDocument, NS_ERROR_FAILURE);
-    NS_ENSURE_TRUE(imgDoc->mImageContent, NS_ERROR_UNEXPECTED);
+    imgDoc->mObservingImageLoader = true;
     imgDoc->mImageContent->LoadImageWithChannel(channel,
                                                 getter_AddRefs(mNextStream));
   }
