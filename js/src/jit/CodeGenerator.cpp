@@ -9423,7 +9423,8 @@ static bool ShouldInitFixedSlots(MIRGenerator* gen, LNewPlainObject* lir,
   }
 
   for (; iter != block->end(); iter++) {
-    if (iter->isConstant() || iter->isPostWriteBarrier()) {
+    if (iter->isConstant() || iter->isPostWriteBarrier() || iter->isBox() ||
+        iter->isAssertCanElidePostWriteBarrier()) {
       // These instructions won't trigger a GC or read object slots.
       continue;
     }
