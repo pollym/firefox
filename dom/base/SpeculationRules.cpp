@@ -108,6 +108,7 @@ SpeculationRules::~SpeculationRules() { CancelHoverTimer(); }
 // https://html.spec.whatwg.org/#register-speculation-rules
 void SpeculationRules::RegisterFromHeader(
     UniquePtr<SpeculationRuleSet> aRuleSet) {
+  mDocument->SetUseCounter(eUseCounter_custom_SpeculationRulesHeader);
   aRuleSet->SetUseCounters(*mDocument);
   mRuleSetsFromHeader.AppendElement(std::move(aRuleSet));
   ConsiderLoads();
