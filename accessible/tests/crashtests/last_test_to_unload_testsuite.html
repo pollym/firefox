@@ -1,12 +1,9 @@
-<?xml version="1.0"?>
-<?xml-stylesheet href="chrome://global/skin" type="text/css"?>
+<!DOCTYPE html>
+<html class="reftest-wait">
+<head>
+<title>bug 471493 'crash [@ nsPropertyTable::GetPropertyInternal]'</title>
 
-<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        title="bug 471493 'crash [@ nsPropertyTable::GetPropertyInternal]'"
-        onload="shutdown();" class="reftest-wait">
-
-  <script type="application/javascript">
-  <![CDATA[
+  <script>
     function shutdown() {
       !SpecialPowers.Services.appinfo.accessibilityEnabled &&
         dump("### Error : Accessibility is expected to be enabled.\n");
@@ -23,14 +20,15 @@
 
       if (SpecialPowers.Services.appinfo.accessibilityEnabled) {
         let observe = (subject, topic, data) => {
-          SpecialPowers.Services.obs.removeObserver(observe, "a11y-init-or-shutdown");
+          SpecialPowers.removeObserver(observe, "a11y-init-or-shutdown");
           data === "0" && document.documentElement.removeAttribute("class");
         };
-        SpecialPowers.Services.obs.addObserver(observe, "a11y-init-or-shutdown");
+        SpecialPowers.addObserver(observe, "a11y-init-or-shutdown");
       } else {
         document.documentElement.removeAttribute("class");
       }
     }
-  ]]>
   </script>
-</window>
+</head>
+<body onload="shutdown();"></body>
+</html>
