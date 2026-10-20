@@ -178,7 +178,7 @@ bool ScriptElement::MaybeProcessScript(nsCOMPtr<nsIParser> aParser) {
                "You forgot to add self as observer");
 
   if (mAlreadyStarted || !mDoneAddingChildren || !cont->GetComposedDoc() ||
-      mMalformed) {
+      mMalformed || cont->IsInSVGUseShadowTree()) {
     return false;
   }
 
