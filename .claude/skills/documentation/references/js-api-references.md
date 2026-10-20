@@ -33,11 +33,15 @@ and they do not agree:
     be kept accurate.
 -   **A destructured parameter's documented name is printed in front of every
     property under it**, so the name a comment invents for an options bag is
-    part of the rendered API rather than a local choice.
+    part of the rendered API rather than a local choice. Call it `options`,
+    whether the parameter is destructured or not, unless the function takes
+    two bags or passes one through to another call; there, name it for the
+    call it belongs to, such as `loadOptions`.
 -   **`@throws` renders** as a `throws` field carrying its type. On a class,
     though, `js:autoclass` takes parameters, return values and exceptions from
     the constructor only, so those tags render nowhere from the class's own
-    comment.
+    comment. A method that checks its own contract at runtime documents the
+    check in `@throws` rather than in a parameter's description.
 
 ## Verify by reading the rendered HTML
 
