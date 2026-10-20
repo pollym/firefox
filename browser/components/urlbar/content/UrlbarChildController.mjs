@@ -24,7 +24,6 @@ const lazy = XPCOMUtils?.declareLazy({
  * @import {TelemetryEvent} from "moz-src:///browser/components/urlbar/UrlbarParentController.sys.mjs"
  * @import {UrlbarView} from "chrome://browser/content/urlbar/UrlbarView.mjs"
  * @import {SmartbarInput} from "moz-src:///browser/components/urlbar/content/SmartbarInput.mjs"
- * @import {UrlbarParent} from "moz-src:///browser/components/urlbar/actors/UrlbarParent.sys.mjs"
  */
 
 /**
@@ -116,11 +115,8 @@ export class UrlbarChildController {
       : new lazy.UrlbarParentController({
           sapName: options.input.sapName,
           isPrivate: options.input.isPrivate,
-          actor: /** @type {UrlbarParent} */ (
-            options.input.browserWindow.windowGlobalChild.parentActor.getActor(
-              "Urlbar"
-            )
-          ),
+          actor:
+            options.input.browserWindow.windowGlobalChild.getActor("Urlbar"),
         });
     this.#parentController.setChild(this);
 

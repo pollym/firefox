@@ -1686,11 +1686,9 @@ export class UrlbarInputBaseTestUtils {
     // controller (the child owns construction; the actor only resolves the
     // chrome window). It is exposed as `controller.parentController`.
     parentOptions.input.browserWindow.windowGlobalChild = {
-      parentActor: {
-        getActor: () => ({
-          browsingContext: { topChromeWindow: browserWindow },
-        }),
-      },
+      getActor: () => ({
+        browsingContext: { topChromeWindow: browserWindow },
+      }),
     };
     // A provided `manager` stands in for the per-sap `ProvidersManager` the
     // child-built parent controller resolves at construction. Swap it in for the
