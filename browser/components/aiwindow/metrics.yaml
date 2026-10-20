@@ -2515,8 +2515,13 @@ smart_window:
         type: string
         description: >
           One of the monitor run error codes: network_error, timeout,
-          rate_limit, auth_error, content_extraction_error, canceled,
-          interrupted, model_error, prompt_load_error or unknown_error.
+          budget_exceeded, rate_limit, request_too_large, max_users_reached,
+          upstream_rate_limit, fastly_rate_limit, request_blocked,
+          invalid_model, invalid_request, global_budget_exceeded,
+          guest_budget_exceeded, max_guests_reached,
+          auth_error, content_extraction_error,
+          canceled, interrupted, model_error, prompt_load_error or
+          unknown_error.
           Only present when success is false. Never a free-form message.
       outcome:
         type: boolean

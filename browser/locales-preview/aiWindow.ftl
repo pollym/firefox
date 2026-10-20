@@ -308,7 +308,23 @@ ai-tasks-alert-history-error-network = { -smart-window-brand-name } couldn’t c
 
 ai-tasks-alert-history-error-timeout = The page took too long to respond. This task will try again at its next scheduled time.
 
-ai-tasks-alert-history-error-rate-limit = { -smart-window-brand-name } has reached its check limit for today. This task will try again at its next scheduled time.
+ai-tasks-alert-history-error-budget = { -smart-window-brand-name } has reached its daily check limit. This task will try again at its next scheduled time.
+
+ai-tasks-alert-history-error-rate-limit = { -smart-window-brand-name } has reached its request limit for now. This task will try again at its next scheduled time.
+
+ai-tasks-alert-history-error-too-large = There was too much page content to compare in one check. This task will try again at its next scheduled time.
+
+ai-tasks-alert-history-error-capacity = { -smart-window-brand-name } is at capacity. This task will try again at its next scheduled time.
+
+ai-tasks-alert-history-error-upstream-rate-limit = { -smart-window-brand-name } is temporarily handling too many requests. This task will try again at its next scheduled time.
+
+ai-tasks-alert-history-error-connection-blocked = { -smart-window-brand-name } temporarily blocked requests from your connection. This task will try again at its next scheduled time.
+
+ai-tasks-alert-history-error-request-blocked = { -smart-window-brand-name } blocked this request for security reasons. This task will try again at its next scheduled time.
+
+ai-tasks-alert-history-error-request = { -smart-window-brand-name } couldn’t process this request. This task will try again at its next scheduled time.
+
+ai-tasks-alert-history-error-service-budget = { -smart-window-brand-name } has reached its usage limit. This task will try again at its next scheduled time.
 
 ai-tasks-alert-history-error-auth = This page asked us to sign in, so there was nothing to compare. Open the page, sign in, and the next check should work.
 
