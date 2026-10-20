@@ -169,13 +169,17 @@ export class _AdsClient {
    *
    * @param {object} prefValues The New Tab store's Prefs.values.
    * @param {string | Array<string>} additionalBlocks Additional value(s) to add to blocks.
+   * @param {object} relevance Relevance scores keyed by
+   *  target. Only sent when the request goes over OHTTP.
    * @returns {MozAdsRequestOptions}
    */
-  requestOptions(prefValues, additionalBlocks = []) {
+  requestOptions(prefValues, additionalBlocks = [], relevance = {}) {
+    const ohttp = this.#configureOhttp();
     return new lazy.MozAdsRequestOptions({
       blocks: this.getBlocks(prefValues, additionalBlocks),
       flags: new Map(Object.entries(prefValues?.adsBackendConfig || {})),
-      ohttp: this.#configureOhttp(),
+      ohttp,
+      relevance: new Map(ohttp ? Object.entries(relevance) : []),
     });
   }
 
