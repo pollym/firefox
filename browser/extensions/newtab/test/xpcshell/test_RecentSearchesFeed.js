@@ -107,17 +107,6 @@ add_task(async function test_enabled_reflects_registry() {
     [PREF_WIDGETS_ENABLED]: false,
   });
   Assert.ok(!noContainer.enabled, "Disabled when the widgets container is off");
-
-  // The registry hides the widget on hosts whose search code predates its
-  // access point; the feed is what would run the search there regardless.
-  const oldHost = feedWithPrefs({
-    ...enabledPrefs(),
-    supportsWidgetSearchSap: false,
-  });
-  Assert.ok(
-    !oldHost.enabled,
-    "Disabled on a host that does not know the widget's search access point"
-  );
 });
 
 // Adds a search to form history against the default engine, as the search

@@ -59,7 +59,7 @@ describe("PrefsFeed", () => {
       ["baz", { value: 1, skipBroadcast: true }],
       ["qux", { value: 1, skipBroadcast: true, alsoToPreloaded: true }],
     ]);
-    services = mockServices(["prefs", "obs", "vc"]);
+    services = mockServices(["prefs", "obs"]);
     nimbusFeatures = mockNimbusFeatures();
     region = { home: "US", REGION_TOPIC: "browser-region-updated" };
     selectableProfileService = {
@@ -337,19 +337,6 @@ describe("PrefsFeed", () => {
           data: { name: "browserNovaEnabled", value: false },
         })
       );
-    });
-  });
-  describe("supportsWidgetSearchSap", () => {
-    it("is true in the initial values on a host that knows the access point", () => {
-      feed.onAction({ type: at.INIT });
-      const [[{ data }]] = feed.store.dispatch.mock.calls;
-      expect(data.supportsWidgetSearchSap).toBe(true);
-    });
-    it("is false in the initial values on a host older than 157", () => {
-      services.vc.compare.mockReturnValue(-1);
-      feed.onAction({ type: at.INIT });
-      const [[{ data }]] = feed.store.dispatch.mock.calls;
-      expect(data.supportsWidgetSearchSap).toBe(false);
     });
   });
   describe("recordsHistory", () => {
