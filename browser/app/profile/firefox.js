@@ -2469,6 +2469,12 @@ pref("browser.smartwindow.smartformfill.disallowedRegions", "FR");
 // something other than a form the user fills in.
 pref("browser.smartwindow.smartformfill.minFormFields", 4);
 
+#ifdef NIGHTLY_BUILD
+pref("browser.smartwindow.aitab.menus", true);
+#else
+pref("browser.smartwindow.aitab.menus", false);
+#endif
+
 // Smart Window Agent
 pref("browser.smartwindow.agent.enabled", true);
 pref("browser.smartwindow.agent.supportedRegions", "US,CA");
