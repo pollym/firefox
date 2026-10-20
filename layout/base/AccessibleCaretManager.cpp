@@ -119,8 +119,6 @@ nsresult AccessibleCaretManager::OnSelectionChanged(Document* aDoc,
     return NS_OK;
   }
 
-  nsAutoScriptBlocker scriptBlocker;
-
   // Move the cursor by JavaScript or unknown internal call.
   if (aReason == nsISelectionListener::NO_REASON ||
       aReason == nsISelectionListener::JS_REASON) {
@@ -826,16 +824,12 @@ void AccessibleCaretManager::OnReflow() {
 
 void AccessibleCaretManager::OnBlur() {
   AC_LOG("%s: HideCaretsAndDispatchCaretStateChangedEvent()", __FUNCTION__);
-
-  nsAutoScriptBlocker scriptBlocker;
   HideCaretsAndDispatchCaretStateChangedEvent();
 }
 
 void AccessibleCaretManager::OnKeyboardEvent() {
   if (GetCaretMode() == CaretMode::Cursor) {
     AC_LOG("%s: HideCaretsAndDispatchCaretStateChangedEvent()", __FUNCTION__);
-
-    nsAutoScriptBlocker scriptBlocker;
     HideCaretsAndDispatchCaretStateChangedEvent();
   }
 }
