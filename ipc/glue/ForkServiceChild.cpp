@@ -262,8 +262,8 @@ already_AddRefed<ForkServerLauncher> ForkServerLauncher::Create() {
 }
 
 NS_IMETHODIMP
-ForkServerLauncher::Observe(nsISupports* aSubject, const char* aTopic,
-                            const char16_t* aData) {
+ForkServerLauncher::Observe(nsISupports* /*aSubject*/, const char* aTopic,
+                            const char16_t* /*aData*/) {
   if (strcmp(aTopic, NS_XPCOM_STARTUP_CATEGORY) == 0) {
     nsCOMPtr<nsIObserverService> obsSvc =
         mozilla::services::GetObserverService();

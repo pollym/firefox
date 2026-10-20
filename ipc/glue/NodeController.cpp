@@ -583,7 +583,7 @@ void NodeController::OnEventMessage(const NodeName& aFromNode,
   (void)mNode->AcceptEvent(fromNode, std::move(event));
 }
 
-void NodeController::OnBroadcast(const NodeName& aFromNode,
+void NodeController::OnBroadcast(const NodeName& /*aFromNode*/,
                                  UniquePtr<IPC::Message> aMessage) {
   MOZ_DIAGNOSTIC_ASSERT(aMessage->type() == BROADCAST_MESSAGE_TYPE);
 

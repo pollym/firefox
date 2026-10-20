@@ -151,7 +151,7 @@ class DataPipeLink : public NodeController::PortObserver {
     NotifyOnUnlock(aLock);
   }
 
-  nsCString Describe(DataPipeAutoLock& aLock) const MOZ_REQUIRES(*mMutex) {
+  nsCString Describe(DataPipeAutoLock& /*aLock*/) const MOZ_REQUIRES(*mMutex) {
     return nsPrintfCString(
         "[%s(%p) c=%u e=%s o=%u a=%u, cb=%s]",
         mReceiverSide ? "Receiver" : "Sender", this, mCapacity,
@@ -581,7 +581,7 @@ NS_IMETHODIMP DataPipeSender::CloseWithStatus(nsresult reason) {
 
 NS_IMETHODIMP DataPipeSender::AsyncWait(nsIOutputStreamCallback* aCallback,
                                         uint32_t aFlags,
-                                        uint32_t aRequestedCount,
+                                        uint32_t /*aRequestedCount*/,
                                         nsIEventTarget* aTarget) {
   AsyncWaitInternal(
       aCallback ? NS_NewCancelableRunnableFunction(
@@ -657,7 +657,7 @@ NS_IMETHODIMP DataPipeReceiver::CloseWithStatus(nsresult aStatus) {
 
 NS_IMETHODIMP DataPipeReceiver::AsyncWait(nsIInputStreamCallback* aCallback,
                                           uint32_t aFlags,
-                                          uint32_t aRequestedCount,
+                                          uint32_t /*aRequestedCount*/,
                                           nsIEventTarget* aTarget) {
   AsyncWaitInternal(
       aCallback ? NS_NewCancelableRunnableFunction(
@@ -675,9 +675,9 @@ NS_IMETHODIMP DataPipeReceiver::AsyncWait(nsIInputStreamCallback* aCallback,
 
 // nsIIPCSerializableInputStream
 
-void DataPipeReceiver::SerializedComplexity(uint32_t aMaxSize,
-                                            uint32_t* aSizeUsed,
-                                            uint32_t* aPipes,
+void DataPipeReceiver::SerializedComplexity(uint32_t /*aMaxSize*/,
+                                            uint32_t* /*aSizeUsed*/,
+                                            uint32_t* /*aPipes*/,
                                             uint32_t* aTransferables) {
   // We report DataPipeReceiver as taking one transferrable to serialize, rather
   // than one pipe, as we aren't starting a new pipe for this purpose, and are
@@ -685,13 +685,13 @@ void DataPipeReceiver::SerializedComplexity(uint32_t aMaxSize,
   *aTransferables = 1;
 }
 
-void DataPipeReceiver::Serialize(InputStreamParams& aParams, uint32_t aMaxSize,
-                                 uint32_t* aSizeUsed) {
+void DataPipeReceiver::Serialize(InputStreamParams& aParams,
+                                 uint32_t /*aMaxSize*/, uint32_t* aSizeUsed) {
   *aSizeUsed = 0;
   aParams = DataPipeReceiverStreamParams(WrapNotNull(this));
 }
 
-bool DataPipeReceiver::Deserialize(const InputStreamParams& aParams) {
+bool DataPipeReceiver::Deserialize(const InputStreamParams& /*aParams*/) {
   MOZ_CRASH("Handled directly in `DeserializeInputStream`");
 }
 
