@@ -17,7 +17,6 @@
 #include "nsStringBundle.h"
 
 using JS::loader::ModuleLoadRequest;
-using JS::loader::ModuleMapKey;
 using JS::loader::ResolveError;
 
 namespace mozilla::dom::loader {
@@ -94,7 +93,7 @@ bool WorkletModuleLoader::CanStartLoad(ModuleLoadRequest* aRequest,
 }
 
 nsresult WorkletModuleLoader::StartFetch(ModuleLoadRequest* aRequest) {
-  InsertRequest(aRequest);
+  InsertRequest(aRequest->URI(), aRequest);
 
   RefPtr<StartFetchRunnable> runnable =
       new StartFetchRunnable(aRequest->GetWorkletLoadContext()->GetHandlerRef(),
@@ -403,22 +402,18 @@ nsresult WorkletModuleLoader::GetResolveFailureMessage(
   return NS_OK;
 }
 
-void WorkletModuleLoader::InsertRequest(ModuleLoadRequest* aRequest) {
-  ModuleMapKey key(aRequest->URI(), aRequest->mModuleType);
-  MOZ_ASSERT(!mFetchingRequests.Contains(key));
-  mFetchingRequests.InsertOrUpdate(key, aRequest);
+void WorkletModuleLoader::InsertRequest(nsIURI* aURI,
+                                        ModuleLoadRequest* aRequest) {
+  mFetchingRequests.InsertOrUpdate(aURI, aRequest);
 }
 
-void WorkletModuleLoader::RemoveRequest(nsIURI* aURI,
-                                        JS::ModuleType aModuleType) {
-  MOZ_ALWAYS_TRUE(mFetchingRequests.Remove(ModuleMapKey(aURI, aModuleType)));
+void WorkletModuleLoader::RemoveRequest(nsIURI* aURI) {
+  MOZ_ASSERT(mFetchingRequests.Remove(aURI));
 }
 
-ModuleLoadRequest* WorkletModuleLoader::GetRequest(
-    nsIURI* aURI, JS::ModuleType aModuleType) const {
+ModuleLoadRequest* WorkletModuleLoader::GetRequest(nsIURI* aURI) const {
   RefPtr<ModuleLoadRequest> req;
-  MOZ_ALWAYS_TRUE(mFetchingRequests.Get(ModuleMapKey(aURI, aModuleType),
-                                        getter_AddRefs(req)));
+  MOZ_ALWAYS_TRUE(mFetchingRequests.Get(aURI, getter_AddRefs(req)));
   return req;
 }
 
