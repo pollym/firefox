@@ -2490,6 +2490,17 @@ export class TopSitesFeed {
     index = this._adjustPinIndexForSponsoredLinks(site, index);
     // If valid index provided, pin at that position
     if (index >= 0) {
+      const currentSite = this._linksWithDefaults?.[requestedIndex];
+      if (
+        this._groupedPinsEnabled &&
+        currentSite?.isPinned &&
+        currentSite.url !== site.url
+      ) {
+        // Bug 2073040: an edit changed a pin's URL, so swap it in place.
+        lazy.NewTabUtils.pinnedLinks.replace(currentSite.url, {
+          url: site.url,
+        });
+      }
       const prefs = this.store.getState().Prefs.values;
       // Classic add button on a full row: replace the last visible frecency tile,
       // matching how a grouped pin pushes the trailing frecency tile off the grid.
