@@ -75,6 +75,10 @@ SMRegExpMacroAssembler::SMRegExpMacroAssembler(JSContext* cx,
     // Not enough registers on x86.
     temp2_ = regs.takeAny();
   }
+  if (!regs.empty()) {
+    // Not enough registers on x86.
+    backtrack_stack_limit_ = regs.takeAny();
+  }
   savedRegisters_ = js::jit::SavedNonVolatileRegisters(regs);
 
   masm_.jump(&entry_label_);  // We'll generate the entry code later
@@ -1074,10 +1078,15 @@ void SMRegExpMacroAssembler::JumpOrBacktrack(Label* to) {
 // If the test fails, call an OOL handler to try growing the stack.
 void SMRegExpMacroAssembler::CheckBacktrackStackLimit() {
   js::jit::Label no_stack_overflow;
-  masm_.branchPtr(
-      Assembler::Below,
-      AbsoluteAddress(ExternalReference::RegexpStackLimit(isolate())),
-      backtrack_stack_pointer_, &no_stack_overflow);
+  if (backtrack_stack_limit_ != js::jit::InvalidReg) {
+    masm_.branchPtr(Assembler::Below, backtrack_stack_limit_,
+                    backtrack_stack_pointer_, &no_stack_overflow);
+  } else {
+    masm_.branchPtr(
+        Assembler::Below,
+        AbsoluteAddress(ExternalReference::RegexpStackLimit(isolate())),
+        backtrack_stack_pointer_, &no_stack_overflow);
+  }
 
   masm_.call(&stack_overflow_label_);
 
@@ -1321,10 +1330,8 @@ void SMRegExpMacroAssembler::initFrameAndRegs() {
   masm_.storePtr(temp1_, backtrackStackBase());
   // Load the current top of the stack. This will usually be the same as the
   // base, but may be different if we are executing one regexp while another is
-  // interrupted.
-  masm_.loadPtr(
-      AbsoluteAddress(ExternalReference::RegexpStackPointer(isolate())),
-      backtrack_stack_pointer_);
+  // interrupted. Also load the stack limit into a register, if we have enough.
+  LoadBacktrackStackRegsFromMemory();
   // Compute the difference between the two, and store it in the stack frame.
   // This is usually 0.
   masm_.subPtr(backtrack_stack_pointer_, temp1_);
@@ -1583,9 +1590,18 @@ void SMRegExpMacroAssembler::LoadBacktrackStackFromMemory(
   masm_.loadPtr(AbsoluteAddress(ExternalReference::TopOfRegexpStack(isolate())),
                 backtrack_stack_pointer_);
   masm_.storePtr(backtrack_stack_pointer_, backtrackStackBaseAddr);
+  LoadBacktrackStackRegsFromMemory();
+}
+
+void SMRegExpMacroAssembler::LoadBacktrackStackRegsFromMemory() {
   masm_.loadPtr(
       AbsoluteAddress(ExternalReference::RegexpStackPointer(isolate())),
       backtrack_stack_pointer_);
+  if (backtrack_stack_limit_ != js::jit::InvalidReg) {
+    masm_.loadPtr(
+        AbsoluteAddress(ExternalReference::RegexpStackLimit(isolate())),
+        backtrack_stack_limit_);
+  }
 }
 
 // This is only used by tracing code.
