@@ -19914,9 +19914,11 @@
 # circumstances. See RemoveForbiddenNodes in SVGUseElement.cpp for the spec
 # text.
 #
-# - 0: Don't restrict ever.
-# - 1: Restrict only cross-document.
-# - 2/other: restrict always.
+# - 0: Don't restrict anything.
+# - 1: Restrict only to SVG graphics elements except foreignObject when
+#      cross-document, and remove foreignObject and other foreign elements if
+#      same-document.
+# - 2/other: restrict only to SVG graphics elements except foreignObject.
 #
 # We allow the behavior to be configurable via this pref. Our chosen default
 # value forbids non-graphical content in <svg:use> clones of cross-document
