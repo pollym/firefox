@@ -349,6 +349,9 @@ class DrawTargetRecording final : public DrawTarget {
   RefPtr<DrawTarget> CreateClippedDrawTarget(const Rect& aBounds,
                                              SurfaceFormat aFormat) override;
 
+  RefPtr<DrawTarget> CreateClippedDrawTargetForRect(
+      const IntRect& aRect, SurfaceFormat aFormat) override;
+
   already_AddRefed<DrawTarget> CreateSimilarDrawTargetForFilter(
       const IntSize& aSize, SurfaceFormat aFormat, FilterNode* aFilter,
       FilterNode* aSource, const Rect& aSourceRect,
@@ -442,6 +445,8 @@ class DrawTargetRecording final : public DrawTarget {
                       SurfaceFormat aFormat);
 
   void RecordTransform(const Matrix& aTransform) const;
+
+  Rect DeviceToUserLayerBounds(const IntRect& aBounds) const;
 
   void FlushTransform() const {
     if (mTransformDirty) {
