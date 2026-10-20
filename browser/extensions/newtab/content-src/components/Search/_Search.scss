@@ -283,6 +283,9 @@ $glyph-forward: url('chrome://browser/skin/forward.svg');
 // search sticks.
 .nova-outer-wrapper.search-has-own-row {
   --search-card-overhang: #{$search-card-overhang};
+  // How far the card reaches above the input, past the search engine button's
+  // row and the gaps around it.
+  --search-card-overhang-block-start: calc(var(--space-small) + var(--size-item-xlarge) + var(--space-medium));
 
   moz-urlbar {
     --urlbar-card-display: none;
@@ -294,7 +297,7 @@ $glyph-forward: url('chrome://browser/skin/forward.svg');
     content: '';
     position: absolute;
     position-anchor: --newtab-search-anchor;
-    inset-block-start: calc(anchor(start) - (var(--space-small) + var(--size-item-xlarge) + var(--space-medium)));
+    inset-block-start: calc(anchor(start) - var(--search-card-overhang-block-start));
     inset-block-end: calc(anchor(end) - var(--space-xlarge));
     inset-inline-start: calc(anchor(start) - var(--search-card-overhang));
     inset-inline-end: calc(anchor(end) - var(--search-card-overhang));
