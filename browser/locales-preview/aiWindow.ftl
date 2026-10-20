@@ -516,7 +516,7 @@ aitab-page-delete-dialog-confirm =
 # Credit at the bottom of a generated page.
 aitab-page-footer-brand = { -smart-window-brand-name }
 
-smartwindow-aitab-creating = Creating a page…
+smartwindow-aitab-creating = Creating your { -smart-page-brand-name }
 # "Open here" opens aitab url in the current tab
 smartwindow-aitab-open-current =
     .label = Open here
