@@ -11,7 +11,6 @@
 
 #include "mozilla/Assertions.h"
 #include "mozilla/Attributes.h"
-#include "mozilla/MathAlgorithms.h"
 #include "mozilla/Maybe.h"
 #include "mozilla/SegmentedVector.h"
 #include "mozilla/Sprintf.h"
@@ -392,14 +391,6 @@ template <typename T>
 inline constexpr unsigned CountLeadingZeros(T value) {
   static_assert(std::is_unsigned_v<T>);
   return std::countl_zero(value);
-}
-
-inline constexpr size_t RoundUpToPowerOfTwo32(size_t value) {
-  return mozilla::RoundUpPow2(value);
-}
-
-inline constexpr size_t RoundUpToPowerOfTwo(size_t value) {
-  return mozilla::RoundUpPow2(value);
 }
 
 template <typename T>
@@ -1406,6 +1397,9 @@ inline bool IsSticky(regexp::Flags flags) { return flags.sticky(); }
 inline bool IsUnicodeSets(regexp::Flags flags) { return flags.unicodeSets(); }
 inline bool IsEitherUnicode(regexp::Flags flags) {
   return flags.unicode() || flags.unicodeSets();
+}
+inline bool ShouldOptionallyStepBackToLeadSurrogate(regexp::Flags flags) {
+  return IsEitherUnicode(flags) && (IsGlobal(flags) || IsSticky(flags));
 }
 
 inline std::optional<regexp::Flag> TryFlagFromChar(char c) {
