@@ -4,6 +4,7 @@
 
 #include "MediaCapabilities.h"
 
+#include <type_traits>
 #include <utility>
 
 #include "AOMDecoder.h"
@@ -273,6 +274,63 @@ static InfoType UnsupportedInfo() {
   info.mSmooth = false;
   info.mPowerEfficient = false;
   return info;
+}
+
+// Only for WithAllocPolicy. The process-wide SingleAllocPolicy that strict
+// video decoder probes are serialized through, and the queue that owns it. A
+// function-local static in WithAllocPolicy would be one per template
+// instantiation, so it lives here.
+struct ProbeAllocPolicy {
+  const RefPtr<TaskQueue> mQueue;  // mPolicy->Cancel() must run here.
+  const RefPtr<SingleAllocPolicy> mPolicy;
+};
+
+// Creates the policy on first use and clears it at XPCOMShutdownThreads.
+static ProbeAllocPolicy* GetProbeAllocPolicy() {
+  static UniquePtr<ProbeAllocPolicy> sPolicy = []() {
+    SchedulerGroup::Dispatch(
+        NS_NewRunnableFunction("GetProbeAllocPolicy", []() {
+          ClearOnShutdown(&sPolicy, ShutdownPhase::XPCOMShutdownThreads);
+        }));
+    RefPtr<TaskQueue> queue =
+        TaskQueue::Create(GetMediaThreadPool(MediaThreadType::PLATFORM_DECODER),
+                          "MediaCapabilities::ProbeAllocPolicy");
+    return MakeUnique<ProbeAllocPolicy>(
+        queue, MakeRefPtr<SingleAllocPolicy>(TrackInfo::TrackType::kVideoTrack,
+                                             queue));
+  }();
+  return sPolicy.get();
+}
+
+// Runs aFunction(AllocPolicy*) with the shared policy while holding a
+// ShutdownBlockingTicket, so shutdown does not reach XPCOMShutdownThreads,
+// where GlobalAllocPolicy is cleared, until the returned promise has settled.
+// Resolves an empty support set instead if shutdown has begun, and cancels the
+// allocations still queued when shutdown starts.
+template <typename Function,
+          typename PromiseType = typename std::invoke_result_t<
+              Function, AllocPolicy*>::element_type>
+static RefPtr<PromiseType> WithAllocPolicy(const nsAString& aName,
+                                           Function&& aFunction) {
+  auto ticket = media::ShutdownBlockingTicket::Create(
+      aName, NS_LITERAL_STRING_FROM_CSTRING(__FILE__), __LINE__);
+  if (!ticket) {
+    LOG("Shutting down, not probing codec support for {}",
+        NS_ConvertUTF16toUTF8(aName).get());
+    typename PromiseType::ResolveValueType unsupported;
+    return PromiseType::CreateAndResolve(unsupported, __func__);
+  }
+  ProbeAllocPolicy* policy = GetProbeAllocPolicy();
+  ticket->ShutdownPromise()->Then(
+      policy->mQueue, __func__,
+      [policy = policy->mPolicy]() { policy->Cancel(); }, []() {});
+  return aFunction(policy->mPolicy.get())
+      ->Then(GetCurrentSerialEventTarget(), __func__,
+             [ticket = std::move(ticket)](
+                 typename PromiseType::ResolveOrRejectValue&& aValue) {
+               return PromiseType::CreateAndResolveOrReject(std::move(aValue),
+                                                            __func__);
+             });
 }
 
 // Whether aMime signals AV1 tier=1 with an explicit level below 4.0
@@ -1378,17 +1436,11 @@ MediaCapabilities::CheckVideoDecodingInfo(
                 // We want to ensure that all decoder's queries are occurring
                 // only once at a time as it can quickly exhaust the system
                 // resources otherwise.
-                static RefPtr<AllocPolicy> sVideoAllocPolicy = [&taskQueue]() {
-                  SchedulerGroup::Dispatch(NS_NewRunnableFunction(
-                      "MediaCapabilities::AllocPolicy:Video", []() {
-                        ClearOnShutdown(&sVideoAllocPolicy,
-                                        ShutdownPhase::XPCOMShutdownThreads);
-                      }));
-                  return new SingleAllocPolicy(
-                      TrackInfo::TrackType::kVideoTrack, taskQueue);
-                }();
-                return PDMFactory::StrictSupportsAsync(params,
-                                                       sVideoAllocPolicy);
+                return WithAllocPolicy(
+                    u"MediaCapabilities::CheckVideoDecodingInfo"_ns,
+                    [&params](AllocPolicy* aPolicy) {
+                      return PDMFactory::StrictSupportsAsync(params, aPolicy);
+                    });
               });
         }
 
