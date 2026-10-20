@@ -59,6 +59,10 @@ var SidebarController = {
 
     let switcherMenuitem;
     sidebar._updateMenus = () => {
+      // The pref observer outlives the window.
+      if (this.uninitializing) {
+        return;
+      }
       const { visible } = sidebar;
       // Hide the sidebar if it is open and should not be visible,
       // and unset the current command and lastOpenedId so they do not
