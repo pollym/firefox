@@ -1476,7 +1476,8 @@ void nsBlockFrame::ReflowAbsoluteDescendantsInInlineFrame(
     // were pushed from a previous fragmentainer.
     AddOrRemoveStateBits(
         NS_BLOCK_HAS_INLINE_ABSPOS_DESCENDANT,
-        prev->HasAnyStateBits(NS_BLOCK_HAS_INLINE_ABSPOS_DESCENDANT));
+        foundAbspos ||
+            prev->HasAnyStateBits(NS_BLOCK_HAS_INLINE_ABSPOS_DESCENDANT));
   } else if (!foundAbspos) {
     // We are a first-in-flow. Remove NS_BLOCK_HAS_INLINE_ABSPOS_DESCENDANT bit
     // if we didn't find any abspos descendants after a full walk over all our
