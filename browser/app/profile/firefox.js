@@ -2713,6 +2713,9 @@ pref("privacy.query_stripping.strip_on_share.enabled", true);
 pref("browser.contentblocking.cryptomining.preferences.ui.enabled", true);
 pref("browser.contentblocking.fingerprinting.preferences.ui.enabled", true);
 
+// Protections panel redesign experiment; enabled via Nimbus.
+pref("browser.protectionsPanelRedesign.enabled", false);
+
 // Possible values for browser.contentblocking.features.strict pref:
 //   Tracking Protection:
 //     "tp": tracking protection enabled
