@@ -456,12 +456,6 @@ export var ReportBrokenSite = new (class ReportBrokenSite {
       "onShowSendMoreInfoPrefChanged",
   };
 
-  constructor() {
-    for (const pref of Object.keys(this.#OBSERVED_PREFS)) {
-      Services.prefs.addObserver(pref, this);
-    }
-  }
-
   #windows = new Set();
 
   #onNewWindow(win) {
