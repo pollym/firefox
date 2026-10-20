@@ -2222,7 +2222,15 @@ pref("browser.newtabpage.activity-stream.telemetry.privatePing.enabled", true);
 // not leave any lingering preferences lying around.
 pref("browser.newtabpage.activity-stream.telemetry.privatePing.redactNewtabPing.enabled", true);
 
-pref("browser.newtabpage.activity-stream.telemetry.privatePing.maxSubmissionDelayMs", 5000);
+pref("browser.newtabpage.activity-stream.telemetry.privatePing.minSubmissionDelayMs", 1000);
+pref("browser.newtabpage.activity-stream.telemetry.privatePing.maxSubmissionDelayMs", 6000);
+
+// Report roughly how long the user read an organic story they opened from
+// New Tab, on the click event in the New Tab content Ping.
+pref("browser.newtabpage.activity-stream.telemetry.privatePing.dwellTime.enabled", false);
+// Scale of the Laplace noise each reported dwell time is multiplied by. A
+// string, since prefs have no floating point type.
+pref("browser.newtabpage.activity-stream.telemetry.privatePing.dwellTime.noiseScale", "0.05");
 
   // Include differentialy private inferred New Tab interests with New Tab content Ping. Only used when user has enabled personalization.
 pref("browser.newtabpage.activity-stream.telemetry.privatePing.inferredInterests.enabled", false);
