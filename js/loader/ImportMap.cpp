@@ -918,13 +918,7 @@ ResolveResult ImportMap::ResolveModuleSpecifier(ImportMap* aImportMap,
   }
 
   // 6. Let serializedBaseURL be baseURL, serialized.
-  //
-  // Impl note: baseURL is null for scripts without a fetch info running in a
-  // loader without a base URI, such as precompiled scripts.
-  nsCString serializedBaseURL;
-  if (baseURL) {
-    serializedBaseURL = baseURL->GetSpecOrDefault();
-  }
+  nsCString serializedBaseURL = baseURL->GetSpecOrDefault();
 
   LOG(("ResolveModuleSpecifier baseURL:%s, specifier: %s",
        serializedBaseURL.get(), NS_ConvertUTF16toUTF8(aSpecifier).get()));
