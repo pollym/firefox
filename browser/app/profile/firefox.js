@@ -606,30 +606,6 @@ pref("browser.urlbar.quicksuggest.online.available", false);
 // [4] browser.urlbar.merino.ohttpRelayURL
 pref("browser.urlbar.quicksuggest.online.enabled", true, sticky);
 
-// Whether the Firefox Suggest contextual opt-in result is enabled.
-pref("browser.urlbar.quicksuggest.contextualOptIn", false);
-
-// Number that the user dismissed the Firefox Suggest contextual opt-in result.
-pref("browser.urlbar.quicksuggest.contextualOptIn.dismissedCount", 0);
-
-// Period until reshow the Firefox Suggest contextual opt-in result when first dismissed.
-pref("browser.urlbar.quicksuggest.contextualOptIn.firstReshowAfterPeriodDays", 7);
-
-// Period until reshow the Firefox Suggest contextual opt-in result when second dismissed.
-pref("browser.urlbar.quicksuggest.contextualOptIn.secondReshowAfterPeriodDays", 14);
-
-// Period until reshow the Firefox Suggest contextual opt-in result when third dismissed.
-pref("browser.urlbar.quicksuggest.contextualOptIn.thirdReshowAfterPeriodDays", 60);
-
-// Number of impression for the Firefox Suggest contextual opt-in result.
-pref("browser.urlbar.quicksuggest.contextualOptIn.impressionCount", 0);
-
-// Limit for impression to dismiss the Firefox Suggest contextual opt-in result.
-pref("browser.urlbar.quicksuggest.contextualOptIn.impressionLimit", 20);
-
-// Days until dismiss the Firefox Suggest contextual opt-in result after first impression.
-pref("browser.urlbar.quicksuggest.contextualOptIn.impressionDaysLimit", 5);
-
 // Whether the quick suggest feature in the urlbar is enabled.
 pref("browser.urlbar.quicksuggest.enabled", false);
 
