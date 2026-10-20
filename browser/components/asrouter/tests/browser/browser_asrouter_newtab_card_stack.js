@@ -38,7 +38,6 @@ add_setup(async function () {
     content: {
       ...message.content,
       transitions: false,
-      screens: [message.content.screens[0]],
     },
   };
 });
@@ -89,7 +88,7 @@ async function checkCardStackPaintOrder(dir) {
           --card-stack-color-3: rgb(0, 255, 0) !important;
           --card-stack-border: 0 none !important;
         }
-        .screen[pos='card-stack'] > :not(.card-stack-front) {
+        .screen[pos='card-stack'] > :not(.card-stack-front, .card-stack-layer-1, .card-stack-layer-2) {
           visibility: hidden !important;
         }
       `;
