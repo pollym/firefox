@@ -3442,7 +3442,7 @@ export class UrlbarView {
 
     let result = row?.result;
     if (result) {
-      this.controller.parentController.onBeforeSelection(result, element);
+      this.controller.parentController.onBeforeSelection(result);
     }
 
     this.#setAccessibleFocus(setAccessibleFocus && element);
