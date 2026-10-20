@@ -4173,6 +4173,7 @@ add_task(async function test_recordEnabledWidgets_trainhop() {
           "widgets.enabled": true,
           "widgets.lists.enabled": true,
           "widgets.system.lists.enabled": false,
+          region: "US",
           trainhopConfig: { widgets: { listsEnabled: true } },
         },
       },
@@ -4185,6 +4186,44 @@ add_task(async function test_recordEnabledWidgets_trainhop() {
     Glean.newtab.widgetsEnabledList.testGetValue(),
     ["lists"],
     "widgetsEnabledList should include widgets gated on by trainhopConfig"
+  );
+});
+
+add_task(async function test_recordEnabledWidgets_region_resolves() {
+  info(
+    "recordEnabledWidgets should re-record when the region resolves and reveals a trainhop widget"
+  );
+  Services.fog.testResetFOG();
+
+  const values = {
+    "widgets.enabled": true,
+    "widgets.lists.enabled": true,
+    "widgets.system.lists.enabled": false,
+    trainhopConfig: { widgets: { listsEnabled: true } },
+  };
+
+  let instance = new TelemetryFeed();
+  instance.store = {
+    getState: () => ({ Prefs: { values } }),
+  };
+
+  instance.recordEnabledWidgets();
+  Assert.deepEqual(
+    Glean.newtab.widgetsEnabledList.testGetValue(),
+    [],
+    "a trainhop-revealed widget is not listed while the region is unresolved"
+  );
+
+  values.region = "US";
+  instance.onAction({
+    type: actionTypes.PREF_CHANGED,
+    data: { name: "region", value: "US" },
+  });
+
+  Assert.deepEqual(
+    Glean.newtab.widgetsEnabledList.testGetValue(),
+    ["lists"],
+    "lists is listed once the region resolves"
   );
 });
 

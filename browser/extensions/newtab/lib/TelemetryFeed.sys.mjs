@@ -2179,10 +2179,11 @@ export class TelemetryFeed {
         this.recordPageLayoutVariant();
         break;
       case at.PREF_CHANGED:
-        // Turning history off hides history-dependent widgets, so the enabled
-        // list has to be re-read: unlike a widget's own pref, this flips
-        // enablement without any widget toggle to hang the update off.
-        if (action.data?.name === "recordsHistory") {
+        // Turning history off hides history-dependent widgets, and resolving
+        // the region reveals trainhop-enabled ones, so the enabled list has to
+        // be re-read: unlike a widget's own pref, these flip enablement without
+        // any widget toggle to hang the update off.
+        if (["recordsHistory", "region"].includes(action.data?.name)) {
           this.recordEnabledWidgets();
         }
         break;

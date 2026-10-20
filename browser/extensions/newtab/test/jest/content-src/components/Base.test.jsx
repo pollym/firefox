@@ -1735,6 +1735,7 @@ function renderNova(overrides = {}, stateOverrides = {}) {
       values: {
         ...INITIAL_STATE.Prefs.values,
         "nova.enabled": true,
+        region: "US",
         showSearch: false,
         "feeds.topsites": false,
         "feeds.section.topstories": false,

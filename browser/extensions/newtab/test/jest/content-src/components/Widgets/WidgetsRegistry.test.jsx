@@ -43,6 +43,7 @@ describe("isWidgetToggleVisible", () => {
   it("is true via trainhopConfig.widgets (addable)", () => {
     expect(
       isWidgetToggleVisible(listsWidget, {
+        region: "US",
         trainhopConfig: { widgets: { listsEnabled: true } },
       })
     ).toBe(true);
@@ -51,6 +52,7 @@ describe("isWidgetToggleVisible", () => {
   it("is true via the widgetsSettings.*Visible override", () => {
     expect(
       isWidgetToggleVisible(listsWidget, {
+        region: "US",
         trainhopConfig: { widgetsSettings: { listsVisible: true } },
       })
     ).toBe(true);
@@ -82,6 +84,7 @@ describe("privacy widget on a profile with no history", () => {
     "widgets.enabled": true,
     "widgets.privacy.enabled": true,
     "widgets.system.privacy.enabled": true,
+    region: "US",
     widgetsConfig: { privacyEnabled: true },
     trainhopConfig: {
       widgetPrivacy: { visible: true },
@@ -127,6 +130,7 @@ describe("recent searches widget on a host that predates its search access point
     "widgets.enabled": true,
     "widgets.recentSearches.enabled": true,
     "widgets.system.recentSearches.enabled": true,
+    region: "US",
     widgetsConfig: { recentSearchesEnabled: true },
     trainhopConfig: {
       widgets: { recentSearchesEnabled: true },
@@ -158,6 +162,119 @@ describe("recent searches widget on a host that predates its search access point
   });
 });
 
+describe("widgets on a profile with no resolved region", () => {
+  const trainhopReveal = {
+    [listsWidget.enabledPref]: true,
+    trainhopConfig: { widgets: { [listsWidget.trainhopEnabledKey]: true } },
+  };
+
+  it("ignores a trainhopConfig.widgets reveal", () => {
+    expect(isWidgetAddable(listsWidget, trainhopReveal)).toBe(false);
+    expect(isWidgetToggleVisible(listsWidget, trainhopReveal)).toBe(false);
+    expect(isWidgetEnabled(listsWidget, trainhopReveal, true)).toBe(false);
+  });
+
+  it("ignores a widgetsSettings.*Visible reveal", () => {
+    const prefs = {
+      [listsWidget.enabledPref]: true,
+      trainhopConfig: {
+        widgetsSettings: { [listsWidget.widgetsSettingsVisibleKey]: true },
+      },
+    };
+    expect(isWidgetAddable(listsWidget, prefs)).toBe(false);
+    expect(isWidgetToggleVisible(listsWidget, prefs)).toBe(false);
+    expect(isWidgetEnabled(listsWidget, prefs, true)).toBe(false);
+  });
+
+  it("ignores a dedicated trainhopNamespace reveal", () => {
+    const potd = WIDGET_REGISTRY.find(w => w.id === "pictureOfTheDay");
+    const prefs = {
+      [potd.enabledPref]: true,
+      trainhopConfig: { [potd.trainhopNamespace]: { visible: true } },
+    };
+    expect(isWidgetAddable(potd, prefs)).toBe(false);
+    expect(isWidgetToggleVisible(potd, prefs)).toBe(false);
+    expect(isWidgetEnabled(potd, prefs, true)).toBe(false);
+  });
+
+  it("treats an empty or null region as unresolved", () => {
+    expect(
+      isWidgetAddable(listsWidget, { ...trainhopReveal, region: "" })
+    ).toBe(false);
+    expect(
+      isWidgetAddable(listsWidget, { ...trainhopReveal, region: null })
+    ).toBe(false);
+  });
+
+  it("acts on the reveal as soon as any region resolves", () => {
+    const prefs = { ...trainhopReveal, region: "FR" };
+    expect(isWidgetAddable(listsWidget, prefs)).toBe(true);
+    expect(isWidgetToggleVisible(listsWidget, prefs)).toBe(true);
+    expect(isWidgetEnabled(listsWidget, prefs, true)).toBe(true);
+  });
+
+  it("leaves the system pref ungated, so a build or operator reveal still works", () => {
+    const prefs = {
+      [listsWidget.enabledPref]: true,
+      [listsWidget.systemEnabledPref]: true,
+    };
+    expect(isWidgetAddable(listsWidget, prefs)).toBe(true);
+    expect(isWidgetToggleVisible(listsWidget, prefs)).toBe(true);
+    expect(isWidgetEnabled(listsWidget, prefs, true)).toBe(true);
+  });
+
+  it("withholds the reveal without hiding a system-enabled widget", () => {
+    const prefs = {
+      ...trainhopReveal,
+      [listsWidget.systemEnabledPref]: true,
+    };
+    expect(isWidgetAddable(listsWidget, prefs)).toBe(true);
+    expect(isWidgetToggleVisible(listsWidget, prefs)).toBe(true);
+    expect(isWidgetEnabled(listsWidget, prefs, true)).toBe(true);
+    expect(
+      isWidgetsContainerVisible({
+        "widgets.system.enabled": true,
+        trainhopConfig: { widgets: { enabled: true } },
+      })
+    ).toBe(true);
+  });
+
+  it("leaves the legacy widgetsConfig toggle ungated", () => {
+    const prefs = {
+      [listsWidget.enabledPref]: true,
+      widgetsConfig: { [listsWidget.trainhopEnabledKey]: true },
+    };
+    expect(isWidgetToggleVisible(listsWidget, prefs)).toBe(true);
+    expect(isWidgetAddable(listsWidget, prefs)).toBe(false);
+    expect(isWidgetEnabled(listsWidget, prefs, true)).toBe(false);
+  });
+
+  it("gates the container's trainhop terms but not its pref terms", () => {
+    expect(
+      isWidgetsContainerVisible({
+        trainhopConfig: { widgets: { enabled: true } },
+      })
+    ).toBe(false);
+    expect(
+      isWidgetsContainerVisible({
+        trainhopConfig: { widgetsSettings: { enabled: true } },
+      })
+    ).toBe(false);
+    expect(isWidgetsContainerVisible({ "widgets.system.enabled": true })).toBe(
+      true
+    );
+    expect(
+      isWidgetsContainerVisible({ widgetsConfig: { enabled: true } })
+    ).toBe(true);
+    expect(
+      isWidgetsContainerVisible({
+        region: "FR",
+        trainhopConfig: { widgets: { enabled: true } },
+      })
+    ).toBe(true);
+  });
+});
+
 describe("isWidgetsContainerVisible", () => {
   it("is false when nothing enables it", () => {
     expect(isWidgetsContainerVisible({})).toBe(false);
@@ -172,6 +289,7 @@ describe("isWidgetsContainerVisible", () => {
   it("is true via trainhopConfig.widgets.enabled", () => {
     expect(
       isWidgetsContainerVisible({
+        region: "US",
         trainhopConfig: { widgets: { enabled: true } },
       })
     ).toBe(true);
@@ -180,6 +298,7 @@ describe("isWidgetsContainerVisible", () => {
   it("is true via widgetsSettings.enabled", () => {
     expect(
       isWidgetsContainerVisible({
+        region: "US",
         trainhopConfig: { widgetsSettings: { enabled: true } },
       })
     ).toBe(true);
@@ -361,6 +480,7 @@ describe("isWidgetAddable", () => {
     expect(
       isWidgetAddable(listsWidget, {
         [listsWidget.systemEnabledPref]: false,
+        region: "US",
         trainhopConfig: {
           widgets: { [listsWidget.trainhopEnabledKey]: true },
         },
@@ -380,6 +500,7 @@ describe("isWidgetAddable", () => {
     expect(
       isWidgetAddable(listsWidget, {
         [listsWidget.systemEnabledPref]: false,
+        region: "US",
         trainhopConfig: { widgetsSettings: { listsVisible: true } },
       })
     ).toBe(true);
@@ -399,6 +520,7 @@ describe("isWidgetAddable", () => {
     expect(
       isWidgetAddable(potd, {
         [potd.systemEnabledPref]: false,
+        region: "US",
         trainhopConfig: { widgetPictureOfTheDay: { visible: true } },
       })
     ).toBe(true);
@@ -409,6 +531,7 @@ describe("isWidgetAddable", () => {
     expect(
       isWidgetAddable(crossword, {
         [crossword.systemEnabledPref]: false,
+        region: "US",
         trainhopConfig: { widgetCrossword: { visible: true } },
       })
     ).toBe(true);
@@ -421,7 +544,7 @@ describe("isWidgetAddable", () => {
     "makes privacy addable via %s despite its preffed-off default",
     (type, payload) => {
       const privacy = WIDGET_REGISTRY.find(w => w.id === "privacy");
-      const prefs = { [privacy.systemEnabledPref]: false };
+      const prefs = { [privacy.systemEnabledPref]: false, region: "US" };
       expect(isWidgetAddable(privacy, prefs)).toBe(false);
       expect(
         isWidgetAddable(privacy, {
@@ -437,6 +560,7 @@ describe("isWidgetAddable", () => {
     expect(
       isWidgetAddable(privacy, {
         [privacy.systemEnabledPref]: false,
+        region: "US",
         trainhopConfig: { widgetPrivacy: { visible: true } },
       })
     ).toBe(true);
@@ -449,7 +573,7 @@ describe("isWidgetAddable", () => {
     "makes stocks addable via %s despite its preffed-off default",
     (type, payload) => {
       const stocks = WIDGET_REGISTRY.find(w => w.id === "stocks");
-      const prefs = { [stocks.systemEnabledPref]: false };
+      const prefs = { [stocks.systemEnabledPref]: false, region: "US" };
       expect(isWidgetAddable(stocks, prefs)).toBe(false);
       expect(
         isWidgetAddable(stocks, {
@@ -473,6 +597,7 @@ describe("isWidgetAddable", () => {
       const prefs = {
         [recentSearches.systemEnabledPref]: false,
         supportsWidgetSearchSap: true,
+        region: "US",
       };
       expect(isWidgetAddable(recentSearches, prefs)).toBe(false);
       expect(
@@ -489,6 +614,7 @@ describe("isWidgetAddable", () => {
     expect(
       isWidgetAddable(recentSearches, {
         [recentSearches.systemEnabledPref]: false,
+        region: "US",
         trainhopConfig: { widgetRecentSearches: { visible: true } },
       })
     ).toBe(true);
@@ -499,6 +625,7 @@ describe("isWidgetAddable", () => {
     expect(
       isWidgetAddable(horoscopes, {
         [horoscopes.systemEnabledPref]: false,
+        region: "US",
         trainhopConfig: { widgetHoroscopes: { visible: true } },
       })
     ).toBe(true);
@@ -509,6 +636,7 @@ describe("isWidgetAddable", () => {
     expect(
       isWidgetAddable(travel, {
         [travel.systemEnabledPref]: false,
+        region: "US",
         trainhopConfig: { widgetTravel: { visible: true } },
       })
     ).toBe(true);
@@ -519,6 +647,7 @@ describe("isWidgetAddable", () => {
     expect(
       isWidgetAddable(solitaire, {
         [solitaire.systemEnabledPref]: false,
+        region: "US",
         trainhopConfig: { widgetSolitaire: { visible: true } },
       })
     ).toBe(true);
@@ -587,6 +716,7 @@ describe("isWidgetEnabled", () => {
         {
           [listsWidget.enabledPref]: true,
           [listsWidget.systemEnabledPref]: false,
+          region: "US",
           trainhopConfig: {
             widgets: { [listsWidget.trainhopEnabledKey]: true },
           },

@@ -491,6 +491,17 @@ export function resolveWidgetOrder(prefs) {
 }
 
 /**
+ * Returns true once the profile's region is known and false
+ * for a region-less profile.
+ *
+ * @param {object} prefs - current pref values from the Redux store
+ * @returns {boolean}
+ */
+export function isRegionResolved(prefs) {
+  return Boolean(prefs.region);
+}
+
+/**
  * Returns true if the widget needs history and this profile records none, so it
  * could only ever render an empty state (Bug 2063207). An absent
  * `recordsHistory` counts as available, so a missing PrefsFeed broadcast cannot
@@ -565,12 +576,17 @@ export function isWidgetAddable(widget, prefs) {
   if (widget.retired || isWidgetDataUnavailable(widget, prefs)) {
     return false;
   }
+  if (prefs[widget.systemEnabledPref]) {
+    return true;
+  }
+  if (!isRegionResolved(prefs)) {
+    return false;
+  }
   return Boolean(
     (widget.trainhopNamespace &&
       prefs.trainhopConfig?.[widget.trainhopNamespace]?.visible) ||
     prefs.trainhopConfig?.widgets?.[widget.trainhopEnabledKey] ||
-    prefs.trainhopConfig?.widgetsSettings?.[widget.widgetsSettingsVisibleKey] ||
-    prefs[widget.systemEnabledPref]
+    prefs.trainhopConfig?.widgetsSettings?.[widget.widgetsSettingsVisibleKey]
   );
 }
 
@@ -630,9 +646,13 @@ export function isWeatherAvailable(prefs) {
  * @returns {boolean}
  */
 export function isWidgetsContainerVisible(prefs) {
+  if (prefs["widgets.system.enabled"] || prefs.widgetsConfig?.enabled) {
+    return true;
+  }
+  if (!isRegionResolved(prefs)) {
+    return false;
+  }
   return Boolean(
-    prefs["widgets.system.enabled"] ||
-    prefs.widgetsConfig?.enabled ||
     prefs.trainhopConfig?.widgets?.enabled ||
     prefs.trainhopConfig?.widgetsSettings?.enabled
   );
