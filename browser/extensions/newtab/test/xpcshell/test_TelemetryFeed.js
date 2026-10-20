@@ -18,7 +18,6 @@ ChromeUtils.defineESModuleGetters(this, {
     "resource://gre/modules/ExtensionSettingsStore.sys.mjs",
   GleanSessionType: "resource://newtab/lib/TelemetryFeed.sys.mjs",
   HomePage: "resource:///modules/HomePage.sys.mjs",
-  isAdEligiblePositionSupported: "resource://newtab/lib/TelemetryFeed.sys.mjs",
   laplaceNoise: "resource://newtab/lib/TelemetryFeed.sys.mjs",
   NewTabContentPing: "resource://newtab/lib/NewTabContentPing.sys.mjs",
   NimbusFeatures: "resource://nimbus/ExperimentAPI.sys.mjs",
@@ -2091,39 +2090,6 @@ add_task(
     sandbox.restore();
   }
 );
-
-add_task(async function test_isAdEligiblePositionSupported() {
-  info(
-    "is_ad_eligible_position should only be sent on hosts whose schema has it"
-  );
-
-  // A train-hopped XPI on a host older than 157 must not send the key, or
-  // glean-core rejects the extras and drops the whole event.
-  Assert.ok(
-    !isAdEligiblePositionSupported("155.0"),
-    "Should not send on a 155 host"
-  );
-  Assert.ok(
-    !isAdEligiblePositionSupported("156.0"),
-    "Should not send on a 156 host"
-  );
-  Assert.ok(
-    isAdEligiblePositionSupported("157.0a1"),
-    "Should send on the 157 nightly it landed in"
-  );
-  Assert.ok(
-    isAdEligiblePositionSupported("157.0b4"),
-    "Should send on 157 beta"
-  );
-  Assert.ok(
-    isAdEligiblePositionSupported("157.0"),
-    "Should send on 157 release"
-  );
-  Assert.ok(
-    isAdEligiblePositionSupported("158.0a1"),
-    "Should send on a newer host"
-  );
-});
 
 add_task(
   async function test_handleTopSitesOrganicImpressionStats_record_glean_topsites_click() {
