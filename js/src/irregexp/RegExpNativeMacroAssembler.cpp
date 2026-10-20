@@ -8,7 +8,6 @@
 
 #include "irregexp/imported/regexp-macro-assembler-arch.h"
 #include "irregexp/imported/regexp-stack.h"
-#include "irregexp/imported/special-case.h"
 #include "jit/JitZone.h"
 #include "jit/Linker.h"
 #include "jit/PerfSpewer.h"
@@ -1603,29 +1602,16 @@ uint32_t SMRegExpMacroAssembler::CaseInsensitiveCompareNonUnicode(
   js::AutoUnsafeCallWithABI unsafe;
 
   MOZ_ASSERT(byteLength % sizeof(char16_t) == 0);
-  size_t length = byteLength / sizeof(char16_t);
-
-  for (size_t i = 0; i < length; i++) {
-    char16_t c1 = substring1[i];
-    char16_t c2 = substring2[i];
-    if (c1 != c2) {
+  // V8's implementation only needs the isolate for the non-ICU implementation.
 #ifdef JS_HAS_INTL_API
-      // Non-unicode regexps have weird case-folding rules.
-      c1 = CaseFolding::Canonicalize(c1);
-      c2 = CaseFolding::Canonicalize(c2);
+  Isolate* isolate = nullptr;
 #else
-      // If we aren't building with ICU, fall back to `/iu` mode. The only
-      // differences are in corner cases.
-      c1 = js::unicode::FoldCase(c1);
-      c2 = js::unicode::FoldCase(c2);
+  Isolate* isolate = js::TlsContext.get()->isolate;
 #endif
-      if (c1 != c2) {
-        return 0;
-      }
-    }
-  }
-
-  return 1;
+  v8::Address lhs = reinterpret_cast<uintptr_t>(substring1);
+  v8::Address rhs = reinterpret_cast<uintptr_t>(substring2);
+  return RegExpMacroAssembler::CaseInsensitiveCompareNonUnicode(
+      lhs, rhs, byteLength, isolate);
 }
 
 // Compare two strings in `/iu` mode (ignoreCase and unicode).
@@ -1635,23 +1621,16 @@ uint32_t SMRegExpMacroAssembler::CaseInsensitiveCompareUnicode(
   js::AutoUnsafeCallWithABI unsafe;
 
   MOZ_ASSERT(byteLength % sizeof(char16_t) == 0);
-  size_t length = byteLength / sizeof(char16_t);
-
-  for (size_t i = 0; i < length; i++) {
-    char16_t c1 = substring1[i];
-    char16_t c2 = substring2[i];
-    if (c1 != c2) {
-      // Unicode regexps use the common and simple case-folding
-      // mappings of the Unicode Character Database.
-      c1 = js::unicode::FoldCase(c1);
-      c2 = js::unicode::FoldCase(c2);
-      if (c1 != c2) {
-        return 0;
-      }
-    }
-  }
-
-  return 1;
+  // V8's implementation only needs the isolate for the non-ICU implementation.
+#ifdef JS_HAS_INTL_API
+  Isolate* isolate = nullptr;
+#else
+  Isolate* isolate = js::TlsContext.get()->isolate;
+#endif
+  v8::Address lhs = reinterpret_cast<uintptr_t>(substring1);
+  v8::Address rhs = reinterpret_cast<uintptr_t>(substring2);
+  return RegExpMacroAssembler::CaseInsensitiveCompareUnicode(
+      lhs, rhs, byteLength, isolate);
 }
 
 /* static */
