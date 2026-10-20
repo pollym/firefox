@@ -1248,6 +1248,7 @@ STATIC_ATOMS = [
     Atom("start", "start"),
     Atom("startsWith", "starts-with"),
     Atom("state", "state"),
+    Atom("staticclonecssrandomseed", "staticclonecssrandomseed"),
     Atom("statusbar", "statusbar"),
     Atom("step", "step"),
     Atom("stop", "stop"),

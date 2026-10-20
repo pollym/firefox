@@ -5018,9 +5018,28 @@ void Element::GetLinkTarget(nsAString& aTarget) {
 
 void Element::GetLinkTargetImpl(nsAString& aTarget) { aTarget.Truncate(); }
 
+uintptr_t Element::GetRandomSeed() const {
+  // Uses the element's address as the element identifier. If the element is
+  // part of a cloned static document (e.g. for print previews), uses the seed
+  // recorded during the clone instead, ensuring that the clone's random base
+  // value is consistent with the element it was cloned from.
+  if (HasProperties() && OwnerDoc()->IsStaticDocument()) {
+    if (void* seed = GetProperty(nsGkAtoms::staticclonecssrandomseed)) {
+      return reinterpret_cast<uintptr_t>(seed);
+    }
+  }
+  return reinterpret_cast<uintptr_t>(this);
+}
+
 /* Part of https://dom.spec.whatwg.org/#concept-cloning-steps-for-a-single-node
    step 2 (if node is an element). */
 nsresult Element::CopyInnerTo(Element* aDst) {
+  // If the element is being cloned into a static document, record the seed.
+  if (aDst->OwnerDoc()->IsStaticDocument()) {
+    aDst->SetProperty(nsGkAtoms::staticclonecssrandomseed,
+                      reinterpret_cast<void*>(GetRandomSeed()));
+  }
+
   MOZ_TRY(aDst->mAttrs.EnsureCapacityToClone(mAttrs));
 
   // SVG attribute parsing has a lot of side effects, and some of its attributes

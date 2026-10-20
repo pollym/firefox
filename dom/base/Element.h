@@ -2153,6 +2153,13 @@ class Element : public FragmentOrElement {
     return HasServoData() && Servo_Element_IsDisplayContents(this);
   }
 
+  /**
+   * A unique value for the element to use in the generation of random base
+   * values for element-scoped CSS `random()` functions.
+   * https://drafts.csswg.org/css-values-5/#random-caching
+   */
+  uintptr_t GetRandomSeed() const;
+
   /*
    * https://html.spec.whatwg.org/#being-rendered
    *

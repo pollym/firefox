@@ -3258,6 +3258,13 @@ class Document : public nsINode,
   void UnlinkOriginalDocumentIfStatic();
 
   /**
+   * Returns a value that identifies this document, used to vary the random
+   * base values of CSS `random()` functions between document instances.
+   * https://drafts.csswg.org/css-values-5/#random-caching
+   */
+  uintptr_t GetRandomSeed() const;
+
+  /**
    * These are called by the parser as it encounters <picture> tags, the end of
    * said tags, and possible picture <source srcset> sources respectively. These
    * are used to inform ResolvePreLoadImage() calls.  Unset attributes are
