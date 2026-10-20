@@ -20382,8 +20382,7 @@ void Document::ProcessInternalResourceLinksWhenSafe() {
   }
   mProcessInternalResourceLinksPending = true;
   nsContentUtils::AddScriptRunner(NS_NewRunnableFunction(
-      "Document::ProcessInternalResourceLinksWhenSafe",
-      [self = RefPtr{this}] {
+      "Document::ProcessInternalResourceLinksWhenSafe", [self = RefPtr{this}] {
         self->mProcessInternalResourceLinksPending = false;
         self->ProcessInternalResourceLinks();
       }));

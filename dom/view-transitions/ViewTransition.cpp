@@ -1292,7 +1292,8 @@ void ViewTransition::PerformPendingOperations() {
         // is canceled, the document stays visible, so skip after the timeout.
         mTimeoutTimer = NS_NewTimer();
         mTimeoutTimer->InitWithNamedFuncCallback(
-            TimeoutCallback, this, StaticPrefs::dom_viewTransitions_timeout_ms(),
+            TimeoutCallback, this,
+            StaticPrefs::dom_viewTransitions_timeout_ms(),
             nsITimer::TYPE_ONE_SHOT, "ViewTransition::TimeoutCallback"_ns);
       }
     }
