@@ -140,6 +140,8 @@ tags = "audiochannel"
 ["browser_delay_autoplay_webAudio.js"]
 tags = "audiochannel"
 
+["browser_drawSnapshot_failure.js"]
+
 ["browser_error_registry.js"]
 
 ["browser_f7_caret_browsing.js"]
