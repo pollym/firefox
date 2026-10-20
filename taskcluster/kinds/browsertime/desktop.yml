@@ -8,6 +8,14 @@ task-defaults:
             .*-qr/.*: 2400
             default: 1800
     suite: raptor
+    dependencies:
+        by-app:
+            firefox:
+                by-test-platform:
+                    macosx(1500|2700)-aarch64(-vms)?-shippable/.*:
+                        build: build-macosx64-aarch64-shippable/opt
+                    default: {}
+            default: {}
     run-on-projects:
         by-test-platform:
             linux.*shippable.*: [mozilla-central]
