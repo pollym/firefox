@@ -3511,6 +3511,10 @@ void Element::SetMappedDeclarationBlock(
 bool Element::FindAttributeDependence(const nsAtom* aAttribute,
                                       const MappedAttributeEntry* const aMaps[],
                                       uint32_t aMapCount) {
+  MOZ_ASSERT(aAttribute);
+  if (!aAttribute->IsStatic()) {
+    return false;
+  }
   for (uint32_t mapindex = 0; mapindex < aMapCount; ++mapindex) {
     for (const MappedAttributeEntry* map = aMaps[mapindex]; map->attribute;
          ++map) {
@@ -4254,6 +4258,10 @@ bool Element::ParseAttribute(int32_t aNamespaceID, nsAtom* aAttribute,
                              const nsAString& aValue,
                              nsIPrincipal* aMaybeScriptedPrincipal,
                              nsAttrValue& aResult) {
+  if (!aAttribute->IsStatic()) {
+    return false;
+  }
+
   if (aAttribute == nsGkAtoms::lang) {
     aResult.ParseAtom(aValue);
     return true;
