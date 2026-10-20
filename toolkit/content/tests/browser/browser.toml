@@ -233,6 +233,9 @@ support-files = ["file_save_webpage_wrapping.html"]
 fail-if = [
   "a11y_checks", # Bug 1854538 clicked body.wide-container may not be accessible
 ]
+skip-if = [
+  "os == 'mac' && os_version == '15.30' && arch == 'aarch64' && debug", # Bug 2062699
+]
 
 ["browser_suspend_videos_outside_viewport.js"]
 support-files = [
