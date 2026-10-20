@@ -127,7 +127,10 @@ XPCOMUtils.defineLazyPreferenceGetter(
   "highlightToSearchFeatureGate",
   "browser.highlightToSearch.featureGate",
   null,
-  () => recordSelectionMenuEnabled()
+  () => {
+    recordSelectionMenuEnabled();
+    updateIgnoredInputs();
+  }
 );
 XPCOMUtils.defineLazyPreferenceGetter(
   lazy,
@@ -1890,10 +1893,12 @@ function reorderChatProviders() {
  * Update ignored input fields Set.
  */
 function updateIgnoredInputs() {
-  GenAI.ignoredInputs = new Set(
-    // Skip empty string as no input type is ""
-    lazy.chatShortcutsIgnoreFields.split(",").filter(v => v)
-  );
+  // Skip empty string as no input type is ""
+  const ignored = lazy.chatShortcutsIgnoreFields.split(",").filter(v => v);
+  if (lazy.highlightToSearchFeatureGate) {
+    ignored.push("textarea");
+  }
+  GenAI.ignoredInputs = new Set(ignored);
 }
 
 // Initialize on first import
