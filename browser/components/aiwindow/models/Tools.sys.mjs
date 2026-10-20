@@ -1626,18 +1626,6 @@ const AITAB_ERROR_GUIDANCE = Object.freeze({
 });
 
 /**
- * Whether the modify_slug field in the tool params is configured
- * for an AITab modification
- *
- * @param {string} modify_slug
- *
- * @returns {boolean}
- */
-export function isAITabModification(modify_slug) {
-  return typeof modify_slug == "string" && !!modify_slug.trim();
-}
-
-/**
  * @param {object} toolParams
  * @param {string[]} [toolParams.url_list]
  * @param {string} [toolParams.focus]
@@ -1673,7 +1661,7 @@ export async function createAITab(
   // Whether this call revises an existing page or writes a new one, so every
   // message the model gets back names what actually happened.
   // Matches how generateAITab reads modify_slug, so a blank one is a create.
-  const isModification = isAITabModification(modify_slug);
+  const isModification = typeof modify_slug == "string" && !!modify_slug.trim();
   const action = isModification ? "updated" : "created";
   const result = await lazy.AITab.generateAITab(
     {

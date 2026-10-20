@@ -3172,8 +3172,7 @@ export class AIWindow extends MozLitElement {
     if (newMessage.role === "tool") {
       const cfg = lazy.getActionLogConfigForTool(
         newMessage.content?.name,
-        newMessage.content?.body,
-        newMessage.content?.args
+        newMessage.content?.body
       );
       if (!cfg.show) {
         return null;

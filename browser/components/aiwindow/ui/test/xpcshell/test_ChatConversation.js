@@ -1,8 +1,6 @@
 /* Any copyright is dedicated to the Public Domain.
  * http://creativecommons.org/publicdomain/zero/1.0/ */
 
-const STATE_CHOOSE = "choose";
-
 do_get_profile();
 
 const { ChatConversation, MESSAGE_ROLE, ChatMessage } =
@@ -891,7 +889,7 @@ add_task(function test_renderState_includes_empty_message_with_tool_ui() {
   const message = conversation.addAssistantMessage("text", "");
   conversation.addUIToolToCurrentMessage(
     "aitab-call",
-    { uiType: "aitab", properties: { state: STATE_CHOOSE } },
+    { uiType: "aitab", properties: { state: "creating" } },
     { emitComplete: false }
   );
 
@@ -2019,7 +2017,7 @@ add_task(function test_addUIToolToCurrentMessage_can_defer_completion() {
 
   conversation.addUIToolToCurrentMessage(
     "aitab-call",
-    { uiType: "aitab", properties: { state: STATE_CHOOSE } },
+    { uiType: "aitab", properties: { state: "creating" } },
     { emitComplete: false }
   );
 

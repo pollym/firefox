@@ -30,12 +30,13 @@ import "chrome://browser/content/aiwindow/components/kit-mention.mjs";
 // eslint-disable-next-line import/no-unassigned-import
 import "chrome://browser/content/aiwindow/components/agent-monitor-item.mjs";
 // eslint-disable-next-line import/no-unassigned-import
+import "chrome://browser/content/aiwindow/components/aitab-tool-ui.mjs";
+// eslint-disable-next-line import/no-unassigned-import
 import "chrome://global/content/elements/moz-textarea.mjs";
 import {
   dispatchClientError,
   installClientErrorListeners,
 } from "chrome://browser/content/aiwindow/modules/ClientErrorTelemetry.mjs";
-import { STATE_CHOOSE } from "chrome://browser/content/aiwindow/components/aitab-tool-ui.mjs";
 
 /**
  * @typedef {import("chrome://browser/content/aiwindow/components/ai-action-confirmation.mjs").TabSelectionData} TabSelectionData
@@ -1451,7 +1452,7 @@ export class AIChatContent extends MozLitElement {
 
   #renderAITab(msg) {
     return html`<aitab-tool-ui
-      .state=${msg.toolUIData.properties?.state ?? STATE_CHOOSE}
+      .state=${msg.toolUIData.properties?.state ?? "creating"}
       .title=${msg.toolUIData.properties?.title ?? ""}
       .viewerURL=${msg.toolUIData.properties?.viewerURL ?? ""}
       @aitab-open-request=${event =>
@@ -2010,6 +2011,10 @@ export class AIChatContent extends MozLitElement {
       lastItem?.type === "message" &&
       lastItem.msg?.role === "assistant" &&
       !!lastItem.msg?.body;
+    const aiTabCreating =
+      lastItem?.type === "message" &&
+      lastItem.msg?.toolUIData?.uiType === UI_TYPES.AITAB &&
+      lastItem.msg.toolUIData.properties?.state === "creating";
     return html`
       <link
         rel="stylesheet"
@@ -2019,7 +2024,9 @@ export class AIChatContent extends MozLitElement {
         <div class="chat-inner-wrapper">
           ${this.#renderMessages(renderItems)}
           ${this.#renderFollowUpSuggestions()}
-          ${this.#renderLoader(actionLogInProgress || replyStreaming)}
+          ${this.#renderLoader(
+            actionLogInProgress || replyStreaming || aiTabCreating
+          )}
           ${this.#renderError()}
         </div>
       </div>
