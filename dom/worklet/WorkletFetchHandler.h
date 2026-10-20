@@ -5,7 +5,6 @@
 #ifndef mozilla_dom_WorkletFetchHandler_h
 #define mozilla_dom_WorkletFetchHandler_h
 
-#include "js/Modules.h"  // JS::ModuleType
 #include "mozilla/dom/PromiseNativeHandler.h"
 #include "mozilla/dom/RequestBinding.h"  // RequestCredentials
 #include "nsIStreamLoader.h"
@@ -32,8 +31,7 @@ class WorkletFetchHandler final : public nsISupports {
                                              ErrorResult& aRv);
 
   // Load a module script on main thread.
-  nsresult StartFetch(JSContext* aCx, nsIURI* aURI, nsIURI* aReferrer,
-                      JS::ModuleType aModuleType);
+  nsresult StartFetch(JSContext* aCx, nsIURI* aURI, nsIURI* aReferrer);
 
   void ExecutionFailed();
   void ExecutionFailed(JS::Handle<JS::Value> aError);
@@ -73,7 +71,7 @@ class StartFetchRunnable final : public Runnable {
  public:
   StartFetchRunnable(
       const nsMainThreadPtrHandle<WorkletFetchHandler>& aHandlerRef,
-      nsIURI* aURI, nsIURI* aReferrer, JS::ModuleType aModuleType);
+      nsIURI* aURI, nsIURI* aReferrer);
   ~StartFetchRunnable() = default;
 
   NS_IMETHOD
@@ -83,7 +81,6 @@ class StartFetchRunnable final : public Runnable {
   nsMainThreadPtrHandle<WorkletFetchHandler> mHandlerRef;
   nsCOMPtr<nsIURI> mURI;
   nsCOMPtr<nsIURI> mReferrer;
-  JS::ModuleType mModuleType;
 };
 
 // WorkletScriptHandler is used to handle the result of fetching the module
@@ -93,8 +90,7 @@ class WorkletScriptHandler final : public PromiseNativeHandler,
  public:
   NS_DECL_THREADSAFE_ISUPPORTS
 
-  WorkletScriptHandler(Worklet* aWorklet, nsIURI* aURI,
-                       JS::ModuleType aModuleType);
+  WorkletScriptHandler(Worklet* aWorklet, nsIURI* aURI);
 
   void ResolvedCallback(JSContext* aCx, JS::Handle<JS::Value> aValue,
                         ErrorResult& aRv) override;
@@ -116,7 +112,6 @@ class WorkletScriptHandler final : public PromiseNativeHandler,
 
   RefPtr<Worklet> mWorklet;
   nsCOMPtr<nsIURI> mURI;
-  JS::ModuleType mModuleType;
 #ifdef NIGHTLY_BUILD
   bool mHasWasmMimeTypeEssence = false;
 #endif

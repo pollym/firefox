@@ -11,7 +11,6 @@
 #include "mozilla/TaskQueue.h"
 #include "mozilla/dom/Document.h"
 #include "mozilla/dom/Fetch.h"
-#include "mozilla/dom/MimeType.h"
 #include "mozilla/dom/Request.h"
 #include "mozilla/dom/RequestBinding.h"
 #include "mozilla/dom/Response.h"
@@ -26,7 +25,6 @@
 #include "mozilla/dom/worklet/WorkletModuleLoader.h"
 #include "nsIContentPolicy.h"
 #include "nsIInputStreamPump.h"
-#include "nsIScriptError.h"
 #include "nsIThreadRetargetableRequest.h"
 #include "xpcpublic.h"
 
@@ -132,12 +130,11 @@ NS_IMETHODIMP StartModuleLoadRunnable::RunOnWorkletThread() {
 
 StartFetchRunnable::StartFetchRunnable(
     const nsMainThreadPtrHandle<WorkletFetchHandler>& aHandlerRef, nsIURI* aURI,
-    nsIURI* aReferrer, JS::ModuleType aModuleType)
+    nsIURI* aReferrer)
     : Runnable("Worklet::StartFetchRunnable"),
       mHandlerRef(aHandlerRef),
       mURI(aURI),
-      mReferrer(aReferrer),
-      mModuleType(aModuleType) {
+      mReferrer(aReferrer) {
   MOZ_ASSERT(!NS_IsMainThread());
 }
 
@@ -155,7 +152,7 @@ StartFetchRunnable::Run() {
   }
 
   JSContext* cx = jsapi.cx();
-  nsresult rv = mHandlerRef->StartFetch(cx, mURI, mReferrer, mModuleType);
+  nsresult rv = mHandlerRef->StartFetch(cx, mURI, mReferrer);
   if (NS_FAILED(rv)) {
     mHandlerRef->HandleFetchFailed(mURI, mModuleType);
     return NS_ERROR_FAILURE;
@@ -472,8 +469,7 @@ void WorkletFetchHandler::ResolvePromises() {
 }
 
 nsresult WorkletFetchHandler::StartFetch(JSContext* aCx, nsIURI* aURI,
-                                         nsIURI* aReferrer,
-                                         JS::ModuleType aModuleType) {
+                                         nsIURI* aReferrer) {
   RequestOrUTF8String requestInput;
   nsresult res = aURI->GetSpec(requestInput.SetAsUTF8String());
   if (NS_WARN_IF(NS_FAILED(res))) {
@@ -524,7 +520,7 @@ nsresult WorkletFetchHandler::StartFetch(JSContext* aCx, nsIURI* aURI,
   }
 
   RefPtr<WorkletScriptHandler> scriptHandler =
-      new WorkletScriptHandler(mWorklet, aURI, aModuleType);
+      new WorkletScriptHandler(mWorklet, aURI);
   fetchPromise->AppendNativeHandler(scriptHandler);
   return NS_OK;
 }
@@ -549,43 +545,8 @@ void WorkletFetchHandler::HandleFetchFailed(nsIURI* aURI,
 //////////////////////////////////////////////////////////////
 NS_IMPL_ISUPPORTS(WorkletScriptHandler, nsIStreamLoaderObserver)
 
-WorkletScriptHandler::WorkletScriptHandler(Worklet* aWorklet, nsIURI* aURI,
-                                           JS::ModuleType aModuleType)
-    : mWorklet(aWorklet), mURI(aURI), mModuleType(aModuleType) {}
-
-// https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script
-// Steps 13.6 and 13.7: any other combination of MIME type and module type
-// results in a null module script.
-static bool IsMimeTypeAllowedForModuleType(const nsAString& aEssence,
-                                           JS::ModuleType aModuleType) {
-  switch (aModuleType) {
-    case JS::ModuleType::JavaScriptOrWasm:
-      // Step 13.7.3: any JavaScript MIME type.
-      if (nsContentUtils::IsJavascriptMIMEType(aEssence)) {
-        return true;
-      }
-#ifdef NIGHTLY_BUILD
-      // Step 13.6: application/wasm.
-      if (StaticPrefs::javascript_options_experimental_wasm_esm_integration()) {
-        return nsContentUtils::HasWasmMimeTypeEssence(aEssence);
-      }
-#endif
-      return false;
-    case JS::ModuleType::JSON:
-      // Step 13.7.5: any JSON MIME type.
-      return nsContentUtils::IsJsonMimeType(aEssence);
-    case JS::ModuleType::Text:
-      // Step 13.7.2: text modules are created whatever the MIME type.
-      return true;
-    case JS::ModuleType::Unknown:
-    case JS::ModuleType::CSS:
-    case JS::ModuleType::Bytes:
-      // Step 3: WorkletModuleLoader::IsModuleTypeAllowed() rejected these
-      // before the fetch started, so no response can arrive for them.
-      MOZ_CRASH("Unexpected module type");
-  }
-  MOZ_CRASH("Unhandled module type");
-}
+WorkletScriptHandler::WorkletScriptHandler(Worklet* aWorklet, nsIURI* aURI)
+    : mWorklet(aWorklet), mURI(aURI) {}
 
 void WorkletScriptHandler::ResolvedCallback(JSContext* aCx,
                                             JS::Handle<JS::Value> aValue,
@@ -612,26 +573,16 @@ void WorkletScriptHandler::ResolvedCallback(JSContext* aCx,
     return;
   }
 
-  nsAutoCString mimeType, mixedCaseMimeType, essence, charset;
-  response->GetMimeType(mimeType, mixedCaseMimeType);
-  (void)CMimeType::Parse(mimeType, essence, charset);
-  NS_ConvertUTF8toUTF16 essence16(essence);
-  if (!IsMimeTypeAllowedForModuleType(essence16, mModuleType)) {
-    AutoTArray<nsString, 2> params = {
-        NS_ConvertUTF8toUTF16(mURI->GetSpecOrDefault()),
-        NS_ConvertUTF8toUTF16(mixedCaseMimeType)};
-    nsContentUtils::ReportToConsole(nsIScriptError::errorFlag,
-                                    "MIMEMISMATCH"_ns,
-                                    mWorklet->GetParentObject()->GetExtantDoc(),
-                                    PropertiesFile::SECURITY_PROPERTIES,
-                                    "BlockModuleWithWrongMimeType", params);
-    HandleFailure(NS_ERROR_DOM_ABORT_ERR);
-    return;
-  }
-
 #ifdef NIGHTLY_BUILD
-  mHasWasmMimeTypeEssence = mModuleType == JS::ModuleType::JavaScriptOrWasm &&
-                            nsContentUtils::HasWasmMimeTypeEssence(essence16);
+  nsAutoCString contentType;
+  ErrorResult result;
+  if (response->GetInternalHeaders()) {
+    response->GetInternalHeaders()->Get("Content-Type"_ns, contentType, result);
+    if (!result.Failed()) {
+      mHasWasmMimeTypeEssence = nsContentUtils::HasWasmMimeTypeEssence(
+          NS_ConvertUTF8toUTF16(contentType));
+    }
+  }
 #endif
 
   nsCOMPtr<nsIInputStream> inputStream;
