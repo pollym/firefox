@@ -145,7 +145,7 @@ ipprotection-site-inclusions-callout-secondary-button-lapsed-users = Dismiss
 
 ## Holiday Promotion Callout
 
-ipprotection-holiday-promo-title = Get unlimited VPN until January 30
+ipprotection-holiday-promo-title-1 = Get unlimited VPN until January 31
 ipprotection-holiday-promo-description = Make your browsing private and harder to trace with built-in VPN.
 ipprotection-holiday-promo-primary-button = Open VPN
 ipprotection-holiday-promo-secondary-button = Dismiss
