@@ -84,6 +84,7 @@ class CSSNumericValue : public CSSStyleValue {
   already_AddRefed<CSSNumericValue> Mul(
       const Sequence<OwningCSSNumberish>& aValues, ErrorResult& aRv);
 
+  // https://drafts.css-houdini.org/css-typed-om-1/#dom-cssnumericvalue-div
   already_AddRefed<CSSNumericValue> Div(
       const Sequence<OwningCSSNumberish>& aValues, ErrorResult& aRv);
 
@@ -184,6 +185,9 @@ class CSSNumericValue : public CSSStyleValue {
   // https://drafts.css-houdini.org/css-typed-om-1/#dom-cssnumericvalue-mul
   already_AddRefed<CSSNumericValue> Mul(
       nsTArray<RefPtr<CSSNumericValue>> aValues, ErrorResult& aRv);
+
+  // https://drafts.css-houdini.org/css-typed-om-1/#cssmath-invert-a-cssnumericvalue
+  already_AddRefed<CSSNumericValue> Invert(ErrorResult& aRv);
 
   StyleNumericValue ToStyleNumericValue() const;
 
