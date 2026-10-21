@@ -96,9 +96,6 @@ tags = "urlbar"
 ["browser_searchbar_enter.js"]
 
 ["browser_searchbar_keyboard_navigation.js"]
-skip-if = [
-  "debug", # Bug 1792718
-]
 
 ["browser_searchbar_openpopup.js"]
 skip-if = [
