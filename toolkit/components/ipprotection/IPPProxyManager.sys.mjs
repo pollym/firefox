@@ -573,7 +573,11 @@ class IPPProxyManagerSingleton extends EventTarget {
           if (error === ERRORS.NOT_READY) {
             this.#cancelChannelFilter();
             this.updateState();
-          } else if (userAction || error === ERRORS.CANCELED) {
+          } else if (error === ERRORS.CANCELED) {
+            this.#cancelChannelFilter();
+            this.#setErrorState(error);
+          } else if (userAction) {
+            this.#connection?.fail();
             this.#cancelChannelFilter();
             this.#setErrorState(error);
           } else {
@@ -1137,6 +1141,7 @@ class IPPProxyManagerSingleton extends EventTarget {
    */
   #setErrorState(error) {
     this.#rotation?.controller.abort();
+    this.#connection?.fail();
 
     const isString = typeof error === "string";
     // Keep the kind in a local: updateState() below clears #errorType.

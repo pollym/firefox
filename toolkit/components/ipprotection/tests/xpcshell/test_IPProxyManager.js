@@ -655,6 +655,52 @@ add_task(async function test_IPPProxyManager_system_start_keeps_error() {
 });
 
 /**
+ * Tests that a load held by a user activation that fails is cancelled with a
+ * proxy error rather than aborted.
+ */
+add_task(
+  async function test_IPPProxyManager_user_activation_failure_fails_held_load() {
+    await initServiceWithFailingPass();
+
+    const started = IPPProxyManager.start(true);
+    const channel = makeDocumentChannel("https://example.com/");
+    applyFilter(IPPProxyManager.channelFilter(), channel);
+    await started;
+
+    Assert.equal(
+      channel.cancelStatus,
+      Cr.NS_ERROR_PROXY_CONNECTION_REFUSED,
+      "The held load should be cancelled with a proxy error"
+    );
+
+    IPProtectionService.uninit();
+  }
+);
+
+/**
+ * Tests that in ERROR, new loads are cancelled with a proxy error.
+ */
+add_task(async function test_IPPProxyManager_error_fails_proxied_loads() {
+  await initServiceWithFailingPass();
+  await IPPProxyManager.start(false);
+
+  const later = makeDocumentChannel("https://example.com/");
+  Assert.strictEqual(
+    applyFilter(IPPProxyManager.channelFilter(), later),
+    null,
+    "A new load should not get a connection"
+  );
+  Assert.equal(
+    later.cancelStatus,
+    Cr.NS_ERROR_PROXY_CONNECTION_REFUSED,
+    "A new load should be cancelled with a proxy error"
+  );
+
+  await IPPProxyManager.stop(false);
+  IPProtectionService.uninit();
+});
+
+/**
  * Tests that usage data is preserved when quota is exceeded.
  */
 add_task(async function test_IPPProxyManager_quota_exceeded() {
