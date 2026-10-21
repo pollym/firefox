@@ -1199,6 +1199,7 @@ class IPPProxyManagerSingleton extends EventTarget {
       return;
     }
 
+    const prevState = this.#state;
     this.#state = state;
 
     this.dispatchEvent(
@@ -1207,6 +1208,7 @@ class IPPProxyManagerSingleton extends EventTarget {
         composed: true,
         detail: {
           state,
+          prevState,
         },
       })
     );

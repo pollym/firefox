@@ -59,12 +59,12 @@ drives the lifecycle of the proxy connection.
   \- Failures during a user activation (missing entitlement, server list, proxy pass…) call `updateState()` to demote the proxy back to its previous state.
   \- Failures during a system activation move to `ERROR` instead, since its callers do not check the result and would otherwise start again from `READY`. `ERRORS.NOT_READY` and `ERRORS.CANCELED` are not failures and demote as above.
   \- Errors after the proxy is connected → `ERROR` via `#setErrorState`.
-- `stop(userAction)` from `ACTIVE` → `READY` after closing the channel filter and observers. It also cancels an activation that is in flight, including one still waiting for the service.
+- `stop(userAction)` from `ACTIVE` → `READY` after closing the channel filter and observers. It also cancels an activation that is in flight, including one still waiting for the service. `IPPAutoActivation` only starts it again on its own when a working connection (`ACTIVE` or `PAUSED`) goes back to `READY`, so a failed activation or a stop out of `ERROR` is not retried until a site rule changes or the service becomes ready anew.
 - `reset()` or helper‑driven recomputations call `updateState()` which demotes the proxy back to `READY`/`NOT_READY` and clears the credential cache.
 - Network errors (`proxy-http-error` with 401) trigger Proxy Pass rotation while staying `ACTIVE`; repeated failures bubble up through `#setErrorState`.
 
 ### Proxy events and hooks
 
-- `IPPProxyManager:StateChanged` is dispatched with `detail.state` whenever the proxy state machine moves.
+- `IPPProxyManager:StateChanged` is dispatched with `detail.state` and `detail.prevState` whenever the proxy state machine moves.
 - `IPPProxyManager` listens to `IPProtectionService:StateChanged` and to `proxy-http-error` from `IPPNetworkErrorObserver`.
 - Consumers can observe `IPPProxyManager.state` (or listen for events) to synchronize UI/telemetry with the proxy lifecycle.
