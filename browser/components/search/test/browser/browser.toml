@@ -98,9 +98,6 @@ tags = "urlbar"
 ["browser_searchbar_keyboard_navigation.js"]
 
 ["browser_searchbar_openpopup.js"]
-skip-if = [
-  "os == 'win' && os_version == '11.26200'", # Bug 2019745
-]
 
 ["browser_searchbar_results.js"]
 
