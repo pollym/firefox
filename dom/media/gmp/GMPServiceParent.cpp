@@ -424,8 +424,7 @@ GeckoMediaPluginServiceParent::GetContentParent(
                                                        __func__);
   }
 
-  auto holder =
-      std::make_unique<MozPromiseHolder<GetGMPContentParentPromise>>();
+  auto holder = MakeUnique<MozPromiseHolder<GetGMPContentParentPromise>>();
   RefPtr<GetGMPContentParentPromise> promise = holder->Ensure(__func__);
   EnsureInitialized()->Then(
       thread, __func__,
@@ -1463,7 +1462,7 @@ nsresult GeckoMediaPluginServiceParent::GetNodeId(
         if (NS_WARN_IF(NS_FAILED(rv))) {
           return rv;
         }
-        auto salt = std::make_unique<nsCString>(newSalt);
+        auto salt = MakeUnique<nsCString>(newSalt);
 
         mPersistentStorageAllowed.InsertOrUpdate(*salt, false);
         entry.Insert(std::move(salt));

@@ -342,8 +342,7 @@ void ScrollContainerFrame::Init(nsIContent* aContent, nsContainerFrame* aParent,
 void ScrollContainerFrame::Destroy(DestroyContext& aContext) {
   if (Maybe<ScrollState> state = SaveState();
       state && !PresShell()->IsDestroying()) {
-    mContent->AsElement()->SetSavedScrollState(
-        std::make_unique<ScrollState>(*state));
+    mContent->AsElement()->SetSavedScrollState(MakeUnique<ScrollState>(*state));
   }
 
   DestroyAbsoluteFrames(aContext);
@@ -2259,14 +2258,14 @@ void ScrollContainerFrame::AsyncScroll::InitSmoothScroll(
   if (!mAnimationPhysics || aOrigin != mOrigin) {
     mOrigin = aOrigin;
     if (StaticPrefs::general_smoothScroll_msdPhysics_enabled()) {
-      mAnimationPhysics = std::make_unique<ScrollAnimationMSDPhysics>(
+      mAnimationPhysics = MakeUnique<ScrollAnimationMSDPhysics>(
           apz::ScrollAnimationKind::Smooth, aInitialPosition,
           /*smallestVisibleIncrement=*/1.0);
     } else {
       ScrollAnimationBezierPhysicsSettings settings =
           layers::apz::ComputeBezierAnimationSettingsForOrigin(mOrigin);
-      mAnimationPhysics = std::make_unique<ScrollAnimationBezierPhysics>(
-          aInitialPosition, settings);
+      mAnimationPhysics =
+          MakeUnique<ScrollAnimationBezierPhysics>(aInitialPosition, settings);
     }
   }
 
@@ -2559,11 +2558,11 @@ void ScrollContainerFrame::ScrollToWithOrigin(nsPoint aScrollPosition,
 
   UniquePtr<ScrollSnapTargetIds> snapTargetIds;
   if (snapDestination) {
-    snapTargetIds = std::make_unique<ScrollSnapTargetIds>(
-        std::move(snapDestination->mTargetIds));
+    snapTargetIds =
+        MakeUnique<ScrollSnapTargetIds>(std::move(snapDestination->mTargetIds));
   } else {
     snapTargetIds =
-        std::make_unique<ScrollSnapTargetIds>(std::move(aParams.mTargetIds));
+        MakeUnique<ScrollSnapTargetIds>(std::move(aParams.mTargetIds));
   }
   if (aParams.IsInstant()) {
     // Asynchronous scrolling is not allowed, so we'll kill any existing
@@ -5274,7 +5273,7 @@ static void AddToListIfHeaderFooter(nsIFrame* aFrame,
 
 StickyScrollContainer& ScrollContainerFrame::EnsureStickyContainer() {
   if (!mStickyContainer) {
-    mStickyContainer = std::make_unique<StickyScrollContainer>(this);
+    mStickyContainer = MakeUnique<StickyScrollContainer>(this);
   }
   return *mStickyContainer;
 }

@@ -936,7 +936,7 @@ void nsWindow::RecreateDirectManipulationIfNeeded() {
     return;
   }
 
-  mDmOwner = std::make_unique<DirectManipulationOwner>(this);
+  mDmOwner = MakeUnique<DirectManipulationOwner>(this);
 
   LayoutDeviceIntRect bounds = mBounds;
   mDmOwner->Init(bounds);
@@ -8625,7 +8625,7 @@ nsresult nsWindow::SynthesizeNativeTouchPoint(
     }
 
     if (!mSynthesizedTouchInput) {
-      mSynthesizedTouchInput = std::make_unique<MultiTouchInput>();
+      mSynthesizedTouchInput = MakeUnique<MultiTouchInput>();
     }
 
     WidgetEventTime time = CurrentMessageWidgetEventTime();
@@ -8653,8 +8653,8 @@ nsresult nsWindow::SynthesizeNativeTouchPoint(
     }
 
     if (!entry) {
-      entry.Insert(std::make_unique<PointerInfo>(
-          aPointerId, aPoint, PointerInfo::PointerType::TOUCH));
+      entry.Insert(MakeUnique<PointerInfo>(aPointerId, aPoint,
+                                           PointerInfo::PointerType::TOUCH));
     } else {
       if (entry.Data()->mType != PointerInfo::PointerType::TOUCH) {
         return NS_ERROR_UNEXPECTED;
@@ -8741,8 +8741,8 @@ nsresult nsWindow::SynthesizeNativePenInput(
     }
 
     if (!entry) {
-      entry.Insert(std::make_unique<PointerInfo>(
-          aPointerId, aPoint, PointerInfo::PointerType::PEN));
+      entry.Insert(MakeUnique<PointerInfo>(aPointerId, aPoint,
+                                           PointerInfo::PointerType::PEN));
     } else {
       if (entry.Data()->mType != PointerInfo::PointerType::PEN) {
         return NS_ERROR_UNEXPECTED;

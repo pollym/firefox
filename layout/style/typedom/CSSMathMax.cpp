@@ -38,8 +38,7 @@ RefPtr<CSSMathMax> CSSMathMax::Create(nsCOMPtr<nsISupports> aParent,
 
   return MakeRefPtr<CSSMathMax>(
       std::move(aParent),
-      WrapMovingNotNull(
-          std::make_unique<StyleNumericType>(aMathMax.numeric_type)),
+      WrapMovingNotNull(MakeUnique<StyleNumericType>(aMathMax.numeric_type)),
       std::move(array));
 }
 

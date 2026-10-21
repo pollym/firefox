@@ -1466,7 +1466,7 @@ nsRefreshDriver::nsRefreshDriver(nsPresContext* aPresContext)
   ++sRefreshDriverCount;
 
   if (aPresContext->IsRoot()) {
-    mHangAnnotator = std::make_unique<PaintPendingHangAnnotator>(*this);
+    mHangAnnotator = MakeUnique<PaintPendingHangAnnotator>(*this);
   }
 }
 

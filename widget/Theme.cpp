@@ -144,7 +144,7 @@ already_AddRefed<nsITheme> do_GetNativeThemeDoNotUseDirectly() {
 
 already_AddRefed<nsITheme> do_GetRDMThemeDoNotUseDirectly() {
   if (MOZ_UNLIKELY(!gRDMInstance)) {
-    gRDMInstance = new Theme(std::make_unique<ScrollbarDrawingAndroid>());
+    gRDMInstance = new Theme(MakeUnique<ScrollbarDrawingAndroid>());
     ClearOnShutdown(&gRDMInstance);
   }
   return do_AddRef(gRDMInstance);
@@ -1482,30 +1482,30 @@ CSSCoord Theme::GetCheckboxRadioPrefSize() { return kCheckboxRadioSize; }
 UniquePtr<ScrollbarDrawing> Theme::ScrollbarStyle() {
   switch (StaticPrefs::widget_non_native_theme_scrollbar_style()) {
     case 1:
-      return std::make_unique<ScrollbarDrawingCocoa>();
+      return MakeUnique<ScrollbarDrawingCocoa>();
     case 2:
-      return std::make_unique<ScrollbarDrawingGTK>();
+      return MakeUnique<ScrollbarDrawingGTK>();
     case 3:
-      return std::make_unique<ScrollbarDrawingAndroid>();
+      return MakeUnique<ScrollbarDrawingAndroid>();
     case 4:
-      return std::make_unique<ScrollbarDrawingWin>();
+      return MakeUnique<ScrollbarDrawingWin>();
     case 5:
-      return std::make_unique<ScrollbarDrawingWin11>();
+      return MakeUnique<ScrollbarDrawingWin11>();
     default:
       break;
   }
     // Default to native scrollbar style for each platform.
 #ifdef XP_WIN
   if (IsWin11OrLater()) {
-    return std::make_unique<ScrollbarDrawingWin11>();
+    return MakeUnique<ScrollbarDrawingWin11>();
   }
-  return std::make_unique<ScrollbarDrawingWin>();
+  return MakeUnique<ScrollbarDrawingWin>();
 #elif defined(MOZ_WIDGET_COCOA) || defined(MOZ_WIDGET_UIKIT)
-  return std::make_unique<ScrollbarDrawingCocoa>();
+  return MakeUnique<ScrollbarDrawingCocoa>();
 #elif MOZ_WIDGET_GTK
-  return std::make_unique<ScrollbarDrawingGTK>();
+  return MakeUnique<ScrollbarDrawingGTK>();
 #elif ANDROID
-  return std::make_unique<ScrollbarDrawingAndroid>();
+  return MakeUnique<ScrollbarDrawingAndroid>();
 #else
 #  error "Unknown platform, need scrollbar implementation."
 #endif

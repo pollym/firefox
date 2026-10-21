@@ -4,8 +4,6 @@
 
 #include <objc/objc-runtime.h>
 
-#include <memory>
-
 #include "nsChangeObserver.h"
 #include "nsCocoaFeatures.h"
 #include "nsCocoaUtils.h"
@@ -23,6 +21,7 @@
 #include "nsString.h"
 #include "nsThreadUtils.h"
 
+#include "mozilla/UniquePtr.h"
 #include "mozilla/dom/Document.h"
 #include "nsIAppStartup.h"
 #include "nsIContent.h"
@@ -838,7 +837,7 @@ NSMenuItem* nsMenuBarX::CreateNativeAppMenuItem(nsMenuX* aMenu,
   // attribute for now.
   if (menuItem->HasAttr(nsGkAtoms::image)) {
     mAppMenuIcons.AppendElement(
-        std::make_unique<nsAppMenuItemIcon>(newMenuItem, menuItem));
+        MakeUnique<nsAppMenuItemIcon>(newMenuItem, menuItem));
   }
 
   return newMenuItem;

@@ -295,7 +295,7 @@ static ProbeAllocPolicy* GetProbeAllocPolicy() {
     RefPtr<TaskQueue> queue =
         TaskQueue::Create(GetMediaThreadPool(MediaThreadType::PLATFORM_DECODER),
                           "MediaCapabilities::ProbeAllocPolicy");
-    return std::make_unique<ProbeAllocPolicy>(
+    return MakeUnique<ProbeAllocPolicy>(
         queue, MakeRefPtr<SingleAllocPolicy>(TrackInfo::TrackType::kVideoTrack,
                                              queue));
   }();

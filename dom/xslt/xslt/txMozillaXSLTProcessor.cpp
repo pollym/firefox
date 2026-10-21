@@ -453,7 +453,7 @@ txMozillaXSLTProcessor::AddXSLTParam(const nsString& aName,
   }
 
   UniquePtr<OwningXSLTParameterValue> varValue =
-      std::make_unique<OwningXSLTParameterValue>();
+      MakeUnique<OwningXSLTParameterValue>();
   varValue->SetAsXPathResult() = xpathResult.forget();
 
   txExpandedName varName(nsId, name);
@@ -883,7 +883,7 @@ void txMozillaXSLTProcessor::SetParameter(const nsAString& aNamespaceURI,
     return;
   }
 
-  UniquePtr<txVariable> newVar = std::make_unique<txVariable>(std::move(value));
+  UniquePtr<txVariable> newVar = MakeUnique<txVariable>(std::move(value));
   mVariables.add(varName, newVar.release());
 }
 
@@ -1291,7 +1291,7 @@ void txMozillaXSLTProcessor::Shutdown() { txXSLTProcessor::shutdown(); }
 UniquePtr<txVariable::OwningXSLTParameterValue> txVariable::convertToOwning(
     const XSLTParameterValue& aValue, ErrorResult& aError) {
   UniquePtr<OwningXSLTParameterValue> value =
-      std::make_unique<OwningXSLTParameterValue>();
+      MakeUnique<OwningXSLTParameterValue>();
   if (aValue.IsUnrestrictedDouble()) {
     value->SetAsUnrestrictedDouble() = aValue.GetAsUnrestrictedDouble();
   } else if (aValue.IsBoolean()) {

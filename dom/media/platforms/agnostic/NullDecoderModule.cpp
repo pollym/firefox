@@ -34,8 +34,7 @@ class NullDecoderModule : public PlatformDecoderModule {
         StaticPrefs::media_test_null_decoder_creation_failure()) {
       return CreateDecoderPromiseFrom(nullptr, aParams);
     }
-    UniquePtr<DummyDataCreator> creator =
-        std::make_unique<NullVideoDataCreator>();
+    UniquePtr<DummyDataCreator> creator = MakeUnique<NullVideoDataCreator>();
     RefPtr<MediaDataDecoder> decoder = new DummyMediaDataDecoder(
         std::move(creator), "null media data decoder"_ns, aParams);
     return CreateDecoderPromiseFrom(decoder.forget(), aParams);

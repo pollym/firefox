@@ -504,8 +504,8 @@ static void AddDataEntryInternal(
   }
 
   mozilla::UniquePtr<mozilla::dom::DataInfo> info =
-      std::make_unique<mozilla::dom::DataInfo>(aBlobImpl, aPrincipal,
-                                               aPartitionKey, aContentParentId);
+      mozilla::MakeUnique<mozilla::dom::DataInfo>(
+          aBlobImpl, aPrincipal, aPartitionKey, aContentParentId);
   BlobURLsReporter::GetJSStackForBlob(info.get());
 
   gDataTable->InsertOrUpdate(aURI, std::move(info));

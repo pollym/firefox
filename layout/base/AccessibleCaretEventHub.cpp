@@ -359,7 +359,7 @@ void AccessibleCaretEventHub::Init() {
     mLongTapInjectorTimer = NS_NewTimer();
   }
 
-  mManager = std::make_unique<AccessibleCaretManager>(mPresShell);
+  mManager = MakeUnique<AccessibleCaretManager>(mPresShell);
 
   mInitialized = true;
 }

@@ -346,8 +346,8 @@ void ProfilerChild::GatherProfileThreadFunction(
       parameters->progress, "Gather-profile thread started", "Profile sent");
   using namespace mozilla::literals::ProportionValue_literals;  // For `1_pc`.
 
-  auto writer = std::make_unique<SpliceableChunkedJSONWriter>(
-      parameters->failureLatchSource);
+  auto writer =
+      MakeUnique<SpliceableChunkedJSONWriter>(parameters->failureLatchSource);
   auto rv =
       profiler_get_profile_json(*writer,
                                 /* aSinceTime */ 0,

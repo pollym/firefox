@@ -1094,7 +1094,7 @@ static void CreateObserversForAnimatedGlyphs(gfxTextRun* aTextRun) {
   observers->SetCapacity(observers->Length() +
                          fontsWithAnimatedGlyphs.Length());
   for (auto font : fontsWithAnimatedGlyphs) {
-    observers->AppendElement(std::make_unique<GlyphObserver>(font, aTextRun));
+    observers->AppendElement(MakeUnique<GlyphObserver>(font, aTextRun));
   }
 }
 
@@ -2641,11 +2641,11 @@ already_AddRefed<gfxTextRun> BuildTextRunsScanner::BuildTextRunForFrames(
     }
     char16_t maskChar =
         needsToMaskPassword ? 0 : textStyle->TextSecurityMaskChar();
-    transformingFactory = std::make_unique<nsCaseTransformTextRunFactory>(
+    transformingFactory = MakeUnique<nsCaseTransformTextRunFactory>(
         std::move(transformingFactory), false, useCapitalEsZett, maskChar);
   }
   if (anyMathMLStyling) {
-    transformingFactory = std::make_unique<MathMLTextRunFactory>(
+    transformingFactory = MakeUnique<MathMLTextRunFactory>(
         std::move(transformingFactory), mathFlags, sstyScriptLevel,
         fontInflation);
   }
@@ -2957,7 +2957,7 @@ void BuildTextRunsScanner::SetupBreakSinksForTextRun(gfxTextRun* aTextRun,
                              mappedFlow->mStartFrame->GetContentOffset());
 
     UniquePtr<BreakSink>* breakSink = mBreakSinks.AppendElement(
-        std::make_unique<BreakSink>(aTextRun, mDrawTarget, offset));
+        MakeUnique<BreakSink>(aTextRun, mDrawTarget, offset));
 
     uint32_t length = iterNext.GetSkippedOffset() - offset;
     uint32_t flags = 0;

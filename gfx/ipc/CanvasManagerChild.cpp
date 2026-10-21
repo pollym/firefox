@@ -220,7 +220,7 @@ RefPtr<webgpu::WebGPUChild> CanvasManagerChild::GetWebGPUChild() {
 
 layers::ActiveResourceTracker* CanvasManagerChild::GetActiveResourceTracker() {
   if (!mActiveResourceTracker) {
-    mActiveResourceTracker = std::make_unique<ActiveResourceTracker>(
+    mActiveResourceTracker = MakeUnique<ActiveResourceTracker>(
         1000, "CanvasManagerChild"_ns, GetCurrentSerialEventTarget());
   }
   return mActiveResourceTracker.get();

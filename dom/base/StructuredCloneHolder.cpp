@@ -316,7 +316,7 @@ void StructuredCloneHolderBase::Write(
 
   aRv.MightThrowJSException();
 
-  mBuffer = std::make_unique<JSAutoStructuredCloneBuffer>(
+  mBuffer = MakeUnique<JSAutoStructuredCloneBuffer>(
       mStructuredCloneScope, &StructuredCloneHolder::sCallbacks, this);
 
   if (!mBuffer->write(aCx, aValue, aTransfer, aCloneDataPolicy,
@@ -361,7 +361,7 @@ void StructuredCloneHolderBase::Adopt(JSStructuredCloneData&& aData,
   MOZ_ASSERT(!mBuffer, "Double Adopt is not allowed");
   MOZ_ASSERT(!mClearCalled, "This method cannot be called after Clear.");
 
-  mBuffer = std::make_unique<JSAutoStructuredCloneBuffer>(
+  mBuffer = MakeUnique<JSAutoStructuredCloneBuffer>(
       mStructuredCloneScope, &StructuredCloneHolder::sCallbacks, this);
   mBuffer->adopt(std::move(aData), aVersion, &StructuredCloneHolder::sCallbacks,
                  this);

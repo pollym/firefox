@@ -223,7 +223,7 @@ class DummyHttpTransaction : public nsAHttpTransaction {
       return mRequestHead.get();
     }
 
-    mRequestHead = std::make_unique<nsHttpRequestHead>();
+    mRequestHead = MakeUnique<nsHttpRequestHead>();
 
     (void)mRequestHead->SetHeader(nsHttp::Host, "example.com"_ns);
     return mRequestHead.get();

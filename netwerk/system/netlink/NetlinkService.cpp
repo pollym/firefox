@@ -770,7 +770,7 @@ void NetlinkService::OnLinkMessage(struct nlmsghdr* aNlh) {
       if (!entry) {
         LOG(("Creating new link [index=%u, name=%s, flags=%u, type=%u]",
              linkIndex, linkName.get(), link->GetFlags(), link->GetType()));
-        entry.Insert(std::make_unique<LinkInfo>(std::move(link)));
+        entry.Insert(MakeUnique<LinkInfo>(std::move(link)));
       } else {
         LOG(("Updating link [index=%u, name=%s, flags=%u, type=%u]", linkIndex,
              linkName.get(), link->GetFlags(), link->GetType()));
@@ -1070,7 +1070,7 @@ void NetlinkService::OnRouteCheckResult(struct nlmsghdr* aNlh) {
   UniquePtr<NetlinkRoute> route;
 
   if (aNlh) {
-    route = std::make_unique<NetlinkRoute>();
+    route = MakeUnique<NetlinkRoute>();
     if (!route->Init(aNlh)) {
       route = nullptr;
     } else {

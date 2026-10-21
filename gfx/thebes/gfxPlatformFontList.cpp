@@ -309,7 +309,7 @@ gfxPlatformFontList::gfxPlatformFontList(bool aNeedFullnamePostscriptNames)
       mOtherFamilyNames(16),
       mSharedCmaps(8) {
   if (aNeedFullnamePostscriptNames) {
-    mExtraNames = std::make_unique<ExtraNames>();
+    mExtraNames = MakeUnique<ExtraNames>();
   }
 
   mLangService = nsLanguageAtomService::GetService();
@@ -317,7 +317,7 @@ gfxPlatformFontList::gfxPlatformFontList(bool aNeedFullnamePostscriptNames)
   LoadBadUnderlineList();
   LoadIconFontOverrideList();
 
-  mFontPrefs = std::make_unique<FontPrefs>();
+  mFontPrefs = MakeUnique<FontPrefs>();
 
   gfxFontUtils::GetPrefsFontList(kFontSystemWhitelistPref, mEnabledFontsList);
   mFontFamilyWhitelistActive = !mEnabledFontsList.IsEmpty();
@@ -1041,7 +1041,7 @@ gfxFontEntry* gfxPlatformFontList::LookupInFaceNameLists(
     // names not completely initialized, so keep track of lookup misses
     if (!mFaceNameListsInitialized) {
       if (!mFaceNamesMissed) {
-        mFaceNamesMissed = std::make_unique<nsTHashSet<nsCString>>(2);
+        mFaceNamesMissed = MakeUnique<nsTHashSet<nsCString>>(2);
       }
       mFaceNamesMissed->Insert(aFaceName);
     }
@@ -1890,7 +1890,7 @@ bool gfxPlatformFontList::FindAndAddFamiliesLocked(
 
 void gfxPlatformFontList::AddToMissedNames(const nsCString& aKey) {
   if (!mOtherNamesMissed) {
-    mOtherNamesMissed = std::make_unique<nsTHashSet<nsCString>>(2);
+    mOtherNamesMissed = MakeUnique<nsTHashSet<nsCString>>(2);
   }
   mOtherNamesMissed->Insert(aKey);
 }
@@ -2949,7 +2949,7 @@ void gfxPlatformFontList::ClearLangGroupPrefFontsLocked() {
   mEmojiPrefFont = nullptr;
 
   // Create a new FontPrefs and replace the existing one.
-  mFontPrefs = std::make_unique<FontPrefs>();
+  mFontPrefs = MakeUnique<FontPrefs>();
 }
 
 // Support for memory reporting

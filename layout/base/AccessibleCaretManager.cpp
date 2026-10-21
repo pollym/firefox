@@ -83,9 +83,8 @@ std::ostream& operator<<(
 AccessibleCaretManager::AccessibleCaretManager(PresShell* aPresShell)
     : AccessibleCaretManager{
           aPresShell,
-          Carets{aPresShell ? std::make_unique<AccessibleCaret>(aPresShell)
-                            : nullptr,
-                 aPresShell ? std::make_unique<AccessibleCaret>(aPresShell)
+          Carets{aPresShell ? MakeUnique<AccessibleCaret>(aPresShell) : nullptr,
+                 aPresShell ? MakeUnique<AccessibleCaret>(aPresShell)
                             : nullptr}} {}
 
 AccessibleCaretManager::AccessibleCaretManager(PresShell* aPresShell,

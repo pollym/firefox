@@ -3355,8 +3355,7 @@ void nsIFrame::BuildDisplayListForStackingContext(
     // Start a new preserves3d context to keep informations on
     // nsDisplayListBuilder.
     autoPreserves3DContext =
-        std::make_unique<nsDisplayListBuilder::AutoPreserves3DContext>(
-            aBuilder);
+        MakeUnique<nsDisplayListBuilder::AutoPreserves3DContext>(aBuilder);
     // Save dirty rect on the builder to avoid being distorted for
     // multiple transforms along the chain.
     aBuilder->SavePreserves3DRect();

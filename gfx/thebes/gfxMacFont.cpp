@@ -168,7 +168,7 @@ bool gfxMacFont::ShapeText(const char16_t* aText, uint32_t aOffset,
   if (ctFontEntry->RequiresAATLayout() && !aVertical &&
       StaticPrefs::gfx_font_rendering_coretext_enabled()) {
     if (!mCoreTextShaper) {
-      mCoreTextShaper = std::make_unique<gfxCoreTextShaper>(this);
+      mCoreTextShaper = MakeUnique<gfxCoreTextShaper>(this);
     }
     if (mCoreTextShaper->ShapeText(aText, aOffset, aLength, aScript, aLanguage,
                                    aVertical, aRounding, aShapedText)) {

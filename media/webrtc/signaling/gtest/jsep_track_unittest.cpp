@@ -493,7 +493,7 @@ static void AddExtmap(SdpMediaSection& aMsection, uint16_t aId,
                       const SdpDirectionAttribute::Direction aDir =
                           SdpDirectionAttribute::kSendrecv) {
   auto& attrs = aMsection.GetAttributeList();
-  auto extmap = std::make_unique<SdpExtmapAttributeList>();
+  auto extmap = MakeUnique<SdpExtmapAttributeList>();
   // Rummage for an existing extmap list
   if (attrs.HasAttribute(SdpAttribute::kExtmapAttribute)) {
     *extmap = attrs.GetExtmap();
@@ -509,8 +509,8 @@ static void AddExtmap(SdpMediaSection& aMsection, uint16_t aId,
 TEST_F(JsepTrackTest, TwoByteExtIdKeptOnSendWhenExtmapAllowMixed) {
   Init(SdpMediaSection::kVideo);
   CreateOffer();
-  GetOffer().GetAttributeList().SetAttribute(std::make_unique<SdpFlagAttribute>(
-      SdpAttribute::kExtmapAllowMixedAttribute));
+  GetOffer().GetAttributeList().SetAttribute(
+      MakeUnique<SdpFlagAttribute>(SdpAttribute::kExtmapAllowMixedAttribute));
   CreateAnswer();
   const nsLiteralCString uri = "urn:ietf:params:rtp-hdrext:toffset"_ns;
   AddExtmap(GetAnswer(), 15, uri);
@@ -1533,7 +1533,7 @@ TEST_F(JsepTrackTest, DataChannelDraft21) {
 TEST_F(JsepTrackTest, DataChannelDraft21AnswerWithDifferentPort) {
   InitCodecs(CodecOverrides{});
 
-  mOffCodecs.LastElement() = std::make_unique<JsepApplicationCodecDescription>(
+  mOffCodecs.LastElement() = MakeUnique<JsepApplicationCodecDescription>(
       "webrtc-datachannel", 256, 4555, 10544);
 
   InitTracks(SdpMediaSection::kApplication);
@@ -1944,8 +1944,7 @@ TEST_F(JsepTrackTest, NonDefaultAudioSdpFmtpLine) {
   {
     // telephone-event doesn't store any params in JsepAudioCodecDescription.
     // Set them directly in the offer sdp instead.
-    auto params =
-        std::make_unique<SdpFmtpAttributeList::TelephoneEventParameters>();
+    auto params = MakeUnique<SdpFmtpAttributeList::TelephoneEventParameters>();
     params->dtmfTones = "2-9";
     GetOffer().SetFmtp({"101", *params});
   }
@@ -1953,8 +1952,7 @@ TEST_F(JsepTrackTest, NonDefaultAudioSdpFmtpLine) {
   {
     // telephone-event doesn't store any params in JsepAudioCodecDescription.
     // Set them directly in the answer sdp instead.
-    auto params =
-        std::make_unique<SdpFmtpAttributeList::TelephoneEventParameters>();
+    auto params = MakeUnique<SdpFmtpAttributeList::TelephoneEventParameters>();
     params->dtmfTones = "0-3,10";
     GetAnswer().SetFmtp({"101", *params});
   }
@@ -2215,7 +2213,7 @@ TEST(JsepTrackRecvPayloadTypesTest, SingleTrackPTsAreUnique)
 
   AutoTArray<UniquePtr<JsepCodecDescription>, 16> codecs;
   codecs.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
 
   SipccSdp offer1(SdpOrigin("", 0, 0, sdp::kIPv4, ""));
   SdpMediaSection& offer1Msection1 = offer1.AddMediaSection(
@@ -2255,9 +2253,9 @@ TEST(JsepTrackRecvPayloadTypesTest, DoubleTrackPTsAreUnique)
 
   AutoTArray<UniquePtr<JsepCodecDescription>, 16> codecs1, codecs2;
   codecs1.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
   codecs2.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("2", "codec1", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("2", "codec1", 48000, 1));
 
   SipccSdp offer1(SdpOrigin("", 0, 0, sdp::kIPv4, ""));
   SdpMediaSection& offer1Msection1 = offer1.AddMediaSection(
@@ -2321,9 +2319,9 @@ TEST(JsepTrackRecvPayloadTypesTest, DoubleTrackPTsAreDuplicates)
 
   AutoTArray<UniquePtr<JsepCodecDescription>, 16> codecs1, codecs2;
   codecs1.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
   codecs2.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
 
   SipccSdp offer1(SdpOrigin("", 0, 0, sdp::kIPv4, ""));
   SdpMediaSection& offer1Msection1 = offer1.AddMediaSection(
@@ -2386,14 +2384,14 @@ TEST(JsepTrackRecvPayloadTypesTest, DoubleTrackPTsOverlap)
 
   AutoTArray<UniquePtr<JsepCodecDescription>, 16> codecs1, codecs2;
   codecs1.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
   codecs1.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("2", "codec2", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("2", "codec2", 48000, 1));
 
   codecs2.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
   codecs2.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("3", "codec2", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("3", "codec2", 48000, 1));
 
   SipccSdp offer1(SdpOrigin("", 0, 0, sdp::kIPv4, ""));
   SdpMediaSection& offer1Msection1 = offer1.AddMediaSection(
@@ -2457,14 +2455,14 @@ TEST(JsepTrackRecvPayloadTypesTest, DoubleTrackPTsDuplicateAfterRenegotiation)
 
   AutoTArray<UniquePtr<JsepCodecDescription>, 16> codecs1, codecs2;
   codecs1.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("1", "codec1", 48000, 1));
   codecs1.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("2", "codec2", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("2", "codec2", 48000, 1));
 
   codecs2.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("3", "codec1", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("3", "codec1", 48000, 1));
   codecs2.AppendElement(
-      std::make_unique<JsepAudioCodecDescription>("4", "codec2", 48000, 1));
+      MakeUnique<JsepAudioCodecDescription>("4", "codec2", 48000, 1));
 
   // First negotiation.
   SipccSdp offer1(SdpOrigin("", 0, 0, sdp::kIPv4, ""));
@@ -2674,7 +2672,7 @@ TEST(JsepTrackRecvSsrcTest, DuplicateSsrcLinesDeduped)
       {.type = audio}, SdpDirectionAttribute::kSendonly, 0,
       SdpHelper::GetProtocolForMediaType(audio), sdp::kIPv4, "0.0.0.0");
 
-  auto ssrcAttr = std::make_unique<SdpSsrcAttributeList>();
+  auto ssrcAttr = MakeUnique<SdpSsrcAttributeList>();
   ssrcAttr->PushEntry(12345678, "cname:test-cname");
   ssrcAttr->PushEntry(12345678, "msid:stream1 track1");
   ssrcAttr->PushEntry(87654321, "cname:test-cname");

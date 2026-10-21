@@ -295,7 +295,7 @@ void FontFace::MaybeReject(FontFaceLoadedRejectReason aReason,
         break;
     }
   } else if (!mLoadedRejection) {
-    mLoadedRejection = std::make_unique<FontFaceLoadedRejection>(
+    mLoadedRejection = MakeUnique<FontFaceLoadedRejection>(
         FontFaceLoadedRejection{aReason, std::move(aMessage)});
   }
 }

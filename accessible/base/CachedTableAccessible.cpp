@@ -365,12 +365,11 @@ UniquePtr<AccIterable> CachedTableCellAccessible::GetExplicitHeadersIterator() {
       if (auto headers =
               remoteAcc->mCachedFields->GetAttribute<nsTArray<uint64_t>>(
                   CacheKey::CellHeaders)) {
-        return std::make_unique<RemoteAccIterator>(*headers,
-                                                   remoteAcc->Document());
+        return MakeUnique<RemoteAccIterator>(*headers, remoteAcc->Document());
       }
     }
   } else if (LocalAccessible* localAcc = mAcc->AsLocal()) {
-    return std::make_unique<AssociatedElementsIterator>(
+    return MakeUnique<AssociatedElementsIterator>(
         localAcc->Document(), localAcc->GetContent(), nsGkAtoms::headers);
   }
   return nullptr;

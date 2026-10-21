@@ -17,6 +17,7 @@
 #include "txXPathResultComparator.h"
 
 using mozilla::CheckedUint32;
+using mozilla::MakeUnique;
 using mozilla::MakeUniqueFallible;
 using mozilla::nsRFPService;
 using mozilla::RFPTarget;
@@ -97,7 +98,7 @@ nsresult txNodeSorter::addSortElement(Expr* aSelectExpr, Expr* aLangExpr,
     }
 
     UniquePtr<txResultStringComparator> comparator =
-        std::make_unique<txResultStringComparator>(ascending, upperFirst);
+        MakeUnique<txResultStringComparator>(ascending, upperFirst);
     rv = comparator->init(
         lang, aContext->getContextNode().OwnerDoc()->ShouldResistFingerprinting(
                   RFPTarget::JSLocale));
@@ -152,7 +153,7 @@ nsresult txNodeSorter::sortNodeSet(txNodeSet* aNodes, txExecutionState* aEs,
     indexes[i] = i;
   }
 
-  auto nodeSetContext = std::make_unique<txNodeSetContext>(aNodes, aEs);
+  auto nodeSetContext = MakeUnique<txNodeSetContext>(aNodes, aEs);
 
   // Sort the indexarray
   SortData sortData{this, nodeSetContext.get(), sortValues.Elements(), NS_OK};

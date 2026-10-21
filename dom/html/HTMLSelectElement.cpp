@@ -1360,7 +1360,7 @@ bool HTMLSelectElement::RestoreState(PresState* aState) {
 void HTMLSelectElement::RestoreStateTo(const SelectContentData& aNewSelected) {
   if (!mIsDoneAddingChildren) {
     // Make a copy of the state for us to restore from in the future.
-    mRestoreState = std::make_unique<SelectContentData>(aNewSelected);
+    mRestoreState = MakeUnique<SelectContentData>(aNewSelected);
     return;
   }
 

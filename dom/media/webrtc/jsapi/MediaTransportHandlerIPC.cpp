@@ -354,12 +354,12 @@ RefPtr<dom::RTCStatsPromise> MediaTransportHandlerIPC::GetIceStats(
                  const InitPromise::ResolveOrRejectValue& aValue) {
                if (aValue.IsReject()) {
                  return IPCPromise::CreateAndResolve(
-                     std::make_unique<dom::RTCStatsCollection>(),
+                     MakeUnique<dom::RTCStatsCollection>(),
                      "MediaTransportHandlerIPC::GetIceStats_1");
                }
                if (!mChild) {
                  return IPCPromise::CreateAndResolve(
-                     std::make_unique<dom::RTCStatsCollection>(),
+                     MakeUnique<dom::RTCStatsCollection>(),
                      "MediaTransportHandlerIPC::GetIceStats_1");
                }
                return mChild->SendGetIceStats(aTransportId, aNow);
@@ -367,7 +367,7 @@ RefPtr<dom::RTCStatsPromise> MediaTransportHandlerIPC::GetIceStats(
       ->Then(mThread, __func__, [](IPCPromise::ResolveOrRejectValue&& aValue) {
         if (aValue.IsReject()) {
           return dom::RTCStatsPromise::CreateAndResolve(
-              std::make_unique<dom::RTCStatsCollection>(),
+              MakeUnique<dom::RTCStatsCollection>(),
               "MediaTransportHandlerIPC::GetIceStats_2");
         }
         return dom::RTCStatsPromise::CreateAndResolve(

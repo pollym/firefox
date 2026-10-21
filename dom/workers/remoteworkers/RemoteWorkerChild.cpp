@@ -327,9 +327,9 @@ nsresult RemoteWorkerChild::ExecWorkerOnMainThread(
   info.mBaseURI = DeserializeURI(aData.baseScriptURL());
   info.mResolvedScriptURI = DeserializeURI(aData.resolvedScriptURL());
 
-  info.mPrincipalInfo = std::make_unique<PrincipalInfo>(aData.principalInfo());
+  info.mPrincipalInfo = MakeUnique<PrincipalInfo>(aData.principalInfo());
   info.mPartitionedPrincipalInfo =
-      std::make_unique<PrincipalInfo>(aData.partitionedPrincipalInfo());
+      MakeUnique<PrincipalInfo>(aData.partitionedPrincipalInfo());
 
   info.mReferrerInfo = aData.referrerInfo();
   info.mDomain = aData.domain();

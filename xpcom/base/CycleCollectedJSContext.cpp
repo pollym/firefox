@@ -397,9 +397,8 @@ js::UniquePtr<JS::JobQueue::SavedJobQueue>
 CycleCollectedJSContext::saveJobQueue(JSContext* cx) {
   auto saved = js::MakeUnique<SavedMicroTaskQueue>(this);
   if (!saved) {
-    // When std::make_unique's allocation fails, the SavedMicroTaskQueue
-    // constructor is never called, so mPendingMicroTaskRunnables is still
-    // initialized.
+    // When MakeUnique's allocation fails, the SavedMicroTaskQueue constructor
+    // is never called, so mPendingMicroTaskRunnables is still initialized.
     JS_ReportOutOfMemory(cx);
     return nullptr;
   }

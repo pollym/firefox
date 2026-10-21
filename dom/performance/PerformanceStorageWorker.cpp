@@ -130,7 +130,7 @@ void PerformanceStorageWorker::AddEntry(
     return;
   }
 
-  UniquePtr<PerformanceProxyData> data = std::make_unique<PerformanceProxyData>(
+  UniquePtr<PerformanceProxyData> data = MakeUnique<PerformanceProxyData>(
       std::move(aData), aInitiatorType, aEntryName);
 
   AddEntryOnWorker(std::move(data));

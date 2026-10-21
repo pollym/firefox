@@ -40,8 +40,7 @@ RefPtr<CSSMathClamp> CSSMathClamp::Create(nsCOMPtr<nsISupports> aParent,
 
   return MakeAndAddRef<CSSMathClamp>(
       std::move(aParent),
-      WrapMovingNotNull(
-          std::make_unique<StyleNumericType>(aMathClamp.numeric_type)),
+      WrapMovingNotNull(MakeUnique<StyleNumericType>(aMathClamp.numeric_type)),
       std::move(lower), std::move(value), std::move(upper));
 }
 

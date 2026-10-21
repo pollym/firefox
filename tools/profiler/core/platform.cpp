@@ -1226,7 +1226,7 @@ class ActivePS {
         mProfileBufferChunkManager(
             aChunkManagerOrNull
                 ? std::move(aChunkManagerOrNull)
-                : std::make_unique<ProfileBufferChunkManagerWithLocalLimit>(
+                : MakeUnique<ProfileBufferChunkManagerWithLocalLimit>(
                       size_t(ClampToAllowedEntries(aCapacity.Value())) *
                           scBytesPerEntry,
                       ChunkSizeForEntries(aCapacity.Value()))),
@@ -2126,7 +2126,7 @@ void profiler_add_state_change_callback(
   }
 
   (void)mIdentifiedProfilingStateChangeCallbacks.append(
-      std::make_unique<IdentifiedProfilingStateChangeCallback>(
+      MakeUnique<IdentifiedProfilingStateChangeCallback>(
           aProfilingStateSet, std::move(aCallback), aUniqueIdentifier));
 }
 
@@ -3836,8 +3836,7 @@ profiler_code_address_service_for_presymbolication() {
     const char* symbolicate = getenv("MOZ_PROFILER_SYMBOLICATE");
     return symbolicate && symbolicate[0] != '\0';
   }();
-  return preSymbolicate ? std::make_unique<ProfilerCodeAddressService>()
-                        : nullptr;
+  return preSymbolicate ? MakeUnique<ProfilerCodeAddressService>() : nullptr;
 }
 
 static ProfilerResult<ProfileGenerationAdditionalInformation>
@@ -4520,7 +4519,7 @@ class SamplerThread {
     // Also this means the sampler has not started its run yet, so any callback
     // added now will be invoked at the end of the next loop; this guarantees
     // that the callback will be invoked after at least one full sampling loop.
-    mPostSamplingCallbackList = std::make_unique<PostSamplingCallbackListItem>(
+    mPostSamplingCallbackList = MakeUnique<PostSamplingCallbackListItem>(
         std::move(mPostSamplingCallbackList), std::move(aCallback));
   }
 
@@ -5828,7 +5827,7 @@ static ProfilingStack* locked_register_thread(
           lockedRWFromAnyThread = aOffThreadRef.GetLockedRWFromAnyThread();
 
       ProfiledThreadData* profiledThreadData = ActivePS::AddLiveProfiledThread(
-          aLock, std::make_unique<ProfiledThreadData>(
+          aLock, MakeUnique<ProfiledThreadData>(
                      aOffThreadRef.UnlockedConstReaderCRef().Info()));
       lockedRWFromAnyThread->SetProfilingFeaturesAndData(
           threadProfilingFeatures, profiledThreadData, aLock);
@@ -5912,7 +5911,7 @@ static void locked_profiler_start(PSLockRef aLock, PowerOfTwo32 aCapacity,
 static Vector<const char*> SplitAtCommas(const char* aString,
                                          UniquePtr<char[]>& aStorage) {
   size_t len = strlen(aString);
-  aStorage = std::make_unique<char[]>(len + 1);
+  aStorage = MakeUnique<char[]>(len + 1);
   PodCopy(aStorage.get(), aString, len + 1);
 
   // Iterate over all characters in aStorage and split at commas, by
@@ -7039,7 +7038,7 @@ static void locked_profiler_start(PSLockRef aLock, PowerOfTwo32 aCapacity,
       ThreadRegistry::OffThreadRef::RWFromAnyThreadWithLock lockedThreadData =
           offThreadRef.GetLockedRWFromAnyThread();
       ProfiledThreadData* profiledThreadData = ActivePS::AddLiveProfiledThread(
-          aLock, std::make_unique<ProfiledThreadData>(info));
+          aLock, MakeUnique<ProfiledThreadData>(info));
       lockedThreadData->SetProfilingFeaturesAndData(threadProfilingFeatures,
                                                     profiledThreadData, aLock);
       lockedThreadData->GetNewCpuTimeInNs();
@@ -8279,7 +8278,7 @@ UniquePtr<ProfileChunkedBuffer> profiler_capture_backtrace() {
 
   ProfileChunkedBuffer captureBuffer(
       ProfileChunkedBuffer::ThreadSafety::WithoutMutex,
-      std::make_unique<ProfileBufferChunkManagerSingle>(
+      MakeUnique<ProfileBufferChunkManagerSingle>(
           ProfileBufferChunkManager::scExpectedMaximumStackSize));
 
   if (!profiler_capture_backtrace_into(captureBuffer,

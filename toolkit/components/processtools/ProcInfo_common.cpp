@@ -4,8 +4,7 @@
 
 #include "mozilla/ProcInfo.h"
 
-#include <memory>
-
+#include "mozilla/UniquePtr.h"
 #include "nsNetCID.h"
 #include "nsServiceManagerUtils.h"
 #include "nsThreadUtils.h"
@@ -13,7 +12,7 @@
 namespace mozilla {
 
 RefPtr<ProcInfoPromise> GetProcInfo(nsTArray<ProcInfoRequest>&& aRequests) {
-  auto holder = std::make_unique<MozPromiseHolder<ProcInfoPromise>>();
+  auto holder = MakeUnique<MozPromiseHolder<ProcInfoPromise>>();
   RefPtr<ProcInfoPromise> promise = holder->Ensure(__func__);
 
   nsresult rv = NS_OK;

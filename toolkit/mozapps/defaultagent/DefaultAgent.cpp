@@ -151,7 +151,7 @@ static void RemoveAllRegistryEntries() {
   maxValueNameLen += 1;
 
   mozilla::UniquePtr<wchar_t[]> valueName =
-      std::make_unique<wchar_t[]>(maxValueNameLen);
+      mozilla::MakeUnique<wchar_t[]>(maxValueNameLen);
 
   DWORD valueIndex = 0;
   // Set this to true if we encounter values in this key that are prefixed with

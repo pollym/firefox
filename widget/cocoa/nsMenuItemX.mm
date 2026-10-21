@@ -110,7 +110,7 @@ nsMenuItemX::nsMenuItemX(nsMenuX* aParent, const nsString& aLabel,
     SetTooltip();
   }
 
-  mIcon = std::make_unique<nsMenuItemIconX>(this);
+  mIcon = MakeUnique<nsMenuItemIconX>(this);
 
   mIsVisible = !nsMenuUtilsX::NodeIsHiddenOrCollapsed(mContent);
 

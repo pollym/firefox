@@ -42,7 +42,7 @@ bool RDDProcessHost::Launch(geckoargs::ChildProcessArgs aExtraOpts) {
   MOZ_ASSERT(mLaunchPhase == LaunchPhase::Unlaunched);
   MOZ_ASSERT(!mRDDChild);
 
-  mPrefSerializer = std::make_unique<ipc::SharedPreferenceSerializer>();
+  mPrefSerializer = MakeUnique<ipc::SharedPreferenceSerializer>();
   if (!mPrefSerializer->SerializeToSharedMemory(GeckoProcessType_RDD,
                                                 /* remoteType */ {})) {
     return false;

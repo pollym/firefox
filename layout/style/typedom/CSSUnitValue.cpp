@@ -33,8 +33,8 @@ RefPtr<CSSUnitValue> CSSUnitValue::Create(nsCOMPtr<nsISupports> aParent,
                                           const nsACString& aUnit) {
   return MakeRefPtr<CSSUnitValue>(
       std::move(aParent),
-      WrapMovingNotNull(std::make_unique<StyleNumericType>(aNumericType)),
-      aValue, aUnit);
+      WrapMovingNotNull(MakeUnique<StyleNumericType>(aNumericType)), aValue,
+      aUnit);
 }
 
 // static
@@ -71,7 +71,7 @@ already_AddRefed<CSSUnitValue> CSSUnitValue::Constructor(
 
   // Step 1.
 
-  auto numericType = std::make_unique<StyleNumericType>();
+  auto numericType = MakeUnique<StyleNumericType>();
   if (!Servo_NumericType_Create(&aUnit, numericType.get())) {
     aRv.ThrowTypeError("Invalid unit: "_ns + aUnit);
     return nullptr;

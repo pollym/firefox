@@ -64,7 +64,7 @@ nsTableCellMap::nsTableCellMap(nsTableFrame& aTableFrame, bool aBorderCollapse)
     prior = rgFrame;
   }
   if (aBorderCollapse) {
-    mBCInfo = std::make_unique<BCInfo>();
+    mBCInfo = MakeUnique<BCInfo>();
   }
 }
 

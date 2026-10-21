@@ -348,7 +348,7 @@ nsUrlClassifierStreamUpdater::DownloadUpdates(
   urlUtil->GetTelemetryProvider(tables.SafeElementAt(0, ""_ns),
                                 mTelemetryProvider);
 
-  mCurrentRequest = std::make_unique<UpdateRequest>();
+  mCurrentRequest = MakeUnique<UpdateRequest>();
   BuildUpdateRequest(aRequestTables, aRequestPayload, aRequestQueryParameters,
                      aIsPostRequest, aProvider, aUpdateUrl, aSuccessCallback,
                      aUpdateErrorCallback, aDownloadErrorCallback,
