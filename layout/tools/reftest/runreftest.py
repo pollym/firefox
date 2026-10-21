@@ -971,7 +971,6 @@ class RefTest:
         )
 
         if crashed:
-            # log suite_end to wrap up, this is usually done with in in-browser harness
             if not self.outputHandler.results:
                 # TODO: while .results is a defaultdict(int), it is proxied via log_actions as data, not type
                 self.outputHandler.results = {
@@ -989,7 +988,11 @@ class RefTest:
                     "Skip": 0,
                     "Slow": 0,
                 }
-            self.log.suite_end(extra={"results": self.outputHandler.results})
+            # When running by manifest, runSerialTests logs suite_end after the
+            # last manifest. Logging it here would end the suite early.
+            if not self.run_by_manifest:
+                # log suite_end to wrap up, this is usually done with in in-browser harness
+                self.log.suite_end(extra={"results": self.outputHandler.results})
 
         if not status and crashed:
             status = 1
