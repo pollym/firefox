@@ -99,8 +99,6 @@ class nsWindowWaylandToplevel final : public nsWindowWayland {
     return mWaylandWindowNext ? mWaylandWindowNext->AsWaylandPopup() : nullptr;
   }
 
-  bool IsPipWindow() const;
-
  protected:
   virtual ~nsWindowWaylandToplevel() = default;
 
@@ -109,6 +107,8 @@ class nsWindowWaylandToplevel final : public nsWindowWayland {
 
   void NativeShow(bool aAction) override;
   void HideAndRemoveAppPopups();
+
+  bool WaylandPipEnabled() const;
 
   void EnableVSyncSource() override;
   void DisableVSyncSource() override;
