@@ -70,7 +70,7 @@ class UnscaledFontFreeType : public UnscaledFont {
   friend class ScaledFontFontconfig;
 
   static void GetVariationSettingsFromFace(
-      std::vector<wr::FontVariation>* aVariations, FT_Face aFace);
+      std::vector<wr::FontVariation>* aVariations, SharedFTFace* aFace);
 
   static void ApplyVariationsToFace(const wr::FontVariation* aVariations,
                                     uint32_t aNumVariations, FT_Face aFace);
