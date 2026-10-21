@@ -52,14 +52,27 @@ SVGDocumentWrapper::~SVGDocumentWrapper() {
   }
 }
 
+static void DoDestroyViewer(nsIDocumentViewer* aViewer) {
+  if (RefPtr doc = aViewer->GetDocument()) {
+    doc->OnPageHide(false, nullptr);
+  }
+  aViewer->Close();
+  aViewer->Destroy();
+}
+
 void SVGDocumentWrapper::DestroyViewer() {
   MOZ_ASSERT(NS_IsMainThread());
-  if (mViewer) {
-    const RefPtr<Document> doc = mViewer->GetDocument();
-    doc->OnPageHide(false, nullptr);
-    mViewer->Close();
-    mViewer->Destroy();
-    mViewer = nullptr;
+  nsCOMPtr viewer = mViewer.forget();
+  if (!viewer) {
+    return;
+  }
+
+  if (nsContentUtils::IsSafeToRunScript()) {
+    DoDestroyViewer(viewer);
+  } else {
+    nsContentUtils::AddScriptRunner(NS_NewRunnableFunction(
+        "DestroyViewer",
+        [viewer = std::move(viewer)] { DoDestroyViewer(viewer); }));
   }
 }
 
