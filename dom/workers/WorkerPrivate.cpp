@@ -1425,22 +1425,6 @@ void WorkerPrivate::EvictFromBFCache() {
   runnable->Dispatch(this);
 }
 
-nsresult WorkerPrivate::SetCsp(nsIContentSecurityPolicy* aCSP) {
-  AssertIsOnMainThread();
-  if (!aCSP) {
-    return NS_OK;
-  }
-  aCSP->EnsureEventTarget(mMainThreadEventTarget);
-
-  mLoadInfo.mCSP = aCSP;
-  auto ctx = OffThreadCSPContext::CreateFromCSP(aCSP);
-  if (NS_WARN_IF(ctx.isErr())) {
-    return ctx.unwrapErr();
-  }
-  mLoadInfo.mCSPContext = ctx.unwrap();
-  return NS_OK;
-}
-
 nsresult WorkerPrivate::SetCSPFromHeaderValues(
     const nsACString& aCSPHeaderValue,
     const nsACString& aCSPReportOnlyHeaderValue) {
@@ -1473,8 +1457,6 @@ nsresult WorkerPrivate::SetCSPFromHeaderValues(
                                            0);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  csp->EnsureEventTarget(mMainThreadEventTarget);
-
   // If there's a CSP header, apply it.
   if (!cspHeaderValue.IsEmpty()) {
     rv = CSP_AppendCSPFromHeader(csp, cspHeaderValue, false);
@@ -1499,14 +1481,9 @@ nsresult WorkerPrivate::SetCSPFromHeaderValues(
     csp->AppendPolicy(addonPolicy->ExtensionPageCSP(), false, false);
   }
 
-  mLoadInfo.mCSP = csp;
-
-  auto ctx = OffThreadCSPContext::CreateFromCSP(csp);
-  if (NS_WARN_IF(ctx.isErr())) {
-    return ctx.unwrapErr();
-  }
-  mLoadInfo.mCSPContext = ctx.unwrap();
-  return NS_OK;
+  RefPtr policyContainer = MakeRefPtr<PolicyContainer>();
+  policyContainer->SetCSP(csp);
+  return SetPolicyContainerOnMainThread(policyContainer);
 }
 
 bool WorkerPrivate::IsFrozenForWorkerThread() const {
@@ -2681,9 +2658,26 @@ nsresult WorkerPrivate::SetPrincipalsOnMainThread(
                                              aLoadGroup);
 }
 
+nsresult WorkerPrivate::SetPolicyContainerOnMainThread(
+    PolicyContainer* aPolicyContainer) {
+  MOZ_TRY(mLoadInfo.SetPolicyContainerOnMainThread(aPolicyContainer));
+
+  if (mLoadInfo.mCSP) {
+    mLoadInfo.mCSP->EnsureEventTarget(mMainThreadEventTarget);
+  }
+
+  return NS_OK;
+}
+
 nsresult WorkerPrivate::SetPrincipalsAndPolicyContainerFromChannel(
     nsIChannel* aChannel) {
-  return mLoadInfo.SetPrincipalsAndPolicyContainerFromChannel(aChannel);
+  MOZ_TRY(mLoadInfo.SetPrincipalsAndPolicyContainerFromChannel(aChannel));
+
+  if (mLoadInfo.mCSP) {
+    mLoadInfo.mCSP->EnsureEventTarget(mMainThreadEventTarget);
+  }
+
+  return NS_OK;
 }
 
 bool WorkerPrivate::FinalChannelPrincipalIsValid(nsIChannel* aChannel) {

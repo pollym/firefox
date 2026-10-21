@@ -664,8 +664,9 @@ nsresult CacheLoadHandler::DataReceived() {
       // XHR Params Allowed
       mWorkerRef->Private()->SetXHRParamsAllowed(parent->XHRParamsAllowed());
 
-      // Set ContentSecurityPolicy
-      nsresult rv = mWorkerRef->Private()->SetCsp(parent->GetCsp());
+      // Set Policy-Container
+      nsresult rv = mWorkerRef->Private()->SetPolicyContainerOnMainThread(
+          parent->GetPolicyContainer());
       NS_ENSURE_SUCCESS(rv, rv);
     }
   }

@@ -986,12 +986,15 @@ class WorkerPrivate final
 
   void EvictFromBFCache();
 
+  PolicyContainer* GetPolicyContainer() const {
+    AssertIsOnMainThread();
+    return mLoadInfo.mPolicyContainer;
+  }
+
   nsIContentSecurityPolicy* GetCsp() const {
     AssertIsOnMainThread();
     return mLoadInfo.mCSP;
   }
-
-  nsresult SetCsp(nsIContentSecurityPolicy* aCSP);
 
   nsresult SetCSPFromHeaderValues(const nsACString& aCSPHeaderValue,
                                   const nsACString& aCSPReportOnlyHeaderValue);
@@ -1146,6 +1149,8 @@ class WorkerPrivate final
   nsresult SetPrincipalsOnMainThread(nsIPrincipal* aPrincipal,
                                      nsIPrincipal* aPartitionedPrincipal,
                                      nsILoadGroup* aLoadGroup);
+
+  nsresult SetPolicyContainerOnMainThread(PolicyContainer* aPolicyContainer);
 
   nsresult SetPrincipalsAndPolicyContainerFromChannel(nsIChannel* aChannel);
 
