@@ -220,6 +220,11 @@ const AD_COMPONENTS = [
  *   The configuration for possible page type parameters.
  * @property {string[]} queryParamNames
  *   An array of query parameters that may be used for the user's search string.
+ * @property {boolean} [requireDocumentLoadForAdClick=false]
+ *   If true, only document loads (top-level or subframe) to an ad server are
+ *   counted as ad clicks. Use this when the provider sends non-document
+ *   requests, such as tracking pixels on hover, to the same endpoint used for
+ *   ad click navigations.
  * @property {boolean} [requireTopLevelImpressionOrigin=false]
  *   If true, a same-document navigation is only allowed to start tracking a
  *   browser if the document that browser actually loaded over the network was
@@ -1722,6 +1727,11 @@ class ContentHandler {
       }
 
       if (!info?.extraAdServersRegexps?.some(regex => regex.test(url))) {
+        return;
+      }
+
+      if (info.requireDocumentLoadForAdClick && !channel.isDocument) {
+        lazy.logConsole.debug("Ignoring non-document request to ad server");
         return;
       }
 
