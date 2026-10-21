@@ -448,12 +448,12 @@ static bool ConvertSourceTextToUTF8(const nsAString& aText, nsACString& aUTF8,
 
 void gfxTextRun::DrawGlyphs(gfxFont* aFont, Range aRange, gfx::Point* aPt,
                             const PropertyProvider* aProvider,
-                            Range aSpacingRange, TextRunDrawParams& aParams,
+                            Range aProviderRange, TextRunDrawParams& aParams,
                             imgDrawingParams& aImgParams,
                             gfx::ShapedTextFlags aOrientation) const {
   AutoTArray<PropertyProvider::Spacing, 200> spacingBuffer;
-  bool haveSpacing =
-      GetAdjustedSpacingArray(aRange, aProvider, aSpacingRange, &spacingBuffer);
+  bool haveSpacing = GetAdjustedSpacingArray(aRange, aProvider, aProviderRange,
+                                             &spacingBuffer);
   aParams.spacing = haveSpacing ? spacingBuffer.Elements() : nullptr;
   nsAutoString sourceText16;
   nsAutoCString sourceText;
