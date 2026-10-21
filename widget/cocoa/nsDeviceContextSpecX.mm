@@ -195,14 +195,6 @@ nsresult nsDeviceContextSpecX::DoEndDocument() {
                                         mPageFormat, mimeType, pdfURL);
       break;
     }
-    case kPMDestinationPreview: {
-      // XXXjwatt Or should we use CocoaFileUtils::RevealFileInFinder(pdfURL);
-      AutoCFTypeRef<CFStringRef> pdfPath(
-          CFURLCopyFileSystemPath(pdfURL, kCFURLPOSIXPathStyle));
-      NSString* path = (NSString*)CFStringRef(pdfPath);
-      [NSWorkspace.sharedWorkspace openFile:path];
-      break;
-    }
     case kPMDestinationFile: {
       AutoCFTypeRef<CFURLRef> destURL(nullptr);
       status = ::PMSessionCopyDestinationLocation(
@@ -259,6 +251,7 @@ nsresult nsDeviceContextSpecX::DoEndDocument() {
                                                  pdfURL);
       break;
     }
+    case kPMDestinationPreview:
     case kPMDestinationFax:
     default:
       return PrintPDFViaPrintSession(pdfURL);
