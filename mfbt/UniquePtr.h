@@ -14,10 +14,7 @@
 
 namespace mozilla {
 
-template <typename T>
-using DefaultDelete = std::default_delete<T>;
-
-template <typename T, class D = DefaultDelete<T>>
+template <typename T, class D = std::default_delete<T>>
 using UniquePtr = std::unique_ptr<T, D>;
 
 }  // namespace mozilla
