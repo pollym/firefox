@@ -144,13 +144,9 @@ nsresult WorkerLoadInfo::SetPolicyContainerOnMainThread(
   PolicyContainer::ToArgs(mPolicyContainer, policyContainerArgs);
   mPolicyContainerArgs.emplace(std::move(policyContainerArgs));
 
-  if (nsIContentSecurityPolicy* csp = mPolicyContainer->GetCSP()) {
-    Result<UniquePtr<OffThreadCSPContext>, nsresult> ctx =
-        OffThreadCSPContext::CreateFromCSP(csp);
-    if (NS_WARN_IF(ctx.isErr())) {
-      return ctx.unwrapErr();
-    }
-    mCSPContext = ctx.unwrap();
+  if (mPolicyContainerArgs->csp().isSome()) {
+    mozilla::ipc::CSPInfo cspInfo(*mPolicyContainerArgs->csp());
+    mCSPContext = MakeUnique<OffThreadCSPContext>(std::move(cspInfo));
   }
 
   return NS_OK;
