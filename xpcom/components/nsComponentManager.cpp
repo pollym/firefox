@@ -6,6 +6,8 @@
 
 #include <stdlib.h>
 
+#include <memory>
+
 #include "LogModulePrefWatcher.h"
 #include "ManifestParser.h"
 #include "StaticComponents.h"
@@ -18,7 +20,6 @@
 #include "mozilla/ScopeExit.h"
 #include "mozilla/Services.h"
 #include "mozilla/URLPreloader.h"
-#include "mozilla/UniquePtr.h"
 #include "mozilla/Variant.h"
 #include "nsArray.h"
 #include "nsCOMPtr.h"
@@ -982,7 +983,7 @@ nsComponentManagerImpl::RegisterFactory(const nsCID& aClass, const char* aName,
     return NS_ERROR_FACTORY_NOT_REGISTERED;
   }
 
-  auto f = MakeUnique<nsFactoryEntry>(aClass, aFactory);
+  auto f = std::make_unique<nsFactoryEntry>(aClass, aFactory);
 
   MonitorAutoLock lock(mLock);
   return mFactories.WithEntryHandle(&f->mCID, [&](auto&& entry) {

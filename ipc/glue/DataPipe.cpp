@@ -120,7 +120,7 @@ class DataPipeLink : public NodeController::PortObserver {
     // to deliver out-of-order, so we don't need to worry about ordering here.
     aLock.AddUnlockAction([controller = RefPtr{mPort.Controller()},
                            port = mPort.Port(), aBytes]() mutable {
-      auto message = MakeUnique<IPC::Message>(
+      auto message = std::make_unique<IPC::Message>(
           MSG_ROUTING_NONE, DATA_PIPE_BYTES_CONSUMED_MESSAGE_TYPE);
       IPC::MessageWriter writer(*message);
       WriteParam(&writer, aBytes);
@@ -139,8 +139,8 @@ class DataPipeLink : public NodeController::PortObserver {
     mPeerStatus = NS_SUCCEEDED(aStatus) ? NS_BASE_STREAM_CLOSED : aStatus;
     aLock.AddUnlockAction([port = std::move(mPort), aStatus, aSendClosed] {
       if (aSendClosed) {
-        auto message = MakeUnique<IPC::Message>(MSG_ROUTING_NONE,
-                                                DATA_PIPE_CLOSED_MESSAGE_TYPE);
+        auto message = std::make_unique<IPC::Message>(
+            MSG_ROUTING_NONE, DATA_PIPE_CLOSED_MESSAGE_TYPE);
         IPC::MessageWriter writer(*message);
         WriteParam(&writer, aStatus);
         port.Controller()->SendUserMessage(port.Port(), std::move(message));

@@ -1123,7 +1123,7 @@ ipc::IPCResult WebGPUParent::GetFrontBufferSnapshot(
     return IPC_OK();
   }
 
-  auto snapshotRequest = MakeUnique<ReadbackSnapshotRequest>(
+  auto snapshotRequest = std::make_unique<ReadbackSnapshotRequest>(
       mContext.get(), data, bufferId, shmem, stride);
 
   ffi::WGPUBufferMapAsyncStatus status = ffi::wgpu_server_buffer_map_blocking(
@@ -1283,7 +1283,7 @@ void WebGPUParent::SwapChainPresent(
   // texture,
   // we can just give it the contents of the last mapped buffer instead of the
   // copy.
-  auto presentRequest = MakeUnique<ReadbackPresentRequest>(
+  auto presentRequest = std::make_unique<ReadbackPresentRequest>(
       mContext.get(), data, mRemoteTextureOwner, aRemoteTextureId, aOwnerId);
 
   ffi::WGPUBufferMapClosure closure = {

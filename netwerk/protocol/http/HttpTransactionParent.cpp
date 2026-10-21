@@ -447,7 +447,7 @@ mozilla::ipc::IPCResult HttpTransactionParent::RecvOnStartRequest(
     const nsILoadInfo::IPAddressSpace& aTargetIPAddressSpace) {
   RefPtr<nsHttpConnectionInfo> cinfo =
       nsHttpConnectionInfo::DeserializeHttpConnectionInfoCloneArgs(aArgs);
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this,
       [self = UnsafePtr<HttpTransactionParent>(this), aStatus,
        aResponseHead = std::move(aResponseHead),
@@ -523,7 +523,7 @@ void HttpTransactionParent::DoOnStartRequest(
 
   if (aResponseHead.isSome()) {
     mResponseHead =
-        MakeUnique<nsHttpResponseHead>(std::move(aResponseHead.ref()));
+        std::make_unique<nsHttpResponseHead>(std::move(aResponseHead.ref()));
   }
   mProxyConnectFailed = aProxyConnectFailed;
   TimingStructArgsToTimingsStruct(aTimings, mTimings);
@@ -585,7 +585,7 @@ mozilla::ipc::IPCResult HttpTransactionParent::RecvOnDataAvailable(
     return IPC_OK();
   }
 
-  mEventQ->RunOrEnqueue(MakeUnique<ChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<ChannelFunctionEvent>(
       [self = UnsafePtr<HttpTransactionParent>(this)]() {
         return self->GetODATarget();
       },
@@ -636,7 +636,7 @@ void HttpTransactionParent::CancelOnMainThread(nsresult aRv) {
   // Cancel is expected to preempt any other channel events, thus we put this
   // event in the front of mEventQ to make sure nsIStreamListener not receiving
   // any ODA/OnStopRequest callbacks.
-  mEventQ->PrependEvent(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->PrependEvent(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpTransactionParent>(this), aRv]() {
         self->Cancel(aRv);
       }));
@@ -660,7 +660,7 @@ mozilla::ipc::IPCResult HttpTransactionParent::RecvOnStopRequest(
     return IPC_OK();
   }
 
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpTransactionParent>(this), aStatus,
              aResponseIsComplete, aTransferSize, aTimings, aResponseTrailers,
              aTransactionObserverResult{std::move(aTransactionObserverResult)},
@@ -697,7 +697,8 @@ void HttpTransactionParent::DoOnStopRequest(
   TimingStructArgsToTimingsStruct(aTimings, mTimings);
 
   if (aResponseTrailers.isSome()) {
-    mResponseTrailers = MakeUnique<nsHttpHeaderArray>(aResponseTrailers.ref());
+    mResponseTrailers =
+        std::make_unique<nsHttpHeaderArray>(aResponseTrailers.ref());
   }
 
   if (aTransactionObserverResult.isSome()) {
@@ -800,7 +801,7 @@ HttpTransactionParent::Cancel(nsresult aStatus) {
   // HttpTransactionChild won't send IPC if already canceled. That's why we have
   // to call DoNotifyListener().
   mEventQ->Suspend();
-  mEventQ->PrependEvent(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->PrependEvent(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpTransactionParent>(this)]() {
         self->DoNotifyListener();
       }));
@@ -821,7 +822,7 @@ void HttpTransactionParent::DoNotifyListener() {
 
   // This is to make sure that ODA in the event queue can be processed before
   // OnStopRequest.
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpTransactionParent>(this)] {
         self->ContinueDoNotifyListener();
       }));

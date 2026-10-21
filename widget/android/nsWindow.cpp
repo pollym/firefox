@@ -282,7 +282,7 @@ class NPZCSupport final
   void PostInputEvent(Lambda&& aLambda) {
     // Use priority queue for input events.
     nsAppShell::PostEvent(
-        MakeUnique<InputEvent<Lambda>>(this, std::move(aLambda)));
+        std::make_unique<InputEvent<Lambda>>(this, std::move(aLambda)));
   }
 
  public:
@@ -1115,7 +1115,7 @@ class LayerViewSupport final
 
    public:
     static UniquePtr<Event> MakeEvent(UniquePtr<Event>&& event) {
-      return MakeUnique<LayerViewEvent>(std::move(event));
+      return std::make_unique<LayerViewEvent>(std::move(event));
     }
 
     explicit LayerViewEvent(UniquePtr<Event>&& event)
@@ -1535,8 +1535,8 @@ class LayerViewSupport final
     };
 
     // Use priority queue for timing-sensitive event.
-    nsAppShell::PostEvent(
-        MakeUnique<LayerViewEvent>(MakeUnique<OnResumedEvent>(aObj)));
+    nsAppShell::PostEvent(std::make_unique<LayerViewEvent>(
+        std::make_unique<OnResumedEvent>(aObj)));
   }
 
   void RequestNewSurface() {

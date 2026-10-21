@@ -151,7 +151,7 @@ UniquePtr<StyleNumericType> ComputeNumericType(
     numericTypes.AppendElement(&value->GetNumericType());
   }
 
-  auto numericType = MakeUnique<StyleNumericType>();
+  auto numericType = std::make_unique<StyleNumericType>();
   if (!aOperation(&numericTypes, numericType.get())) {
     aRv.ThrowTypeError("Incompatible types");
     return nullptr;
@@ -165,7 +165,7 @@ UniquePtr<StyleNumericType> ComputeNumericType(
 CSSNumericValue::CSSNumericValue(nsCOMPtr<nsISupports> aParent,
                                  NumericValueType aNumericValueType)
     : CSSStyleValue(std::move(aParent), StyleValueType::NumericValue),
-      mNumericType(WrapMovingNotNull(MakeUnique<StyleNumericType>())),
+      mNumericType(WrapMovingNotNull(std::make_unique<StyleNumericType>())),
       mNumericValueType(aNumericValueType) {}
 
 CSSNumericValue::CSSNumericValue(
@@ -546,7 +546,7 @@ already_AddRefed<CSSNumericValue> CSSNumericValue::Negate() {
   }
 
   // Step 3.
-  auto numericType = MakeUnique<StyleNumericType>(GetNumericType());
+  auto numericType = std::make_unique<StyleNumericType>(GetNumericType());
 
   RefPtr<CSSMathNegate> mathNegate =
       CSSMathNegate::Create(mParent, std::move(numericType), this);
@@ -615,7 +615,7 @@ already_AddRefed<CSSNumericValue> CSSNumericValue::Invert(ErrorResult& aRv) {
   }
 
   // Step 3.
-  auto numericType = MakeUnique<StyleNumericType>(GetNumericType());
+  auto numericType = std::make_unique<StyleNumericType>(GetNumericType());
   Servo_NumericType_Invert(numericType.get());
 
   RefPtr<CSSMathInvert> mathInvert =

@@ -287,7 +287,7 @@ bool PathContainsInvalidLinks(wchar_t* const fullPath) {
       }
 
       mozilla::UniquePtr<UINT8[]> byteBuffer =
-          mozilla::MakeUnique<UINT8[]>(MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
+          std::make_unique<UINT8[]>(MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
       ZeroMemory(byteBuffer.get(), MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
       REPARSE_DATA_BUFFER* buffer = (REPARSE_DATA_BUFFER*)byteBuffer.get();
       DWORD bytes = 0;
@@ -352,7 +352,7 @@ bool IsProgramFilesPath(NS_tchar* fullPath) {
     return false;
   }
   mozilla::UniquePtr<wchar_t[]> longInstallPath =
-      mozilla::MakeUnique<wchar_t[]>(longInstallPathChars);
+      std::make_unique<wchar_t[]>(longInstallPathChars);
   if (!GetLongPathNameW(fullPath, longInstallPath.get(),
                         longInstallPathChars)) {
     return false;
@@ -388,7 +388,7 @@ bool IsProgramFilesPath(NS_tchar* fullPath) {
       // extra character for the trailing backslash.
       length += 1;
       mozilla::UniquePtr<wchar_t[]> programFiles32PathWithSlash =
-          mozilla::MakeUnique<wchar_t[]>(length + 1);
+          std::make_unique<wchar_t[]>(length + 1);
 
       NS_tsnprintf(programFiles32PathWithSlash.get(), length + 1, NS_T("%s\\"),
                    programFiles32Path.get());
@@ -422,7 +422,7 @@ bool IsProgramFilesPath(NS_tchar* fullPath) {
       return false;
     }
     mozilla::UniquePtr<wchar_t[]> programFilesNativePath =
-        mozilla::MakeUnique<wchar_t[]>(lengthChars);
+        std::make_unique<wchar_t[]>(lengthChars);
 
     // Now actually read the value.
     if (RegGetValueW(
@@ -448,7 +448,7 @@ bool IsProgramFilesPath(NS_tchar* fullPath) {
       // extra character for the trailing backslash.
       nativePathStrLen += 1;
       mozilla::UniquePtr<wchar_t[]> programFilesNativePathWithSlash =
-          mozilla::MakeUnique<wchar_t[]>(nativePathStrLen + 1);
+          std::make_unique<wchar_t[]>(nativePathStrLen + 1);
 
       NS_tsnprintf(programFilesNativePathWithSlash.get(), nativePathStrLen + 1,
                    NS_T("%s\\"), programFilesNativePath.get());

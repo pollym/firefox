@@ -546,7 +546,7 @@ class MediaCacheStream : public DecoderDoctorLifeLogger<MediaCacheStream> {
   // slop when combined with the rest of the object members.
   // This partial buffer should always be read/write within the cache's monitor.
   const UniquePtr<uint8_t[]> mPartialBlockBuffer =
-      MakeUnique<uint8_t[]>(BLOCK_SIZE);
+      std::make_unique<uint8_t[]>(BLOCK_SIZE);
 
   // True if associated with a private browsing window.
   const bool mIsPrivateBrowsing;

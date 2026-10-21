@@ -770,7 +770,7 @@ NS_IMETHODIMP
 HttpBaseChannel::SetContentDispositionFilename(
     const nsAString& aContentDispositionFilename) {
   mContentDispositionFilename =
-      MakeUnique<nsString>(aContentDispositionFilename);
+      std::make_unique<nsString>(aContentDispositionFilename);
 
   // For safety reasons ensure the filename doesn't contain null characters and
   // replace them with underscores. We may later pass the extension to system
@@ -6782,7 +6782,7 @@ HttpBaseChannel::MaybeCloneResponseHeadForCachedResource() {
     return nullptr;
   }
 
-  return MakeUnique<nsHttpResponseHead>(*mResponseHead);
+  return std::make_unique<nsHttpResponseHead>(*mResponseHead);
 }
 
 void HttpBaseChannel::SetDummyChannelForCachedResource(
@@ -6791,9 +6791,9 @@ void HttpBaseChannel::SetDummyChannelForCachedResource(
   MOZ_ASSERT(!mResponseHead,
              "SetDummyChannelForCachedResource should only be called once");
   if (aMaybeResponseHead) {
-    mResponseHead = MakeUnique<nsHttpResponseHead>(*aMaybeResponseHead);
+    mResponseHead = std::make_unique<nsHttpResponseHead>(*aMaybeResponseHead);
   } else {
-    mResponseHead = MakeUnique<nsHttpResponseHead>();
+    mResponseHead = std::make_unique<nsHttpResponseHead>();
   }
 }
 

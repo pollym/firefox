@@ -32,9 +32,9 @@
 #endif
 
 #include <algorithm>
+#include <memory>
 
 #include "mozilla/ToString.h"
-#include "mozilla/UniquePtr.h"
 #include "mozilla/gfx/gfxVars.h"
 #include "mozilla/layers/KnowsCompositor.h"
 #include "nsPrintfCString.h"
@@ -2177,7 +2177,7 @@ MediaResult FFmpegVideoDecoder<LIBAV_VER>::CreateImageVAAPI(
     AVHWFramesContext* context =
         (AVHWFramesContext*)mCodecContext->hw_frames_ctx->data;
     mVideoFramePool =
-        MakeUnique<VideoFramePool<LIBAV_VER>>(context->initial_pool_size);
+        std::make_unique<VideoFramePool<LIBAV_VER>>(context->initial_pool_size);
   }
   auto surface = mVideoFramePool->GetVideoFrameSurface(
       vaDesc, mFrame->width, mFrame->height, mCodecContext, mFrame, mLib);
@@ -2330,7 +2330,7 @@ MediaResult FFmpegVideoDecoder<LIBAV_VER>::CreateImageVulkan(
     AVHWFramesContext* context =
         (AVHWFramesContext*)mCodecContext->hw_frames_ctx->data;
     mVideoFramePool =
-        MakeUnique<VideoFramePool<LIBAV_VER>>(context->initial_pool_size);
+        std::make_unique<VideoFramePool<LIBAV_VER>>(context->initial_pool_size);
   }
 
   int32_t vulkanCopyBufIdx = -1;
@@ -2465,7 +2465,7 @@ MediaResult FFmpegVideoDecoder<LIBAV_VER>::CreateImageV4L2(
     // But, this value is only used for deciding when we are running out of
     // free buffers and so should start copying them.  So a rough estimate
     // is sufficient, and the codec defaults to 20 capture buffers.
-    mVideoFramePool = MakeUnique<VideoFramePool<LIBAV_VER>>(20);
+    mVideoFramePool = std::make_unique<VideoFramePool<LIBAV_VER>>(20);
   }
 
   auto surface = mVideoFramePool->GetVideoFrameSurface(
@@ -3303,7 +3303,7 @@ MediaResult FFmpegVideoDecoder<LIBAV_VER>::CreateImageMediaCodec(
 
   RefPtr<layers::Image> img;
   if (mAndroidImageReader) {
-    auto listener = MakeUnique<CompositeListener>(this);
+    auto listener = std::make_unique<CompositeListener>(this);
     mFrameMap.Insert(listener.get(), frame);
     auto readerImage = MakeRefPtr<layers::AndroidImageReaderImage>(
         mAndroidImageReader->mImageReaderId,
@@ -3317,7 +3317,7 @@ MediaResult FFmpegVideoDecoder<LIBAV_VER>::CreateImageMediaCodec(
         false /* NOT continuous */, gl::OriginPos::BottomLeft, mInfo.HasAlpha(),
         false /* force color space stuff */,
         /* aTransformOverride */ Nothing());
-    auto listener = MakeUnique<CompositeListener>(this);
+    auto listener = std::make_unique<CompositeListener>(this);
     mFrameMap.Insert(listener.get(), frame);
     img->AsSurfaceTextureImage()->RegisterSetCurrentCallback(
         std::move(listener));

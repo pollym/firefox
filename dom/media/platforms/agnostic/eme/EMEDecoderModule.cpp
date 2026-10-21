@@ -148,7 +148,7 @@ class EMEDecryptor final : public MediaDataDecoder,
     }
 
     const auto& decrypt = mDecrypts.InsertOrUpdate(
-        aSample, MakeUnique<DecryptPromiseRequestHolder>());
+        aSample, std::make_unique<DecryptPromiseRequestHolder>());
     mProxy->Decrypt(aSample)
         ->Then(mThread, __func__, this, &EMEDecryptor::Decrypted,
                &EMEDecryptor::Decrypted)
@@ -474,7 +474,7 @@ EMEDecoderModule::AsyncCreateDecoder(const CreateDecoderParams& aParams) {
   if (MP4Decoder::IsAAC(aParams.mConfig.mMimeType)) {
     // The CDM expects encrypted AAC to be in ADTS format.
     // See bug 1433344.
-    converter = MakeUnique<ADTSSampleConverter>(aParams.AudioConfig());
+    converter = std::make_unique<ADTSSampleConverter>(aParams.AudioConfig());
   }
 
   RefPtr<EMEDecoderModule::CreateDecoderPromise> p =

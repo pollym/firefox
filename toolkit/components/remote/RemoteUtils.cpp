@@ -59,7 +59,7 @@ mozilla::UniquePtr<char[]> ConstructCommandLine(int32_t argc, const char** argv,
     argvlen += len;
   }
 
-  mozilla::UniquePtr<char[]> buffer = mozilla::MakeUnique<char[]>(
+  mozilla::UniquePtr<char[]> buffer = std::make_unique<char[]>(
       argvlen + argc + 1 + sizeof(int32_t) * (argc + 1));
 
   int32_t* bufferInt = reinterpret_cast<int32_t*>(buffer.get());

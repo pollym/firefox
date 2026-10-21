@@ -264,7 +264,7 @@ nsSHistory::nsSHistory(BrowsingContext* aRootBC)
 
   // Init mHistoryTracker on setting mRootBC so we can bind its event
   // target to the tabGroup.
-  mHistoryTracker = mozilla::MakeUnique<HistoryTracker>(
+  mHistoryTracker = std::make_unique<HistoryTracker>(
       this,
       mozilla::Preferences::GetUint(CONTENT_VIEWER_TIMEOUT_SECONDS,
                                     CONTENT_VIEWER_TIMEOUT_SECONDS_DEFAULT),

@@ -755,7 +755,7 @@ class AdjustedTarget {
           return;
         }
       }
-      mShadowTarget = MakeUnique<AdjustedTargetForShadow>(
+      mShadowTarget = std::make_unique<AdjustedTargetForShadow>(
           aCtx, aCtx->mTarget, boundsAfterFilter, mUsedOperation);
       mTarget = mShadowTarget->DT();
       offsetToFinalDT = mShadowTarget->OffsetToFinalDT();
@@ -785,7 +785,7 @@ class AdjustedTarget {
         mOptimizeFilter = true;
       }
 
-      mFilterTarget = MakeUnique<AdjustedTargetForFilter>(
+      mFilterTarget = std::make_unique<AdjustedTargetForFilter>(
           aCtx, mTarget, offsetToFinalDT, intBounds,
           gfx::RoundedToInt(boundsAfterFilter), mUsedOperation,
           mOptimizeFilter);
@@ -4285,7 +4285,7 @@ bool CanvasRenderingContext2D::SetFontInternal(const nsACString& aFont,
   }
 
   if (!mFontStyleCache) {
-    mFontStyleCache = MakeUnique<FontStyleCache>();
+    mFontStyleCache = std::make_unique<FontStyleCache>();
   }
 
   nsPresContext* c = presShell->GetPresContext();
@@ -4528,7 +4528,7 @@ bool CanvasRenderingContext2D::SetFontInternalDisconnected(
 
   // Do we have a cached fontgroup that corresponds to this `font` value?
   if (!mFontGroupCache) {
-    mFontGroupCache = MakeUnique<FontGroupCache>();
+    mFontGroupCache = std::make_unique<FontGroupCache>();
   }
 
   FontGroupCacheKey key(
@@ -4812,7 +4812,7 @@ struct MOZ_STACK_CLASS CanvasBidiProcessor final
   explicit CanvasBidiProcessor(gfx::FontPaletteValueSet* aPaletteValueSet)
       : mPaletteValueSet(aPaletteValueSet) {
     if (StaticPrefs::gfx_missing_fonts_notify()) {
-      mMissingFonts = MakeUnique<gfxMissingFontRecorder>();
+      mMissingFonts = std::make_unique<gfxMissingFontRecorder>();
     }
   }
 
@@ -5239,8 +5239,8 @@ UniquePtr<TextMetrics> CanvasRenderingContext2D::DrawOrMeasureText(
   if (currentFontStyle->GetStyle()->size == 0.0F) {
     aError = NS_OK;
     if (aOp == TextDrawOperation::MEASURE) {
-      return MakeUnique<TextMetrics>(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                     0.0, 0.0, 0.0, 0.0);
+      return std::make_unique<TextMetrics>(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                           0.0, 0.0, 0.0, 0.0, 0.0);
     }
     return nullptr;
   }
@@ -5250,8 +5250,8 @@ UniquePtr<TextMetrics> CanvasRenderingContext2D::DrawOrMeasureText(
     // This may not be correct - what should TextMetrics contain in the case of
     // infinite width or height?
     if (aOp == TextDrawOperation::MEASURE) {
-      return MakeUnique<TextMetrics>(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                     0.0, 0.0, 0.0, 0.0);
+      return std::make_unique<TextMetrics>(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                           0.0, 0.0, 0.0, 0.0, 0.0);
     }
     return nullptr;
   }
@@ -5412,7 +5412,7 @@ UniquePtr<TextMetrics> CanvasRenderingContext2D::DrawOrMeasureText(
         -processor.mBoundingBox.Y() - baselineAnchor;
     double actualBoundingBoxDescent =
         processor.mBoundingBox.YMost() + baselineAnchor;
-    return MakeUnique<TextMetrics>(
+    return std::make_unique<TextMetrics>(
         totalWidth, actualBoundingBoxLeft, actualBoundingBoxRight,
         fontMetrics.maxAscent - baselineAnchor,   // fontBBAscent
         fontMetrics.maxDescent + baselineAnchor,  // fontBBDescent

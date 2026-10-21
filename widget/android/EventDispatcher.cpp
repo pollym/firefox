@@ -437,7 +437,7 @@ nsresult EventDispatcher::DispatchToEmbedder(
   if (aCallback) {
     callback = java::EventDispatcher::NativeCallbackDelegate::New();
     NativeCallbackDelegateSupport::AttachNative(
-        callback, MakeUnique<NativeCallbackDelegateSupport>(aCallback));
+        callback, std::make_unique<NativeCallbackDelegateSupport>(aCallback));
   }
 
   dom::AutoNoJSAPI nojsapi;

@@ -58,7 +58,7 @@ std::wstring RegKey::GetString(const wchar_t* aValueName) {
   LSTATUS status = ::RegGetValueW(mKey, aValueName, nullptr, RRF_RT_REG_SZ,
                                   nullptr, nullptr, &len);
 
-  mozilla::UniquePtr<uint8_t[]> buf = mozilla::MakeUnique<uint8_t[]>(len);
+  mozilla::UniquePtr<uint8_t[]> buf = std::make_unique<uint8_t[]>(len);
   status = ::RegGetValueW(mKey, aValueName, nullptr, RRF_RT_REG_SZ, nullptr,
                           buf.get(), &len);
   if (status != ERROR_SUCCESS) {

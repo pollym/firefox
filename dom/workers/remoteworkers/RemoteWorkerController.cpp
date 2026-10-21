@@ -230,7 +230,7 @@ void RemoteWorkerController::MaybeStartSharedWorkerOp(Args&&... aArgs) {
   MOZ_ASSERT(!mIsServiceWorker);
 
   UniquePtr<PendingSharedWorkerOp> op =
-      MakeUnique<PendingSharedWorkerOp>(std::forward<Args>(aArgs)...);
+      std::make_unique<PendingSharedWorkerOp>(std::forward<Args>(aArgs)...);
 
   if (!op->MaybeStart(this)) {
     mPendingOps.AppendElement(std::move(op));
@@ -312,7 +312,7 @@ RefPtr<ServiceWorkerOpPromise> RemoteWorkerController::ExecServiceWorkerOp(
       new ServiceWorkerOpPromise::Private(__func__);
 
   UniquePtr<PendingServiceWorkerOp> op =
-      MakeUnique<PendingServiceWorkerOp>(std::move(aArgs), promise);
+      std::make_unique<PendingServiceWorkerOp>(std::move(aArgs), promise);
 
   if (!op->MaybeStart(this)) {
     mPendingOps.AppendElement(std::move(op));
@@ -332,7 +332,7 @@ RemoteWorkerController::ExecServiceWorkerFetchEventOp(
       new ServiceWorkerFetchEventOpPromise::Private(__func__);
 
   UniquePtr<PendingSWFetchEventOp> op =
-      MakeUnique<PendingSWFetchEventOp>(aArgs, promise, std::move(aReal));
+      std::make_unique<PendingSWFetchEventOp>(aArgs, promise, std::move(aReal));
 
   if (!op->MaybeStart(this)) {
     mPendingOps.AppendElement(std::move(op));

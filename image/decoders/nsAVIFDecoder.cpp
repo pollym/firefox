@@ -315,10 +315,10 @@ static Mp4parseStatus CreateSampleIterator(
     return rv;
   }
 
-  UniquePtr<IndiceWrapper> wrapper = MakeUnique<IndiceWrapper>(data);
+  UniquePtr<IndiceWrapper> wrapper = std::make_unique<IndiceWrapper>(data);
   auto index = MakeRefPtr<MP4SampleIndex>(*wrapper, aBuffer, trackID, false,
                                           AssertedCast<uint32_t>(timescale));
-  aIteratorOut = MakeUnique<SampleIterator>(index);
+  aIteratorOut = std::make_unique<SampleIterator>(index);
   return MP4PARSE_STATUS_OK;
 }
 
@@ -1021,7 +1021,7 @@ UniquePtr<AVIFDecodedData> Dav1dDecoder::Dav1dPictureToDecodedData(
   static_assert(std::is_same_v<int, decltype(aPicture->p.w)>);
   static_assert(std::is_same_v<int, decltype(aPicture->p.h)>);
 
-  UniquePtr<AVIFDecodedData> data = MakeUnique<AVIFDecodedData>();
+  UniquePtr<AVIFDecodedData> data = std::make_unique<AVIFDecodedData>();
 
   data->mRenderSize.emplace(aPicture->frame_hdr->render_width,
                             aPicture->frame_hdr->render_height);
@@ -1126,7 +1126,7 @@ UniquePtr<AVIFDecodedData> AOMDecoder::AOMImageToToDecodedData(
   MOZ_ASSERT(aom_img_plane_height(colorImage, AOM_PLANE_U) ==
              aom_img_plane_height(colorImage, AOM_PLANE_V));
 
-  UniquePtr<AVIFDecodedData> data = MakeUnique<AVIFDecodedData>();
+  UniquePtr<AVIFDecodedData> data = std::make_unique<AVIFDecodedData>();
 
   data->mRenderSize.emplace(colorImage->r_w, colorImage->r_h);
 

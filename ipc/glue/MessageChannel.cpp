@@ -628,7 +628,7 @@ bool MessageChannel::Open(ScopedPort aPort, Side aSide,
     mMessageChannelId = aMessageChannelId;
     mWorkerThread = std::move(eventTarget);
     mShutdownTask = shutdownTask;
-    mLink = MakeUnique<PortLink>(this, std::move(aPort));
+    mLink = std::make_unique<PortLink>(this, std::move(aPort));
     mChannelState = ChannelConnected;
     mSide = aSide;
   }
@@ -799,7 +799,7 @@ bool MessageChannel::SendBuildIDsMatchMessage(const char* aParentBuildID) {
     return false;
   }
 
-  auto msg = MakeUnique<BuildIDsMatchMessage>();
+  auto msg = std::make_unique<BuildIDsMatchMessage>();
 
   MOZ_RELEASE_ASSERT(!msg->is_sync());
   MOZ_RELEASE_ASSERT(msg->nested_level() != IPC::Message::NESTED_INSIDE_SYNC);
@@ -1267,7 +1267,7 @@ bool MessageChannel::Send(UniquePtr<Message> aMsg, UniquePtr<Message>* aReply) {
     MOZ_RELEASE_ASSERT(DispatchingSyncMessage() || DispatchingAsyncMessage());
     IPC_LOG("Cancel from Send");
     auto cancel =
-        MakeUnique<CancelMessage>(CurrentNestedInsideSyncTransaction());
+        std::make_unique<CancelMessage>(CurrentNestedInsideSyncTransaction());
     CancelTransaction(CurrentNestedInsideSyncTransaction());
     SendMessageToLink(std::move(cancel));
   }
@@ -2220,8 +2220,8 @@ void MessageChannel::InduceConnectionError() {
 }
 
 void MessageChannel::NotifyImpendingShutdown() {
-  UniquePtr<Message> msg =
-      MakeUnique<Message>(MSG_ROUTING_NONE, IMPENDING_SHUTDOWN_MESSAGE_TYPE);
+  UniquePtr<Message> msg = std::make_unique<Message>(
+      MSG_ROUTING_NONE, IMPENDING_SHUTDOWN_MESSAGE_TYPE);
   MonitorAutoLock lock(*mMonitor);
   if (Connected()) {
     SendMessageToLink(std::move(msg));
@@ -2254,7 +2254,7 @@ void MessageChannel::Close() {
       // already received a Goodbye from the other side (and our state is
       // ChannelClosing), there's no reason to send one.
       if (ChannelConnected == mChannelState) {
-        SendMessageToLink(MakeUnique<GoodbyeMessage>());
+        SendMessageToLink(std::make_unique<GoodbyeMessage>());
       }
       mLink->Close();
       mChannelState = ChannelClosed;
@@ -2487,7 +2487,7 @@ void MessageChannel::CancelCurrentTransaction() {
             CurrentNestedInsideSyncTransaction());
     MOZ_RELEASE_ASSERT(DispatchingSyncMessage());
     auto cancel =
-        MakeUnique<CancelMessage>(CurrentNestedInsideSyncTransaction());
+        std::make_unique<CancelMessage>(CurrentNestedInsideSyncTransaction());
     CancelTransaction(CurrentNestedInsideSyncTransaction());
     SendMessageToLink(std::move(cancel));
   }

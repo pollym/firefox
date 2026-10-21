@@ -733,14 +733,14 @@ RefPtr<BoolPromise> FileSystemDataManager::BeginOpen() {
             switch (self->mVersion) {
               case 1: {
                 self->mDatabaseManager =
-                    MakeUnique<FileSystemDatabaseManagerVersion001>(
+                    std::make_unique<FileSystemDatabaseManagerVersion001>(
                         self, std::move(connection), std::move(fmPtr), rootId);
                 break;
               }
 
               case 2: {
                 self->mDatabaseManager =
-                    MakeUnique<FileSystemDatabaseManagerVersion002>(
+                    std::make_unique<FileSystemDatabaseManagerVersion002>(
                         self, std::move(connection), std::move(fmPtr), rootId);
                 break;
               }

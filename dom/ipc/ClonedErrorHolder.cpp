@@ -391,7 +391,7 @@ bool ClonedErrorHolder::Holder::ReadStructuredCloneInternal(
     length -= size;
   }
 
-  mBuffer = MakeUnique<JSAutoStructuredCloneBuffer>(
+  mBuffer = std::make_unique<JSAutoStructuredCloneBuffer>(
       mStructuredCloneScope, &StructuredCloneHolder::sCallbacks, this);
   mBuffer->adopt(std::move(data), version, &StructuredCloneHolder::sCallbacks);
   return true;

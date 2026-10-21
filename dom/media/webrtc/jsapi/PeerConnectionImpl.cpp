@@ -177,9 +177,10 @@ class JSErrorResult : public binding_danger::TErrorResult<
 
 class WrappableJSErrorResult {
  public:
-  WrappableJSErrorResult() : mRv(MakeUnique<JSErrorResult>()), isCopy(false) {}
+  WrappableJSErrorResult()
+      : mRv(std::make_unique<JSErrorResult>()), isCopy(false) {}
   WrappableJSErrorResult(const WrappableJSErrorResult& other)
-      : mRv(MakeUnique<JSErrorResult>()), isCopy(true) {}
+      : mRv(std::make_unique<JSErrorResult>()), isCopy(true) {}
   ~WrappableJSErrorResult() {
     if (isCopy) {
       MOZ_ASSERT(NS_IsMainThread());
@@ -382,7 +383,7 @@ PeerConnectionImpl::PeerConnectionImpl(const GlobalObject* aGlobal)
       mSTSThread(nullptr),
       mForceIceTcp(false),
       mTransportHandler(nullptr),
-      mUuidGen(MakeUnique<PCUuidGenerator>()),
+      mUuidGen(std::make_unique<PCUuidGenerator>()),
       mIceRestartCount(0),
       mIceRollbackCount(0),
       mTrickle(true)  // TODO(ekr@rtfm.com): Use pref
@@ -534,8 +535,8 @@ nsresult PeerConnectionImpl::Initialize(PeerConnectionObserver& aObserver,
   mTransportHandler = std::move(transportHandler);
   mTransportHandler->CreateIceCtx("PC:" + GetName());
 
-  mJsepSession =
-      MakeUnique<JsepSessionImpl>(mName, MakeUnique<PCUuidGenerator>());
+  mJsepSession = std::make_unique<JsepSessionImpl>(
+      mName, std::make_unique<PCUuidGenerator>());
   mJsepSession->SetRtxIsAllowed(mRtxIsAllowed);
 
   res = mJsepSession->Init();
@@ -3827,7 +3828,7 @@ RefPtr<dom::RTCStatsPromise> PeerConnectionImpl::GetDataChannelStats(
         ->Then(GetMainThreadSerialEventTarget(), __func__,
                [](DataChannelConnection::StatsPromise::ResolveOrRejectValue&&
                       aResult) {
-                 auto report = MakeUnique<dom::RTCStatsCollection>();
+                 auto report = std::make_unique<dom::RTCStatsCollection>();
                  if (aResult.IsResolve()) {
                    if (!report->mDataChannelStats.AppendElements(
                            aResult.ResolveValue(), fallible)) {
@@ -3985,7 +3986,7 @@ RefPtr<dom::RTCStatsReportPromise> PeerConnectionImpl::GetStats(
         GetMainThreadSerialEventTarget(), __func__,
         [this, self = RefPtr<PeerConnectionImpl>(this)]() {
           UniquePtr<dom::RTCStatsReportInternal> finalStats =
-              MakeUnique<dom::RTCStatsReportInternal>();
+              std::make_unique<dom::RTCStatsReportInternal>();
           // Might not be set if this encountered some error.
           if (mFinalStats) {
             *finalStats = *mFinalStats;
@@ -4053,7 +4054,7 @@ RefPtr<dom::RTCStatsReportPromise> PeerConnectionImpl::GetStats(
     promises.AppendElement(GetDataChannelStats(now));
   }
 
-  auto pcStatsCollection = MakeUnique<dom::RTCStatsCollection>();
+  auto pcStatsCollection = std::make_unique<dom::RTCStatsCollection>();
   RTCPeerConnectionStats pcStats;
   pcStats.mTimestamp.Construct(now);
   pcStats.mType.Construct(RTCStatsType::Peer_connection);
@@ -4069,7 +4070,7 @@ RefPtr<dom::RTCStatsReportPromise> PeerConnectionImpl::GetStats(
 
   // This is what we're going to return; all the stuff in |promises| will be
   // accumulated here.
-  auto report = MakeUnique<dom::RTCStatsReportInternal>();
+  auto report = std::make_unique<dom::RTCStatsReportInternal>();
   report->mPcid = NS_ConvertASCIItoUTF16(mName.c_str());
   if (mWindow && mWindow->GetBrowsingContext()) {
     report->mBrowserId = mWindow->GetBrowsingContext()->BrowserId();

@@ -778,7 +778,7 @@ already_AddRefed<AudioWorkletNode> AudioWorkletNode::Constructor(
   // StructuredCloneHolder does not have a move constructor.  Instead allocate
   // memory so that the pointer can be passed to the rendering thread.
   UniquePtr<StructuredCloneHolder> serializedOptions =
-      MakeUnique<StructuredCloneHolder>(
+      std::make_unique<StructuredCloneHolder>(
           StructuredCloneHolder::CloningSupported,
           StructuredCloneHolder::TransferringNotSupported,
           JS::StructuredCloneScope::SameProcess);

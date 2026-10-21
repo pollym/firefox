@@ -652,7 +652,7 @@ void JSHolderMap::Put(void* aHolder, nsScriptObjectTracer* aTracer,
     auto ptr = mPerZoneJSHolders.lookupForAdd(aZone);
     if (!ptr) {
       MOZ_ALWAYS_TRUE(
-          mPerZoneJSHolders.add(ptr, aZone, MakeUnique<EntryVector>()));
+          mPerZoneJSHolders.add(ptr, aZone, std::make_unique<EntryVector>()));
     }
     vector = ptr->value().get();
   }

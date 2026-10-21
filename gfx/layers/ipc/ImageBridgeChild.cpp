@@ -532,14 +532,16 @@ void ImageBridgeChild::Bind(Endpoint<PImageBridgeChild>&& aEndpoint) {
     return;
   }
 
-  mSectionAllocator = MakeUnique<FixedSizeSmallShmemSectionAllocator>(this);
+  mSectionAllocator =
+      std::make_unique<FixedSizeSmallShmemSectionAllocator>(this);
   mCanSend = true;
 }
 
 void ImageBridgeChild::BindSameProcess(RefPtr<ImageBridgeParent> aParent) {
   Open(aParent, aParent->GetThread(), mozilla::ipc::ChildSide);
 
-  mSectionAllocator = MakeUnique<FixedSizeSmallShmemSectionAllocator>(this);
+  mSectionAllocator =
+      std::make_unique<FixedSizeSmallShmemSectionAllocator>(this);
   mCanSend = true;
 }
 

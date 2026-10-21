@@ -971,7 +971,8 @@ RefPtr<RemoteStreamPromise> NeckoParent::CreateRemoteStreamForResolvedURI(
     return RemoteStreamPromise::CreateAndReject(rv, __func__);
   }
 
-  auto promiseHolder = MakeUnique<MozPromiseHolder<RemoteStreamPromise>>();
+  auto promiseHolder =
+      std::make_unique<MozPromiseHolder<RemoteStreamPromise>>();
   RefPtr<RemoteStreamPromise> promise = promiseHolder->Ensure(__func__);
 
   nsCOMPtr<nsIMIMEService> mime = do_GetService("@mozilla.org/mime;1", &rv);

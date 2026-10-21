@@ -121,13 +121,14 @@ class AccAttributes {
                     "Please only move strings into this function. To make a "
                     "copy, use SetAttributeStringCopy.");
       UniquePtr<nsString> value =
-          MakeUnique<nsString>(std::forward<T>(aAttrValue));
+          std::make_unique<nsString>(std::forward<T>(aAttrValue));
       mData.InsertOrUpdate(aAttrName, AsVariant(std::move(value)));
     } else if constexpr (std::is_same_v<ValType, gfx::Matrix4x4>) {
-      UniquePtr<gfx::Matrix4x4> value = MakeUnique<gfx::Matrix4x4>(aAttrValue);
+      UniquePtr<gfx::Matrix4x4> value =
+          std::make_unique<gfx::Matrix4x4>(aAttrValue);
       mData.InsertOrUpdate(aAttrName, AsVariant(std::move(value)));
     } else if constexpr (std::is_same_v<ValType, nsRect>) {
-      UniquePtr<nsRect> value = MakeUnique<nsRect>(aAttrValue);
+      UniquePtr<nsRect> value = std::make_unique<nsRect>(aAttrValue);
       mData.InsertOrUpdate(aAttrName, AsVariant(std::move(value)));
     } else if constexpr (std::is_same_v<ValType, AccGroupInfo*>) {
       UniquePtr<AccGroupInfo> value(aAttrValue);

@@ -431,7 +431,7 @@ class WebRenderAPI final {
    public:
     static WrTransactionEvent Transaction(WebRenderAPI* aApi,
                                           TransactionBuilder& aTxn) {
-      auto transaction = MakeUnique<TransactionBuilder>(
+      auto transaction = std::make_unique<TransactionBuilder>(
           aApi, aTxn.Take(), aTxn.UseSceneBuilderThread(), /* aOwnsData */ true,
           aTxn.mRemoteTextureTxnScheduler, aTxn.mRemoteTextureTxnId);
       return WrTransactionEvent(Tag::Transaction, std::move(transaction));
@@ -447,7 +447,7 @@ class WebRenderAPI final {
         UniquePtr<layers::AsyncImagePipelineOps>&&
             aPendingAsyncImagePipelineOps,
         WebRenderAPI* aApi, const TransactionBuilder& aTxn) {
-      auto transaction = MakeUnique<TransactionBuilder>(
+      auto transaction = std::make_unique<TransactionBuilder>(
           aApi, aTxn.Raw(), aTxn.UseSceneBuilderThread(), /* aOwnsData */ false,
           aTxn.mRemoteTextureTxnScheduler, aTxn.mRemoteTextureTxnId);
       return WrTransactionEvent(Tag::PendingAsyncImagePipelineOps,

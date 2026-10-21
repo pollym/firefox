@@ -514,9 +514,9 @@ nsresult nsAppShell::Init() {
     ScreenManager& screenManager = ScreenManager::GetSingleton();
 
     if (gfxPlatform::IsHeadless()) {
-      screenManager.SetHelper(mozilla::MakeUnique<HeadlessScreenHelper>());
+      screenManager.SetHelper(std::make_unique<HeadlessScreenHelper>());
     } else {
-      screenManager.SetHelper(mozilla::MakeUnique<ScreenHelperCocoa>());
+      screenManager.SetHelper(std::make_unique<ScreenHelperCocoa>());
     }
 
     InitMemoryPressureObserver();

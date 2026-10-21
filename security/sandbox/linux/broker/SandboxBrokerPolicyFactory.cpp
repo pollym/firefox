@@ -1002,7 +1002,7 @@ static void AddVulkanDependencies(SandboxBroker::Policy* policy, int aPid) {
 
 /* static */ UniquePtr<SandboxBroker::Policy>
 SandboxBrokerPolicyFactory::GetRDDPolicy(int aPid) {
-  auto policy = MakeUnique<SandboxBroker::Policy>();
+  auto policy = std::make_unique<SandboxBroker::Policy>();
 
   AddSharedMemoryPaths(policy.get(), aPid);
 
@@ -1120,7 +1120,7 @@ SandboxBrokerPolicyFactory::GetRDDPolicy(int aPid) {
 
 /* static */ UniquePtr<SandboxBroker::Policy>
 SandboxBrokerPolicyFactory::GetSocketProcessPolicy(int aPid) {
-  auto policy = MakeUnique<SandboxBroker::Policy>();
+  auto policy = std::make_unique<SandboxBroker::Policy>();
 
   policy->AddPath(rdonly, "/dev/urandom");
   policy->AddPath(rdonly, "/dev/random");
@@ -1179,7 +1179,7 @@ SandboxBrokerPolicyFactory::GetSocketProcessPolicy(int aPid) {
 
 /* static */ UniquePtr<SandboxBroker::Policy>
 SandboxBrokerPolicyFactory::GetUtilityProcessPolicy(int aPid) {
-  auto policy = MakeUnique<SandboxBroker::Policy>();
+  auto policy = std::make_unique<SandboxBroker::Policy>();
 
   policy->AddPath(rdonly, "/dev/urandom");
   policy->AddPath(rdonly, "/proc/cpuinfo");
@@ -1243,7 +1243,7 @@ SandboxBrokerPolicyFactory::GetUtilityProcessPolicy(int aPid) {
 /* static */
 UniquePtr<SandboxBroker::Policy>
 SandboxBrokerPolicyFactory::GetHWInferencePolicy(int aPid) {
-  auto policy = MakeUnique<SandboxBroker::Policy>();
+  auto policy = std::make_unique<SandboxBroker::Policy>();
 
   AddSharedMemoryPaths(policy.get(), aPid);
 

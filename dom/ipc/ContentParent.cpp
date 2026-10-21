@@ -2399,7 +2399,8 @@ bool ContentParent::BeginSubprocessLaunch(ProcessPriority aPriority) {
 
   // Instantiate the pref serializer. It will be cleaned up in
   // `LaunchSubprocessReject`/`LaunchSubprocessResolve`.
-  mPrefSerializer = MakeUnique<mozilla::ipc::SharedPreferenceSerializer>();
+  mPrefSerializer =
+      std::make_unique<mozilla::ipc::SharedPreferenceSerializer>();
   if (!mPrefSerializer->SerializeToSharedMemory(GeckoProcessType_Content,
                                                 GetRemoteType())) {
     NS_WARNING("SharedPreferenceSerializer::SerializeToSharedMemory failed");
@@ -4509,8 +4510,8 @@ void ContentParent::FriendlyName(nsAString& aName, bool aAnonymize) {
 
 mozilla::ipc::IPCResult ContentParent::RecvInitCrashReporter(
     const CrashReporter::CrashReporterInitArgs& aInitArgs) {
-  mCrashReporter = MakeUnique<CrashReporterHost>(GeckoProcessType_Content,
-                                                 OtherChildID(), aInitArgs);
+  mCrashReporter = std::make_unique<CrashReporterHost>(
+      GeckoProcessType_Content, OtherChildID(), aInitArgs);
   return IPC_OK();
 }
 
@@ -4538,7 +4539,7 @@ bool ContentParent::SendRequestMemoryReport(
     const uint32_t& aGeneration, const bool& aAnonymize,
     const bool& aMinimizeMemoryUsage, const Maybe<FileDescriptor>& aDMDFile) {
   // This automatically cancels the previous request.
-  mMemoryReportRequest = MakeUnique<MemoryReportRequestHost>(aGeneration);
+  mMemoryReportRequest = std::make_unique<MemoryReportRequestHost>(aGeneration);
   RefPtr<ContentParent> self(this);
   PContentParent::SendRequestMemoryReport(aGeneration, aAnonymize,
                                           aMinimizeMemoryUsage, aDMDFile)
@@ -4842,7 +4843,7 @@ static int32_t AddGeolocationListener(
     nsIDOMGeoPositionErrorCallback* errorCallBack, bool highAccuracy) {
   RefPtr<Geolocation> geo = Geolocation::NonWindowSingleton();
 
-  UniquePtr<PositionOptions> options = MakeUnique<PositionOptions>();
+  UniquePtr<PositionOptions> options = std::make_unique<PositionOptions>();
   options->mTimeout = 0;
   options->mMaximumAge = 0;
   options->mEnableHighAccuracy = highAccuracy;
@@ -5780,13 +5781,13 @@ mozilla::ipc::IPCResult ContentParent::RecvBeginDriverCrashGuard(
   UniquePtr<gfx::DriverCrashGuard> guard;
   switch (aGuardType) {
     case gfx::CrashGuardType::D3D11Layers:
-      guard = MakeUnique<gfx::D3D11LayersCrashGuard>(this);
+      guard = std::make_unique<gfx::D3D11LayersCrashGuard>(this);
       break;
     case gfx::CrashGuardType::GLContext:
-      guard = MakeUnique<gfx::GLContextCrashGuard>(this);
+      guard = std::make_unique<gfx::GLContextCrashGuard>(this);
       break;
     case gfx::CrashGuardType::WMFVPXVideo:
-      guard = MakeUnique<gfx::WMFVPXVideoCrashGuard>(this);
+      guard = std::make_unique<gfx::WMFVPXVideoCrashGuard>(this);
       break;
     default:
       return IPC_FAIL(this, "unknown crash guard type");

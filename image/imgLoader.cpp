@@ -1344,7 +1344,7 @@ nsresult imgLoader::InitCache() {
   os->AddObserver(this, "profile-before-change", false);
   os->AddObserver(this, "xpcom-shutdown", false);
 
-  mCacheTracker = MakeUnique<imgCacheExpirationTracker>();
+  mCacheTracker = std::make_unique<imgCacheExpirationTracker>();
 
   return NS_OK;
 }

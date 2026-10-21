@@ -422,7 +422,7 @@ RefPtr<MediaDataDecoder::DecodePromise> GMPVideoDecoder::Decode(
   // requested twice, if the old frame is still outstanding. We will simply drop
   // the extra decoded frame and request more input if the last outstanding.
   mSamples.WithEntryHandle(frameTimestamp, [&](auto entryHandle) {
-    auto sampleData = MakeUnique<SampleMetadata>(sample);
+    auto sampleData = std::make_unique<SampleMetadata>(sample);
     entryHandle.InsertOrUpdate(std::move(sampleData));
   });
 

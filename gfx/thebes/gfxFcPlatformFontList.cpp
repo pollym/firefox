@@ -1990,7 +1990,7 @@ void gfxFcPlatformFontList::InitSharedFontListForPlatform() {
                       keyName, aFamilyName, fontlist::Family::kNoIndex,
                       visibility,
                       /*bundled*/ aAppFont, /*badUnderline*/ false));
-                  return MakeUnique<FacesData>();
+                  return std::make_unique<FacesData>();
                 })
             .get();
 
@@ -2035,7 +2035,7 @@ void gfxFcPlatformFontList::InitSharedFontListForPlatform() {
                     visibility,
                     /*bundled*/ aAppFont, /*badUnderline*/ false));
 
-                return MakeUnique<FacesData>();
+                return std::make_unique<FacesData>();
               })
           .get()
           ->Add(fontlist::Face::InitData(initData), /* aSingleName = */ false);
@@ -2836,8 +2836,9 @@ gfxPlatformFontList::PrefFontList* gfxFcPlatformFontList::FindGenericFamilies(
           }
 
           // -- select the fonts to be used for the generic
-          auto prefFonts = MakeUnique<PrefFontList>();  // can be empty but in
-                                                        // practice won't happen
+          auto prefFonts =
+              std::make_unique<PrefFontList>();  // can be empty but in
+                                                 // practice won't happen
           uint32_t limit = StaticPrefs::
               gfx_font_rendering_fontconfig_max_generic_substitutions();
           bool foundFontWithLang = false;

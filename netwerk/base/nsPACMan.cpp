@@ -379,9 +379,9 @@ nsPACMan::nsPACMan(nsISerialEventTarget* mainThreadEventTarget)
   mIncludePath = Preferences::GetBool(kPACIncludePath, false);
   if (StaticPrefs::network_proxy_parse_pac_on_socket_process() &&
       gIOService->SocketProcessReady()) {
-    mPAC = MakeUnique<RemoteProxyAutoConfig>();
+    mPAC = std::make_unique<RemoteProxyAutoConfig>();
   } else {
-    mPAC = MakeUnique<ProxyAutoConfig>();
+    mPAC = std::make_unique<ProxyAutoConfig>();
     if (!sThreadLocalSetup) {
       sThreadLocalSetup = true;
       PR_NewThreadPrivateIndex(&sThreadLocalIndex, nullptr);

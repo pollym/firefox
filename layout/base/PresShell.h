@@ -3316,7 +3316,7 @@ class PresShell final : public nsStubDocumentObserver,
   // that point on.  (There's not much else we can do, when the set grows
   // larger than the available memory.)
   UniquePtr<nsTHashSet<void*>> mAllocatedPointers{
-      MakeUnique<nsTHashSet<void*>>()};
+      std::make_unique<nsTHashSet<void*>>()};
 #endif
 
   // A list of stack weak frames. This is a pointer to the last item in the

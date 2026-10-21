@@ -380,7 +380,7 @@ GeckoChildProcessHost::GeckoChildProcessHost(GeckoProcessType aProcessType,
       mChildID(++gChildCounter),
       mIsFileContent(aIsFileContent),
       mMonitor("mozilla.ipc.GeckoChildProcessHost.mMonitor"),
-      mLaunchOptions(MakeUnique<base::LaunchOptions>()),
+      mLaunchOptions(std::make_unique<base::LaunchOptions>()),
       mInitialChannelId(nsID::GenerateUUID()),
       mProcessState(CREATING_CHANNEL),
 #ifdef XP_WIN
@@ -1757,7 +1757,7 @@ Result<Ok, LaunchError> WindowsProcessLauncher::DoSetup() {
   }
 
 #  if defined(MOZ_SANDBOX)
-  mResults.mSandboxBroker = MakeUnique<SandboxBroker>();
+  mResults.mSandboxBroker = std::make_unique<SandboxBroker>();
 
   // XXX: Bug 1124167: We should get rid of the process specific logic for
   // sandboxing in this class at some point. Unfortunately it will take a bit

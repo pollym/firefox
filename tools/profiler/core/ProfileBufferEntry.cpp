@@ -1340,7 +1340,7 @@ ProfilerThreadId ProfileBuffer::DoStreamSamplesAndMarkersToJSON(
         aGetStreamingParametersForThreadCallback,
     double aSinceTime, ProcessStreamingContext* aStreamingContextForMarkers,
     mozilla::ProgressLogger aProgressLogger) const {
-  UniquePtr<char[]> dynStrBuf = MakeUnique<char[]>(kMaxFrameKeyLength);
+  UniquePtr<char[]> dynStrBuf = std::make_unique<char[]>(kMaxFrameKeyLength);
 
   return mEntries.Read([&](ProfileChunkedBuffer::Reader* aReader) {
     MOZ_ASSERT(aReader,

@@ -152,7 +152,7 @@ MessageSpecificData MakeMessageSpecificData(UINT event, WPARAM wParam,
         NCCALCSIZE_PARAMS ncCalcSizeParams = *ncCalcSizeParamsPtr;
         WINDOWPOS windowPos = *ncCalcSizeParams.lppos;
         UniquePtr<std::pair<NCCALCSIZE_PARAMS, WINDOWPOS>> ncCalcSizeData =
-            MakeUnique<std::pair<NCCALCSIZE_PARAMS, WINDOWPOS>>(
+            std::make_unique<std::pair<NCCALCSIZE_PARAMS, WINDOWPOS>>(
                 std::pair(std::move(ncCalcSizeParams), std::move(windowPos)));
         return MessageSpecificData(
             std::make_pair(shouldIndicateValidArea,

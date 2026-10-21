@@ -227,8 +227,8 @@ Http2Session::Http2Session(nsISocketTransport* aSocketTransport,
 
   LOG3(("Http2Session::Http2Session %p serial=0x%" PRIX64 "\n", this, mSerial));
 
-  mInputFrameBuffer = MakeUnique<char[]>(mInputFrameBufferSize);
-  mOutputQueueBuffer = MakeUnique<char[]>(mOutputQueueSize);
+  mInputFrameBuffer = std::make_unique<char[]>(mInputFrameBufferSize);
+  mOutputQueueBuffer = std::make_unique<char[]>(mOutputQueueSize);
   mDecompressBuffer.SetCapacity(kDefaultBufferSize);
 
   mPushAllowance = gHttpHandler->SpdyPushAllowance();

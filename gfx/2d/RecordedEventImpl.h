@@ -3652,7 +3652,7 @@ RecordedPathCreation::RecordedPathCreation(S& aStream)
   ReadElement(aStream, mRefPtr);
   ReadElementConstrained(aStream, mFillRule, FillRule::FILL_WINDING,
                          FillRule::FILL_EVEN_ODD);
-  mPathOps = MakeUnique<PathOps>(aStream);
+  mPathOps = std::make_unique<PathOps>(aStream);
 }
 
 inline void RecordedPathCreation::OutputSimpleEventInfo(

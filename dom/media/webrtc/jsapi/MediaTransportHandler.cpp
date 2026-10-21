@@ -377,7 +377,7 @@ class MediaTransportImplNicer final : public MediaTransportImpl,
 class MediaTransportHandlerLocal final : public MediaTransportHandler {
  public:
   MediaTransportHandlerLocal()
-      : mImpl(MakeUnique<MediaTransportImplNicer>(mEvents)),
+      : mImpl(std::make_unique<MediaTransportImplNicer>(mEvents)),
         mTarget(mImpl->Init()) {}
 
   RefPtr<IceLogPromise> GetIceLog(const nsCString& aPattern) override {
@@ -1443,7 +1443,7 @@ static nsString BuildCertificateStats(const nsTArray<uint8_t>& aDerCert,
 RefPtr<dom::RTCStatsPromise> MediaTransportImplNicer::GetIceStats(
     const std::string& aTransportId, DOMHighResTimeStamp aNow) {
   MOZ_ASSERT(mStsThread->IsOnCurrentThread());
-  auto stats = MakeUnique<dom::RTCStatsCollection>();
+  auto stats = std::make_unique<dom::RTCStatsCollection>();
   if (mIceCtx) {
     dom::RTCIceRole iceRole =
         mIceCtx->GetControlling() == NrIceCtx::ICE_CONTROLLING
@@ -1945,9 +1945,9 @@ RefPtr<TransportFlow> MediaTransportImplNicer::CreateTransportFlow(
   RefPtr flow = MakeRefPtr<TransportFlow>(aTransportId);
 
   // The media streams are made on STS so we need to defer setup.
-  auto ice = MakeUnique<TransportLayerIce>();
-  auto dtls = MakeUnique<TransportLayerDtls>();
-  auto srtp = MakeUnique<TransportLayerSrtp>(*dtls);
+  auto ice = std::make_unique<TransportLayerIce>();
+  auto dtls = std::make_unique<TransportLayerDtls>();
+  auto srtp = std::make_unique<TransportLayerSrtp>(*dtls);
   dtls->SetRole(aDtlsClient ? TransportLayerDtls::CLIENT
                             : TransportLayerDtls::SERVER);
 

@@ -42,7 +42,7 @@ SandboxReporter::SandboxReporter()
     : mClientFd(-1),
       mServerFd(-1),
       mMutex("SandboxReporter"),
-      mBuffer(MakeUnique<SandboxReport[]>(kSandboxReporterBufferSize)),
+      mBuffer(std::make_unique<SandboxReport[]>(kSandboxReporterBufferSize)),
       mCount(0) {}
 
 bool SandboxReporter::Init() {

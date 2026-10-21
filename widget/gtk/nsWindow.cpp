@@ -3313,7 +3313,7 @@ TimeStamp nsWindow::GetEventTimeStamp(guint32 aEventTime) {
 #ifdef MOZ_X11
 mozilla::CurrentX11TimeGetter* nsWindow::GetCurrentTimeGetter() {
   if (MOZ_UNLIKELY(!mCurrentTimeGetter)) {
-    mCurrentTimeGetter = MakeUnique<CurrentX11TimeGetter>(mGdkWindow);
+    mCurrentTimeGetter = std::make_unique<CurrentX11TimeGetter>(mGdkWindow);
   }
   return mCurrentTimeGetter.get();
 }
@@ -7499,7 +7499,7 @@ UniquePtr<WaylandSurfaceLock> nsWindow::LockSurface() {
   if (mIsDestroyed || !mSurface) {
     return nullptr;
   }
-  return MakeUnique<WaylandSurfaceLock>(MOZ_WL_SURFACE(mContainer));
+  return std::make_unique<WaylandSurfaceLock>(MOZ_WL_SURFACE(mContainer));
 #else
   return nullptr;
 #endif

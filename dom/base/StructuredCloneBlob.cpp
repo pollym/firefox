@@ -6,6 +6,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <new>
 #include <utility>
 
@@ -16,7 +17,6 @@
 #include "mozilla/ErrorResult.h"
 #include "mozilla/Maybe.h"
 #include "mozilla/Span.h"
-#include "mozilla/UniquePtr.h"
 #include "mozilla/dom/BindingDeclarations.h"
 #include "mozilla/dom/BlobImpl.h"
 #include "mozilla/dom/StructuredCloneHolderBinding.h"
@@ -186,7 +186,7 @@ bool StructuredCloneBlob::Holder::ReadStructuredCloneInternal(
     length -= size;
   }
 
-  mBuffer = MakeUnique<JSAutoStructuredCloneBuffer>(
+  mBuffer = std::make_unique<JSAutoStructuredCloneBuffer>(
       mStructuredCloneScope, &StructuredCloneHolder::sCallbacks, this);
   mBuffer->adopt(std::move(data), version, &StructuredCloneHolder::sCallbacks);
 
