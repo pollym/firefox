@@ -353,6 +353,11 @@ add_task(async function test_search_action_click() {
       const panel = await showSelectionMenu(browser);
       const searchButton = document.getElementById("search-action-button");
       Assert.ok(!searchButton.hidden, "Search is offered without a chatbot");
+      Assert.deepEqual(
+        Glean.sapImpressionCounts.textSelection.testGetValue(),
+        { [SearchService.defaultEngine.id]: 1 },
+        "Showing Search records one impression, for the default engine"
+      );
 
       const panelHidden = BrowserTestUtils.waitForEvent(panel, "popuphidden");
       searchButton.click();
@@ -394,6 +399,7 @@ add_task(async function test_search_action_click() {
  * action is offered.
  */
 add_task(async function test_search_disabled_keeps_ai_action() {
+  Services.fog.testResetFOG();
   await SpecialPowers.pushPrefEnv({
     set: [
       ["browser.highlightToSearch.featureGate", true],
@@ -416,6 +422,11 @@ add_task(async function test_search_disabled_keeps_ai_action() {
         document.getElementById("search-action-button").hidden,
         "Search is hidden when turned off"
       );
+      Assert.deepEqual(
+        Glean.sapImpressionCounts.textSelection.testGetValue(),
+        {},
+        "No impression is recorded while Search is hidden"
+      );
 
       panel.hide();
     });
@@ -424,10 +435,81 @@ add_task(async function test_search_disabled_keeps_ai_action() {
   }
 });
 
+async function doPrivateWindowImpressionTest(shouldRecordCounts) {
+  Services.fog.testResetFOG();
+  await SpecialPowers.pushPrefEnv({
+    set: [
+      ["browser.highlightToSearch.featureGate", true],
+      ["browser.highlightToSearch.enabled", true],
+      ["browser.highlightToSearch.search.enabled", true],
+      ["browser.ml.chat.provider", ""],
+      // This pref is the opposite of what it seems like it should be.
+      ["browser.engagement.search_counts.pbm", !shouldRecordCounts],
+    ],
+  });
+
+  const win = await BrowserTestUtils.openNewBrowserWindow({ private: true });
+
+  try {
+    await BrowserTestUtils.openNewForegroundTab(
+      win.gBrowser,
+      "data:text/plain,hi"
+    );
+    const browser = win.gBrowser.selectedBrowser;
+    await SimpleTest.promiseFocus(browser);
+
+    const selectPromise = SpecialPowers.spawn(browser, [], () =>
+      ContentTaskUtils.waitForCondition(() => content.getSelection().toString())
+    );
+    win.goDoCommand("cmd_selectAll");
+    await selectPromise;
+    await BrowserTestUtils.synthesizeMouse(
+      browser,
+      60,
+      10,
+      { type: "mouseup" },
+      browser
+    );
+
+    const panel = win.document.getElementById(
+      "selection-shortcut-action-panel"
+    );
+    await TestUtils.waitForCondition(
+      () => panel.getAttribute("panelopen") === "true",
+      "Selection menu opened in a private window"
+    );
+    Assert.ok(
+      !win.document.getElementById("search-action-button").hidden,
+      "Search is offered in a private window"
+    );
+    Assert.deepEqual(
+      Glean.sapImpressionCounts.textSelection.testGetValue(),
+      shouldRecordCounts ? { [SearchService.defaultPrivateEngine.id]: 1 } : {},
+      "The impression follows the private browsing counts pref"
+    );
+  } finally {
+    await BrowserTestUtils.closeWindow(win);
+    await SpecialPowers.popPrefEnv();
+  }
+}
+
+/**
+ * Check that the Search impression is recorded in a private window, using the
+ * private default engine, unless private browsing counts are turned off.
+ */
+add_task(async function test_private_window_impression_counts_enabled() {
+  await doPrivateWindowImpressionTest(true);
+});
+
+add_task(async function test_private_window_impression_counts_disabled() {
+  await doPrivateWindowImpressionTest(false);
+});
+
 /**
  * Check that Smart Window never offers the Search action.
  */
 add_task(async function test_smart_window_hides_search() {
+  Services.fog.testResetFOG();
   await SpecialPowers.pushPrefEnv({
     set: [
       ["browser.highlightToSearch.featureGate", true],
@@ -460,6 +542,11 @@ add_task(async function test_smart_window_hides_search() {
     Assert.ok(
       win.document.getElementById("search-action-button").hidden,
       "Search is not offered in Smart Window"
+    );
+    Assert.deepEqual(
+      Glean.sapImpressionCounts.textSelection.testGetValue(),
+      {},
+      "No impression is recorded in Smart Window"
     );
   } finally {
     await BrowserTestUtils.closeWindow(win);

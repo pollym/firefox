@@ -15,6 +15,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
   AIWindowUI:
     "moz-src:///browser/components/aiwindow/ui/modules/AIWindowUI.sys.mjs",
   ASRouterTargeting: "resource:///modules/asrouter/ASRouterTargeting.sys.mjs",
+  BrowserSearchTelemetry:
+    "moz-src:///browser/components/search/BrowserSearchTelemetry.sys.mjs",
   ContentAnalysisUtils: "resource://gre/modules/ContentAnalysisUtils.sys.mjs",
   E10SUtils: "resource://gre/modules/E10SUtils.sys.mjs",
   EveryWindow: "resource:///modules/EveryWindow.sys.mjs",
@@ -536,8 +538,8 @@ export const GenAI = {
       return collapsed.substring(0, truncLength) + Services.locale.ellipsis;
     };
 
-    // Returns whether the action ends up visible, so callers can tell whether
-    // the menu has anything to offer.
+    // Returns the engine the action searches with, or null if the action ends
+    // up hidden, so callers can tell whether the menu has anything to offer.
     panel.setSearchButtonLabel = (selection, browser) => {
       // The default engine getters throw rather than return null until the
       // search service has initialized, and throwing here would stop the panel
@@ -555,7 +557,7 @@ export const GenAI = {
         lazy.highlightToSearchSearchEnabled;
       searchActionButton.hidden = !canShow;
       if (!canShow) {
-        return false;
+        return null;
       }
       document.l10n.setAttributes(
         searchActionButton,
@@ -565,7 +567,7 @@ export const GenAI = {
           selection: truncateSelection(selection),
         }
       );
-      return true;
+      return engine;
     };
 
     searchActionButton.addEventListener("click", () => {
@@ -857,16 +859,17 @@ export const GenAI = {
         // Smart Window has its own separate gate above and only ever offers
         // the AI action; don't let the Search action leak in there, and don't
         // touch the AI button's visibility on that path either.
+        let searchEngine = null;
         if (!isSmartWindow) {
           const aiActionButton =
             shortcutPanel.querySelector("#ai-action-button");
           const aiVisible = this.canShowAIAction;
           aiActionButton.hidden = !aiVisible;
-          const searchVisible = shortcutPanel.setSearchButtonLabel(
+          searchEngine = shortcutPanel.setSearchButtonLabel(
             data.selection,
             browser
           );
-          if (!aiVisible && !searchVisible) {
+          if (!aiVisible && !searchEngine) {
             // Nothing to offer: don't open an empty menu or log an impression
             // of one, and close any menu left from the previous selection.
             shortcutPanel.hide();
@@ -888,6 +891,13 @@ export const GenAI = {
           selection: data.selection.length,
           smart_window: isSmartWindow,
         });
+        if (searchEngine) {
+          lazy.BrowserSearchTelemetry.recordSapImpression(
+            browser,
+            searchEngine,
+            "text_selection"
+          );
+        }
 
         // Position the shortcuts relative to the browser's top-left corner
         const screenYBase = data.screenYDevPx / devicePixelRatio;
