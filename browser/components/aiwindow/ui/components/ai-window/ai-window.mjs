@@ -24,6 +24,8 @@ const { XPCOMUtils } = ChromeUtils.importESModule(
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
+  AuthProvider:
+    "moz-src:///browser/components/aiwindow/models/AuthProvider.sys.mjs",
   Chat: "moz-src:///browser/components/aiwindow/models/Chat.sys.mjs",
   GET_PAGE_CONTENT:
     "moz-src:///browser/components/aiwindow/models/Tools.sys.mjs",
@@ -2815,7 +2817,7 @@ export class AIWindow extends MozLitElement {
       // Kicked off before the engine and prompt work, which it has no data
       // dependency on, so a cold or expired token doesn't add a round-trip
       // between the user hitting send and the request going out.
-      const fxAccountTokenPromise = lazy.openAIEngine.getFxAccountToken();
+      const tokenPromise = lazy.AuthProvider.getToken();
 
       const { engine, parameters } = await lazy.buildEngineForFeature(
         lazy.MODEL_FEATURES.CHAT,
@@ -2862,7 +2864,7 @@ export class AIWindow extends MozLitElement {
         browsingContext,
         mode: this.mode,
         signal,
-        fxAccountTokenPromise,
+        tokenPromise,
       });
 
       ChromeUtils.addProfilerMarker(

@@ -16,6 +16,7 @@ import { sinon } from "resource://testing-common/Sinon.sys.mjs";
 import { MLTestUtils } from "resource://testing-common/MLTestUtils.sys.mjs";
 
 import { TestUtils } from "resource://testing-common/TestUtils.sys.mjs";
+import { AuthProvider } from "moz-src:///browser/components/aiwindow/models/AuthProvider.sys.mjs";
 import { Chat } from "moz-src:///browser/components/aiwindow/models/Chat.sys.mjs";
 import { openAIEngine } from "moz-src:///browser/components/aiwindow/models/openAIEngine.sys.mjs";
 import {
@@ -136,7 +137,7 @@ export class MockEngineManager {
           () => new MLTestUtils.MockLLMEngine(options)
         )
       ),
-      sinon.stub(openAIEngine, "getFxAccountToken").resolves("mock-fxa-token"),
+      sinon.stub(AuthProvider, "getToken").resolves("mock-fxa-token"),
       fetchWithHistory,
     ];
   }
@@ -961,7 +962,7 @@ export const AIWindowTestUtils = {
 
   /**
    * Convenience wrapper that starts a mock OpenAI server, pushes the endpoint
-   * pref, stubs getFxAccountToken, runs a task, then tears everything down.
+   * pref, stubs getToken, runs a task, then tears everything down.
    *
    * Consider using stubEngineNetworkBoundaries (in the functional suite's
    * head.js) instead for new tests — it additionally stubs openAIEngine.build
@@ -983,14 +984,14 @@ export const AIWindowTestUtils = {
       ],
     });
 
-    const getFxAccountTokenStub = sinon
-      .stub(openAIEngine, "getFxAccountToken")
+    const getTokenStub = sinon
+      .stub(AuthProvider, "getToken")
       .resolves("mock-fxa-token");
 
     try {
       await task({ port });
     } finally {
-      getFxAccountTokenStub.restore();
+      getTokenStub.restore();
       await SpecialPowers.popPrefEnv();
       await AIWindowTestUtils.stopMockOpenAI(server);
     }
