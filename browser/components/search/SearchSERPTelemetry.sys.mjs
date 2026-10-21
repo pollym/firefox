@@ -331,6 +331,9 @@ class TelemetryHandler {
   // Callback used when syncing telemetry settings.
   #telemetrySettingsSync;
 
+  // The promise of the initialization in progress or completed.
+  #initPromise = null;
+
   // _browserInfoByURL is a map of tracked search urls to objects containing:
   // * {object} info
   //   the search provider information associated with the url.
@@ -394,12 +397,16 @@ class TelemetryHandler {
    * Initializes the TelemetryHandler and its ContentHandler. It will add
    * appropriate listeners to the window so that window opening and closing
    * can be tracked.
+   *
+   * @returns {Promise<void>}
+   *   Resolves once initialization has completed.
    */
-  async init() {
-    if (this._initialized) {
-      return;
-    }
+  init() {
+    this.#initPromise ??= this.#init();
+    return this.#initPromise;
+  }
 
+  async #init() {
     this._telemetrySettings = lazy.RemoteSettings(TELEMETRY_SETTINGS_KEY);
     let rawProviderInfo = [];
     try {
@@ -474,6 +481,7 @@ class TelemetryHandler {
     this.#telemetrySettingsSync = null;
 
     this._initialized = false;
+    this.#initPromise = null;
   }
 
   /**
