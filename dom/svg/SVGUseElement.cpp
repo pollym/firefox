@@ -360,12 +360,10 @@ static bool IsForbiddenUseNode(const nsINode& aNode,
   if (svg->IsAnyOfSVGElements(nsGkAtoms::foreignObject)) {
     return true;
   }
-  switch (aMode) {
-    case ForbiddenUseNodeMode::Strict:
-      return !svg->IsSVGGraphicsElement();
-    case ForbiddenUseNodeMode::ForeignObjectOnly:
-      return false;
+  if (aMode == ForbiddenUseNodeMode::ForeignObjectOnly) {
+    return false;
   }
+  return !svg->IsSVGGraphicsElement();
 }
 
 [[nodiscard]]
