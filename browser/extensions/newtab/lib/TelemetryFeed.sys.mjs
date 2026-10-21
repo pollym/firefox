@@ -144,7 +144,7 @@ export function laplaceNoise(scale) {
  * port has to be part of the key. Never recorded.
  *
  * @param  {string} portID the newtab that sent both actions
- * @param  {number} [dwellId] the id SafeAnchor put on both of them
+ * @param  {number|string} [dwellId] the id SafeAnchor put on both of them
  * @returns {string|null} the token, or null if the link did not send one
  */
 function dwellTokenFor(portID, dwellId) {
@@ -1332,7 +1332,7 @@ export class TelemetryFeed {
    * notification, which can be up to an interval later.
    *
    * @param  {object} page an entry of this.#openedPages
-   * @param  {Element} browser the <browser> showing it
+   * @param  {MozBrowser} browser the <browser> showing it
    */
   #watchOpenedPage(page, browser) {
     page.progressListener = {
