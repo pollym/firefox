@@ -965,22 +965,31 @@ export var Policies = {
         }
       }
 
-      if (param.Block) {
-        const hosts = param.Block.map(url => url.hostname)
-          .sort()
-          .join("\n");
-        lazy.runOncePerModification(
-          "clearCookiesForBlockedHosts",
-          hosts,
-          () => {
-            for (const blocked of param.Block) {
-              Services.cookies.removeCookiesWithOriginAttributes(
-                "{}",
-                blocked.hostname
+      lazy.clearRunOnceModification("clearCookiesForBlockedHosts");
+      for (const { hostname } of param.Block ?? []) {
+        try {
+          for (const cookie of Services.cookies.getCookiesWithOriginAttributes(
+            "{}",
+            hostname
+          )) {
+            if (
+              cookie.rawHost == hostname ||
+              cookie.rawHost.endsWith(`.${hostname}`)
+            ) {
+              Services.cookies.remove(
+                cookie.host,
+                cookie.name,
+                cookie.path,
+                cookie.originAttributes
               );
             }
           }
-        );
+        } catch (ex) {
+          lazy.reportFailure(
+            "Cookies",
+            `Unable to clear cookies for blocked host - ${hostname}`
+          );
+        }
       }
 
       if (param.ExpireAtSessionEnd != undefined) {
