@@ -39,8 +39,7 @@ class BrowserSearchTelemetryHandler {
    * - sap.counts
    * - sap.deprecated_counts (deprecated), and associated SEARCH_COUNTS histogram
    * - sap.search_form_counts
-   * - sap.impression_counts (currently only used for context menu items and the
-   *   text selection menu)
+   * - sap.impression_counts (currently only used for context menu items)
    * - serp.impression
    * - browser.engagement.navigation.*
    * - browser.search.content.* (deprecated, some may need to be mirrored)
