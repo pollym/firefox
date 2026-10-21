@@ -16,7 +16,6 @@
 #include "json_reader.h"
 #include "nss_scoped_ptrs.h"
 #include "testvectors_base/test-structs.h"
-#include "pk11_import.h"
 
 namespace nss_test {
 
@@ -29,7 +28,7 @@ class Pkcs11AesCmacTest : public ::testing::Test {
       return nullptr;
     }
 
-    ScopedPK11SymKey result(nss_test::ImportSymKey(
+    ScopedPK11SymKey result(PK11_ImportSymKey(
         slot.get(), mech, PK11_OriginUnwrap, CKA_SIGN, key_item, nullptr));
 
     return result;

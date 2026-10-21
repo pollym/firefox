@@ -19,7 +19,6 @@
 #include "testvectors_base/gcm-vectors_base.h"
 #include "gtest/gtest.h"
 #include "util.h"
-#include "pk11_import.h"
 
 namespace nss_test {
 
@@ -131,7 +130,7 @@ class Pkcs11AesGcmTest : public ::testing::TestWithParam<AesGcmKatValue> {
                         static_cast<unsigned int>(key.size())};
 
     // Import key.
-    ScopedPK11SymKey sym_key(nss_test::ImportSymKey(
+    ScopedPK11SymKey sym_key(PK11_ImportSymKey(
         slot.get(), mech, PK11_OriginUnwrap, CKA_ENCRYPT, &key_item, nullptr));
     ASSERT_TRUE(!!sym_key) << msg;
 

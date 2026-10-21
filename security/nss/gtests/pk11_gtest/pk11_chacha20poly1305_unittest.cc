@@ -18,7 +18,6 @@
 #include "testvectors_base/test-structs.h"
 #include "testvectors_base/chachapoly-vectors_base.h"
 #include "gtest/gtest.h"
-#include "pk11_import.h"
 
 namespace nss_test {
 
@@ -231,8 +230,8 @@ class Pkcs11ChaCha20Poly1305Test
                        static_cast<unsigned int>(testvector.key.size())};
 
     // Import key.
-    ScopedPK11SymKey key(nss_test::ImportSymKey(
-        slot.get(), kMech, PK11_OriginUnwrap, CKA_ENCRYPT, &keyItem, nullptr));
+    ScopedPK11SymKey key(PK11_ImportSymKey(slot.get(), kMech, PK11_OriginUnwrap,
+                                           CKA_ENCRYPT, &keyItem, nullptr));
     EXPECT_TRUE(!!key);
 
     // Check.
@@ -508,7 +507,7 @@ TEST_F(Pkcs11ChaCha20Poly1305Test, Xor) {
   ScopedPK11SlotInfo slot(PK11_GetInternalSlot());
   SECItem keyItem = {siBuffer, toUcharPtr(kKeyData),
                      static_cast<unsigned int>(sizeof(kKeyData))};
-  ScopedPK11SymKey key(nss_test::ImportSymKey(
+  ScopedPK11SymKey key(PK11_ImportSymKey(
       slot.get(), kMechXor, PK11_OriginUnwrap, CKA_ENCRYPT, &keyItem, nullptr));
   EXPECT_TRUE(!!key);
 
@@ -543,9 +542,9 @@ TEST_F(Pkcs11ChaCha20Poly1305Test, XorLegacy) {
   ScopedPK11SlotInfo slot(PK11_GetInternalSlot());
   SECItem keyItem = {siBuffer, toUcharPtr(kKeyData),
                      static_cast<unsigned int>(sizeof(kKeyData))};
-  ScopedPK11SymKey key(nss_test::ImportSymKey(slot.get(), kMechXorLegacy,
-                                              PK11_OriginUnwrap, CKA_ENCRYPT,
-                                              &keyItem, nullptr));
+  ScopedPK11SymKey key(PK11_ImportSymKey(slot.get(), kMechXorLegacy,
+                                         PK11_OriginUnwrap, CKA_ENCRYPT,
+                                         &keyItem, nullptr));
   EXPECT_TRUE(!!key);
 
   SECItem ctrNonceItem = {siBuffer, toUcharPtr(kXorParamsLegacy),
@@ -692,8 +691,8 @@ TEST_F(Pkcs11ChaCha20Poly1305Test, AEADOpInvalidTagLength) {
   ScopedPK11SlotInfo slot(PK11_GetInternalSlot());
   SECItem key_item = {siBuffer, toUcharPtr(kKeyData),
                       static_cast<unsigned int>(sizeof(kKeyData))};
-  ScopedPK11SymKey key(nss_test::ImportSymKey(
-      slot.get(), kMech, PK11_OriginUnwrap, CKA_ENCRYPT, &key_item, nullptr));
+  ScopedPK11SymKey key(PK11_ImportSymKey(slot.get(), kMech, PK11_OriginUnwrap,
+                                         CKA_ENCRYPT, &key_item, nullptr));
   ASSERT_TRUE(!!key);
   SECItem empty = {siBuffer, NULL, 0};
 

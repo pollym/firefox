@@ -14,7 +14,6 @@
 #include "secerr.h"
 #include "sechash.h"
 #include "util.h"
-#include "pk11_import.h"
 
 extern std::string g_source_dir;
 
@@ -49,12 +48,12 @@ class HpkeTest {
       EXPECT_TRUE(expected.empty());
       return;
     }
-    SECStatus rv = nss_test::ExtractKeyValue(actual);
+    SECStatus rv = PK11_ExtractKeyValue(actual);
     EXPECT_EQ(SECSuccess, rv);
     if (rv != SECSuccess) {
       return;
     }
-    SECItem* rawkey = nss_test::GetKeyData(actual);
+    SECItem* rawkey = PK11_GetKeyData(actual);
     CheckEquality(expected, rawkey);
   }
 
@@ -63,12 +62,12 @@ class HpkeTest {
       EXPECT_EQ(!!expected, !!actual);
       return;
     }
-    SECStatus rv = nss_test::ExtractKeyValue(expected);
+    SECStatus rv = PK11_ExtractKeyValue(expected);
     EXPECT_EQ(SECSuccess, rv);
     if (rv != SECSuccess) {
       return;
     }
-    SECItem* raw = nss_test::GetKeyData(expected);
+    SECItem* raw = PK11_GetKeyData(expected);
     ASSERT_NE(nullptr, raw);
     ASSERT_NE(nullptr, raw->data);
     std::vector<uint8_t> expected_vec(raw->data, raw->data + raw->len);
@@ -561,7 +560,7 @@ class TestVectors : public HpkeTest, public ::testing::Test {
       SECItem item = {siBuffer, toUcharPtr(sk_data.data()),
                       static_cast<unsigned int>(sk_data.size())};
       SECKEYPrivateKey* sk = nullptr;
-      SECStatus rv = nss_test::ImportDERPrivateKeyInfoAndReturnKey(
+      SECStatus rv = PK11_ImportDERPrivateKeyInfoAndReturnKey(
           slot.get(), &item, nullptr, nullptr, false, false, KU_ALL, &sk,
           nullptr);
       if (rv != SECSuccess) {
@@ -590,9 +589,9 @@ class TestVectors : public HpkeTest, public ::testing::Test {
       if (!vec.psk.empty()) {
         SECItem psk_item = {siBuffer, toUcharPtr(vec.psk.data()),
                             static_cast<unsigned int>(vec.psk.size())};
-        PK11SymKey* psk_key = nss_test::ImportSymKey(
-            slot.get(), CKM_HKDF_KEY_GEN, PK11_OriginUnwrap, CKA_WRAP,
-            &psk_item, nullptr);
+        PK11SymKey* psk_key =
+            PK11_ImportSymKey(slot.get(), CKM_HKDF_KEY_GEN, PK11_OriginUnwrap,
+                              CKA_WRAP, &psk_item, nullptr);
         EXPECT_NE(nullptr, psk_key);
         psk.reset(psk_key);
       }
@@ -808,9 +807,6 @@ TEST_P(ModeParameterizedTest, BadEncapsulatedPubKey) {
 }
 
 TEST_P(ModeParameterizedTest, ContextExportImportEncrypt) {
-  if (PK11_IsFIPS()) {
-    GTEST_SKIP() << "FIPS tokens can't export an unwrapped context";
-  }
   std::vector<uint8_t> msg = {'s', 'e', 'c', 'r', 'e', 't'};
   std::vector<uint8_t> aad = {'a', 'a', 'd'};
 
@@ -825,9 +821,6 @@ TEST_P(ModeParameterizedTest, ContextExportImportEncrypt) {
 }
 
 TEST_P(ModeParameterizedTest, ContextExportImportExport) {
-  if (PK11_IsFIPS()) {
-    GTEST_SKIP() << "FIPS tokens can't export an unwrapped context";
-  }
   ScopedHpkeContext sender;
   ScopedHpkeContext receiver;
   ScopedPK11SymKey sender_export;
@@ -1046,7 +1039,7 @@ TEST_F(ModeParameterizedTest, InvalidReceiverKeyType) {
   ScopedSECKEYPublicKey pub_key;
   ScopedSECKEYPrivateKey priv_key(
       PK11_GenerateKeyPair(slot.get(), CKM_RSA_PKCS_KEY_PAIR_GEN, &rsa_param,
-                           &pub_tmp, PR_FALSE, PK11_IsFIPS(), nullptr));
+                           &pub_tmp, PR_FALSE, PR_FALSE, nullptr));
   ASSERT_NE(nullptr, priv_key);
   ASSERT_NE(nullptr, pub_tmp);
   pub_key.reset(pub_tmp);
@@ -1068,8 +1061,8 @@ TEST_F(ModeParameterizedTest, InvalidReceiverKeyType) {
   memcpy(ecParams.data + 2, oidData->oid.data, oidData->oid.len);
 
   priv_key.reset(PK11_GenerateKeyPair(slot.get(), CKM_EC_KEY_PAIR_GEN,
-                                      &ecParams, &pub_tmp, PR_FALSE,
-                                      PK11_IsFIPS(), nullptr));
+                                      &ecParams, &pub_tmp, PR_FALSE, PR_FALSE,
+                                      nullptr));
   ASSERT_NE(nullptr, priv_key);
   ASSERT_NE(nullptr, pub_tmp);
   pub_key.reset(pub_tmp);
