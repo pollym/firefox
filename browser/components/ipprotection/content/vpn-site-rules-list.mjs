@@ -252,7 +252,7 @@ export default class VPNSiteRulesList extends MozLitElement {
         <img
           class="vpn-site-rules-delete-icon"
           src=${this.deleteFailed
-            ? "chrome://global/skin/icons/warning.svg"
+            ? "chrome://browser/content/aiwindow/assets/warning.svg"
             : "chrome://global/skin/icons/delete.svg"}
           alt=""
         />
