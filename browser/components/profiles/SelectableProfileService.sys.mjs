@@ -109,6 +109,7 @@ export const PROFILE_THEMES_MAP = new Map([
       dataL10nTitle: "profiles-yellow-theme-title",
       downloadURL:
         "https://addons.mozilla.org/firefox/downloads/file/4552782/profiles_yellow-1.0.xpi",
+      version: "1.0",
       colors: {
         light: {
           chromeColor: "rgb(255, 230, 153)",
@@ -130,6 +131,7 @@ export const PROFILE_THEMES_MAP = new Map([
       dataL10nTitle: "profiles-orange-theme-title",
       downloadURL:
         "https://addons.mozilla.org/firefox/downloads/file/4552788/profiles_orange-1.0.xpi",
+      version: "1.0",
       colors: {
         light: {
           chromeColor: "rgb(255, 205, 158)",
@@ -151,6 +153,7 @@ export const PROFILE_THEMES_MAP = new Map([
       dataL10nTitle: "profiles-red-theme-title",
       downloadURL:
         "https://addons.mozilla.org/firefox/downloads/file/4552785/profiles_red-1.0.xpi",
+      version: "1.0",
       colors: {
         light: {
           chromeColor: "rgb(255, 195, 201)",
@@ -172,6 +175,7 @@ export const PROFILE_THEMES_MAP = new Map([
       dataL10nTitle: "profiles-pink-theme-title",
       downloadURL:
         "https://addons.mozilla.org/firefox/downloads/file/4552787/profiles_pink-1.0.xpi",
+      version: "1.0",
       colors: {
         light: {
           chromeColor: "rgb(255, 194, 219)",
@@ -193,6 +197,7 @@ export const PROFILE_THEMES_MAP = new Map([
       dataL10nTitle: "profiles-purple-theme-title",
       downloadURL:
         "https://addons.mozilla.org/firefox/downloads/file/4552786/profiles_purple-1.0.xpi",
+      version: "1.0",
       colors: {
         light: {
           chromeColor: "rgb(247, 202, 255)",
@@ -214,6 +219,7 @@ export const PROFILE_THEMES_MAP = new Map([
       dataL10nTitle: "profiles-violet-theme-title",
       downloadURL:
         "https://addons.mozilla.org/firefox/downloads/file/4552784/profiles_violet-1.0.xpi",
+      version: "1.0",
       colors: {
         light: {
           chromeColor: "rgb(221, 207, 255)",
@@ -235,6 +241,7 @@ export const PROFILE_THEMES_MAP = new Map([
       dataL10nTitle: "profiles-blue-theme-title",
       downloadURL:
         "https://addons.mozilla.org/firefox/downloads/file/4551961/profiles_blue-1.0.xpi",
+      version: "1.0",
       colors: {
         light: {
           chromeColor: "rgb(171, 223, 255)",
@@ -256,6 +263,7 @@ export const PROFILE_THEMES_MAP = new Map([
       dataL10nTitle: "profiles-green-theme-title",
       downloadURL:
         "https://addons.mozilla.org/firefox/downloads/file/4552789/profiles_green-1.0.xpi",
+      version: "1.0",
       colors: {
         light: {
           chromeColor: "rgb(181, 240, 181)",
@@ -277,6 +285,7 @@ export const PROFILE_THEMES_MAP = new Map([
       dataL10nTitle: "profiles-cyan-theme-title",
       downloadURL:
         "https://addons.mozilla.org/firefox/downloads/file/4552790/profiles_cyan-1.0.xpi",
+      version: "1.0",
       colors: {
         light: {
           chromeColor: "rgb(166, 236, 244)",
@@ -1078,7 +1087,12 @@ class SelectableProfileServiceClass extends EventEmitter {
       if (themeEntry?.downloadURL) {
         let themeInstall = await lazy.AddonManager.getInstallForURL(
           themeEntry.downloadURL,
-          { telemetryInfo }
+          {
+            id: themeId,
+            telemetryInfo,
+            type: "theme",
+            version: themeEntry.version,
+          }
         );
         await themeInstall.install();
         theme = await lazy.AddonManager.getAddonByID(themeId);
