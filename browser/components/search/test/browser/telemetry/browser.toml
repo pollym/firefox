@@ -223,7 +223,11 @@ support-files = ["searchTelemetry.html", "searchTelemetryAd.html"]
 support-files = ["searchTelemetry.html", "searchTelemetryAd.html"]
 
 ["browser_search_telemetry_sources_ads_clicks.js"]
-support-files = ["searchTelemetryAd.html"]
+support-files = [
+  "searchTelemetryAd.html",
+  "redirect_ad.sjs",
+  "redirect_final.sjs",
+]
 
 ["browser_search_telemetry_sources_ads_data_attributes.js"]
 support-files = [
