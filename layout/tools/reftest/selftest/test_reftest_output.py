@@ -85,6 +85,7 @@ def test_output_crash(runtests):
     assert crash[0]["action"] == "crash"
     assert crash[0]["signature"]
     assert crash[0]["minidump_path"]
+    assert crash[0]["group"].endswith("reftest-crash.list")
 
     lines = filter_action("test_end", lines)
     assert len(lines) == 0

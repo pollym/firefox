@@ -308,6 +308,7 @@ class RefTest:
         self.outputHandler = None
         self.testDumpFile = os.path.join(tempfile.gettempdir(), "reftests.json")
         self.currentManifest = "No test started"
+        self.currentManifestID = None
         self.gtkTheme = self.getGtkTheme()
 
         self.run_by_manifest = True
@@ -966,6 +967,7 @@ class RefTest:
             os.path.join(profile.profile, "minidumps"),
             options.symbolsPath,
             test=self.lastTestSeen,
+            group=self.currentManifestID,
         )
 
         if crashed:
@@ -1114,6 +1116,8 @@ class RefTest:
             self.log.group_start(name=manifest_id)
             self.log.info(f"Running tests in {manifest}")
             self.currentManifest = manifest
+            self.currentManifestID = manifest_id
+            self.lastTestSeen = manifest
             status = run(tests=tests)
             overall = overall or status
             self.log.group_end(name=manifest_id)
