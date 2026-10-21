@@ -18,6 +18,7 @@
 #include "nsGlobalWindowInner.h"
 #include "nsIGlobalObject.h"
 #include "nsILoadInfo.h"
+#include "nsIURIMutator.h"
 #include "nsNetUtil.h"
 #include "nsScriptSecurityManager.h"
 #include "nsString.h"
@@ -182,6 +183,8 @@ bool ConnectionAllowlists::ShouldLoad(nsIURI* aURI,
   // TODO(Bug 2072261): WebRTC.
   // TODO: Requests vs URL.
 
+  nsCOMPtr<nsIURI> uri = aURI;
+
   switch (aLoadInfo->GetExternalContentPolicyType()) {
     case ExtContentPolicyType::TYPE_DOCUMENT:
     case ExtContentPolicyType::TYPE_SUBDOCUMENT:
@@ -189,8 +192,22 @@ bool ConnectionAllowlists::ShouldLoad(nsIURI* aURI,
       // https://html.spec.whatwg.org/multipage/browsing-the-web.html#navigate-to-a-javascript:-url,
       // documents loaded via javascript: URL don't trigger a real request, so
       // they also shouldn't be blockable by the Connection Allowlists.
-      if (aURI->SchemeIs("javascript")) {
+      if (uri->SchemeIs("javascript")) {
         return true;
+      }
+      break;
+
+    case ExtContentPolicyType::TYPE_WEBSOCKET:
+      // Per
+      // https://websockets.spec.whatwg.org/#concept-websocket-establish,
+      // the request URL of a WebSocket has its ws: or wss: scheme replaced
+      // with http: or https:, so match the allowlist against that URL.
+      MOZ_ASSERT(uri->SchemeIs("ws") || uri->SchemeIs("wss"));
+      if (NS_WARN_IF(NS_FAILED(
+              NS_MutateURI(uri)
+                  .SetScheme(uri->SchemeIs("wss") ? "https"_ns : "http"_ns)
+                  .Finalize(uri)))) {
+        return false;
       }
       break;
 
@@ -202,7 +219,7 @@ bool ConnectionAllowlists::ShouldLoad(nsIURI* aURI,
       break;
   }
 
-  return !ShouldBlockURL(aURI, aLoadInfo);
+  return !ShouldBlockURL(uri, aLoadInfo);
 }
 
 // https://wicg.github.io/connection-allowlists/#abstract-opdef-match-a-url-to-a-connection-allowlist
