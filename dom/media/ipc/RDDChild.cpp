@@ -77,7 +77,7 @@ bool RDDChild::SendRequestMemoryReport(const uint32_t& aGeneration,
                                        const bool& aAnonymize,
                                        const bool& aMinimizeMemoryUsage,
                                        const Maybe<FileDescriptor>& aDMDFile) {
-  mMemoryReportRequest = std::make_unique<MemoryReportRequestHost>(aGeneration);
+  mMemoryReportRequest = MakeUnique<MemoryReportRequestHost>(aGeneration);
 
   PRDDChild::SendRequestMemoryReport(aGeneration, aAnonymize,
                                      aMinimizeMemoryUsage, aDMDFile)

@@ -20,7 +20,7 @@ const SdpFmtpAttributeList::Parameters* SdpMediaSection::FindFmtp(
 }
 
 void SdpMediaSection::SetFmtp(const SdpFmtpAttributeList::Fmtp& fmtpToSet) {
-  auto fmtps = std::make_unique<SdpFmtpAttributeList>();
+  auto fmtps = MakeUnique<SdpFmtpAttributeList>();
 
   if (GetAttributeList().HasAttribute(SdpAttribute::kFmtpAttribute)) {
     *fmtps = GetAttributeList().GetFmtp();
@@ -42,7 +42,7 @@ void SdpMediaSection::SetFmtp(const SdpFmtpAttributeList::Fmtp& fmtpToSet) {
 }
 
 void SdpMediaSection::RemoveFmtp(const std::string& pt) {
-  auto fmtps = std::make_unique<SdpFmtpAttributeList>();
+  auto fmtps = MakeUnique<SdpFmtpAttributeList>();
 
   SdpAttributeList& attrList = GetAttributeList();
   if (attrList.HasAttribute(SdpAttribute::kFmtpAttribute)) {
@@ -63,7 +63,7 @@ void SdpMediaSection::RemoveUnlistedPayloadTypeAttributes() {
   SdpAttributeList& attrList = GetAttributeList();
 
   if (attrList.HasAttribute(SdpAttribute::kFmtpAttribute)) {
-    auto fmtps = std::make_unique<SdpFmtpAttributeList>(attrList.GetFmtp());
+    auto fmtps = MakeUnique<SdpFmtpAttributeList>(attrList.GetFmtp());
     std::erase_if(fmtps->mFmtps, [&](const SdpFmtpAttributeList::Fmtp& aFmtp) {
       return !HasFormat(aFmtp.format);
     });
@@ -168,8 +168,7 @@ void SdpMediaSection::SetRtcpFbs(const SdpRtcpFbAttributeList& rtcpfbs) {
     return;
   }
 
-  GetAttributeList().SetAttribute(
-      std::make_unique<SdpRtcpFbAttributeList>(rtcpfbs));
+  GetAttributeList().SetAttribute(MakeUnique<SdpRtcpFbAttributeList>(rtcpfbs));
 }
 
 void SdpMediaSection::SetSsrcs(const std::vector<uint32_t>& ssrcs,
@@ -179,7 +178,7 @@ void SdpMediaSection::SetSsrcs(const std::vector<uint32_t>& ssrcs,
     return;
   }
 
-  auto ssrcAttr = std::make_unique<SdpSsrcAttributeList>();
+  auto ssrcAttr = MakeUnique<SdpSsrcAttributeList>();
   for (auto ssrc : ssrcs) {
     // When using ssrc attributes, we are required to at least have a cname.
     // (See https://tools.ietf.org/html/rfc5576#section-6.1)
@@ -193,7 +192,7 @@ void SdpMediaSection::SetSsrcs(const std::vector<uint32_t>& ssrcs,
 
 void SdpMediaSection::AddMsid(const std::string& id,
                               const std::string& appdata) {
-  auto msids = std::make_unique<SdpMsidAttributeList>();
+  auto msids = MakeUnique<SdpMsidAttributeList>();
   if (GetAttributeList().HasAttribute(SdpAttribute::kMsidAttribute)) {
     msids->mMsids = GetAttributeList().GetMsid().mMsids;
   }

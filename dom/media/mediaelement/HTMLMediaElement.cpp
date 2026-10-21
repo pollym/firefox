@@ -2395,7 +2395,7 @@ already_AddRefed<Promise> HTMLMediaElement::MozRequestDebugInfo(
   if (NS_WARN_IF(aRv.Failed())) {
     return nullptr;
   }
-  auto result = std::make_unique<dom::HTMLMediaElementDebugInfo>();
+  auto result = MakeUnique<dom::HTMLMediaElementDebugInfo>();
   if (mMediaKeys) {
     GetEMEInfo(result->mEMEInfo);
   }

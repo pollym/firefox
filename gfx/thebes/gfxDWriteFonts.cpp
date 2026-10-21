@@ -681,7 +681,7 @@ bool gfxDWriteFont::ProvidesGlyphWidths() const {
 
 int32_t gfxDWriteFont::GetGlyphWidth(uint16_t aGID) {
   if (!mGlyphWidths) {
-    mGlyphWidths = std::make_unique<nsTHashMap<nsUint32HashKey, int32_t>>(128);
+    mGlyphWidths = MakeUnique<nsTHashMap<nsUint32HashKey, int32_t>>(128);
   }
 
   return mGlyphWidths->LookupOrInsertWith(

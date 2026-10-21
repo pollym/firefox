@@ -110,8 +110,8 @@ nsresult WorkerLoadInfo::SetPrincipalsOnMainThread(
 
   mLoadGroup = aLoadGroup;
 
-  mPrincipalInfo = std::make_unique<PrincipalInfo>();
-  mPartitionedPrincipalInfo = std::make_unique<PrincipalInfo>();
+  mPrincipalInfo = MakeUnique<PrincipalInfo>();
+  mPartitionedPrincipalInfo = MakeUnique<PrincipalInfo>();
   StoragePrincipalHelper::GetRegularPrincipalOriginAttributes(
       aLoadGroup, mOriginAttributes);
 
@@ -120,7 +120,7 @@ nsresult WorkerLoadInfo::SetPrincipalsOnMainThread(
   if (aPrincipal->Equals(aPartitionedPrincipal)) {
     *mPartitionedPrincipalInfo = *mPrincipalInfo;
   } else {
-    mPartitionedPrincipalInfo = std::make_unique<PrincipalInfo>();
+    mPartitionedPrincipalInfo = MakeUnique<PrincipalInfo>();
     MOZ_TRY(PrincipalToPrincipalInfo(aPartitionedPrincipal,
                                      mPartitionedPrincipalInfo.get()));
   }
@@ -146,7 +146,7 @@ nsresult WorkerLoadInfo::SetPolicyContainerOnMainThread(
 
   if (mPolicyContainerArgs->csp().isSome()) {
     mozilla::ipc::CSPInfo cspInfo(*mPolicyContainerArgs->csp());
-    mCSPContext = std::make_unique<OffThreadCSPContext>(std::move(cspInfo));
+    mCSPContext = MakeUnique<OffThreadCSPContext>(std::move(cspInfo));
   }
 
   return NS_OK;

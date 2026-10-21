@@ -312,11 +312,11 @@ nsPresContext::nsPresContext(dom::Document* aDocument, nsPresContextType aType)
 
   // if text perf logging enabled, init stats struct
   if (MOZ_LOG_TEST(gfxPlatform::GetLog(eGfxLog_textperf), LogLevel::Warning)) {
-    mTextPerf = std::make_unique<gfxTextPerfMetrics>();
+    mTextPerf = MakeUnique<gfxTextPerfMetrics>();
   }
 
   if (StaticPrefs::gfx_missing_fonts_notify()) {
-    mMissingFonts = std::make_unique<gfxMissingFontRecorder>();
+    mMissingFonts = MakeUnique<gfxMissingFontRecorder>();
   }
 
   if (StaticPrefs::layout_dynamic_toolbar_max_height() > 0 &&
@@ -564,7 +564,7 @@ void nsPresContext::PreferenceChanged(const char* aPrefName) {
   if (prefName.EqualsLiteral(GFX_MISSING_FONTS_NOTIFY_PREF)) {
     if (StaticPrefs::gfx_missing_fonts_notify()) {
       if (!mMissingFonts) {
-        mMissingFonts = std::make_unique<gfxMissingFontRecorder>();
+        mMissingFonts = MakeUnique<gfxMissingFontRecorder>();
         // trigger reflow to detect missing fonts on the current page
         changeHint |= NS_STYLE_HINT_REFLOW;
       }
@@ -669,9 +669,9 @@ void nsPresContext::Init(nsDeviceContext* aDeviceContext) {
   mAnimationEventDispatcher =
       MakeRefPtr<mozilla::AnimationEventDispatcher>(this);
   mEffectCompositor = MakeRefPtr<mozilla::EffectCompositor>(this);
-  mTransitionManager = std::make_unique<nsTransitionManager>(this);
-  mAnimationManager = std::make_unique<nsAnimationManager>(this);
-  mTimelineManager = std::make_unique<mozilla::TimelineManager>(this);
+  mTransitionManager = MakeUnique<nsTransitionManager>(this);
+  mAnimationManager = MakeUnique<nsAnimationManager>(this);
+  mTimelineManager = MakeUnique<mozilla::TimelineManager>(this);
 
   if (mDocument->GetDisplayDocument()) {
     NS_ASSERTION(mDocument->GetDisplayDocument()->GetPresContext(),
@@ -822,7 +822,7 @@ void nsPresContext::AttachPresShell(mozilla::PresShell* aPresShell) {
   MOZ_ASSERT(!mPresShell);
   mPresShell = aPresShell;
 
-  mRestyleManager = std::make_unique<mozilla::RestyleManager>(this);
+  mRestyleManager = MakeUnique<mozilla::RestyleManager>(this);
 
   // Since CounterStyleManager is also the name of a method of
   // nsPresContext, it is necessary to prefix the class with the mozilla
@@ -2036,8 +2036,7 @@ void nsPresContext::MediaFeatureValuesChanged(
   }
 
   if (!mPendingMediaFeatureValuesChange) {
-    mPendingMediaFeatureValuesChange =
-        std::make_unique<MediaFeatureChange>(aChange);
+    mPendingMediaFeatureValuesChange = MakeUnique<MediaFeatureChange>(aChange);
   } else {
     *mPendingMediaFeatureValuesChange |= aChange;
   }
@@ -2843,7 +2842,7 @@ UniquePtr<intl::Bidi> nsPresContext::GetBidiEngine() {
   if (mBidiEngine) {
     return std::move(mBidiEngine);
   }
-  return std::make_unique<mozilla::intl::Bidi>();
+  return MakeUnique<mozilla::intl::Bidi>();
 }
 
 void nsPresContext::FlushFontFeatureValues() {

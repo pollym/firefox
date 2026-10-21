@@ -307,7 +307,7 @@ void nsMutationReceiver::ContentWillBeRemoved(nsIContent* aChild,
                   aChild,
                   [&isNewEntry] {
                     isNewEntry = true;
-                    return std::make_unique<nsCOMArray<nsMutationReceiver>>();
+                    return MakeUnique<nsCOMArray<nsMutationReceiver>>();
                   })
               .get();
       if (!isNewEntry) {

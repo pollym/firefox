@@ -1404,7 +1404,7 @@ int RemoveFile::Parse(NS_tchar* line) {
     return PARSE_ERROR;
   }
 
-  mRelPath = std::make_unique<NS_tchar[]>(MAXPATHLEN);
+  mRelPath = mozilla::MakeUnique<NS_tchar[]>(MAXPATHLEN);
   NS_tstrcpy(mRelPath.get(), validPath);
 
   mFile.reset(get_full_path(validPath));
@@ -1528,7 +1528,7 @@ int RemoveDir::Parse(NS_tchar* line) {
     return PARSE_ERROR;
   }
 
-  mRelPath = std::make_unique<NS_tchar[]>(MAXPATHLEN);
+  mRelPath = mozilla::MakeUnique<NS_tchar[]>(MAXPATHLEN);
   NS_tstrcpy(mRelPath.get(), validPath);
 
   mDir.reset(get_full_path(validPath));
@@ -1638,7 +1638,7 @@ int AddFile::Parse(NS_tchar* line) {
     return PARSE_ERROR;
   }
 
-  mRelPath = std::make_unique<NS_tchar[]>(MAXPATHLEN);
+  mRelPath = mozilla::MakeUnique<NS_tchar[]>(MAXPATHLEN);
   NS_tstrcpy(mRelPath.get(), validPath);
 
   mFile.reset(get_full_path(validPath));
@@ -1760,8 +1760,7 @@ class PatchFileDecoder {
   template <typename ChildClass>
   static mozilla::UniquePtr<PatchFileDecoder> TryLoadAs(FILE* aPatchFile,
                                                         int* aReturnValue) {
-    // We cannot use std::make_unique because child classes hide their
-    // constructors.
+    // We cannot use MakeUnique because child classes hide their constructors.
     mozilla::UniquePtr<ChildClass> ptr{new ChildClass()};
     fseek(aPatchFile, 0, SEEK_SET);
     int rv = ptr->Load(aPatchFile);
@@ -2104,7 +2103,7 @@ int PatchFile::Parse(NS_tchar* line) {
     return PARSE_ERROR;
   }
 
-  mFileRelPath = std::make_unique<NS_tchar[]>(MAXPATHLEN);
+  mFileRelPath = mozilla::MakeUnique<NS_tchar[]>(MAXPATHLEN);
   NS_tstrcpy(mFileRelPath.get(), validPath);
 
   mFile.reset(get_full_path(validPath));
@@ -3652,7 +3651,7 @@ int NS_main(int argc, NS_tchar** argv) {
   // modify.
   int suiArgc = argc;
   mozilla::UniquePtr<const NS_tchar*[]> suiArgv =
-      std::make_unique<const NS_tchar*[]>(suiArgc);
+      mozilla::MakeUnique<const NS_tchar*[]>(suiArgc);
   for (int argIndex = 0; argIndex < suiArgc; argIndex++) {
     suiArgv.get()[argIndex] = argv[argIndex];
   }

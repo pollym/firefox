@@ -722,8 +722,7 @@ bool RasterImage::SetMetadata(const ImageMetadata& aMetadata,
   if (LoadHasSize() && aMetadata.HasAnimation() && !mAnimationState) {
     // We're becoming animated, so initialize animation stuff.
     mAnimationState.emplace(mAnimationMode);
-    mFrameAnimator =
-        std::make_unique<FrameAnimator>(this, mSize.ToUnknownSize());
+    mFrameAnimator = MakeUnique<FrameAnimator>(this, mSize.ToUnknownSize());
 
     if (!StaticPrefs::image_mem_animated_discardable_AtStartup()) {
       // We don't support discarding animated images (See bug 414259).

@@ -427,7 +427,7 @@ nsresult nsHttpHandler::Init() {
         }
         auto map = mAltSvcMappingTemptativeMap.Lock();
         map->InsertOrUpdate(
-            host, std::make_unique<nsCString>(nsPrintfCString("h3=:%d", port)));
+            host, MakeUnique<nsCString>(nsPrintfCString("h3=:%d", port)));
       }
     }
   }
@@ -466,7 +466,7 @@ nsresult nsHttpHandler::Init() {
   rv = InitConnectionMgr();
   if (NS_FAILED(rv)) return rv;
 
-  mAltSvcCache = std::make_unique<AltSvcCache>();
+  mAltSvcCache = MakeUnique<AltSvcCache>();
 
   mRequestContextService = RequestContextService::GetOrCreate();
 
@@ -2025,7 +2025,7 @@ void nsHttpHandler::PrefsChanged(const char* pref) {
           if (index != kNotFound) {
             map->InsertOrUpdate(
                 Substring(token, 0, index),
-                std::make_unique<nsCString>(Substring(token, index + 1)));
+                MakeUnique<nsCString>(Substring(token, index + 1)));
           }
         }
       }

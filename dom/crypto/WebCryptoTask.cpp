@@ -2582,7 +2582,7 @@ GenerateAsymmetricKeyTask::GenerateAsymmetricKeyTask(
     nsIGlobalObject* aGlobal, JSContext* aCx, const nsString& aAlgName,
     const ObjectOrString& aAlgorithm, bool aExtractable,
     const Sequence<nsString>& aKeyUsages)
-    : mKeyPair(std::make_unique<CryptoKeyPair>()),
+    : mKeyPair(MakeUnique<CryptoKeyPair>()),
       mMechanism(CKM_INVALID_MECHANISM),
       mRsaParams(),
       mDhParams(),
@@ -2593,7 +2593,7 @@ GenerateAsymmetricKeyTask::GenerateAsymmetricKeyTask(
 GenerateAsymmetricKeyTask::GenerateAsymmetricKeyTask(
     nsIGlobalObject* aGlobal, JSContext* aCx, const ObjectOrString& aAlgorithm,
     bool aExtractable, const Sequence<nsString>& aKeyUsages)
-    : mKeyPair(std::make_unique<CryptoKeyPair>()),
+    : mKeyPair(MakeUnique<CryptoKeyPair>()),
       mMechanism(CKM_INVALID_MECHANISM),
       mRsaParams(),
       mDhParams(),

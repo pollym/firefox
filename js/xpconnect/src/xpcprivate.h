@@ -1279,7 +1279,7 @@ class XPCWrappedNativeTearOff final {
 
   XPCWrappedNativeTearOff* AddTearOff() {
     MOZ_ASSERT(!mNextTearOff);
-    mNextTearOff = std::make_unique<XPCWrappedNativeTearOff>();
+    mNextTearOff = mozilla::MakeUnique<XPCWrappedNativeTearOff>();
     return mNextTearOff.get();
   }
 

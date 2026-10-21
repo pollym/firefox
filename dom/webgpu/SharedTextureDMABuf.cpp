@@ -60,7 +60,7 @@ UniquePtr<SharedTextureDMABuf> SharedTextureDMABuf::Create(
     return nullptr;
   }
 
-  return std::make_unique<SharedTextureDMABuf>(
+  return MakeUnique<SharedTextureDMABuf>(
       aWidth, aHeight, aFormat, aUsage, std::move(surface),
       desc.get_SurfaceDescriptorDMABuf(), dmaBufInfo);
 }

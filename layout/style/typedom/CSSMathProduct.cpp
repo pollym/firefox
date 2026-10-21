@@ -49,7 +49,7 @@ RefPtr<CSSMathProduct> CSSMathProduct::Create(
   }
 
   return Create(std::move(aParent),
-                std::make_unique<StyleNumericType>(aMathProduct.numeric_type),
+                MakeUnique<StyleNumericType>(aMathProduct.numeric_type),
                 std::move(values));
 }
 

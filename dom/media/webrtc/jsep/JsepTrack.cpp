@@ -474,8 +474,8 @@ void JsepTrack::AddToMsection(const std::vector<std::string>& aRids,
                               SsrcGenerator& ssrcGenerator, bool rtxEnabled,
                               SdpMediaSection* msection) {
   if (aRids.size() > 1) {
-    auto simulcast = std::make_unique<SdpSimulcastAttribute>();
-    auto ridAttrs = std::make_unique<SdpRidAttributeList>();
+    auto simulcast = MakeUnique<SdpSimulcastAttribute>();
+    auto ridAttrs = MakeUnique<SdpRidAttributeList>();
     for (const std::string& rid : aRids) {
       SdpRidAttributeList::Rid ridAttr;
       ridAttr.id = rid;
@@ -508,7 +508,7 @@ void JsepTrack::AddToMsection(const std::vector<std::string>& aRids,
         return;
       }
       std::vector<uint32_t> allSsrcs;
-      auto group = std::make_unique<SdpSsrcGroupAttributeList>();
+      auto group = MakeUnique<SdpSsrcGroupAttributeList>();
       for (const auto& ssrc : mSsrcs) {
         const auto rtxSsrc = mSsrcToRtxSsrc[ssrc];
         allSsrcs.push_back(ssrc);
@@ -597,7 +597,7 @@ void JsepTrack::CreateEncodings(
   // For each stream make sure we have an encoding, and configure
   // that encoding appropriately.
   for (size_t i = 0; i < numEncodings; ++i) {
-    auto encoding = std::make_unique<JsepTrackEncoding>();
+    auto encoding = MakeUnique<JsepTrackEncoding>();
     if (mRids.size() > i) {
       encoding->mRid = mRids[i];
     }
@@ -858,7 +858,7 @@ nsresult JsepTrack::Negotiate(const SdpMediaSection& answer,
   }
 
   UniquePtr<JsepTrackNegotiatedDetails> negotiatedDetails =
-      std::make_unique<JsepTrackNegotiatedDetails>();
+      MakeUnique<JsepTrackNegotiatedDetails>();
 
   CreateEncodings(remote, negotiatedCodecs, negotiatedDetails.get());
 

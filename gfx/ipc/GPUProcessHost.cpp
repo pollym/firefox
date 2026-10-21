@@ -58,7 +58,7 @@ bool GPUProcessHost::Launch(geckoargs::ChildProcessArgs aExtraOpts) {
   MOZ_ASSERT(!gfxPlatform::IsHeadless() ||
              StaticPrefs::layers_gpu_process_allow_headless_AtStartup());
 
-  mPrefSerializer = std::make_unique<ipc::SharedPreferenceSerializer>();
+  mPrefSerializer = MakeUnique<ipc::SharedPreferenceSerializer>();
   if (!mPrefSerializer->SerializeToSharedMemory(GeckoProcessType_GPU,
                                                 /* remoteType */ {})) {
     return false;

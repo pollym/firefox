@@ -2538,11 +2538,10 @@ class ArchivedOriginScope {
     UniquePtr<OriginAttributesPattern> mPattern;
 
     explicit Pattern(const OriginAttributesPattern& aPattern)
-        : mPattern(std::make_unique<OriginAttributesPattern>(aPattern)) {}
+        : mPattern(MakeUnique<OriginAttributesPattern>(aPattern)) {}
 
     Pattern(const Pattern& aOther)
-        : mPattern(
-              std::make_unique<OriginAttributesPattern>(*aOther.mPattern)) {}
+        : mPattern(MakeUnique<OriginAttributesPattern>(*aOther.mPattern)) {}
 
     Pattern(Pattern&& aOther) = default;
 
@@ -2868,7 +2867,7 @@ nsresult LoadArchivedOrigins() {
           "SELECT DISTINCT originAttributes, originKey "
           "FROM webappsstore2;"_ns));
 
-  auto archivedOrigins = std::make_unique<ArchivedOriginHashtable>();
+  auto archivedOrigins = MakeUnique<ArchivedOriginHashtable>();
 
   // XXX Actually, this could use a hashtable variant of
   // CollectElementsWhileHasResult
@@ -2889,8 +2888,8 @@ nsresult LoadArchivedOrigins() {
                Err(NS_ERROR_FAILURE));
 
         archivedOrigins->InsertOrUpdate(
-            hashKey, std::make_unique<ArchivedOriginInfo>(originAttributes,
-                                                          originNoSuffix));
+            hashKey,
+            MakeUnique<ArchivedOriginInfo>(originAttributes, originNoSuffix));
 
         return Ok{};
       }));
@@ -3615,7 +3614,7 @@ void DatastoreWriteOptimizer::ApplyAndReset(
             // about the UpdateWithMove flag.
 
             aOrderedItems.RemoveElementAt(index);
-            entry.Data() = std::make_unique<InsertItemInfo>(
+            entry.Data() = MakeUnique<InsertItemInfo>(
                 updateItemInfo->SerialNumber(), updateItemInfo->GetKey(),
                 updateItemInfo->GetValue());
           } else {
@@ -7437,7 +7436,7 @@ void PrepareDatastoreOp::GetResponse(LSRequestResponse& aResponse) {
     gPreparedDatastores = new PreparedDatastoreHashtable();
   }
   const auto& preparedDatastore = gPreparedDatastores->InsertOrUpdate(
-      mDatastoreId, std::make_unique<PreparedDatastore>(
+      mDatastoreId, MakeUnique<PreparedDatastore>(
                         mDatastore, ContentParentHandle(), Origin(),
                         mDatastoreId, /* aForPreload */ mForPreload));
 

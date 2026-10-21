@@ -1563,7 +1563,7 @@ class ConnectionPool::CloseConnectionRunnable final
 };
 
 struct ConnectionPool::DatabaseInfo final {
-  friend std::default_delete<DatabaseInfo>;
+  friend mozilla::DefaultDelete<DatabaseInfo>;
 
   RefPtr<ConnectionPool> mConnectionPool;
   const nsCString mDatabaseId;
@@ -1604,7 +1604,7 @@ struct ConnectionPool::DatabaseInfo final {
 };
 
 struct ConnectionPool::DatabaseCompleteCallback final {
-  friend std::default_delete<DatabaseCompleteCallback>;
+  friend DefaultDelete<DatabaseCompleteCallback>;
 
   nsCString mDatabaseId;
   nsCOMPtr<nsIRunnable> mCallback;
@@ -1666,7 +1666,7 @@ class ConnectionPool::TransactionRunnable final : public Runnable {
 #endif
 
 class ConnectionPool::TransactionInfo final {
-  friend std::default_delete<TransactionInfo>;
+  friend mozilla::DefaultDelete<TransactionInfo>;
 
   nsTHashSet<TransactionInfo*> mBlocking;
   nsTArray<NotNull<TransactionInfo*>> mBlockingOrdered;
@@ -4799,7 +4799,7 @@ class Utils final : public PBackgroundIndexedDBUtilsParent {
  ******************************************************************************/
 
 struct DatabaseActorInfo final {
-  friend std::default_delete<DatabaseActorInfo>;
+  friend mozilla::DefaultDelete<DatabaseActorInfo>;
 
   SafeRefPtr<FullDatabaseMetadata> mMetadata;
   // We don't use LinkedList<CheckedUnsafePtr<Database>> because
@@ -7953,14 +7953,14 @@ uint64_t ConnectionPool::Start(
     MutexAutoLock lock(mDatabasesMutex);
 
     dbInfo = mDatabases
-                 .InsertOrUpdate(aDatabaseId, std::make_unique<DatabaseInfo>(
-                                                  this, aDatabaseId))
+                 .InsertOrUpdate(aDatabaseId,
+                                 MakeUnique<DatabaseInfo>(this, aDatabaseId))
                  .get();
   }
 
   MOZ_ASSERT(!mTransactions.Contains(transactionId));
   auto& transactionInfo = *mTransactions.InsertOrUpdate(
-      transactionId, std::make_unique<TransactionInfo>(
+      transactionId, MakeUnique<TransactionInfo>(
                          *dbInfo, aBackgroundChildLoggingId, aDatabaseId,
                          transactionId, aLoggingSerialNumber, aObjectStoreNames,
                          aIsWriteTransaction, aTransactionOp));
@@ -8072,7 +8072,7 @@ void ConnectionPool::WaitForDatabaseToComplete(const nsCString& aDatabaseId,
   }
 
   mCompleteCallbacks.EmplaceBack(
-      std::make_unique<DatabaseCompleteCallback>(aDatabaseId, aCallback));
+      MakeUnique<DatabaseCompleteCallback>(aDatabaseId, aCallback));
 }
 
 void ConnectionPool::Shutdown() {
@@ -16477,7 +16477,7 @@ void OpenDatabaseOp::EnsureDatabaseActor() {
     info = gLiveDatabaseHashtable
                ->InsertOrUpdate(
                    mDatabaseId.ref(),
-                   std::make_unique<DatabaseActorInfo>(
+                   MakeUnique<DatabaseActorInfo>(
                        mMetadata.clonePtr(),
                        WrapNotNullUnchecked(mDatabase.unsafeGetRawPtr())))
                .get();

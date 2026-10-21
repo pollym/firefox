@@ -271,6 +271,7 @@ allowlist-types = [
     "nsStyleXUL",
     "mozilla::UniquePtr",
     "mozilla::DeclarationBlock",
+    "mozilla::DefaultDelete",
     "mozilla::Side",
     "mozilla::binding_danger::AssertAndSuppressCleanupPolicy",
     "mozilla::InheritTarget",

@@ -89,8 +89,7 @@ UniquePtr<SerializedStackHolder> GetCurrentStackForNetMonitor(JSContext* aCx) {
 }
 
 UniquePtr<SerializedStackHolder> GetCurrentStack(JSContext* aCx) {
-  UniquePtr<SerializedStackHolder> stack =
-      std::make_unique<SerializedStackHolder>();
+  UniquePtr<SerializedStackHolder> stack = MakeUnique<SerializedStackHolder>();
   stack->SerializeCurrentStack(aCx);
   return stack;
 }

@@ -90,7 +90,7 @@ bool GMPProcessParent::Launch(int32_t aTimeoutMs) {
           mMonitor("GMPProcessParent::PrefSerializerRunnable::mMonitor") {}
 
     NS_IMETHOD Run() override {
-      auto prefSerializer = std::make_unique<ipc::SharedPreferenceSerializer>();
+      auto prefSerializer = MakeUnique<ipc::SharedPreferenceSerializer>();
       bool success =
           prefSerializer->SerializeToSharedMemory(GeckoProcessType_GMPlugin,
                                                   /* remoteType */ {});

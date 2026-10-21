@@ -2193,7 +2193,7 @@ UniquePtr<VideoFrame::TransferredData> VideoFrame::Transfer() {
     return nullptr;
   }
 
-  auto frame = std::make_unique<TransferredData>(GetVideoFrameData());
+  auto frame = MakeUnique<TransferredData>(GetVideoFrameData());
   Close();
   return frame;
 }

@@ -2602,7 +2602,7 @@ static const nsTHashMap<nsUint32HashKey, Script>* ScriptTagToCodeTable() {
   // "If multiple threads attempt to initialize the same static local variable
   // concurrently, the initialization occurs exactly once."
   static UniquePtr<TableT> sScriptTagToCode = []() {
-    auto tagToCode = std::make_unique<TableT>(size_t(Script::NUM_SCRIPT_CODES));
+    auto tagToCode = MakeUnique<TableT>(size_t(Script::NUM_SCRIPT_CODES));
     Script scriptCount =
         Script(std::min<int>(UnicodeProperties::GetMaxNumberOfScripts() + 1,
                              int(Script::NUM_SCRIPT_CODES)));
@@ -2746,7 +2746,7 @@ void gfxFontGroup::InitTextRun(DrawTarget* aDrawTarget, gfxTextRun* aTextRun,
       char16_t newCh = HandleNumberInChar(origCh, prevIsArabic, numOption);
       if (newCh != origCh) {
         if (!transformedString) {
-          transformedString = std::make_unique<char16_t[]>(aLength);
+          transformedString = MakeUnique<char16_t[]>(aLength);
           if constexpr (sizeof(T) == sizeof(char16_t)) {
             memcpy(transformedString.get(), aString, i * sizeof(char16_t));
           } else {

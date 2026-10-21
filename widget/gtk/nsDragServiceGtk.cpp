@@ -43,7 +43,7 @@ ClipboardTargets nsDragSessionGtk::DragTaskGtk::GetTargets() {
 }
 
 nsDragSessionGtk::nsDragSessionGtk() {
-  mRecentTask = std::make_unique<DragTaskGtk>();
+  mRecentTask = MakeUnique<DragTaskGtk>();
 }
 
 NS_IMETHODIMP
@@ -205,7 +205,7 @@ gboolean nsDragSessionGtk::ScheduleMotionEvent(
 
   // Returning TRUE means we'll reply with a status message, unless we first
   // get a leave.
-  UniquePtr<DragTaskGtk> task = std::make_unique<DragTaskGtk>(
+  UniquePtr<DragTaskGtk> task = MakeUnique<DragTaskGtk>(
       eDragTaskMotion, aDragContext, aWindow, aWindowPoint, aTime);
   return Schedule(std::move(task));
 }
@@ -214,7 +214,7 @@ gboolean nsDragSessionGtk::ScheduleDropEvent(nsWindow* aWindow,
                                              GdkDragContext* aDragContext,
                                              LayoutDeviceIntPoint aWindowPoint,
                                              guint aTime) {
-  UniquePtr<DragTaskGtk> task = std::make_unique<DragTaskGtk>(
+  UniquePtr<DragTaskGtk> task = MakeUnique<DragTaskGtk>(
       eDragTaskDrop, aDragContext, aWindow, aWindowPoint, aTime);
   if (!Schedule(std::move(task))) {
     NS_WARNING("Additional drag drop ignored");
@@ -231,7 +231,7 @@ void nsDragSessionGtk::ScheduleLeaveEvent() {
   // We don't know at this stage whether a drop signal will immediately
   // follow.  If the drop signal gets sent it will happen before we return
   // to the main loop and the scheduled leave task will be replaced.
-  UniquePtr<DragTaskGtk> task = std::make_unique<DragTaskGtk>(eDragTaskLeave);
+  UniquePtr<DragTaskGtk> task = MakeUnique<DragTaskGtk>(eDragTaskLeave);
   if (!Schedule(std::move(task))) {
     NS_WARNING("Drag leave after drop");
   }

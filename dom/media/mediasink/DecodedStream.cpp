@@ -596,7 +596,7 @@ nsresult DecodedStream::Start(const TimeUnit& aStartTime,
         // proper one. This effectively halts playback for this DecodedStream.
         return NS_OK;
       }
-      mData = std::make_unique<DecodedStreamData>(
+      mData = MakeUnique<DecodedStreamData>(
           std::move(mInit), mDummyTrack->mTrack->Graph(),
           std::move(audioOutputTrack), std::move(videoOutputTrack),
           std::move(mAudioEndedPromise), std::move(mVideoEndedPromise),

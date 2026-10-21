@@ -3332,7 +3332,7 @@ nsresult nsDocShell::FixupAndLoadURIString(
       triggeringPrincipal = nsContentUtils::GetSystemPrincipal();
     }
     UniquePtr<SessionHistoryInfo> previousActiveEntry(mActiveEntry.release());
-    mActiveEntry = std::make_unique<SessionHistoryInfo>(
+    mActiveEntry = MakeUnique<SessionHistoryInfo>(
         uri, triggeringPrincipal, nullptr, nullptr, nullptr,
         nsLiteralCString("text/html"));
     mBrowsingContext->SetActiveSessionHistoryEntry(
@@ -4055,7 +4055,7 @@ nsresult nsDocShell::LoadErrorPage(nsIURI* aErrorURI, nsIURI* aFailedURI,
     // We keep the loading entry for the load that failed here. If the user
     // reloads we want to try to reload the original load, not the error page.
     loadState->SetLoadingSessionHistoryInfo(
-        std::make_unique<LoadingSessionHistoryInfo>(*mLoadingEntry));
+        MakeUnique<LoadingSessionHistoryInfo>(*mLoadingEntry));
   }
 
   // Prevent initial about:blank handling, as it's likely irrelevant and
@@ -8313,7 +8313,7 @@ nsresult nsDocShell::HandleSameDocumentNavigation(
   UniquePtr<mozilla::dom::LoadingSessionHistoryInfo> oldLoadingEntry;
   mLoadingEntry.swap(oldLoadingEntry);
   if (aLoadState->GetLoadingSessionHistoryInfo()) {
-    mLoadingEntry = std::make_unique<LoadingSessionHistoryInfo>(
+    mLoadingEntry = MakeUnique<LoadingSessionHistoryInfo>(
         *aLoadState->GetLoadingSessionHistoryInfo());
     mNeedToReportActiveAfterLoadingBecomesActive = false;
   }
@@ -8411,7 +8411,7 @@ nsresult nsDocShell::HandleSameDocumentNavigation(
     }
 
     UniquePtr<SessionHistoryInfo> previousActiveEntry(mActiveEntry.release());
-    mActiveEntry = std::make_unique<SessionHistoryInfo>(mLoadingEntry->mInfo);
+    mActiveEntry = MakeUnique<SessionHistoryInfo>(mLoadingEntry->mInfo);
     if (currentLayoutHistoryState) {
       // Restore the existing nsILayoutHistoryState object, since it is
       // possibly being used by the layout. When doing a new load, the
@@ -8462,9 +8462,9 @@ nsresult nsDocShell::HandleSameDocumentNavigation(
     UniquePtr<SessionHistoryInfo> previousActiveEntry(mActiveEntry.release());
     if (previousActiveEntry) {
       mActiveEntry =
-          std::make_unique<SessionHistoryInfo>(*previousActiveEntry, newURI);
+          MakeUnique<SessionHistoryInfo>(*previousActiveEntry, newURI);
     } else {
-      mActiveEntry = std::make_unique<SessionHistoryInfo>(
+      mActiveEntry = MakeUnique<SessionHistoryInfo>(
           newURI, newURITriggeringPrincipal, newURIPrincipalToInherit,
           newURIPartitionedPrincipalToInherit, newPolicyContainer,
           mContentTypeHint);
@@ -10120,7 +10120,7 @@ nsresult nsDocShell::DoURILoad(nsDocShellLoadState* aLoadState,
   } else if (doInitialSyncLoad) {
     // Materialize LoadingSessionHistoryInfo here, because DocumentChannel
     // loads have it, and later history behavior depends on it existing.
-    UniquePtr<SessionHistoryInfo> entry = std::make_unique<SessionHistoryInfo>(
+    UniquePtr<SessionHistoryInfo> entry = MakeUnique<SessionHistoryInfo>(
         uri, aLoadState->TriggeringPrincipal(),
         aLoadState->PrincipalToInherit(),
         aLoadState->PartitionedPrincipalToInherit(),
@@ -11536,12 +11536,11 @@ void nsDocShell::UpdateActiveEntry(
   UniquePtr<SessionHistoryInfo> previousActiveEntry(mActiveEntry.release());
   if (previousActiveEntry) {
     // Link this entry to the previous active entry.
-    mActiveEntry =
-        std::make_unique<SessionHistoryInfo>(*previousActiveEntry, aURI);
+    mActiveEntry = MakeUnique<SessionHistoryInfo>(*previousActiveEntry, aURI);
   } else {
     Document* doc = GetDocument();
     MOZ_ASSERT(doc);
-    mActiveEntry = std::make_unique<SessionHistoryInfo>(
+    mActiveEntry = MakeUnique<SessionHistoryInfo>(
         aURI, aTriggeringPrincipal, doc->NodePrincipal(), nullptr,
         aPolicyContainer, mContentTypeHint);
   }
@@ -12059,7 +12058,7 @@ nsresult nsDocShell::EnsureEditorData() {
     // we're shutting down, or we already have a detached editor data
     // stored in the session history. We should only have one editordata
     // per docshell.
-    mEditorData = std::make_unique<nsDocShellEditorData>(this);
+    mEditorData = MakeUnique<nsDocShellEditorData>(this);
   }
 
   return mEditorData ? NS_OK : NS_ERROR_NOT_AVAILABLE;
@@ -13191,7 +13190,7 @@ nsresult nsIDocShell::SetHTMLEditor(HTMLEditor* aHTMLEditor) {
 NS_IMETHODIMP
 nsDocShell::SetColorMatrix(const nsTArray<float>& aMatrix) {
   if (aMatrix.Length() == MATRIX_LENGTH) {
-    mColorMatrix = std::make_unique<gfx::Matrix5x4>();
+    mColorMatrix = MakeUnique<gfx::Matrix5x4>();
     static_assert(
         MATRIX_LENGTH * sizeof(float) == sizeof(mColorMatrix->components),
         "Size mismatch for our memcpy");
@@ -13307,7 +13306,7 @@ void nsDocShell::SetLoadingSessionHistoryInfo(
   MOZ_LOG(gSHLog, LogLevel::Debug,
           ("Setting the loading entry on nsDocShell %p to %s", this,
            aLoadingInfo.mInfo.GetURI()->GetSpecOrDefault().get()));
-  mLoadingEntry = std::make_unique<LoadingSessionHistoryInfo>(aLoadingInfo);
+  mLoadingEntry = MakeUnique<LoadingSessionHistoryInfo>(aLoadingInfo);
   mNeedToReportActiveAfterLoadingBecomesActive =
       aNeedToReportActiveAfterLoadingBecomesActive;
 }
@@ -13326,7 +13325,7 @@ void nsDocShell::MoveLoadingToActiveEntry(bool aExpired, uint32_t aCacheKey,
             ("Moving the loading entry to the active entry on nsDocShell %p "
              "to %s",
              this, mLoadingEntry->mInfo.GetURI()->GetSpecOrDefault().get()));
-    mActiveEntry = std::make_unique<SessionHistoryInfo>(mLoadingEntry->mInfo);
+    mActiveEntry = MakeUnique<SessionHistoryInfo>(mLoadingEntry->mInfo);
     mLoadingEntry.swap(loadingEntry);
     if (!mActiveEntryIsLoadingFromSessionHistory) {
       if (mNeedToReportActiveAfterLoadingBecomesActive) {

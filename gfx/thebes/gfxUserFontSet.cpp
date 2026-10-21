@@ -235,7 +235,7 @@ void gfxUserFontEntry::StoreUserFontData(
     const nsACString& aOriginalName, FallibleTArray<uint8_t>* aMetadata,
     uint32_t aMetaOrigLen, uint8_t aCompression, RefPtr<FontData>&& aFontData) {
   if (!aFontEntry->mUserFontData) {
-    aFontEntry->mUserFontData = std::make_unique<gfxUserFontData>();
+    aFontEntry->mUserFontData = MakeUnique<gfxUserFontData>();
   }
   gfxUserFontData* userFontData = aFontEntry->mUserFontData.get();
   userFontData->mSrcIndex = aSrcIndex;

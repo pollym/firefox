@@ -38,8 +38,7 @@ RefPtr<CSSMathMin> CSSMathMin::Create(nsCOMPtr<nsISupports> aParent,
 
   return MakeRefPtr<CSSMathMin>(
       std::move(aParent),
-      WrapMovingNotNull(
-          std::make_unique<StyleNumericType>(aMathMin.numeric_type)),
+      WrapMovingNotNull(MakeUnique<StyleNumericType>(aMathMin.numeric_type)),
       std::move(array));
 }
 

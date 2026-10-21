@@ -17,6 +17,7 @@
 #include "txXSLTPatterns.h"
 
 using mozilla::LogLevel;
+using mozilla::MakeUnique;
 using mozilla::UniquePtr;
 using mozilla::WrapUnique;
 
@@ -27,7 +28,7 @@ nsresult txStylesheet::init() {
 
   // Create default templates
   // element/root template
-  mContainerTemplate = std::make_unique<txPushParams>();
+  mContainerTemplate = MakeUnique<txPushParams>();
 
   UniquePtr<txNodeTest> nt(new txNodeTypeTest(txNodeTypeTest::NODE_TYPE));
   UniquePtr<Expr> nodeExpr(
@@ -48,18 +49,18 @@ nsresult txStylesheet::init() {
   loopNodeSet->mNext = WrapUnique(popParams);
   pushContext->mBailTarget = loopNodeSet->mNext.get();
 
-  popParams->mNext = std::make_unique<txReturn>();
+  popParams->mNext = MakeUnique<txReturn>();
 
   // attribute/textnode template
-  nt = std::make_unique<txNodeTypeTest>(txNodeTypeTest::NODE_TYPE);
-  nodeExpr = std::make_unique<LocationStep>(nt.get(), LocationStep::SELF_AXIS);
+  nt = MakeUnique<txNodeTypeTest>(txNodeTypeTest::NODE_TYPE);
+  nodeExpr = MakeUnique<LocationStep>(nt.get(), LocationStep::SELF_AXIS);
   (void)nt.release();
 
-  mCharactersTemplate = std::make_unique<txValueOf>(std::move(nodeExpr), false);
-  mCharactersTemplate->mNext = std::make_unique<txReturn>();
+  mCharactersTemplate = MakeUnique<txValueOf>(std::move(nodeExpr), false);
+  mCharactersTemplate->mNext = MakeUnique<txReturn>();
 
   // pi/comment/namespace template
-  mEmptyTemplate = std::make_unique<txReturn>();
+  mEmptyTemplate = MakeUnique<txReturn>();
 
   return NS_OK;
 }

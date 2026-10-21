@@ -242,8 +242,8 @@ CacheLoadHandler::CacheLoadHandler(ThreadSafeWorkerRef* aWorkerRef,
   AssertIsOnMainThread();
 
   // Worker scripts are always decoded as UTF-8 per spec.
-  mDecoder = std::make_unique<ScriptDecoder>(
-      UTF_8_ENCODING, ScriptDecoder::BOMHandling::Remove);
+  mDecoder = MakeUnique<ScriptDecoder>(UTF_8_ENCODING,
+                                       ScriptDecoder::BOMHandling::Remove);
 }
 
 void CacheLoadHandler::Fail(nsresult aRv) {
@@ -441,7 +441,7 @@ void CacheLoadHandler::ResolvedCallback(JSContext* aCx,
   mChannelInfo = response->GetChannelInfo();
   const UniquePtr<PrincipalInfo>& pInfo = response->GetPrincipalInfo();
   if (pInfo) {
-    mPrincipalInfo = std::make_unique<PrincipalInfo>(*pInfo);
+    mPrincipalInfo = mozilla::MakeUnique<PrincipalInfo>(*pInfo);
   }
 
   if (!inputStream) {

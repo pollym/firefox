@@ -262,8 +262,7 @@ bool SipccSdpMediaSection::LoadConnection(sdp_t* sdp, uint16_t level,
   if (numAddr < 0) {
     numAddr = 0;
   }
-  mConnection =
-      std::make_unique<SdpConnection>(addrType, address, ttl, numAddr);
+  mConnection = MakeUnique<SdpConnection>(addrType, address, ttl, numAddr);
   return true;
 }
 

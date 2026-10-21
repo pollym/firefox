@@ -474,9 +474,9 @@ nsresult nsAppShell::Init() {
   if (XRE_IsParentProcess()) {
     ScreenManager& screenManager = ScreenManager::GetSingleton();
     if (gfxPlatform::IsHeadless()) {
-      screenManager.SetHelper(std::make_unique<HeadlessScreenHelper>());
+      screenManager.SetHelper(mozilla::MakeUnique<HeadlessScreenHelper>());
     } else {
-      screenManager.SetHelper(std::make_unique<ScreenHelperGTK>());
+      screenManager.SetHelper(mozilla::MakeUnique<ScreenHelperGTK>());
     }
 
     if (gtk_check_version(3, 16, 3) == nullptr) {

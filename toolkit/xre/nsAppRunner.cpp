@@ -3371,7 +3371,7 @@ static mozilla::Maybe<uint64_t> ReadInstallTimestamp(nsIFile* aJsonFile,
   }
   rewind(f.get());
 
-  auto buf = std::make_unique<uint8_t[]>(len);
+  auto buf = MakeUnique<uint8_t[]>(len);
   if (fread(buf.get(), 1, len, f.get()) != (size_t)len) {
     return mozilla::Nothing();
   }
@@ -3536,7 +3536,7 @@ Maybe<mozilla::PathString> GenerateDowngradeTelemetry(
   rv = pingFile->OpenANSIFileDesc("w", &file);
   NS_ENSURE_SUCCESS(rv, Nothing());
 
-  JSONWriter w(std::make_unique<FileWriteFunc>(file));
+  JSONWriter w(MakeUnique<FileWriteFunc>(file));
   w.Start();
   {
     w.StringProperty("type",
@@ -5007,7 +5007,7 @@ int XREMain::XRE_mainInit(bool* aExitFlag) {
   }
   if (ar == ARG_FOUND) {
     UniquePtr<DBusService> dbusService =
-        std::make_unique<DBusService>(dbusServiceLauncher);
+        MakeUnique<DBusService>(dbusServiceLauncher);
     if (dbusService->Init()) {
       dbusService->Run();
     }
@@ -6622,7 +6622,7 @@ int XREMain::XRE_main(int argc, char* argv[], const BootstrapConfig& aConfig) {
   nsresult rv = NS_OK;
 
   if (aConfig.appData) {
-    mAppData = std::make_unique<XREAppData>(*aConfig.appData);
+    mAppData = MakeUnique<XREAppData>(*aConfig.appData);
   } else {
     MOZ_RELEASE_ASSERT(aConfig.appDataPath);
     nsCOMPtr<nsIFile> appini;
@@ -6632,7 +6632,7 @@ int XREMain::XRE_main(int argc, char* argv[], const BootstrapConfig& aConfig) {
       return 1;
     }
 
-    mAppData = std::make_unique<XREAppData>();
+    mAppData = MakeUnique<XREAppData>();
     rv = XRE_ParseAppData(appini, *mAppData);
     if (NS_FAILED(rv)) {
       Output(true, "Couldn't read application.ini");
@@ -6780,7 +6780,7 @@ int XREMain::XRE_main(int argc, char* argv[], const BootstrapConfig& aConfig) {
   // Start the real application. We use |aInitJSContext = false| because
   // XRE_mainRun wants to initialize the JSContext after reading user prefs.
 
-  mScopedXPCOM = std::make_unique<ScopedXPCOMStartup>();
+  mScopedXPCOM = MakeUnique<ScopedXPCOMStartup>();
 
   rv = mScopedXPCOM->Initialize(/* aInitJSContext = */ false);
   if (rv == NS_ERROR_OMNIJAR_CORRUPT) {

@@ -1416,7 +1416,7 @@ mozilla::ipc::IPCResult WindowGlobalParent::RecvExpectPageUseCounters(
   // counters before reporting via Telemetry.
   mPageUseCountersWindow = page;
   if (!page->mPageUseCounters) {
-    page->mPageUseCounters = std::make_unique<PageUseCounters>();
+    page->mPageUseCounters = MakeUnique<PageUseCounters>();
   }
   ++page->mPageUseCounters->mWaiting;
 

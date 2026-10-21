@@ -140,7 +140,7 @@ struct YUV8BitData {
                             "CbCr without Y makes no sense");
       return NS_ERROR_INVALID_ARG;
     }
-    mYChannel = std::make_unique<uint8_t[]>(yMemorySize.value());
+    mYChannel = MakeUnique<uint8_t[]>(yMemorySize.value());
     if (!mYChannel) {
       return NS_ERROR_OUT_OF_MEMORY;
     }
@@ -155,11 +155,11 @@ struct YUV8BitData {
                           bitDepth);
 
     if (cbcrMemorySize.isSome()) {
-      mCbChannel = std::make_unique<uint8_t[]>(cbcrMemorySize.value());
+      mCbChannel = MakeUnique<uint8_t[]>(cbcrMemorySize.value());
       if (!mCbChannel) {
         return NS_ERROR_OUT_OF_MEMORY;
       }
-      mCrChannel = std::make_unique<uint8_t[]>(cbcrMemorySize.value());
+      mCrChannel = MakeUnique<uint8_t[]>(cbcrMemorySize.value());
       if (!mCrChannel) {
         return NS_ERROR_OUT_OF_MEMORY;
       }
@@ -184,7 +184,7 @@ struct YUV8BitData {
       if (alphaSize.isNothing()) {
         return NS_ERROR_INVALID_ARG;
       }
-      mAlphaChannel = std::make_unique<uint8_t[]>(alphaSize.value());
+      mAlphaChannel = MakeUnique<uint8_t[]>(alphaSize.value());
       if (!mAlphaChannel) {
         return NS_ERROR_OUT_OF_MEMORY;
       }

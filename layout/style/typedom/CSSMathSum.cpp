@@ -48,7 +48,7 @@ RefPtr<CSSMathSum> CSSMathSum::Create(nsCOMPtr<nsISupports> aParent,
   }
 
   return Create(std::move(aParent),
-                std::make_unique<StyleNumericType>(aMathSum.numeric_type),
+                MakeUnique<StyleNumericType>(aMathSum.numeric_type),
                 std::move(values));
 }
 

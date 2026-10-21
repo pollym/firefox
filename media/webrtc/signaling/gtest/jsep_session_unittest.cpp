@@ -49,7 +49,7 @@ class FakeUuidGenerator : public mozilla::JsepUuidGenerator {
   }
 
   mozilla::UniquePtr<mozilla::JsepUuidGenerator> Clone() const {
-    return std::make_unique<FakeUuidGenerator>(*this);
+    return mozilla::MakeUnique<FakeUuidGenerator>(*this);
   }
 
  private:
@@ -72,10 +72,10 @@ class JsepSessionTest : public JsepSessionTestBase,
     Preferences::SetBool("media.webrtc.codec.video.av1.enabled", true);
     Preferences::SetBool("media.navigator.audio.use_fec", false);
 
-    mSessionOff = std::make_unique<JsepSessionImpl>(
-        "Offerer", std::make_unique<FakeUuidGenerator>());
-    mSessionAns = std::make_unique<JsepSessionImpl>(
-        "Answerer", std::make_unique<FakeUuidGenerator>());
+    mSessionOff =
+        MakeUnique<JsepSessionImpl>("Offerer", MakeUnique<FakeUuidGenerator>());
+    mSessionAns = MakeUnique<JsepSessionImpl>("Answerer",
+                                              MakeUnique<FakeUuidGenerator>());
 
     EXPECT_EQ(NS_OK, mSessionOff->Init());
     EXPECT_EQ(NS_OK, mSessionAns->Init());
@@ -108,14 +108,14 @@ class JsepSessionTest : public JsepSessionTestBase,
                                    header.direction);
     }
 
-    mOffererTransport = std::make_unique<TransportData>();
-    mAnswererTransport = std::make_unique<TransportData>();
+    mOffererTransport = MakeUnique<TransportData>();
+    mAnswererTransport = MakeUnique<TransportData>();
 
     AddTransportData(*mSessionOff, *mOffererTransport);
     AddTransportData(*mSessionAns, *mAnswererTransport);
 
-    mOffCandidates = std::make_unique<CandidateSet>();
-    mAnsCandidates = std::make_unique<CandidateSet>();
+    mOffCandidates = MakeUnique<CandidateSet>();
+    mAnsCandidates = MakeUnique<CandidateSet>();
   }
 
   static std::vector<JsepTransceiver>& GetTransceivers(JsepSession& aSession) {
@@ -2842,7 +2842,7 @@ TEST_P(JsepSessionTest, SetLocalOfferRejectsChangedFingerprint) {
   UniquePtr<Sdp> munge(Parse(offer));
   SdpMediaSection& mediaSection = munge->GetMediaSection(0);
 
-  auto fingerprints = std::make_unique<SdpFingerprintAttributeList>();
+  auto fingerprints = MakeUnique<SdpFingerprintAttributeList>();
   fingerprints->PushEntry("sha-256", std::vector<uint8_t>(32, 0));
   mediaSection.GetAttributeList().SetAttribute(std::move(fingerprints));
 
@@ -4712,7 +4712,7 @@ TEST_F(JsepSessionTest, TestIceLite) {
 
   UniquePtr<Sdp> parsedOffer(Parse(offer));
   parsedOffer->GetAttributeList().SetAttribute(
-      std::make_unique<SdpFlagAttribute>(SdpAttribute::kIceLiteAttribute));
+      MakeUnique<SdpFlagAttribute>(SdpAttribute::kIceLiteAttribute));
 
   std::ostringstream os;
   parsedOffer->Serialize(os);
@@ -4875,7 +4875,7 @@ TEST_F(JsepSessionTest, TestAnswererIsControllingWhenRemoteIsIceLite) {
 
   UniquePtr<Sdp> parsedOffer(Parse(offer));
   parsedOffer->GetAttributeList().SetAttribute(
-      std::make_unique<SdpFlagAttribute>(SdpAttribute::kIceLiteAttribute));
+      MakeUnique<SdpFlagAttribute>(SdpAttribute::kIceLiteAttribute));
   std::ostringstream os;
   parsedOffer->Serialize(os);
   std::string iceLiteOffer = os.str();
@@ -4911,7 +4911,7 @@ TEST_F(JsepSessionTest, TestIceRoleUpdatedWhenRemoteSwitchesToIceLite) {
 
   UniquePtr<Sdp> parsedReoffer(Parse(reoffer));
   parsedReoffer->GetAttributeList().SetAttribute(
-      std::make_unique<SdpFlagAttribute>(SdpAttribute::kIceLiteAttribute));
+      MakeUnique<SdpFlagAttribute>(SdpAttribute::kIceLiteAttribute));
   std::ostringstream os;
   parsedReoffer->Serialize(os);
   std::string iceLiteReoffer = os.str();
@@ -5719,7 +5719,7 @@ TEST_F(JsepSessionTest, TestRtcpFbStar) {
   std::string offer = CreateOffer();
 
   UniquePtr<Sdp> parsedOffer(Parse(offer));
-  auto rtcpfbs = std::make_unique<SdpRtcpFbAttributeList>();
+  auto rtcpfbs = MakeUnique<SdpRtcpFbAttributeList>();
   rtcpfbs->PushEntry("*", SdpRtcpFbAttributeList::kNack);
   parsedOffer->GetMediaSection(0).GetAttributeList().SetAttribute(
       std::move(rtcpfbs));
@@ -8524,7 +8524,7 @@ TEST_F(JsepSessionTest, TestTransportAttributeValidation) {
   {
     UniquePtr<Sdp> parsed = Parse(sdpTemplate);
     parsed->GetMediaSection(0).GetAttributeList().SetAttribute(
-        std::make_unique<SdpSetupAttribute>(SdpSetupAttribute::kHoldconn));
+        MakeUnique<SdpSetupAttribute>(SdpSetupAttribute::kHoldconn));
     auto sdp = parsed->ToString();
     auto result = mSessionOff->SetRemoteDescription(kJsepSdpOffer, sdp);
     ASSERT_TRUE(result.mError.isSome());
@@ -8586,7 +8586,7 @@ TEST_F(JsepSessionTest, TestTransportAttributeValidation) {
     parsed->GetMediaSection(1).GetAttributeList().RemoveAttribute(
         SdpAttribute::kIceUfragAttribute);
     parsed->GetMediaSection(1).GetAttributeList().SetAttribute(
-        std::make_unique<SdpFlagAttribute>(SdpAttribute::kBundleOnlyAttribute));
+        MakeUnique<SdpFlagAttribute>(SdpAttribute::kBundleOnlyAttribute));
     auto sdp = parsed->ToString();
     auto result = mSessionOff->SetRemoteDescription(kJsepSdpOffer, sdp);
     ASSERT_FALSE(result.mError.isSome());
@@ -8598,7 +8598,7 @@ TEST_F(JsepSessionTest, TestTransportAttributeValidation) {
     parsed->GetMediaSection(1).GetAttributeList().RemoveAttribute(
         SdpAttribute::kIcePwdAttribute);
     parsed->GetMediaSection(1).GetAttributeList().SetAttribute(
-        std::make_unique<SdpFlagAttribute>(SdpAttribute::kBundleOnlyAttribute));
+        MakeUnique<SdpFlagAttribute>(SdpAttribute::kBundleOnlyAttribute));
     auto sdp = parsed->ToString();
     auto result = mSessionOff->SetRemoteDescription(kJsepSdpOffer, sdp);
     ASSERT_FALSE(result.mError.isSome());
@@ -8610,7 +8610,7 @@ TEST_F(JsepSessionTest, TestTransportAttributeValidation) {
     parsed->GetMediaSection(1).GetAttributeList().RemoveAttribute(
         SdpAttribute::kFingerprintAttribute);
     parsed->GetMediaSection(1).GetAttributeList().SetAttribute(
-        std::make_unique<SdpFlagAttribute>(SdpAttribute::kBundleOnlyAttribute));
+        MakeUnique<SdpFlagAttribute>(SdpAttribute::kBundleOnlyAttribute));
     auto sdp = parsed->ToString();
     auto result = mSessionOff->SetRemoteDescription(kJsepSdpOffer, sdp);
     ASSERT_FALSE(result.mError.isSome());
@@ -8642,8 +8642,7 @@ TEST_F(JsepSessionTest, TestBundleSupportWithZeroPort) {
     if (!attrs.HasAttribute(SdpAttribute::kBundleOnlyAttribute) &&
         i < num_m_sections - 1) {
       sdp->GetMediaSection(i).GetAttributeList().SetAttribute(
-          std::make_unique<SdpFlagAttribute>(
-              SdpAttribute::kBundleOnlyAttribute));
+          MakeUnique<SdpFlagAttribute>(SdpAttribute::kBundleOnlyAttribute));
       sdp->GetMediaSection(i).SetPort(0);
     } else {
       // For the last msection setting port to non 0 and removing bundle only if

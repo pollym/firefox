@@ -202,8 +202,8 @@ class GkSkWStream final : public SkWStream {
 
 already_AddRefed<PrintTargetSkPDF> PrintTargetSkPDF::CreateOrNull(
     nsIOutputStream* aStream, const IntSize& aSizeInPoints) {
-  return do_AddRef(new PrintTargetSkPDF(
-      aSizeInPoints, std::make_unique<GkSkWStream>(aStream)));
+  return do_AddRef(
+      new PrintTargetSkPDF(aSizeInPoints, MakeUnique<GkSkWStream>(aStream)));
 }
 
 static SkPDF::Metadata GetDefaultMetadata() {

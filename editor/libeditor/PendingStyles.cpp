@@ -381,7 +381,7 @@ void PendingStyles::PreserveStyle(nsStaticAtom& aHTMLProperty,
   // outer inline elements of them are computed without these styles.  E.g.,
   // background-color may be applied bottom-half of the text.  Therefore, we
   // need to apply the font styles first.
-  UniquePtr<PendingStyle> style = std::make_unique<PendingStyle>(
+  UniquePtr<PendingStyle> style = MakeUnique<PendingStyle>(
       &aHTMLProperty, aAttribute, aAttributeValueOrCSSValue);
   if (&aHTMLProperty == nsGkAtoms::font && aAttribute != nsGkAtoms::bgcolor) {
     MOZ_ASSERT(aAttribute == nsGkAtoms::color ||
@@ -419,7 +419,7 @@ void PendingStyles::ClearStyleInternal(
 
   CancelPreservingStyle(aHTMLProperty, aAttribute);
 
-  mClearingStyles.AppendElement(std::make_unique<PendingStyle>(
+  mClearingStyles.AppendElement(MakeUnique<PendingStyle>(
       aHTMLProperty, aAttribute, u""_ns, aSpecifiedStyle));
 }
 

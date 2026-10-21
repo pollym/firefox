@@ -211,7 +211,7 @@ CompartmentPrivate::CompartmentPrivate(
       isUAWidgetCompartment(false),
       hasExclusiveExpandos(false),
       wasShutdown(false),
-      mWrappedJSMap(std::make_unique<JSObject2WrappedJSMap>()),
+      mWrappedJSMap(mozilla::MakeUnique<JSObject2WrappedJSMap>()),
       mScope(std::move(scope)) {
   MOZ_COUNT_CTOR(xpc::CompartmentPrivate);
 }
@@ -253,7 +253,7 @@ void RealmPrivate::Init(HandleObject aGlobal, const SiteIdentifier& aSite) {
   if (CompartmentPrivate* priv = CompartmentPrivate::Get(c)) {
     MOZ_ASSERT(priv->originInfo.IsSameOrigin(principal));
   } else {
-    auto scope = std::make_unique<XPCWrappedNativeScope>(c, aGlobal);
+    auto scope = mozilla::MakeUnique<XPCWrappedNativeScope>(c, aGlobal);
     priv = new CompartmentPrivate(c, std::move(scope),
                                   BasePrincipal::Cast(principal), aSite);
     JS_SetCompartmentPrivate(c, priv);
@@ -3137,10 +3137,10 @@ static const JSWrapObjectCallbacks WrapObjectCallbacks = {
 
 XPCJSRuntime::XPCJSRuntime(JSContext* aCx)
     : CycleCollectedJSRuntime(aCx),
-      mWrappedJSMap(std::make_unique<JSObject2WrappedJSMap>()),
-      mIID2NativeInterfaceMap(std::make_unique<IID2NativeInterfaceMap>()),
-      mClassInfo2NativeSetMap(std::make_unique<ClassInfo2NativeSetMap>()),
-      mNativeSetMap(std::make_unique<NativeSetMap>()),
+      mWrappedJSMap(mozilla::MakeUnique<JSObject2WrappedJSMap>()),
+      mIID2NativeInterfaceMap(mozilla::MakeUnique<IID2NativeInterfaceMap>()),
+      mClassInfo2NativeSetMap(mozilla::MakeUnique<ClassInfo2NativeSetMap>()),
+      mNativeSetMap(mozilla::MakeUnique<NativeSetMap>()),
       mGCIsRunning(false),
       mDoingFinalization(false),
       mAsyncSnowWhiteFreer(new AsyncFreeSnowWhite()) {

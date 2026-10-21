@@ -1578,7 +1578,7 @@ void BrowserChild::FlushAllCoalescedMouseData() {
       continue;
     }
     UniquePtr<CoalescedMouseData> dispatchData =
-        std::make_unique<CoalescedMouseData>();
+        MakeUnique<CoalescedMouseData>();
 
     dispatchData->RetrieveDataFrom(*data);
     mToBeDispatchedMouseData.Push(dispatchData.release());
@@ -1620,7 +1620,7 @@ mozilla::ipc::IPCResult BrowserChild::RecvRealMouseMoveEvent(
     // with the same pointer id to mToBeDispatchedMouseData, coalesce the
     // current one, and process all pending data in mToBeDispatchedMouseData.
     UniquePtr<CoalescedMouseData> dispatchData =
-        std::make_unique<CoalescedMouseData>();
+        MakeUnique<CoalescedMouseData>();
 
     dispatchData->RetrieveDataFrom(*data);
     mToBeDispatchedMouseData.Push(dispatchData.release());
@@ -1629,7 +1629,7 @@ mozilla::ipc::IPCResult BrowserChild::RecvRealMouseMoveEvent(
     CoalescedMouseData* newData =
         mCoalescedMouseData
             .InsertOrUpdate(aMouseEvent.pointerId,
-                            std::make_unique<CoalescedMouseData>())
+                            MakeUnique<CoalescedMouseData>())
             .get();
     // We don't want to dispatch aEvent immediately.  However, we need to
     // dispatch eMouseRawUpdate immediately if there is a `pointerrawupdate`
@@ -1736,7 +1736,7 @@ mozilla::ipc::IPCResult BrowserChild::RecvRealMouseButtonEvent(
     FlushAllCoalescedMouseData();
 
     UniquePtr<CoalescedMouseData> dispatchData =
-        std::make_unique<CoalescedMouseData>();
+        MakeUnique<CoalescedMouseData>();
 
     // We'll dispatch aEvent immediately via
     // ProcessPendingCoalescedMouseDataAndDispatchEvents().

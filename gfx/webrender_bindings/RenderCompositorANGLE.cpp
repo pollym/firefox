@@ -54,7 +54,7 @@ UniquePtr<RenderCompositor> RenderCompositorANGLE::Create(
   }
 
   UniquePtr<RenderCompositorANGLE> compositor =
-      std::make_unique<RenderCompositorANGLE>(aWidget, std::move(gl));
+      MakeUnique<RenderCompositorANGLE>(aWidget, std::move(gl));
   if (!compositor->Initialize(aError)) {
     return nullptr;
   }

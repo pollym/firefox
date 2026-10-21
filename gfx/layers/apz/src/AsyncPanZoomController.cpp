@@ -555,7 +555,7 @@ AsyncPanZoomAnimation* PlatformSpecificStateBase::CreateFlingAnimation(
 
 UniquePtr<VelocityTracker> PlatformSpecificStateBase::CreateVelocityTracker(
     Axis* aAxis) {
-  return std::make_unique<SimpleVelocityTracker>(aAxis);
+  return MakeUnique<SimpleVelocityTracker>(aAxis);
 }
 
 // This is a helper class for populating
@@ -873,7 +873,7 @@ AsyncPanZoomController::AsyncPanZoomController(
                            ViewportMaxScale() / ParentLayerToScreenScale(1)),
       mLastSampleTime(GetFrameTime()),
       mLastCheckerboardReport(GetFrameTime()),
-      mOverscrollEffect(std::make_unique<OverscrollEffect>(*this)),
+      mOverscrollEffect(MakeUnique<OverscrollEffect>(*this)),
       mState(NOTHING),
       mX(this),
       mY(this),
@@ -896,7 +896,7 @@ AsyncPanZoomController::~AsyncPanZoomController() { MOZ_ASSERT(IsDestroyed()); }
 
 PlatformSpecificStateBase* AsyncPanZoomController::GetPlatformSpecificState() {
   if (!mPlatformSpecificState) {
-    mPlatformSpecificState = std::make_unique<PlatformSpecificState>();
+    mPlatformSpecificState = MakeUnique<PlatformSpecificState>();
   }
   return mPlatformSpecificState.get();
 }
@@ -5569,7 +5569,7 @@ void AsyncPanZoomController::ReportCheckerboard(
 
   MutexAutoLock lock(mCheckerboardEventLock);
   if (!mCheckerboardEvent && (recordTrace || forTelemetry)) {
-    mCheckerboardEvent = std::make_unique<CheckerboardEvent>(recordTrace);
+    mCheckerboardEvent = MakeUnique<CheckerboardEvent>(recordTrace);
   }
   mPotentialCheckerboardTracker.InTransform(inTransformingState,
                                             recordTrace || forTelemetry);

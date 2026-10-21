@@ -97,7 +97,7 @@ UniquePtr<RenderCompositor> RenderCompositorOGLSWGL::Create(
     return nullptr;
   }
 
-  return std::make_unique<RenderCompositorOGLSWGL>(compositor, aWidget, ctx);
+  return MakeUnique<RenderCompositorOGLSWGL>(compositor, aWidget, ctx);
 }
 
 RenderCompositorOGLSWGL::RenderCompositorOGLSWGL(
@@ -291,7 +291,7 @@ RenderCompositorOGLSWGL::DoCreateTile(Surface* aSurface) {
   auto source = MakeRefPtr<TextureImageTextureSourceOGL>(
       mCompositor->AsCompositorOGL(), layers::TextureFlags::NO_FLAGS);
 
-  return std::make_unique<TileOGL>(std::move(source), aSurface->TileSize());
+  return MakeUnique<TileOGL>(std::move(source), aSurface->TileSize());
 }
 
 bool RenderCompositorOGLSWGL::MaybeReadback(

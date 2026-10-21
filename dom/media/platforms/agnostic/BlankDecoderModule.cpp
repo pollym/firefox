@@ -118,12 +118,11 @@ BlankDecoderModule::AsyncCreateDecoder(const CreateDecoderParams& aParams) {
   UniquePtr<DummyDataCreator> creator;
   if (aParams.IsVideo()) {
     const VideoInfo& config = aParams.VideoConfig();
-    creator = std::make_unique<BlankVideoDataCreator>(
+    creator = MakeUnique<BlankVideoDataCreator>(
         config.mDisplay.width, config.mDisplay.height, aParams.mImageContainer);
   } else if (aParams.IsAudio()) {
     const AudioInfo& config = aParams.AudioConfig();
-    creator =
-        std::make_unique<BlankAudioDataCreator>(config.mChannels, config.mRate);
+    creator = MakeUnique<BlankAudioDataCreator>(config.mChannels, config.mRate);
   }
   RefPtr<MediaDataDecoder> decoder;
   if (creator) {

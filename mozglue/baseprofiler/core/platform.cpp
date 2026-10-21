@@ -497,7 +497,7 @@ class ActivePS {
         mInterval(aInterval),
         mFeatures(AdjustFeatures(aFeatures, aFilterCount)),
         mProfileBufferChunkManager(
-            std::make_unique<ProfileBufferChunkManagerWithLocalLimit>(
+            MakeUnique<ProfileBufferChunkManagerWithLocalLimit>(
                 size_t(ClampToAllowedEntries(aCapacity.Value())) *
                     scBytesPerEntry,
                 ChunkSizeForEntries(aCapacity.Value()))),
@@ -2337,14 +2337,14 @@ static ProfilingStack* locked_register_thread(PSLockRef aLock,
   RefPtr<ThreadInfo> info = new ThreadInfo(aName, profiler_current_thread_id(),
                                            profiler_is_main_thread());
   UniquePtr<RegisteredThread> registeredThread =
-      std::make_unique<RegisteredThread>(info, aStackTop);
+      MakeUnique<RegisteredThread>(info, aStackTop);
 
   TLSRegisteredThread::SetRegisteredThread(aLock, registeredThread.get());
 
   if (ActivePS::Exists(aLock) && ActivePS::ShouldProfileThread(aLock, info)) {
     registeredThread->RacyRegisteredThread().SetIsBeingProfiled(true);
     ActivePS::AddLiveProfiledThread(aLock, registeredThread.get(),
-                                    std::make_unique<ProfiledThreadData>(info));
+                                    MakeUnique<ProfiledThreadData>(info));
   }
 
   ProfilingStack* profilingStack =
@@ -2363,7 +2363,7 @@ static void locked_profiler_start(PSLockRef aLock, PowerOfTwo32 aCapacity,
 static Vector<const char*> SplitAtCommas(const char* aString,
                                          UniquePtr<char[]>& aStorage) {
   size_t len = strlen(aString);
-  aStorage = std::make_unique<char[]>(len + 1);
+  aStorage = MakeUnique<char[]>(len + 1);
   PodCopy(aStorage.get(), aString, len + 1);
 
   // Iterate over all characters in aStorage and split at commas, by
@@ -2907,9 +2907,8 @@ static void locked_profiler_start(PSLockRef aLock, PowerOfTwo32 aCapacity,
 
     if (ActivePS::ShouldProfileThread(aLock, info)) {
       registeredThread->RacyRegisteredThread().SetIsBeingProfiled(true);
-      ActivePS::AddLiveProfiledThread(
-          aLock, registeredThread.get(),
-          std::make_unique<ProfiledThreadData>(info));
+      ActivePS::AddLiveProfiledThread(aLock, registeredThread.get(),
+                                      MakeUnique<ProfiledThreadData>(info));
       registeredThread->RacyRegisteredThread().ReinitializeOnResume();
     }
   }
@@ -3439,7 +3438,7 @@ UniquePtr<ProfileChunkedBuffer> profiler_capture_backtrace() {
 
   ProfileChunkedBuffer captureBuffer(
       ProfileChunkedBuffer::ThreadSafety::WithoutMutex,
-      std::make_unique<ProfileBufferChunkManagerSingle>(
+      MakeUnique<ProfileBufferChunkManagerSingle>(
           ProfileBufferChunkManager::scExpectedMaximumStackSize));
 
   if (!profiler_capture_backtrace_into(captureBuffer,
@@ -3591,9 +3590,9 @@ namespace mozilla::profiler::detail {
 
   // Blocks are copied one by one and keep their size, so a chunk holding
   // `usedBytes` of blocks is enough to hold all of them again.
-  auto buffer = std::make_unique<ProfileChunkedBuffer>(
+  auto buffer = MakeUnique<ProfileChunkedBuffer>(
       ProfileChunkedBuffer::ThreadSafety::WithoutMutex,
-      std::make_unique<ProfileBufferChunkManagerSingle>(usedBytes));
+      MakeUnique<ProfileBufferChunkManagerSingle>(usedBytes));
   if (!buffer->AppendContents(aSource)) {
     return nullptr;
   }

@@ -600,7 +600,7 @@ nsresult nsCocoaWindow::SynthesizeNativeTouchPoint(
   }
 
   if (!mSynthesizedTouchInput) {
-    mSynthesizedTouchInput = std::make_unique<MultiTouchInput>();
+    mSynthesizedTouchInput = MakeUnique<MultiTouchInput>();
   }
 
   LayoutDeviceIntPoint pointInWindow = aPoint - WidgetToScreenOffset();
@@ -1379,8 +1379,8 @@ void nsCocoaWindow::UpdateVibrancy(
 mozilla::VibrancyManager& nsCocoaWindow::EnsureVibrancyManager() {
   MOZ_ASSERT(mChildView, "Only call this once we have a view!");
   if (!mVibrancyManager) {
-    mVibrancyManager = std::make_unique<VibrancyManager>(
-        *this, mChildView.vibrancyViewsContainer);
+    mVibrancyManager =
+        MakeUnique<VibrancyManager>(*this, mChildView.vibrancyViewsContainer);
   }
   return *mVibrancyManager;
 }

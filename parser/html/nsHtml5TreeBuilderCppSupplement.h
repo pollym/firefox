@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include <memory>
-
 #include "ErrorList.h"
 #include "nsError.h"
 #include "nsHtml5AttributeName.h"
@@ -18,6 +16,7 @@
 #include "mozilla/StaticPrefs_dom.h"
 #include "mozilla/StaticPrefs_media.h"
 #include "mozilla/StaticPrefs_network.h"
+#include "mozilla/UniquePtr.h"
 #include "mozilla/UniquePtrExtensions.h"
 #include "mozilla/dom/Sanitizer.h"
 #include "nsTHashMap.h"
@@ -305,7 +304,7 @@ void nsHtml5TreeBuilder::SetSanitizer(mozilla::dom::Sanitizer* aSanitizer,
              "Sanitizing while parsing needs the op-less builder.");
   if (aSanitizer) {
     aSanitizer->RecordSanitizeUse();
-    mSanitizerState = std::make_unique<SanitizerState>(aSanitizer, aSafe);
+    mSanitizerState = mozilla::MakeUnique<SanitizerState>(aSanitizer, aSafe);
   } else {
     mSanitizerState = nullptr;
   }
@@ -1940,7 +1939,7 @@ nsIContentHandle* nsHtml5TreeBuilder::AllocateContentHandle() {
   }
   if (mHandlesUsed == NS_HTML5_TREE_BUILDER_HANDLE_ARRAY_LENGTH) {
     mOldHandles.AppendElement(std::move(mHandles));
-    mHandles = std::make_unique<nsIContent*[]>(
+    mHandles = mozilla::MakeUnique<nsIContent*[]>(
         NS_HTML5_TREE_BUILDER_HANDLE_ARRAY_LENGTH);
     mHandlesUsed = 0;
   }

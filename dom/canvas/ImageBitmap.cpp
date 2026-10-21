@@ -971,7 +971,7 @@ UniquePtr<ImageBitmapCloneData> ImageBitmap::ToCloneData() const {
     return nullptr;
   }
 
-  auto result = std::make_unique<ImageBitmapCloneData>();
+  auto result = MakeUnique<ImageBitmapCloneData>();
   result->mPictureRect = mPictureRect;
   result->mAlphaType = mAlphaType;
   result->mSurface = std::move(dataSurface);

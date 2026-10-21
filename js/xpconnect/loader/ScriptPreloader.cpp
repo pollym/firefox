@@ -639,7 +639,7 @@ Result<Ok, nsresult> ScriptPreloader::InitCacheInternal(
 
     size_t offset = 0;
     while (!buf.finished()) {
-      auto script = std::make_unique<CachedStencil>(*this, buf);
+      auto script = MakeUnique<CachedStencil>(*this, buf);
       MOZ_RELEASE_ASSERT(script);
 
       auto scriptData = data + script->mOffset;

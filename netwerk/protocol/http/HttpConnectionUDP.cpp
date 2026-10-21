@@ -581,7 +581,7 @@ void HttpConnectionUDP::OnConnected() {
 
 already_AddRefed<nsIInputStream> HttpConnectionUDP::CreateProxyConnectStream(
     nsAHttpTransaction* trans) {
-  UniquePtr<nsHttpRequestHead> request = std::make_unique<nsHttpRequestHead>();
+  UniquePtr<nsHttpRequestHead> request = MakeUnique<nsHttpRequestHead>();
   nsAutoCString host;
   DebugOnly<nsresult> rv{};
   rv = nsHttpHandler::GenerateHostPort(

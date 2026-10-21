@@ -433,7 +433,7 @@ void RendererOGL::BeginRecording(const TimeStamp& aRecordingStart,
 
   mRootPipelineId = aRootPipelineId;
   mCompositionRecorder =
-      std::make_unique<layers::CompositionRecorder>(aRecordingStart);
+      MakeUnique<layers::CompositionRecorder>(aRecordingStart);
   mCompositor->MaybeRequestAllowFrameRecording(true);
 }
 

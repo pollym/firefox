@@ -421,7 +421,7 @@ bool CanvasChild::EnsureRecorder(gfx::IntSize aSize, gfx::SurfaceFormat aFormat,
         gfxPlatform::GetPlatform()->GetPreferredCanvasBackend();
     auto recorder = MakeRefPtr<CanvasDrawEventRecorder>(mWorkerRef);
     if (!recorder->Init(aTextureType, aWebglTextureType, backendType,
-                        std::make_unique<RecorderHelpers>(this))) {
+                        MakeUnique<RecorderHelpers>(this))) {
       return false;
     }
 

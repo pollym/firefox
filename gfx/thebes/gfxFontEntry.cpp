@@ -395,7 +395,7 @@ bool gfxFontEntry::TryGetSVGData(const gfxFont* aFont) {
 
     // gfxSVGGlyphs will hb_blob_destroy() the table when it is finished
     // with it.
-    mSVGGlyphs = std::make_unique<gfxSVGGlyphs>(svgTable, this);
+    mSVGGlyphs = MakeUnique<gfxSVGGlyphs>(svgTable, this);
     mSVGInitialized = true;
   }
 
@@ -792,7 +792,7 @@ bool gfxFontEntry::SupportsOpenTypeFeature(Script aScript,
                                            uint32_t aFeatureTag) {
   MutexAutoLock lock(mFeatureInfoLock);
   if (!mSupportedFeatures) {
-    mSupportedFeatures = std::make_unique<nsTHashMap<nsUint32HashKey, bool>>();
+    mSupportedFeatures = MakeUnique<nsTHashMap<nsUint32HashKey, bool>>();
   }
 
   // note: high-order three bytes *must* be unique for each feature
@@ -854,7 +854,7 @@ const hb_set_t* gfxFontEntry::InputsForOpenTypeFeature(Script aScript,
                                                        uint32_t aFeatureTag) {
   MutexAutoLock lock(mFeatureInfoLock);
   if (!mFeatureInputs) {
-    mFeatureInputs = std::make_unique<nsTHashMap<nsUint32HashKey, hb_set_t*>>();
+    mFeatureInputs = MakeUnique<nsTHashMap<nsUint32HashKey, hb_set_t*>>();
   }
 
   NS_ASSERTION(aFeatureTag == HB_TAG('s', 'u', 'p', 's') ||
@@ -911,7 +911,7 @@ bool gfxFontEntry::SupportsGraphiteFeature(uint32_t aFeatureTag) {
   MutexAutoLock lock(mFeatureInfoLock);
 
   if (!mSupportedFeatures) {
-    mSupportedFeatures = std::make_unique<nsTHashMap<nsUint32HashKey, bool>>();
+    mSupportedFeatures = MakeUnique<nsTHashMap<nsUint32HashKey, bool>>();
   }
 
   // note: high-order three bytes *must* be unique for each feature

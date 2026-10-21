@@ -110,7 +110,7 @@ ForkServiceChild::ForkServiceChild(int aFd, GeckoChildProcessHost* aProcess)
     : mMutex("mozilla.ipc.ForkServiceChild.mMutex"),
       mFailed(false),
       mProcess(aProcess) {
-  mTcver = std::make_unique<MiniTransceiver>(aFd);
+  mTcver = MakeUnique<MiniTransceiver>(aFd);
 }
 
 ForkServiceChild::~ForkServiceChild() { close(mTcver->GetFD()); }

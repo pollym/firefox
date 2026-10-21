@@ -1098,7 +1098,7 @@ bool WebRenderBridgeParent::UpdateSharedExternalImage(
     // previous external image ID. This can happen when an image is animated,
     // and it is changing the external image that the animation points to.
     if (!aScheduleRelease) {
-      aScheduleRelease = std::make_unique<ScheduleSharedSurfaceRelease>(this);
+      aScheduleRelease = MakeUnique<ScheduleSharedSurfaceRelease>(this);
     }
     aScheduleRelease->Add(aKey, it->second);
     it->second = aExtId;
@@ -1407,9 +1407,8 @@ bool WebRenderBridgeParent::SetDisplayList(
   }
 
   if (!IsRootWebRenderBridgeParent() && !aRenderOffscreen) {
-    aTxn.Notify(wr::Checkpoint::SceneBuilt,
-                std::make_unique<SceneBuiltNotification>(this, aWrEpoch,
-                                                         aTxnStartTime));
+    aTxn.Notify(wr::Checkpoint::SceneBuilt, MakeUnique<SceneBuiltNotification>(
+                                                this, aWrEpoch, aTxnStartTime));
   }
 
   NeedIncreasedMaxDirtyPageModifier();
@@ -2354,7 +2353,7 @@ void WebRenderBridgeParent::MaybeNotifyOfLayers(
   }
 
   aBuilder.Notify(wr::Checkpoint::SceneBuilt,
-                  std::make_unique<ScheduleObserveLayersUpdate>(
+                  MakeUnique<ScheduleObserveLayersUpdate>(
                       mCompositorBridge, GetLayersId(), aWillHaveLayers));
   mLastNotifiedHasLayers = aWillHaveLayers;
 }

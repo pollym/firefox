@@ -67,7 +67,7 @@ void Http2WebTransportSessionImpl::CloseSession(uint32_t aStatus,
   mHandler->SetSentFin();
 
   Capsule capsule = Capsule::CloseWebTransportSession(aStatus, aReason);
-  UniquePtr<CapsuleEncoder> encoder = std::make_unique<CapsuleEncoder>();
+  UniquePtr<CapsuleEncoder> encoder = MakeUnique<CapsuleEncoder>();
   encoder->EncodeCapsule(capsule);
   EnqueueOutCapsule(CapsuleTransmissionPriority::Important, std::move(encoder));
 }
@@ -133,7 +133,7 @@ void Http2WebTransportSessionImpl::SendDatagram(nsTArray<uint8_t>&& aData,
 
   Capsule capsule = Capsule::WebTransportDatagram(std::move(aData));
 
-  UniquePtr<CapsuleEncoder> encoder = std::make_unique<CapsuleEncoder>();
+  UniquePtr<CapsuleEncoder> encoder = MakeUnique<CapsuleEncoder>();
   encoder->EncodeCapsule(capsule);
   EnqueueOutCapsule(CapsuleTransmissionPriority::Normal, std::move(encoder));
 }
@@ -195,7 +195,7 @@ void Http2WebTransportSessionImpl::CreateOutgoingBidirectionalStream(
   auto id = mLocalStreamsFlowControl.TakeStreamId(WebTransportStreamType::BiDi);
   if (!id) {
     mBidiPendingStreamCallbacks.Push(
-        std::make_unique<PendingStreamCallback>(std::move(aCallback)));
+        MakeUnique<PendingStreamCallback>(std::move(aCallback)));
     return;
   }
 
@@ -209,7 +209,7 @@ void Http2WebTransportSessionImpl::CreateOutgoingUnidirectionalStream(
       mLocalStreamsFlowControl.TakeStreamId(WebTransportStreamType::UniDi);
   if (!id) {
     mUnidiPendingStreamCallbacks.Push(
-        std::make_unique<PendingStreamCallback>(std::move(aCallback)));
+        MakeUnique<PendingStreamCallback>(std::move(aCallback)));
     return;
   }
 
@@ -231,39 +231,33 @@ void Http2WebTransportSessionImpl::SendMaintenanceCapsules(
     CapsuleTransmissionPriority aPriority) {
   auto encoder = mSessionDataFc.CreateSessionDataBlockedCapsule();
   if (encoder) {
-    mCapsuleQueue[aPriority].Push(
-        std::make_unique<CapsuleEncoder>(encoder.ref()));
+    mCapsuleQueue[aPriority].Push(MakeUnique<CapsuleEncoder>(encoder.ref()));
   }
   encoder = mReceiverFc.CreateMaxDataCapsule();
   if (encoder) {
-    mCapsuleQueue[aPriority].Push(
-        std::make_unique<CapsuleEncoder>(encoder.ref()));
+    mCapsuleQueue[aPriority].Push(MakeUnique<CapsuleEncoder>(encoder.ref()));
   }
   encoder = mLocalStreamsFlowControl[WebTransportStreamType::BiDi]
                 .CreateStreamsBlockedCapsule();
   if (encoder) {
-    mCapsuleQueue[aPriority].Push(
-        std::make_unique<CapsuleEncoder>(encoder.ref()));
+    mCapsuleQueue[aPriority].Push(MakeUnique<CapsuleEncoder>(encoder.ref()));
   }
   encoder = mLocalStreamsFlowControl[WebTransportStreamType::UniDi]
                 .CreateStreamsBlockedCapsule();
   if (encoder) {
-    mCapsuleQueue[aPriority].Push(
-        std::make_unique<CapsuleEncoder>(encoder.ref()));
+    mCapsuleQueue[aPriority].Push(MakeUnique<CapsuleEncoder>(encoder.ref()));
   }
   encoder = mRemoteStreamsFlowControl[WebTransportStreamType::BiDi]
                 .FlowControl()
                 .CreateMaxStreamsCapsule();
   if (encoder) {
-    mCapsuleQueue[aPriority].Push(
-        std::make_unique<CapsuleEncoder>(encoder.ref()));
+    mCapsuleQueue[aPriority].Push(MakeUnique<CapsuleEncoder>(encoder.ref()));
   }
   encoder = mRemoteStreamsFlowControl[WebTransportStreamType::UniDi]
                 .FlowControl()
                 .CreateMaxStreamsCapsule();
   if (encoder) {
-    mCapsuleQueue[aPriority].Push(
-        std::make_unique<CapsuleEncoder>(encoder.ref()));
+    mCapsuleQueue[aPriority].Push(MakeUnique<CapsuleEncoder>(encoder.ref()));
   }
   for (const auto& stream : mOutgoingStreams.Values()) {
     stream->WriteMaintenanceCapsules(mCapsuleQueue[aPriority]);
@@ -623,7 +617,7 @@ Http2WebTransportSession::Http2WebTransportSession(
     Http2WebTransportInitialSettings aSettings)
     : Http2StreamTunnel(aSession, aPriority, aBcId, aConnectionInfo),
       mImpl(MakeRefPtr<Http2WebTransportSessionImpl>(this, aSettings)),
-      mCapsuleParser(std::make_unique<CapsuleParser>(mImpl)) {
+      mCapsuleParser(MakeUnique<CapsuleParser>(mImpl)) {
   LOG(("Http2WebTransportSession ctor:%p", this));
 }
 

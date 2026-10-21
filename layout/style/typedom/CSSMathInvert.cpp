@@ -41,7 +41,7 @@ RefPtr<CSSMathInvert> CSSMathInvert::Create(
       CSSNumericValue::Create(aParent, *aMathInvert.value);
 
   return Create(std::move(aParent),
-                std::make_unique<StyleNumericType>(aMathInvert.numeric_type),
+                MakeUnique<StyleNumericType>(aMathInvert.numeric_type),
                 std::move(value));
 }
 
@@ -65,8 +65,7 @@ already_AddRefed<CSSMathInvert> CSSMathInvert::Constructor(
   // Step 1.
   RefPtr<CSSNumericValue> value = CSSNumericValue::Create(global, aArg);
 
-  auto numericType =
-      std::make_unique<StyleNumericType>(value->GetNumericType());
+  auto numericType = MakeUnique<StyleNumericType>(value->GetNumericType());
   Servo_NumericType_Invert(numericType.get());
 
   // Step 2.
@@ -97,8 +96,7 @@ void CSSMathInvert::ToCssTextWithProperty(const CSSPropertyId& aPropertyId,
 }
 
 StyleMathInvert CSSMathInvert::ToStyleMathInvert() const {
-  auto value =
-      std::make_unique<StyleNumericValue>(mValue->ToStyleNumericValue());
+  auto value = MakeUnique<StyleNumericValue>(mValue->ToStyleNumericValue());
 
   return StyleMathInvert{GetNumericType(),
                          StyleBox<StyleNumericValue>(std::move(value))};

@@ -658,7 +658,7 @@ CanonicalBrowsingContext::CreateLoadingSessionHistoryEntryForLoad(
 
     // If the entry was updated, update also the LoadingSessionHistoryInfo.
     UniquePtr<LoadingSessionHistoryInfo> lshi =
-        std::make_unique<LoadingSessionHistoryInfo>(entry, existingLoadingInfo);
+        MakeUnique<LoadingSessionHistoryInfo>(entry, existingLoadingInfo);
     aLoadState->SetLoadingSessionHistoryInfo(std::move(lshi));
     existingLoadingInfo = aLoadState->GetLoadingSessionHistoryInfo();
     (void)SetHistoryEntryCount(entry->BCHistoryLength());
@@ -684,10 +684,9 @@ CanonicalBrowsingContext::CreateLoadingSessionHistoryEntryForLoad(
 
   UniquePtr<LoadingSessionHistoryInfo> loadingInfo;
   if (existingLoadingInfo) {
-    loadingInfo =
-        std::make_unique<LoadingSessionHistoryInfo>(*existingLoadingInfo);
+    loadingInfo = MakeUnique<LoadingSessionHistoryInfo>(*existingLoadingInfo);
   } else {
-    loadingInfo = std::make_unique<LoadingSessionHistoryInfo>(entry);
+    loadingInfo = MakeUnique<LoadingSessionHistoryInfo>(entry);
     mLoadingEntries.AppendElement(
         LoadingSessionHistoryEntry{loadingInfo->mLoadId, entry});
   }
@@ -804,8 +803,7 @@ CanonicalBrowsingContext::ReplaceLoadingSessionHistoryEntryForLoad(
         MaybeReuseNavigationKeyFromActiveEntry(loadingEntry);
       }
 
-      auto result =
-          std::make_unique<LoadingSessionHistoryInfo>(loadingEntry, aInfo);
+      auto result = MakeUnique<LoadingSessionHistoryInfo>(loadingEntry, aInfo);
       if (Navigation::IsAPIEnabled()) {
         MOZ_LOG_FMT(gNavigationAPILog, LogLevel::Debug,
                     "CanonicalBrowsingContext::"
@@ -1414,7 +1412,7 @@ already_AddRefed<nsDocShellLoadState> CanonicalBrowsingContext::CreateLoadInfo(
   RefPtr loadState = MakeRefPtr<nsDocShellLoadState>(info.GetURI());
   info.FillLoadInfo(*loadState);
   UniquePtr<LoadingSessionHistoryInfo> loadingInfo;
-  loadingInfo = std::make_unique<LoadingSessionHistoryInfo>(aEntry);
+  loadingInfo = MakeUnique<LoadingSessionHistoryInfo>(aEntry);
   loadingInfo->mTriggeringNavigationType = Some(aNavigationType);
   mLoadingEntries.AppendElement(
       LoadingSessionHistoryEntry{loadingInfo->mLoadId, aEntry});

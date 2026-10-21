@@ -343,9 +343,9 @@ RefPtr<WebRenderAPI::CreatePromise> WebRenderAPI::Create(
             compositor->SupportsExternalBufferTextures();
 
         RefPtr<RenderThread> thread = RenderThread::Get();
-        auto renderer = std::make_unique<RendererOGL>(
-            std::move(thread), std::move(compositor), aWindowId, wrRenderer,
-            aBridge);
+        auto renderer =
+            MakeUnique<RendererOGL>(std::move(thread), std::move(compositor),
+                                    aWindowId, wrRenderer, aBridge);
         if (wrRenderer && renderer) {
           wr::WrExternalImageHandler handler =
               renderer->GetExternalImageHandler();
@@ -441,7 +441,7 @@ void WebRenderAPI::DestroyRenderer() {
   wr_api_stop_render_backend(mDocHandle);
 
   layers::SynchronousTask task("Destroy WebRenderAPI");
-  auto event = std::make_unique<RemoveRenderer>(&task);
+  auto event = MakeUnique<RemoveRenderer>(&task);
   RunOnRenderThread(std::move(event));
   task.Wait();
 
@@ -498,8 +498,7 @@ layers::RemoteTextureInfoList* WebRenderAPI::GetPendingRemoteTextureInfoList() {
   }
 
   if (!mPendingRemoteTextureInfoList) {
-    mPendingRemoteTextureInfoList =
-        std::make_unique<layers::RemoteTextureInfoList>();
+    mPendingRemoteTextureInfoList = MakeUnique<layers::RemoteTextureInfoList>();
   }
   return mPendingRemoteTextureInfoList.get();
 }
@@ -519,7 +518,7 @@ layers::AsyncImagePipelineOps* WebRenderAPI::GetPendingAsyncImagePipelineOps(
       gfxCriticalNoteOnce << "Invalid AsyncImagePipelineOps";
     }
     mPendingAsyncImagePipelineOps =
-        std::make_unique<layers::AsyncImagePipelineOps>(aTxn.Raw());
+        MakeUnique<layers::AsyncImagePipelineOps>(aTxn.Raw());
   } else {
     MOZ_RELEASE_ASSERT(mPendingAsyncImagePipelineOps->mTransaction ==
                        aTxn.Raw());
@@ -731,8 +730,8 @@ void WebRenderAPI::Readback(const TimeStamp& aStartTime, gfx::IntSize size,
   UpdateDebugFlags(0);
 
   layers::SynchronousTask task("Readback");
-  auto event = std::make_unique<Readback>(&task, aStartTime, size, aFormat,
-                                          buffer, aNeedsYFlip);
+  auto event = MakeUnique<Readback>(&task, aStartTime, size, aFormat, buffer,
+                                    aNeedsYFlip);
   // This event will be passed from wr_backend thread to renderer thread. That
   // implies that all frame data have been processed when the renderer runs this
   // read-back event. Then, we could make sure this read-back event gets the
@@ -791,7 +790,7 @@ void WebRenderAPI::Pause() {
   };
 
   layers::SynchronousTask task("Pause");
-  auto event = std::make_unique<PauseEvent>(&task);
+  auto event = MakeUnique<PauseEvent>(&task);
   RenderThread::Get()->PostEvent(mId, std::move(event));
 
   task.Wait();
@@ -821,7 +820,7 @@ bool WebRenderAPI::Resume() {
 
   bool result = false;
   layers::SynchronousTask task("Resume");
-  auto event = std::make_unique<ResumeEvent>(&task, &result);
+  auto event = MakeUnique<ResumeEvent>(&task, &result);
   RenderThread::Get()->PostEvent(mId, std::move(event));
 
   task.Wait();
@@ -868,7 +867,7 @@ void WebRenderAPI::WaitUntilPresentationFlushed() {
   };
 
   layers::SynchronousTask task("WaitUntilPresentationFlushed");
-  auto event = std::make_unique<WaitFlushedEvent>(&task);
+  auto event = MakeUnique<WaitFlushedEvent>(&task);
   // This event will be passed from wr_backend thread to renderer thread. That
   // implies that all frame data have been processed when the renderer runs this
   // event.
@@ -905,7 +904,7 @@ bool WebRenderAPI::CheckAndClearDidRasterize() {
 
   bool result = false;
   layers::SynchronousTask task("CheckAndClearDidRasterize");
-  auto event = std::make_unique<CheckRasterizeEvent>(&task, &result);
+  auto event = MakeUnique<CheckRasterizeEvent>(&task, &result);
   RunOnRenderThread(std::move(event));
 
   task.Wait();
@@ -966,7 +965,7 @@ void WebRenderAPI::BeginRecording(const TimeStamp& aRecordingStart,
   };
 
   auto event =
-      std::make_unique<BeginRecordingEvent>(aRecordingStart, aRootPipelineId);
+      MakeUnique<BeginRecordingEvent>(aRecordingStart, aRootPipelineId);
   RunOnRenderThread(std::move(event));
 }
 
@@ -998,7 +997,7 @@ RefPtr<WebRenderAPI::EndRecordingPromise> WebRenderAPI::EndRecording() {
     MozPromiseHolder<WebRenderAPI::EndRecordingPromise> mPromise;
   };
 
-  auto event = std::make_unique<EndRecordingEvent>();
+  auto event = MakeUnique<EndRecordingEvent>();
   auto promise = event->GetPromise();
 
   RunOnRenderThread(std::move(event));
@@ -1042,8 +1041,8 @@ RefPtr<WebRenderAPI::ScreenPixelsPromise> WebRenderAPI::RequestScreenPixels(
   };
 
   auto promise = MakeRefPtr<ScreenPixelsPromise::Private>(__func__);
-  auto event = std::make_unique<ScreenshotEvent>(
-      aSourceRect, std::move(aHardwareBuffer), promise);
+  auto event = MakeUnique<ScreenshotEvent>(aSourceRect,
+                                           std::move(aHardwareBuffer), promise);
 
   RenderThread::Get()->PostEvent(mId, std::move(event));
   return promise;
@@ -1219,7 +1218,7 @@ class FrameStartTime : public RendererEvent {
 };
 
 void WebRenderAPI::SetFrameStartTime(const TimeStamp& aTime) {
-  auto event = std::make_unique<FrameStartTime>(aTime);
+  auto event = MakeUnique<FrameStartTime>(aTime);
   RunOnRenderThread(std::move(event));
 }
 
@@ -1889,8 +1888,7 @@ gfxContext* DisplayListBuilder::GetTextContext(
     mCachedTextDT = new layout::TextDrawTarget(*this, aResources, aSc, aManager,
                                                aItem, aBounds);
     if (mCachedTextDT->IsValid()) {
-      mCachedContext =
-          std::make_unique<gfxContext>(mCachedTextDT, aDeviceOffset);
+      mCachedContext = MakeUnique<gfxContext>(mCachedTextDT, aDeviceOffset);
     }
   } else {
     mCachedTextDT->Reinitialize(aResources, aSc, aManager, aItem, aBounds);

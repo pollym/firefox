@@ -305,7 +305,7 @@ SessionHistoryInfo::SharedState SessionHistoryInfo::SharedState::Create(
         aPartitionedPrincipalToInherit, aPolicyContainer, aContentType));
   }
 
-  return SharedState(std::make_unique<SHEntrySharedState>(
+  return SharedState(MakeUnique<SHEntrySharedState>(
       aTriggeringPrincipal, aPrincipalToInherit, aPartitionedPrincipalToInherit,
       aPolicyContainer, aContentType));
 }
@@ -331,8 +331,8 @@ SessionHistoryInfo::SharedState::~SharedState() {
     mParent
         .RefPtr<SHEntrySharedParentState>::~RefPtr<SHEntrySharedParentState>();
   } else {
-    mChild
-        .std::unique_ptr<SHEntrySharedState>::~unique_ptr<SHEntrySharedState>();
+    mChild.UniquePtr<SHEntrySharedState>::~unique_ptr<
+        SHEntrySharedState, DefaultDelete<SHEntrySharedState>>();
   }
 }
 
@@ -342,7 +342,7 @@ SessionHistoryInfo::SharedState& SessionHistoryInfo::SharedState::operator=(
     if (XRE_IsParentProcess()) {
       mParent = aOther.mParent;
     } else {
-      mChild = std::make_unique<SHEntrySharedState>(*aOther.mChild);
+      mChild = MakeUnique<SHEntrySharedState>(*aOther.mChild);
     }
   }
   return *this;
@@ -370,7 +370,7 @@ void SessionHistoryInfo::SharedState::Init() {
         RefPtr<SHEntrySharedParentState>(new SHEntrySharedParentState());
   } else {
     new (&mChild)
-        UniquePtr<SHEntrySharedState>(std::make_unique<SHEntrySharedState>());
+        UniquePtr<SHEntrySharedState>(MakeUnique<SHEntrySharedState>());
   }
 }
 
@@ -380,7 +380,7 @@ void SessionHistoryInfo::SharedState::Init(
     new (&mParent) RefPtr<SHEntrySharedParentState>(aOther.mParent);
   } else {
     new (&mChild) UniquePtr<SHEntrySharedState>(
-        std::make_unique<SHEntrySharedState>(*aOther.mChild));
+        MakeUnique<SHEntrySharedState>(*aOther.mChild));
   }
 }
 
@@ -447,7 +447,7 @@ void SessionHistoryEntry::SetByLoadId(uint64_t aLoadId,
       aLoadId, LoadingEntry{
                    .mEntry = aEntry,
                    .mInfoSnapshotForValidation =
-                       std::make_unique<SessionHistoryInfo>(aEntry->Info()),
+                       MakeUnique<SessionHistoryInfo>(aEntry->Info()),
                });
 }
 
@@ -463,18 +463,18 @@ void SessionHistoryEntry::RemoveLoadId(uint64_t aLoadId) {
 }
 
 SessionHistoryEntry::SessionHistoryEntry()
-    : mInfo(std::make_unique<SessionHistoryInfo>()), mID(++gEntryID) {}
+    : mInfo(MakeUnique<SessionHistoryInfo>()), mID(++gEntryID) {}
 
 SessionHistoryEntry::SessionHistoryEntry(nsDocShellLoadState* aLoadState,
                                          nsIChannel* aChannel)
-    : mInfo(std::make_unique<SessionHistoryInfo>(aLoadState, aChannel)),
+    : mInfo(MakeUnique<SessionHistoryInfo>(aLoadState, aChannel)),
       mID(++gEntryID) {}
 
 SessionHistoryEntry::SessionHistoryEntry(SessionHistoryInfo* aInfo)
-    : mInfo(std::make_unique<SessionHistoryInfo>(*aInfo)), mID(++gEntryID) {}
+    : mInfo(MakeUnique<SessionHistoryInfo>(*aInfo)), mID(++gEntryID) {}
 
 SessionHistoryEntry::SessionHistoryEntry(const SessionHistoryEntry& aEntry)
-    : mInfo(std::make_unique<SessionHistoryInfo>(*aEntry.mInfo)),
+    : mInfo(MakeUnique<SessionHistoryInfo>(*aEntry.mInfo)),
       mParent(aEntry.mParent),
       mID(aEntry.mID),
       mBCHistoryLength(aEntry.mBCHistoryLength) {}
@@ -1404,7 +1404,7 @@ SessionHistoryEntry::SyncTreesForSubframeNavigation(
 }
 
 void SessionHistoryEntry::ReplaceWith(const SessionHistoryEntry& aSource) {
-  mInfo = std::make_unique<SessionHistoryInfo>(*aSource.mInfo);
+  mInfo = MakeUnique<SessionHistoryInfo>(*aSource.mInfo);
   mChildren.Clear();
 }
 
@@ -1443,7 +1443,7 @@ nsFrameLoader* SessionHistoryEntry::GetFrameLoader() {
 
 void SessionHistoryEntry::SetInfo(SessionHistoryInfo* aInfo) {
   // FIXME Assert that we're not changing shared state!
-  mInfo = std::make_unique<SessionHistoryInfo>(*aInfo);
+  mInfo = MakeUnique<SessionHistoryInfo>(*aInfo);
 }
 
 already_AddRefed<nsIURI> SessionHistoryInfo::GetURIOrInheritedForAboutBlank()
@@ -1727,7 +1727,7 @@ bool ParamTraits<nsILayoutHistoryState*>::Read(
     (*aResult)->SetScrollPositionOnly(scrollPositionOnly);
     for (uint32_t i = 0; i < keys.Length(); ++i) {
       mozilla::PresState& state = states[i];
-      auto newState = std::make_unique<mozilla::PresState>(state);
+      auto newState = mozilla::MakeUnique<mozilla::PresState>(state);
       (*aResult)->AddState(keys[i], std::move(newState));
     }
   }

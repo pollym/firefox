@@ -1452,7 +1452,7 @@ void ServoStyleSet::RunPostTraversalTasks() {
 
 ServoStyleRuleMap* ServoStyleSet::StyleRuleMap() {
   if (!mStyleRuleMap) {
-    mStyleRuleMap = std::make_unique<ServoStyleRuleMap>();
+    mStyleRuleMap = MakeUnique<ServoStyleRuleMap>();
   }
   mStyleRuleMap->EnsureTable(*this);
   return mStyleRuleMap.get();
