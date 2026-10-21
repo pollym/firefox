@@ -57,6 +57,7 @@ export const SearchSERPTelemetryUtils = {
     SUBMITTED: "submitted",
   },
   COMPONENTS: {
+    AD_BRAND_ZONE: "ad_brand_zone",
     AD_CAROUSEL: "ad_carousel",
     AD_IMAGE_ROW: "ad_image_row",
     AD_LINK: "ad_link",
@@ -102,6 +103,7 @@ const SCAN = {
 };
 
 const AD_COMPONENTS = [
+  SearchSERPTelemetryUtils.COMPONENTS.AD_BRAND_ZONE,
   SearchSERPTelemetryUtils.COMPONENTS.AD_CAROUSEL,
   SearchSERPTelemetryUtils.COMPONENTS.AD_IMAGE_ROW,
   SearchSERPTelemetryUtils.COMPONENTS.AD_LINK,

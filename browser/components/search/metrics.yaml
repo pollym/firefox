@@ -436,6 +436,7 @@ serp:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1816735
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1849371
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1901839
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=2079978
     data_reviews:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1814773
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1816730
@@ -463,6 +464,7 @@ serp:
         description: |
           The target component used to trigger the action.
           Possible values are:
+          `ad_brand_zone` (added in Firefox 160),
           `ad_carousel`,
           `ad_image_row`,
           `ad_link`,
@@ -493,6 +495,7 @@ serp:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1849371
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1909979
       - https://bugzilla.mozilla.org/show_bug.cgi?id=2074916
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=2079978
     data_reviews:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1816728
       - https://bugzilla.mozilla.org/show_bug.cgi?id=1849371
@@ -508,6 +511,7 @@ serp:
       component:
         description: |
           Type of components on a SERP. Possible values are:
+          `ad_brand_zone` (added in Firefox 160),
           `ad_carousel`,
           `ad_image_row`,
           `ad_link`,
