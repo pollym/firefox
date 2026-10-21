@@ -377,6 +377,72 @@ add_task(async function test_restore_replaces_a_pending_inclusion() {
 });
 
 /**
+ * Makes the next proxy pass request fail.
+ */
+function failProxyPass() {
+  IPPDummyAuthProvider.setProxyPass({
+    status: 500,
+    error: "test_error",
+    usage: null,
+  });
+}
+
+/**
+ * Tests that an inclusion activation that fails is not retried: the proxy
+ * stays in ERROR, even as more rules come in.
+ */
+add_task(async function test_failed_inclusion_is_not_retried() {
+  await withAutoActivation(async autoActivation => {
+    failProxyPass();
+    setSiteRule(IPPPrincipalRules.INCLUDED);
+    const startSpy = sinon.spy(IPPProxyManager, "start");
+
+    try {
+      const failed = waitForProxyState(IPPProxyStates.ERROR);
+      autoActivation.init();
+      await failed;
+
+      Services.prefs.setStringPref(
+        MATCH_PATTERNS_PREF,
+        JSON.stringify(["*://other.example.com/*"])
+      );
+
+      Assert.equal(startSpy.callCount, 1, "The proxy should be asked once");
+      Assert.equal(
+        IPPProxyManager.state,
+        IPPProxyStates.ERROR,
+        "The proxy should stay in ERROR"
+      );
+    } finally {
+      startSpy.restore();
+    }
+  });
+});
+
+/**
+ * Tests that the last inclusion going away clears a failed inclusion
+ * activation.
+ */
+add_task(async function test_failed_inclusion_cleared_by_last_rule() {
+  await withAutoActivation(async autoActivation => {
+    failProxyPass();
+    setSiteRule(IPPPrincipalRules.INCLUDED);
+    const failed = waitForProxyState(IPPProxyStates.ERROR);
+    autoActivation.init();
+    await failed;
+
+    const stopped = waitForProxyState(IPPProxyStates.READY);
+    setSiteRule(IPPPrincipalRules.DEFAULT);
+    await stopped;
+
+    Assert.ok(
+      !IPPProxyManager.channelFilter(),
+      "The channel filter should be gone"
+    );
+  });
+});
+
+/**
  * Tests that rules changing mid-session are followed: the first included site
  * brings a narrow connection up, and the last one going away takes it down.
  */

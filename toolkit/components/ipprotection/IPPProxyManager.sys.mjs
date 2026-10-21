@@ -290,7 +290,8 @@ class IPPProxyManagerSingleton extends EventTarget {
     if (
       this.#activatingPromise ||
       this.#state === IPPProxyStates.ACTIVE ||
-      this.#state === IPPProxyStates.ACTIVATING
+      this.#state === IPPProxyStates.ACTIVATING ||
+      this.#state === IPPProxyStates.ERROR
     ) {
       this.stop(false);
     }
@@ -562,10 +563,15 @@ class IPPProxyManagerSingleton extends EventTarget {
         },
         error => {
           clearActivation();
-          this.#cancelChannelFilter();
           if (error === ERRORS.NOT_READY) {
+            this.#cancelChannelFilter();
             this.updateState();
+          } else if (userAction || error === ERRORS.CANCELED) {
+            this.#cancelChannelFilter();
+            this.#setErrorState(error);
           } else {
+            // Nobody checks a system activation's result, so keep holding
+            // traffic in ERROR until stop() rather than retrying from READY.
             this.#setErrorState(error);
           }
           return { started: false, error };
@@ -1120,8 +1126,8 @@ class IPPProxyManagerSingleton extends EventTarget {
     const errorType = isString ? ERRORS.from(error) : ERRORS.GENERIC;
     this.#errorType = errorType;
 
-    if (this.#state === IPPProxyStates.ACTIVE) {
-      // If the proxy is active, switch to the error state.
+    if (this.#state === IPPProxyStates.ACTIVE || this.#connection?.active) {
+      // If the proxy is active or holding traffic, switch to the error state.
       // Stop will need to be called to move out of the error state.
       this.#setState(IPPProxyStates.ERROR);
     } else {

@@ -44,7 +44,7 @@ drives the lifecycle of the proxy connection.
 - `READY`: Service is `READY` and the proxy can be activated.
 - `ACTIVATING`: `start()` is working on an activation: waiting for the service while holding traffic behind a channel filter, then fetching a proxy pass and selecting an endpoint.
 - `ACTIVE`: Proxy connected. Usage and network observers are reporting metrics.
-- `ERROR`: An unrecoverable error occurred while the proxy is connected such as failing when rotating credentials. Stop must be called to change states.
+- `ERROR`: An unrecoverable error occurred while the proxy is connected, such as failing when rotating credentials, or a system activation (`start(false)`) failed. The channel filter keeps holding traffic. Stop must be called to change states.
 - `PAUSED`: Everything is working but the bandwidth limit has been reached so we can't connect to the VPN. The bandwidth will reset next month.
 
 ### Proxy transitions
@@ -56,7 +56,8 @@ drives the lifecycle of the proxy connection.
   \- From `READY` it moves to `ACTIVATING`.
   \- From `NOT_READY` it waits, as long as the service could still become ready: while the startup cache is open every non-`READY` state is a guess carried over from the previous session, and a service that is merely initializing is not an answer either. Once the real state is known, `UNAVAILABLE` and `UNAUTHENTICATED` need the user and `start()` reports `ERRORS.NOT_READY` instead of holding traffic. `browser.ipProtection.serviceWaitTimeout` is the backstop.
   \- Successful activation → `ACTIVE` and telemetry `ipprotection.started`.
-  \- Failures during activation (missing entitlement, server list, proxy pass…) call `updateState()` to demote the proxy back to its previous state.
+  \- Failures during a user activation (missing entitlement, server list, proxy pass…) call `updateState()` to demote the proxy back to its previous state.
+  \- Failures during a system activation move to `ERROR` instead, since its callers do not check the result and would otherwise start again from `READY`. `ERRORS.NOT_READY` and `ERRORS.CANCELED` are not failures and demote as above.
   \- Errors after the proxy is connected → `ERROR` via `#setErrorState`.
 - `stop(userAction)` from `ACTIVE` → `READY` after closing the channel filter and observers. It also cancels an activation that is in flight, including one still waiting for the service.
 - `reset()` or helper‑driven recomputations call `updateState()` which demotes the proxy back to `READY`/`NOT_READY` and clears the credential cache.

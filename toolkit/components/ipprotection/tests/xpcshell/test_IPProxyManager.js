@@ -517,9 +517,9 @@ add_task(async function test_IPPProxyManager_catastrophic_on_500() {
 });
 
 /**
- * Tests that activation failures reset the proxy state to the previous state.
+ * Starts the service with a proxy pass request that fails.
  */
-add_task(async function test_IPPProxyManager_activation_failure() {
+async function initServiceWithFailingPass() {
   IPPDummyAuthProvider.simulateSignIn(true);
   IPPDummyAuthProvider.setGetEntitlementResponse({
     entitlement: createTestEntitlement(),
@@ -537,13 +537,64 @@ add_task(async function test_IPPProxyManager_activation_failure() {
     IPProtectionStates.READY,
     "IP Protection service should be ready"
   );
+}
 
-  await IPPProxyManager.start(false);
+/**
+ * Tests that a user activation that fails returns to the previous state.
+ */
+add_task(async function test_IPPProxyManager_user_activation_failure() {
+  await initServiceWithFailingPass();
+
+  await IPPProxyManager.start(true);
 
   Assert.equal(
     IPPProxyManager.state,
     IPPProxyStates.READY,
     "Proxy should return to READY state after activation failure"
+  );
+  Assert.ok(
+    !IPPProxyManager.channelFilter(),
+    "The channel filter should be gone"
+  );
+
+  IPProtectionService.uninit();
+});
+
+/**
+ * Tests that a system activation that fails stays in ERROR, holding traffic,
+ * until it is stopped.
+ */
+add_task(async function test_IPPProxyManager_system_activation_failure() {
+  await initServiceWithFailingPass();
+
+  await IPPProxyManager.start(false);
+
+  Assert.equal(
+    IPPProxyManager.state,
+    IPPProxyStates.ERROR,
+    "Proxy should be in ERROR after a system activation failure"
+  );
+  Assert.ok(
+    IPPProxyManager.channelFilter()?.active,
+    "The channel filter should still hold traffic"
+  );
+
+  IPPProxyManager.updateState();
+  Assert.equal(
+    IPPProxyManager.state,
+    IPPProxyStates.ERROR,
+    "Recomputing the state should not leave ERROR"
+  );
+
+  await IPPProxyManager.stop(false);
+  Assert.equal(
+    IPPProxyManager.state,
+    IPPProxyStates.READY,
+    "Stopping should leave ERROR"
+  );
+  Assert.ok(
+    !IPPProxyManager.channelFilter(),
+    "Stopping should remove the channel filter"
   );
 
   IPProtectionService.uninit();
