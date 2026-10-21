@@ -2196,18 +2196,18 @@ export class CommandLineHandler {
    * @returns {boolean} True if the arguments matched the expected form.
    */
   openUrls(args) {
-    // Arguments are expected to be in pairs of "-url" "<url>".
+    // Arguments are expected to be URL flag and URL pairs.
     if (args.length % 2 != 0) {
       return false;
     }
 
     for (let i = 0; i < args.length; i += 2) {
-      if (args[i] != "-url") {
+      if (args[i] != "-url" && args[i] != "-url-background") {
         return false;
       }
     }
 
-    // Now the arguments are verified to only be "-url" arguments we can pass
+    // Now the arguments are verified to only be URL arguments we can pass
     // them directly to the only handler for those arguments.
     let workingDir = Services.dirsvc.get("CurWorkD", Ci.nsIFile);
     let cmdLine = Cu.createCommandLine(
@@ -2230,6 +2230,10 @@ export class CommandLineHandler {
   }
 
   async redirectCommandLine(args) {
+    let shouldActivate =
+      !args.length ||
+      args.length % 2 != 0 ||
+      args.some((arg, index) => index % 2 == 0 && arg != "-url-background");
     let defaultPath = await this.findDefaultProfilePath();
 
     if (defaultPath) {
@@ -2244,7 +2248,11 @@ export class CommandLineHandler {
       // existing instance of this profile (this even works for the current
       // instance on macOS which is the only platform we call this for).
       try {
-        SelectableProfileService.sendCommandLine(defaultPath, args, true);
+        SelectableProfileService.sendCommandLine(
+          defaultPath,
+          args,
+          shouldActivate
+        );
 
         return;
       } catch (e) {
@@ -2253,7 +2261,10 @@ export class CommandLineHandler {
     }
 
     // Fall back to re-launching.
-    SelectableProfileService.execProcess(["-foreground", ...args]);
+    SelectableProfileService.execProcess([
+      ...(shouldActivate ? ["-foreground"] : []),
+      ...args,
+    ]);
   }
 
   handle(cmdLine) {
