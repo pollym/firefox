@@ -52,6 +52,13 @@ export function newConversation() {
 }
 
 /**
+ * @typedef {object} HTTPChatWindowFixture
+ * @property {MozBrowser} browser - The new window's selected browser.
+ * @property {sinon.SinonStub} buildStub - Records engine builds and delegates
+ *   chat and title generation to their production implementations.
+ */
+
+/**
  * A conversation with a chat engine, ready for Chat.fetchWithHistory. Call it
  * while a MockEngineManager is installed so the engine is a mocked one.
  *
@@ -707,6 +714,81 @@ export const AIWindowTestUtils = {
   },
 
   /**
+   * Runs a chat scenario in a new window with HTTP chat and title responses,
+   * mocked engines for other features, and cleanup of its requests and window.
+   *
+   * @param {MockOpenAIServerOptions} serverOptions - The HTTP response options.
+   * @param {(fixture: HTTPChatWindowFixture) => Promise<void>} task
+   *   The chat scenario to run.
+   * @returns {Promise<void>}
+   */
+  async withHTTPChatWindow(serverOptions, task) {
+    const { SpecialPowers } = context().window;
+    const { stubEngineNetworkBoundaries } = context().scope;
+    const { restore, port } = await stubEngineNetworkBoundaries({
+      passthroughFeatures: new Set(["chat", "title-generation"]),
+      serverOptions,
+    });
+    await SpecialPowers.pushPrefEnv({
+      set: [
+        ["browser.smartwindow.customEndpoint", `http://localhost:${port}/v1`],
+      ],
+    });
+
+    const sandbox = sinon.createSandbox();
+    const abortController = new AbortController();
+    const turns = new Set();
+    const conversations = new Set();
+    let win;
+
+    try {
+      const fetchWithHistory = sandbox
+        .stub(Chat, "fetchWithHistory")
+        .callsFake(options => {
+          conversations.add(options.conversation);
+          const signal = options.signal
+            ? AbortSignal.any([options.signal, abortController.signal])
+            : abortController.signal;
+          const turn = fetchWithHistory.wrappedMethod.call(Chat, {
+            ...options,
+            signal,
+          });
+          turns.add(turn);
+          const settled = () => turns.delete(turn);
+          turn.then(settled, settled);
+
+          return turn;
+        });
+
+      win = await AIWindowTestUtils.openReadyAIWindow();
+      await task({
+        browser: win.gBrowser.selectedBrowser,
+        buildStub: openAIEngine.build,
+      });
+    } finally {
+      abortController.abort();
+      try {
+        while (turns.size) {
+          await Promise.allSettled(turns);
+        }
+        await Promise.allSettled(
+          Array.from(conversations, conversation => conversation.titlePromise)
+        );
+      } finally {
+        try {
+          if (win) {
+            await BrowserTestUtils.closeWindow(win);
+          }
+        } finally {
+          sandbox.restore();
+          await SpecialPowers.popPrefEnv();
+          await restore();
+        }
+      }
+    }
+  },
+
+  /**
    * Wait for the smartbar action to be set.
    *
    * @param {object} browser - The browser element
@@ -744,6 +826,8 @@ export const AIWindowTestUtils = {
    *   ["Hello from mock."].
    * @property {number} [streamChunkDelayMs] - Delay in milliseconds before
    *   each streamed chunk. Defaults to 0.
+   * @property {(index: number) => Promise<void>|void} [beforeStreamChunk]
+   *   Called before sending each text chunk; may pause the stream.
    * @property {MockToolCall|null} [toolCall] - When non-null, the first
    *   streaming request that includes tools will respond with this tool call
    *   instead of text content. A subsequent request containing the tool result
@@ -773,6 +857,7 @@ export const AIWindowTestUtils = {
   startMockOpenAI({
     streamChunks = ["Hello from mock."],
     streamChunkDelayMs = 0,
+    beforeStreamChunk,
     toolCall = null,
     followupChunks = ["Tool complete."],
     onRequest,
@@ -898,6 +983,9 @@ export const AIWindowTestUtils = {
 
         (async () => {
           for (const [index, chunk] of streamChunks.entries()) {
+            if (beforeStreamChunk) {
+              await beforeStreamChunk(index);
+            }
             if (streamChunkDelayMs) {
               await new Promise(resolve =>
                 lazy.setTimeout(resolve, streamChunkDelayMs)
