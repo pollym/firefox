@@ -495,7 +495,12 @@ class IPPProxyManagerSingleton extends EventTarget {
     }
 
     if (this.#state === IPPProxyStates.ERROR) {
-      return { started: false, error: this.#errorType ?? ERRORS.GENERIC };
+      if (!userAction) {
+        return { started: false, error: this.#errorType ?? ERRORS.GENERIC };
+      }
+      // A user retry tears the failed connection down; the next state
+      // announced is ACTIVATING, not an idle READY in between.
+      this.#stopInternal();
     }
 
     const abortController = new AbortController();
@@ -504,6 +509,8 @@ class IPPProxyManagerSingleton extends EventTarget {
     try {
       serviceReady = this.#waitForService(abortSignal);
     } catch (error) {
+      // Settles a retry out of ERROR, which would stay in ERROR.
+      this.updateState();
       return { started: false, error };
     }
     this.#activationAbortController = abortController;
@@ -681,16 +688,7 @@ class IPPProxyManagerSingleton extends EventTarget {
       return;
     }
 
-    if (this.#connection) {
-      this.#cancelChannelFilter();
-
-      lazy.clearTimeout(this.#rotationTimer);
-      this.#rotationTimer = 0;
-
-      this.#rotation?.controller.abort();
-
-      this.networkErrorObserver.stop();
-    }
+    this.#stopInternal();
 
     lazy.logConsole.info("Stopped");
 
@@ -702,6 +700,7 @@ class IPPProxyManagerSingleton extends EventTarget {
       userAction,
       duration: String(sessionLength),
     });
+
     this.updateState();
     if (
       userAction &&
@@ -710,6 +709,24 @@ class IPPProxyManagerSingleton extends EventTarget {
     ) {
       this.refreshUsage();
     }
+  }
+
+  /**
+   * Tears the connection down without announcing a state, for callers that
+   * move to the next state themselves.
+   */
+  #stopInternal() {
+    if (this.#connection) {
+      this.#cancelChannelFilter();
+
+      lazy.clearTimeout(this.#rotationTimer);
+      this.#rotationTimer = 0;
+
+      this.#rotation?.controller.abort();
+
+      this.networkErrorObserver.stop();
+    }
+    this.#errorType = null;
   }
 
   /**
