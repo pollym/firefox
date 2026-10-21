@@ -992,8 +992,7 @@ class WorkerPrivate final
   }
 
   nsIContentSecurityPolicy* GetCsp() const {
-    AssertIsOnMainThread();
-    return mLoadInfo.mCSP;
+    return PolicyContainer::GetCSP(GetPolicyContainer());
   }
 
   nsresult SetCSPFromHeaderValues(const nsACString& aCSPHeaderValue,

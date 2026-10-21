@@ -134,7 +134,6 @@ nsresult WorkerLoadInfo::SetPolicyContainerOnMainThread(
 
   mPolicyContainer = aPolicyContainer;
   mPolicyContainerArgs.reset();
-  mCSP = nullptr;
   mCSPContext = nullptr;
 
   if (!mPolicyContainer) {
@@ -145,10 +144,9 @@ nsresult WorkerLoadInfo::SetPolicyContainerOnMainThread(
   PolicyContainer::ToArgs(mPolicyContainer, policyContainerArgs);
   mPolicyContainerArgs.emplace(std::move(policyContainerArgs));
 
-  mCSP = mPolicyContainer->GetCSP();
-  if (mCSP) {
+  if (nsIContentSecurityPolicy* csp = mPolicyContainer->GetCSP()) {
     Result<UniquePtr<OffThreadCSPContext>, nsresult> ctx =
-        OffThreadCSPContext::CreateFromCSP(mCSP);
+        OffThreadCSPContext::CreateFromCSP(csp);
     if (NS_WARN_IF(ctx.isErr())) {
       return ctx.unwrapErr();
     }
@@ -347,7 +345,7 @@ bool WorkerLoadInfo::ProxyReleaseMainThreadObjects(
 bool WorkerLoadInfo::ProxyReleaseMainThreadObjects(
     WorkerPrivate* aWorkerPrivate,
     nsCOMPtr<nsILoadGroup>&& aLoadGroupToCancel) {
-  static const uint32_t kDoomedCount = 12;
+  static const uint32_t kDoomedCount = 11;
   nsTArray<nsCOMPtr<nsISupports>> doomed(kDoomedCount);
 
   SwapToISupportsArray(mWindow, doomed);
@@ -358,7 +356,6 @@ bool WorkerLoadInfo::ProxyReleaseMainThreadObjects(
   SwapToISupportsArray(mPartitionedPrincipal, doomed);
   SwapToISupportsArray(mLoadingPrincipal, doomed);
   SwapToISupportsArray(mChannel, doomed);
-  SwapToISupportsArray(mCSP, doomed);
   SwapToISupportsArray(mPolicyContainer, doomed);
   SwapToISupportsArray(mLoadGroup, doomed);
   SwapToISupportsArray(mInterfaceRequestor, doomed);

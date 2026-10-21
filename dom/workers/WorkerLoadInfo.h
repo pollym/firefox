@@ -73,7 +73,6 @@ struct WorkerLoadInfoData {
 
   RefPtr<PolicyContainer> mPolicyContainer;
   Maybe<mozilla::ipc::PolicyContainerArgs> mPolicyContainerArgs;
-  nsCOMPtr<nsIContentSecurityPolicy> mCSP;
   UniquePtr<OffThreadCSPContext> mCSPContext;
 
   // IP address space inherited from the parent document's policy container.

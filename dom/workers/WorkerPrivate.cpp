@@ -1429,7 +1429,7 @@ nsresult WorkerPrivate::SetCSPFromHeaderValues(
     const nsACString& aCSPHeaderValue,
     const nsACString& aCSPReportOnlyHeaderValue) {
   AssertIsOnMainThread();
-  MOZ_DIAGNOSTIC_ASSERT(!mLoadInfo.mCSP);
+  MOZ_DIAGNOSTIC_ASSERT(!mLoadInfo.mPolicyContainer);
 
   NS_ConvertASCIItoUTF16 cspHeaderValue(aCSPHeaderValue);
   NS_ConvertASCIItoUTF16 cspROHeaderValue(aCSPReportOnlyHeaderValue);
@@ -2662,8 +2662,8 @@ nsresult WorkerPrivate::SetPolicyContainerOnMainThread(
     PolicyContainer* aPolicyContainer) {
   MOZ_TRY(mLoadInfo.SetPolicyContainerOnMainThread(aPolicyContainer));
 
-  if (mLoadInfo.mCSP) {
-    mLoadInfo.mCSP->EnsureEventTarget(mMainThreadEventTarget);
+  if (nsIContentSecurityPolicy* csp = GetCsp()) {
+    csp->EnsureEventTarget(mMainThreadEventTarget);
   }
 
   return NS_OK;
@@ -2673,8 +2673,8 @@ nsresult WorkerPrivate::SetPrincipalsAndPolicyContainerFromChannel(
     nsIChannel* aChannel) {
   MOZ_TRY(mLoadInfo.SetPrincipalsAndPolicyContainerFromChannel(aChannel));
 
-  if (mLoadInfo.mCSP) {
-    mLoadInfo.mCSP->EnsureEventTarget(mMainThreadEventTarget);
+  if (nsIContentSecurityPolicy* csp = GetCsp()) {
+    csp->EnsureEventTarget(mMainThreadEventTarget);
   }
 
   return NS_OK;
