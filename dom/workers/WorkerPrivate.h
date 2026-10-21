@@ -1143,12 +1143,11 @@ class WorkerPrivate final
 
   void CycleCollect();
 
-  nsresult SetPrincipalsAndCSPOnMainThread(nsIPrincipal* aPrincipal,
-                                           nsIPrincipal* aPartitionedPrincipal,
-                                           nsILoadGroup* aLoadGroup,
-                                           nsIContentSecurityPolicy* aCsp);
+  nsresult SetPrincipalsOnMainThread(nsIPrincipal* aPrincipal,
+                                     nsIPrincipal* aPartitionedPrincipal,
+                                     nsILoadGroup* aLoadGroup);
 
-  nsresult SetPrincipalsAndCSPFromChannel(nsIChannel* aChannel);
+  nsresult SetPrincipalsAndPolicyContainerFromChannel(nsIChannel* aChannel);
 
   bool FinalChannelPrincipalIsValid(nsIChannel* aChannel);
 

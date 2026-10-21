@@ -279,7 +279,8 @@ nsresult NetworkLoadHandler::DataReceivedFromNetwork(nsIStreamLoader* aLoader,
     // URL must exactly match the final worker script URL in order to
     // properly set the referrer header on fetch/xhr requests.  If bug 1340694
     // is ever fixed this can be removed.
-    rv = mWorkerRef->Private()->SetPrincipalsAndCSPFromChannel(channel);
+    rv = mWorkerRef->Private()->SetPrincipalsAndPolicyContainerFromChannel(
+        channel);
     NS_ENSURE_SUCCESS(rv, rv);
 
     nsCOMPtr<nsIContentSecurityPolicy> csp = mWorkerRef->Private()->GetCsp();

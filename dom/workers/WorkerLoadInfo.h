@@ -11,6 +11,7 @@
 #include "mozilla/UniquePtr.h"
 #include "mozilla/dom/ChannelInfo.h"
 #include "mozilla/dom/OffThreadCSPContext.h"
+#include "mozilla/dom/PolicyContainer.h"
 #include "mozilla/dom/ServiceWorkerRegistrationDescriptor.h"
 #include "mozilla/dom/WorkerCommon.h"
 #include "mozilla/ipc/PBackgroundSharedTypes.h"
@@ -39,6 +40,7 @@ namespace mozilla {
 
 namespace ipc {
 class PrincipalInfo;
+class PolicyContainerArgs;
 }  // namespace ipc
 
 namespace dom {
@@ -68,6 +70,9 @@ struct WorkerLoadInfoData {
 
   nsCOMPtr<nsIScriptContext> mScriptContext;
   nsCOMPtr<nsPIDOMWindowInner> mWindow;
+
+  RefPtr<PolicyContainer> mPolicyContainer;
+  Maybe<mozilla::ipc::PolicyContainerArgs> mPolicyContainerArgs;
   nsCOMPtr<nsIContentSecurityPolicy> mCSP;
   UniquePtr<OffThreadCSPContext> mCSPContext;
 
@@ -188,16 +193,16 @@ struct WorkerLoadInfo : WorkerLoadInfoData {
 
   WorkerLoadInfo& operator=(WorkerLoadInfo&& aOther) = default;
 
-  nsresult SetPrincipalsAndCSPOnMainThread(nsIPrincipal* aPrincipal,
-                                           nsIPrincipal* aPartitionedPrincipal,
-                                           nsILoadGroup* aLoadGroup,
-                                           nsIContentSecurityPolicy* aCSP);
+  nsresult SetPrincipalsOnMainThread(nsIPrincipal* aPrincipal,
+                                     nsIPrincipal* aPartitionedPrincipal,
+                                     nsILoadGroup* aLoadGroup);
+  nsresult SetPolicyContainerOnMainThread(PolicyContainer* aPolicyContainer);
 
   nsresult GetPrincipalsAndLoadGroupFromChannel(
       nsIChannel* aChannel, nsIPrincipal** aPrincipalOut,
       nsIPrincipal** aPartitionedPrincipalOut, nsILoadGroup** aLoadGroupOut);
 
-  nsresult SetPrincipalsAndCSPFromChannel(nsIChannel* aChannel);
+  nsresult SetPrincipalsAndPolicyContainerFromChannel(nsIChannel* aChannel);
 
   bool FinalChannelPrincipalIsValid(nsIChannel* aChannel);
 

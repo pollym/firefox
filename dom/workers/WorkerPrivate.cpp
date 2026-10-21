@@ -2674,15 +2674,16 @@ void WorkerPrivate::SetBaseURI(nsIURI* aBaseURI) {
                                                    mLocationInfo.mOrigin);
 }
 
-nsresult WorkerPrivate::SetPrincipalsAndCSPOnMainThread(
+nsresult WorkerPrivate::SetPrincipalsOnMainThread(
     nsIPrincipal* aPrincipal, nsIPrincipal* aPartitionedPrincipal,
-    nsILoadGroup* aLoadGroup, nsIContentSecurityPolicy* aCsp) {
-  return mLoadInfo.SetPrincipalsAndCSPOnMainThread(
-      aPrincipal, aPartitionedPrincipal, aLoadGroup, aCsp);
+    nsILoadGroup* aLoadGroup) {
+  return mLoadInfo.SetPrincipalsOnMainThread(aPrincipal, aPartitionedPrincipal,
+                                             aLoadGroup);
 }
 
-nsresult WorkerPrivate::SetPrincipalsAndCSPFromChannel(nsIChannel* aChannel) {
-  return mLoadInfo.SetPrincipalsAndCSPFromChannel(aChannel);
+nsresult WorkerPrivate::SetPrincipalsAndPolicyContainerFromChannel(
+    nsIChannel* aChannel) {
+  return mLoadInfo.SetPrincipalsAndPolicyContainerFromChannel(aChannel);
 }
 
 bool WorkerPrivate::FinalChannelPrincipalIsValid(nsIChannel* aChannel) {
@@ -3765,7 +3766,7 @@ nsresult WorkerPrivate::GetLoadInfo(
                                      : nsILoadInfo::NoStoragePermission);
     NS_ENSURE_SUCCESS(rv, rv);
 
-    rv = loadInfo.SetPrincipalsAndCSPFromChannel(loadInfo.mChannel);
+    rv = loadInfo.SetPrincipalsAndPolicyContainerFromChannel(loadInfo.mChannel);
     NS_ENSURE_SUCCESS(rv, rv);
   }
 
