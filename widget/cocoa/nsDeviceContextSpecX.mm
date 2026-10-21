@@ -217,20 +217,32 @@ nsresult nsDeviceContextSpecX::DoEndDocument() {
       AutoCFTypeRef<CFStringRef> sourcePathRef(
           CFURLCopyFileSystemPath(pdfURL, kCFURLPOSIXPathStyle));
       NSString* sourcePath = (NSString*)CFStringRef(sourcePathRef);
-      NSFileManager* fileManager = [NSFileManager defaultManager];
-      if ([fileManager fileExistsAtPath:sourcePath]) {
-        NSURL* src = static_cast<NSURL*>(CFURLRef(pdfURL));
-        NSURL* dest = static_cast<NSURL*>(CFURLRef(destURL));
-        bool ok = [fileManager
-            replaceItemAtURL:dest
-               withItemAtURL:src
-              backupItemName:nil
-                     options:NSFileManagerItemReplacementUsingNewMetadataOnly
-            resultingItemURL:nil
-                       error:nil];
-        if (!ok) {
-          return NS_ERROR_FAILURE;
-        }
+      NSFileManager* fileManager = NSFileManager.defaultManager;
+      if (![fileManager fileExistsAtPath:sourcePath]) {
+        break;
+      }
+      NSURL* src = static_cast<NSURL*>(CFURLRef(pdfURL));
+      NSURL* dest = static_cast<NSURL*>(CFURLRef(destURL));
+      if ([fileManager
+              replaceItemAtURL:dest
+                 withItemAtURL:src
+                backupItemName:nil
+                       options:NSFileManagerItemReplacementUsingNewMetadataOnly
+              resultingItemURL:nil
+                         error:nil]) {
+        break;
+      }
+      // The move can fail, e.g. if the destination is on another volume, so
+      // fall back to a copy.
+      NSData* data = [NSData dataWithContentsOfURL:src
+                                           options:NSDataReadingMappedIfSafe
+                                             error:nil];
+      bool copied = data && [data writeToURL:dest
+                                     options:NSDataWritingAtomic
+                                       error:nil];
+      [fileManager removeItemAtURL:src error:nil];
+      if (!copied) {
+        return NS_ERROR_FAILURE;
       }
       break;
     }
