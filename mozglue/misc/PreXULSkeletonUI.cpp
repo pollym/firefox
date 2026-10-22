@@ -70,12 +70,9 @@ struct ColorRect {
 
 // DrawRect is mostly the same as ColorRect, but exists as an implementation
 // detail to simplify drawing borders. We draw borders as a strokeOnly rect
-// underneath an inner rect of a particular color. We also need to keep
-// track of the backgroundColor for rounding rects, in order to correctly
-// anti-alias.
+// underneath an inner rect of a particular color.
 struct DrawRect {
   uint32_t color;
-  uint32_t backgroundColor;
   int x;
   int y;
   int width;
@@ -99,9 +96,9 @@ NormalizedRGB UintToRGB(uint32_t color) {
 }
 
 uint32_t RGBToUint(const NormalizedRGB& rgb) {
-  return (static_cast<uint32_t>(rgb.r * 255.0) << 16) |
-         (static_cast<uint32_t>(rgb.g * 255.0) << 8) |
-         (static_cast<uint32_t>(rgb.b * 255.0) << 0);
+  return (static_cast<uint32_t>(rgb.r * 255.0 + 0.5) << 16) |
+         (static_cast<uint32_t>(rgb.g * 255.0 + 0.5) << 8) |
+         (static_cast<uint32_t>(rgb.b * 255.0 + 0.5) << 0);
 }
 
 double Lerp(double a, double b, double x) { return a + x * (b - a); }
@@ -112,6 +109,10 @@ NormalizedRGB Lerp(const NormalizedRGB& a, const NormalizedRGB& b, double x) {
 
 // Produces a smooth curve in [0,1] based on a linear input in [0,1]
 double SmoothStep3(double x) { return x * x * (3.0 - 2.0 * x); }
+
+uint32_t Composite(uint32_t color, double alpha, uint32_t base) {
+  return RGBToUint(Lerp(UintToRGB(base), UintToRGB(color), alpha));
+}
 
 struct Margin {
   int top = 0;
@@ -440,8 +441,11 @@ void RasterizeRoundedRectTopAndBottom(const DrawRect& rect) {
     return;
   }
 
-  NormalizedRGB rgbBase = UintToRGB(rect.backgroundColor);
-  NormalizedRGB rgbBlend = UintToRGB(rect.color);
+  // Blend the corner pixels with what is already painted below them, which is
+  // the border for the inner part of a bordered rect.
+  auto blend = [&](uint32_t* pixel, double alpha) {
+    *pixel = Composite(rect.color, alpha, *pixel);
+  };
 
   for (int rowIndex = 0; rowIndex < rect.borderRadius; ++rowIndex) {
     int yTop = rect.y + rect.borderRadius - 1 - rowIndex;
@@ -465,13 +469,11 @@ void RasterizeRoundedRectTopAndBottom(const DrawRect& rect) {
       double distance =
           SignedDistanceToCircle(pixelX, pixelY, (double)rect.borderRadius);
       double alpha = DistanceAntiAlias(distance);
-      NormalizedRGB rgb = Lerp(rgbBase, rgbBlend, alpha);
-      uint32_t color = RGBToUint(rgb);
 
-      innermostPixelTopLeft[-columnIndex] = color;
-      innermostPixelTopRight[columnIndex] = color;
-      innermostPixelBottomLeft[-columnIndex] = color;
-      innermostPixelBottomRight[columnIndex] = color;
+      blend(&innermostPixelTopLeft[-columnIndex], alpha);
+      blend(&innermostPixelTopRight[columnIndex], alpha);
+      blend(&innermostPixelBottomLeft[-columnIndex], alpha);
+      blend(&innermostPixelBottomRight[columnIndex], alpha);
     }
 
     std::fill(innermostPixelTopLeft + 1, innermostPixelTopRight, rect.color);
@@ -541,8 +543,6 @@ void RasterizeColorRect(const ColorRect& colorRect) {
   if (colorRect.borderWidth == 0) {
     DrawRect rect = {};
     rect.color = colorRect.color;
-    rect.backgroundColor =
-        sPixelBuffer[colorRect.y * sWindowWidth + colorRect.x];
     rect.x = colorRect.x;
     rect.y = colorRect.y;
     rect.width = colorRect.width;
@@ -553,8 +553,6 @@ void RasterizeColorRect(const ColorRect& colorRect) {
   } else {
     DrawRect borderRect = {};
     borderRect.color = colorRect.borderColor;
-    borderRect.backgroundColor =
-        sPixelBuffer[colorRect.y * sWindowWidth + colorRect.x];
     borderRect.x = colorRect.x;
     borderRect.y = colorRect.y;
     borderRect.width = colorRect.width;
@@ -566,7 +564,6 @@ void RasterizeColorRect(const ColorRect& colorRect) {
 
     DrawRect baseRect = {};
     baseRect.color = colorRect.color;
-    baseRect.backgroundColor = borderRect.color;
     baseRect.x = colorRect.x + colorRect.borderWidth;
     baseRect.y = colorRect.y + colorRect.borderWidth;
     baseRect.width = colorRect.width - 2 * colorRect.borderWidth;
