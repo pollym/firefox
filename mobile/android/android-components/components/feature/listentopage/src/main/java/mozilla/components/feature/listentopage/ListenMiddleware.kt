@@ -299,6 +299,7 @@ class ListenMiddleware(
         dispatch(
             ListenAction.Content.ContentReady(
                 languageTag = language,
+                languageSource = content.languageSource,
                 title = displayData.title,
                 site = displayData.site,
             )

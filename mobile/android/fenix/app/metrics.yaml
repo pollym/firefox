@@ -9290,6 +9290,11 @@ listen_to_page:
         description: |
           The BCP 47 language the page is read in.
         type: string
+      language_source:
+        description: |
+          Where the language came from: `page` when the page declares a usable language,
+          or `device` when it declares none and the device language is used instead.
+        type: string
     bugs:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=2064878
     data_reviews:

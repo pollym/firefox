@@ -32,6 +32,7 @@ import mozilla.components.browser.state.state.createTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.listentopage.content.Content
 import mozilla.components.feature.listentopage.content.ContentProvider
+import mozilla.components.feature.listentopage.content.LanguageSource
 import mozilla.components.feature.listentopage.content.TextChunker
 import mozilla.components.feature.listentopage.facts.ListenToPageFacts
 import mozilla.components.feature.listentopage.fakes.FakeAudioFileCache
@@ -524,6 +525,26 @@ class ListenMiddlewareTest {
         // played until the whole of it had been synthesized.
         assertEquals("Sentence 1 is right here.", synthesizer.requests.first())
         assertTrue(article.length > synthesizer.requests.first().length * 50)
+    }
+
+    @Test
+    fun `test that the article language source is reported with the content`() = runTest {
+        val actions = mutableListOf<ListenAction>()
+        val store =
+            storeWith(recordInto = actions) {
+                Result.success(
+                    Content(
+                        text = "An article in the fallback language.",
+                        languageTag = "en-US",
+                        languageSource = LanguageSource.Fallback,
+                    )
+                )
+            }
+        store.listenAndPlay(TAB_ID, URL)
+        advanceUntilIdle()
+
+        val ready = actions.filterIsInstance<ListenAction.Content.ContentReady>().single()
+        assertEquals(LanguageSource.Fallback, ready.languageSource)
     }
 
     // The engine offers a voice here, so the synthesis is reached and it is the synthesis that fails.

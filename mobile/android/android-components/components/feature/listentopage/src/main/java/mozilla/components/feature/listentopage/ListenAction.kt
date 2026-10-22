@@ -5,6 +5,7 @@
 package mozilla.components.feature.listentopage
 
 import kotlin.time.Duration
+import mozilla.components.feature.listentopage.content.LanguageSource
 import mozilla.components.feature.listentopage.synthesis.SpeechRate
 import mozilla.components.lib.state.Action
 
@@ -46,11 +47,13 @@ sealed interface ListenAction : Action {
          * The article was extracted from the page.
          *
          * @property languageTag language of the article.
+         * @property languageSource Where [languageTag] came from.
          * @property title The article title, or `null` when the page has none.
          * @property site The site the article is from, or `null` when its URL names none.
          */
         data class ContentReady(
             val languageTag: String,
+            val languageSource: LanguageSource = LanguageSource.Page,
             val title: String? = null,
             val site: String? = null,
         ) : Content

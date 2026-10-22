@@ -8,6 +8,7 @@ import mozilla.components.feature.listentopage.ListenAction
 import mozilla.components.feature.listentopage.ListenState
 import mozilla.components.feature.listentopage.PlaybackPhase
 import mozilla.components.feature.listentopage.PlaybackState
+import mozilla.components.feature.listentopage.content.LanguageSource
 import mozilla.components.lib.state.Middleware
 import mozilla.components.lib.state.Store
 import mozilla.telemetry.glean.private.NoExtras
@@ -61,8 +62,16 @@ internal class ListenToPageTelemetryMiddleware : Middleware<ListenState, ListenA
 
     private fun handleContent(action: ListenAction.Content) {
         when (action) {
-            is ListenAction.Content.ContentReady ->
-                ListenToPage.contentReady.record(ListenToPage.ContentReadyExtra(language = action.languageTag))
+            is ListenAction.Content.ContentReady -> {
+                val languageSource =
+                    when (action.languageSource) {
+                        LanguageSource.Page -> PAGE
+                        LanguageSource.Fallback -> DEVICE
+                    }
+                ListenToPage.contentReady.record(
+                    ListenToPage.ContentReadyExtra(language = action.languageTag, languageSource = languageSource)
+                )
+            }
 
             ListenAction.Content.ContentUnavailable -> ListenToPage.contentUnavailable.record(NoExtras())
         }
@@ -144,6 +153,8 @@ private const val CLOSE_BUTTON = "close_button"
 private const val TAB_CLOSED = "tab_closed"
 private const val USER_SELECTED = "user_selected"
 private const val FALLBACK = "fallback"
+private const val PAGE = "page"
+private const val DEVICE = "device"
 
 private val PlaybackState.isPlayingOrBuffering: Boolean
     get() = phase == PlaybackPhase.Playing || phase == PlaybackPhase.Buffering
