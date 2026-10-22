@@ -18,7 +18,6 @@ BROWSER_CHROME_MANIFESTS += [
     "tests/moreFromMozilla/browser.toml",
     "tests/networking/browser.toml",
     "tests/performance/browser.toml",
-    "tests/permissions/browser-srd.toml",
     "tests/permissions/browser.toml",
     "tests/privacy/browser-srd.toml",
     "tests/privacy/browser.toml",
