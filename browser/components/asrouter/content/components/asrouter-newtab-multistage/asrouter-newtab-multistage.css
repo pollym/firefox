@@ -2473,6 +2473,7 @@ html {
 .onboardingContainer .screen[pos=card-stack] .welcome-text h2 {
   font-size: var(--font-size-small);
   font-weight: var(--font-weight);
+  color: var(--text-color-deemphasized);
 }
 .onboardingContainer .screen[pos=card-stack] .action-buttons {
   display: flex;
