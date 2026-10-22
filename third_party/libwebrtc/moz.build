@@ -325,6 +325,7 @@ DIRS += [
     "/third_party/libwebrtc/modules/rtp_rtcp/rtp_video_header_gn",
     "/third_party/libwebrtc/modules/rtp_rtcp/sframe_descriptor_gn",
     "/third_party/libwebrtc/modules/rtp_rtcp/sframe_rtp_packet_received_gn",
+    "/third_party/libwebrtc/modules/sframe/sframe_encryption_config_gn",
     "/third_party/libwebrtc/modules/sframe/sframe_media_encryptor_interface_gn",
     "/third_party/libwebrtc/modules/third_party/fft/fft_gn",
     "/third_party/libwebrtc/modules/third_party/g711/g711_3p_gn",
