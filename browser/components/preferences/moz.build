@@ -16,7 +16,6 @@ BROWSER_CHROME_MANIFESTS += [
     "tests/home/browser.toml",
     "tests/languages/browser.toml",
     "tests/moreFromMozilla/browser.toml",
-    "tests/networking/browser-srd.toml",
     "tests/networking/browser.toml",
     "tests/performance/browser-srd.toml",
     "tests/performance/browser.toml",
