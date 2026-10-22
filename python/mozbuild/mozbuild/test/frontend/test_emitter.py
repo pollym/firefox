@@ -238,6 +238,19 @@ class TestEmitterBasic(unittest.TestCase):
         for _, flags in host_ldflags.get_flags():
             self.assertNotIn("-STACK:8388608", flags)
 
+    def test_macos_program_rpath(self):
+        reader = self.reader(
+            "compile-flags",
+            extra_substs={"OS_ARCH": "Darwin"},
+        )
+        sources, ldflags, lib, flags = self.read_topsrcdir(reader)
+        self.assertEqual(ldflags.flags["MACOS_RPATH"], ["-Wl,-rpath,@executable_path"])
+
+    def test_macos_program_rpath_other_os(self):
+        reader = self.reader("compile-flags")
+        sources, ldflags, lib, flags = self.read_topsrcdir(reader)
+        self.assertEqual(ldflags.flags["MACOS_RPATH"], [])
+
     def test_per_source_object_deps(self):
         reader = self.reader("per-source-object-deps")
         objs = self.read_topsrcdir(reader)
