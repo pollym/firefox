@@ -811,6 +811,7 @@ SettingGroupManager.registerGroups({
       {
         id: "highlightToSearchEnabled",
         l10nId: "highlight-to-search-settings-enable",
+        subcategory: "highlight-to-search",
         items: [
           { id: "highlightToSearchAskChatbot" },
           {
@@ -960,6 +961,7 @@ SettingGroupManager.registerGroups({
       {
         id: "highlightToSearchEnabled",
         l10nId: "highlight-to-search-settings-enable",
+        subcategory: "highlight-to-search",
         items: [
           { id: "highlightToSearchAskChatbot" },
           {

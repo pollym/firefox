@@ -843,6 +843,14 @@ split-view-footer {
     }
   }
 
+  .more-actions-separator {
+    align-self: center;
+    width: 1px;
+    height: 18px;
+    margin-inline: var(--space-xsmall);
+    background-color: var(--border-color);
+  }
+
   #ai-action-button::part(button) {
     --button-background-color-selected: var(--button-background-color);
     --button-border-color-selected: var(--button-border-color);
@@ -899,6 +907,17 @@ split-view-footer {
   .copy-action-confirmation[copied] .copy-action-confirmation-icon {
     display: block;
   }
+
+  &[copied] {
+    #more-actions-button,
+    #more-actions-separator {
+      display: none;
+    }
+  }
+}
+
+#selection-more-actions-panel > .panel-subview-body {
+  gap: var(--space-medium);
 }
 
 #ask-chat-shortcuts {

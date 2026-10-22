@@ -94,6 +94,19 @@ genai-shortcut-copy-confirmation = Copied
 genai-shortcut-more-actions-button =
     .tooltiptext = More options
     .aria-label = More options
+genai-more-actions-panel =
+    .aria-label = Choose which actions to show
+# $provider (string) - name of the chatbot provider
+genai-more-actions-ai-provider =
+    .label = Ask { $provider }
+genai-more-actions-ai-generic =
+    .label = Ask AI
+genai-more-actions-search =
+    .label = Search
+genai-more-actions-copy =
+    .label = Copy
+genai-more-actions-manage-settings =
+    .label = Manage settings
 
 genai-menu-new-badge = New
 genai-menu-summarize-page = Summarize Page
