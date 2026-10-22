@@ -9337,8 +9337,9 @@ listen_to_page:
     extra_keys:
       source:
         description: |
-          Session ended due to either the `close_button` or `tab_closed`
-          (the listened tab was closed or user navigated elsewhere).
+          Session ended due to either the `close_button`, `tab_closed`
+          (the listened tab was closed or user navigated elsewhere) or
+          `reader_mode_closed` when the user left reader mode on the listened tab.
         type: string
     bugs:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=2064878

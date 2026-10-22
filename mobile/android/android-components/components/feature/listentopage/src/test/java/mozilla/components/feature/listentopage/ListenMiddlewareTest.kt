@@ -1869,9 +1869,8 @@ class ListenMiddlewareTest {
         )
     }
 
-    // Listening outlives the reader view it was started from: only closing the tab ends the session.
     @Test
-    fun `test that leaving reader mode does not stop the session`() = runTest {
+    fun `test that leaving reader mode stops the session`() = runTest {
         val browserStore = browserStoreWithOpenTabs()
         val actions = mutableListOf<ListenAction>()
         val store =
@@ -1882,6 +1881,29 @@ class ListenMiddlewareTest {
         advanceUntilIdle()
 
         browserStore.dispatch(ReaderAction.UpdateReaderActiveAction(TAB_ID, false))
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf(
+                ListenAction.Session.ListenRequested(TAB_ID, URL),
+                ListenAction.Session.StopRequested(ListenAction.Session.StopSource.ReaderModeClosed),
+            ),
+            actions.filterIsInstance<ListenAction.Session>(),
+        )
+    }
+
+    @Test
+    fun `test that leaving reader mode on another tab does not stop the session`() = runTest {
+        val browserStore = browserStoreWithOpenTabs()
+        val actions = mutableListOf<ListenAction>()
+        val store =
+            storeWith(browserStore = browserStore, recordInto = actions) {
+                Result.success(Content(text = "Article text.", languageTag = "en-US"))
+            }
+        store.listenAndPlay(TAB_ID, URL)
+        advanceUntilIdle()
+
+        browserStore.dispatch(ReaderAction.UpdateReaderActiveAction(OTHER_TAB_ID, false))
         advanceUntilIdle()
 
         assertEquals(

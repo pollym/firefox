@@ -300,6 +300,15 @@ class ListenToPageTelemetryMiddlewareTest {
     }
 
     @Test
+    fun `WHEN the session is stopped by closing reader mode THEN record stopped with reader_mode_closed`() {
+        val store = createStore(phase = PlaybackPhase.Playing)
+
+        store.dispatch(ListenAction.Session.StopRequested(ListenAction.Session.StopSource.ReaderModeClosed))
+
+        assertEquals("reader_mode_closed", ListenToPage.stopped.testGetValue()!!.single().extra?.get("source"))
+    }
+
+    @Test
     fun `WHEN no offline voice is available THEN record no_offline_voice with the language`() {
         val store = createStore(phase = PlaybackPhase.Idle, languageTag = "en-US")
 

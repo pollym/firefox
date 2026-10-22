@@ -38,6 +38,9 @@ sealed interface ListenAction : Action {
 
             /** The listened tab was closed or user navigated elsewhere. */
             TabClosed,
+
+            /** The user left reader mode on the listened tab. */
+            ReaderModeClosed,
         }
     }
 

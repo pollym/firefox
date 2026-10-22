@@ -15,6 +15,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -244,17 +245,25 @@ class ListenMiddleware(
         val startingTab = browserStore.state.findTab(tabId)
         val startingTabUrl = startingTab?.content?.url
         val startingTabPageUrl = startingTab?.pageUrl
+        val startedInReaderMode = startingTab?.readerState?.active == true
 
         tabClosureJob = scope.launch {
-            browserStore.stateFlow
-                .first { state ->
-                    val tab = state.findTab(tabId) ?: return@first true
-                    // checks if the tab's url has been updated while listening to the tab
-                    tab.content.url != startingTabUrl && tab.pageUrl != startingTabPageUrl
-                }
-                .let {
-                    store.dispatch(ListenAction.Session.StopRequested(ListenAction.Session.StopSource.TabClosed))
-                }
+            val source =
+                browserStore.stateFlow
+                    .mapNotNull { state ->
+                        val tab = state.findTab(tabId)
+                        when {
+                            tab == null -> ListenAction.Session.StopSource.TabClosed
+                            // checks if the tab's url has been updated while listening to the tab
+                            tab.content.url != startingTabUrl && tab.pageUrl != startingTabPageUrl ->
+                                ListenAction.Session.StopSource.TabClosed
+                            startedInReaderMode && !tab.readerState.active ->
+                                ListenAction.Session.StopSource.ReaderModeClosed
+                            else -> null
+                        }
+                    }
+                    .first()
+            store.dispatch(ListenAction.Session.StopRequested(source))
         }
     }
 
