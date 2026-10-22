@@ -480,6 +480,11 @@ class LinkFlags(BaseCompileFlags):
                 ),
                 ("LDFLAGS",),
             ),
+            (
+                "WIN32_EXE_DEFAULT",
+                context.config.substs.get("WIN32_EXE_DEFAULT_LDFLAGS"),
+                ("PROGRAM_LDFLAGS",),
+            ),
         )
         BaseCompileFlags.__init__(self, context)
 
