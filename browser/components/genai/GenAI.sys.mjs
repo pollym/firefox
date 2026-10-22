@@ -289,7 +289,7 @@ export const GenAI = {
         id: "localhost",
         link1: "https://llamafile.ai",
         linksId: "genai-settings-chat-localhost-links",
-        maxLength: 32768,
+        maxLength: 8192,
         name: "localhost",
       },
     ],
