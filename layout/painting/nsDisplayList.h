@@ -3068,8 +3068,7 @@ class nsDisplayListIterator {
  */
 class MOZ_STACK_CLASS nsDisplayListUnlinkingIterator {
  public:
-  explicit nsDisplayListUnlinkingIterator(nsDisplayItem* aNode = nullptr)
-      : mNode(aNode) {
+  explicit nsDisplayListUnlinkingIterator(nsDisplayItem* aNode) : mNode(aNode) {
     Unlink();
   }
 
@@ -3081,6 +3080,10 @@ class MOZ_STACK_CLASS nsDisplayListUnlinkingIterator {
       delete;
   nsDisplayListUnlinkingIterator& operator=(
       const nsDisplayListUnlinkingIterator&) = delete;
+  nsDisplayListUnlinkingIterator& operator=(nsDisplayListUnlinkingIterator&&) =
+      delete;
+
+  nsDisplayListUnlinkingIterator() = default;
 
   ~nsDisplayListUnlinkingIterator() {
     MOZ_ASSERT(!mNode, "Taken display items left unconsumed");
@@ -3112,8 +3115,8 @@ class MOZ_STACK_CLASS nsDisplayListUnlinkingIterator {
     mNext = mNode ? std::exchange(mNode->mNext, nullptr) : nullptr;
   }
 
-  nsDisplayItem* mNode;
-  nsDisplayItem* mNext;
+  nsDisplayItem* mNode = nullptr;
+  nsDisplayItem* mNext = nullptr;
 };
 
 /**
