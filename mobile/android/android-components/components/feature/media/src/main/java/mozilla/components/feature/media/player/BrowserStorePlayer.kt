@@ -5,6 +5,7 @@
 package mozilla.components.feature.media.player
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import androidx.media3.common.MediaItem
@@ -14,17 +15,23 @@ import androidx.media3.common.SimpleBasePlayer
 import androidx.media3.common.util.UnstableApi
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import java.io.ByteArrayOutputStream
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.mediasession.MediaSession as MozMediaSession
 import mozilla.components.feature.media.ext.findActiveMediaTab
 import mozilla.components.feature.media.ext.getArtistOrUrl
+import mozilla.components.feature.media.ext.getNonPrivateIcon
 import mozilla.components.feature.media.ext.getTitleOrUrl
 import mozilla.components.lib.state.ext.flowScoped
 
@@ -39,6 +46,7 @@ import mozilla.components.lib.state.ext.flowScoped
  *   instead of metadata from private tabs).
  * @param store The [BrowserStore] whose active media tab drives player state.
  * @param mainDispatcher Dispatcher for store observation; must be a main-thread dispatcher.
+ * @param encodingDispatcher Dispatcher used to off-load artwork PNG encoding off the main thread.
  * @param looper Looper for [SimpleBasePlayer]; must be the same thread backing [mainDispatcher].
  */
 @UnstableApi
@@ -46,8 +54,15 @@ internal class BrowserStorePlayer(
     private val context: Context,
     private val store: BrowserStore,
     mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val encodingDispatcher: CoroutineDispatcher = Dispatchers.Default,
     looper: Looper = Looper.getMainLooper(),
 ) : SimpleBasePlayer(looper) {
+
+    @VisibleForTesting internal var cachedArtwork: Pair<String, ByteArray>? = null
+
+    private var artworkJob: Job? = null
+
+    private var lastArtworkKey: Pair<String, MozMediaSession.Metadata?>? = null
 
     // `scope` starts the store-observing coroutine as part of its initializer; the looper
     // check must run first. Keep this `init` block above the declaration of `scope`.
@@ -63,7 +78,10 @@ internal class BrowserStorePlayer(
             flow
                 .map { it.findActiveMediaTab() }
                 .distinctUntilChangedBy { it?.mediaSessionState }
-                .collect { invalidateState() }
+                .collect { tab ->
+                    refreshArtwork(tab)
+                    invalidateState()
+                }
         }
 
     override fun getState(): State {
@@ -115,15 +133,50 @@ internal class BrowserStorePlayer(
 
     private fun buildMediaItemData(tab: SessionState): MediaItemData {
         val meta = tab.mediaSessionState?.metadata
-        val metadata =
+        val builder =
             MediaMetadata.Builder()
                 .setTitle(tab.getTitleOrUrl(context, meta?.title))
                 .setArtist(tab.getArtistOrUrl(meta?.artist))
-                .build()
+        cachedArtwork
+            ?.takeIf { it.first == tab.id }
+            ?.let { builder.setArtworkData(it.second, MediaMetadata.PICTURE_TYPE_FRONT_COVER) }
+
         return MediaItemData.Builder(tab.id)
             .setMediaItem(MediaItem.Builder().setMediaId(tab.id).build())
-            .setMediaMetadata(metadata)
+            .setMediaMetadata(builder.build())
             .build()
+    }
+
+    private fun refreshArtwork(tab: SessionState?) {
+        if (tab == null) {
+            artworkJob?.cancel()
+            artworkJob = null
+            cachedArtwork = null
+            lastArtworkKey = null
+            return
+        }
+        val metadata = tab.mediaSessionState?.metadata
+        val key = tab.id to metadata
+        if (key == lastArtworkKey) return
+        lastArtworkKey = key
+        artworkJob?.cancel()
+        cachedArtwork = null
+        artworkJob = scope.launch {
+            val bytes = runCatching {
+                tab.getNonPrivateIcon(metadata?.getArtwork)?.let { bitmap ->
+                    withContext(encodingDispatcher) {
+                        ByteArrayOutputStream()
+                            .also { out -> bitmap.compress(Bitmap.CompressFormat.PNG, BITMAP_COMPRESSION_QUALITY, out) }
+                            .toByteArray()
+                    }
+                }
+            }
+                .onFailure { if (it is CancellationException || it !is Exception) throw it }
+                .getOrNull()
+            if (store.state.findActiveMediaTab()?.id != tab.id) return@launch
+            cachedArtwork = bytes?.let { tab.id to it }
+            invalidateState()
+        }
     }
 
     private companion object {
@@ -137,3 +190,6 @@ internal class BrowserStorePlayer(
                 .build()
     }
 }
+
+// Ignored by PNG compression (lossless); required by the Bitmap.compress signature.
+private const val BITMAP_COMPRESSION_QUALITY = 100

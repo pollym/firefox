@@ -4,12 +4,15 @@
 
 package mozilla.components.feature.media.player
 
+import android.graphics.Bitmap
 import android.os.HandlerThread
 import android.os.Looper
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.coroutines.ContinuationInterceptor
+import kotlin.test.assertNotNull
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.test.runTest
@@ -182,6 +185,62 @@ class BrowserStorePlayerTest {
         }
 
     @Test
+    fun `GIVEN a playing tab with artwork WHEN artwork is fetched THEN state exposes artwork bytes`() = runTest {
+        val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val tab =
+            mediaTab(
+                metadata =
+                    MediaSession.Metadata(title = "Song", artist = "Artist", album = null, getArtwork = { bitmap })
+            )
+        val store = BrowserStore(BrowserState(tabs = listOf(tab)))
+
+        val player = newPlayer(store)
+        drain()
+
+        assertNotNull(player.mediaMetadata.artworkData)
+    }
+
+    @Test
+    fun `GIVEN a private tab with artwork WHEN artwork is fetched THEN state does not expose artwork bytes`() =
+        runTest {
+            val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+            val tab =
+                mediaTab(
+                    private = true,
+                    metadata =
+                        MediaSession.Metadata(title = "Song", artist = "Artist", album = null, getArtwork = { bitmap }),
+                )
+            val store = BrowserStore(BrowserState(tabs = listOf(tab)))
+
+            val player = newPlayer(store)
+            drain()
+
+            assertNull(player.mediaMetadata.artworkData)
+        }
+
+    @Test
+    fun `GIVEN a playing tab with cached artwork WHEN its media session is deactivated THEN the cached artwork is cleared`() =
+        runTest {
+            val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+            val tab =
+                mediaTab(
+                    metadata =
+                        MediaSession.Metadata(title = "Song", artist = "Artist", album = null, getArtwork = { bitmap })
+                )
+            val store = BrowserStore(BrowserState(tabs = listOf(tab)))
+
+            val player = newPlayer(store)
+            drain()
+            assertNotNull(player.mediaMetadata.artworkData)
+
+            store.dispatch(MediaSessionAction.DeactivatedMediaSessionAction(tabId = tab.id))
+            drain()
+
+            assertNull(player.cachedArtwork)
+            assertNull(player.mediaMetadata.artworkData)
+        }
+
+    @Test
     fun `GIVEN a playing tab WHEN its playback state transitions to paused THEN playWhenReady flips to false`() =
         runTest {
             val tab = mediaTab()
@@ -201,6 +260,86 @@ class BrowserStorePlayerTest {
 
             assertEquals(Player.STATE_READY, player.playbackState)
             assertFalse(player.playWhenReady)
+        }
+
+    @Test
+    fun `GIVEN two tabs with artwork WHEN the active tab changes THEN the cached artwork is not shown for the new tab until its fetch completes`() =
+        runTest {
+            val bitmapA = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+            val pendingB = CompletableDeferred<Bitmap?>()
+            val tabA =
+                mediaTab(
+                        url = "https://a.example",
+                        metadata =
+                            MediaSession.Metadata(title = "A", artist = null, album = null, getArtwork = { bitmapA }),
+                    )
+                    .copy(id = "tab-a")
+            val tabB =
+                mediaTab(
+                        MediaSession.PlaybackState.PAUSED,
+                        url = "https://b.example",
+                        metadata =
+                            MediaSession.Metadata(
+                                title = "B",
+                                artist = null,
+                                album = null,
+                                getArtwork = { pendingB.await() },
+                            ),
+                    )
+                    .copy(id = "tab-b")
+            val store = BrowserStore(BrowserState(tabs = listOf(tabA, tabB)))
+
+            val player = newPlayer(store)
+            drain()
+            assertNotNull(player.mediaMetadata.artworkData)
+
+            store.dispatch(
+                MediaSessionAction.UpdateMediaPlaybackStateAction(
+                    tabId = tabA.id,
+                    playbackState = MediaSession.PlaybackState.STOPPED,
+                )
+            )
+            drain()
+
+            assertEquals("B", player.mediaMetadata.title.toString())
+            assertNull(player.mediaMetadata.artworkData)
+        }
+
+    @Test
+    fun `GIVEN a tab with artwork WHEN its metadata changes THEN the old artwork is not shown until the new fetch completes`() =
+        runTest {
+            val bitmapA = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+            val pendingB = CompletableDeferred<Bitmap?>()
+            val tab =
+                mediaTab(
+                    metadata = MediaSession.Metadata(title = "A", artist = null, album = null, getArtwork = { bitmapA })
+                )
+            val store = BrowserStore(BrowserState(tabs = listOf(tab)))
+
+            val player = newPlayer(store)
+            drain()
+            assertNotNull(player.mediaMetadata.artworkData)
+
+            store.dispatch(
+                MediaSessionAction.UpdateMediaMetadataAction(
+                    tabId = tab.id,
+                    metadata =
+                        MediaSession.Metadata(
+                            title = "B",
+                            artist = null,
+                            album = null,
+                            getArtwork = { pendingB.await() },
+                        ),
+                )
+            )
+            drain()
+
+            assertEquals("B", player.mediaMetadata.title.toString())
+            assertNull(player.mediaMetadata.artworkData)
+
+            pendingB.complete(bitmapA)
+            drain()
+            assertNotNull(player.mediaMetadata.artworkData)
         }
 
     @Test
@@ -262,6 +401,7 @@ class BrowserStorePlayerTest {
                         context = testContext,
                         store = store,
                         mainDispatcher = dispatcher,
+                        encodingDispatcher = dispatcher,
                         looper = otherThread.looper,
                     )
                 }
@@ -309,6 +449,52 @@ class BrowserStorePlayerTest {
             drain()
 
             assertEquals(listOf(false), observed)
+        }
+
+    @Test
+    fun `GIVEN a playing tab WHEN its metadata is updated THEN artwork is re-fetched and mediaMetadata reflects the new title`() =
+        runTest {
+            val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+            var artworkCalls = 0
+            val tab =
+                mediaTab(
+                    metadata =
+                        MediaSession.Metadata(
+                            title = "A",
+                            artist = null,
+                            album = null,
+                            getArtwork = {
+                                artworkCalls++
+                                bitmap
+                            },
+                        )
+                )
+            val store = BrowserStore(BrowserState(tabs = listOf(tab)))
+
+            val player = newPlayer(store)
+            drain()
+            assertEquals(1, artworkCalls)
+            assertEquals("A", player.mediaMetadata.title.toString())
+
+            store.dispatch(
+                MediaSessionAction.UpdateMediaMetadataAction(
+                    tabId = tab.id,
+                    metadata =
+                        MediaSession.Metadata(
+                            title = "B",
+                            artist = null,
+                            album = null,
+                            getArtwork = {
+                                artworkCalls++
+                                bitmap
+                            },
+                        ),
+                )
+            )
+            drain()
+
+            assertEquals(2, artworkCalls)
+            assertEquals("B", player.mediaMetadata.title.toString())
         }
 
     @Test
@@ -433,12 +619,32 @@ class BrowserStorePlayerTest {
             verify(controllerA, never()).play()
         }
 
+    @Test
+    fun `GIVEN a tab whose artwork fetch throws WHEN artwork is fetched THEN no artwork is exposed`() = runTest {
+        val tab =
+            mediaTab(
+                metadata =
+                    MediaSession.Metadata(
+                        title = "Song",
+                        artist = null,
+                        album = null,
+                        getArtwork = { throw IllegalStateException("artwork failed") },
+                    )
+            )
+        val player = newPlayer(BrowserStore(BrowserState(tabs = listOf(tab))))
+        drain()
+
+        assertNull(player.mediaMetadata.artworkData)
+        assertEquals(Player.STATE_READY, player.playbackState)
+    }
+
     private fun kotlinx.coroutines.test.TestScope.newPlayer(store: BrowserStore): BrowserStorePlayer {
         val dispatcher = coroutineContext[ContinuationInterceptor] as CoroutineDispatcher
         return BrowserStorePlayer(
             context = testContext,
             store = store,
             mainDispatcher = dispatcher,
+            encodingDispatcher = dispatcher,
             looper = Looper.getMainLooper(),
         )
     }
