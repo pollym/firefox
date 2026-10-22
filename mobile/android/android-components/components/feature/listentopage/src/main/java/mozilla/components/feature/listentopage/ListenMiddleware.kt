@@ -423,10 +423,9 @@ class ListenMiddleware(
     /**
      * Reads the article out again in [voice], from where the playback of the one before it had got to.
      *
-     * The audio already made is in the previous voice, so it is thrown away rather than played to its end. "Where it
-     * had got to" is a position in the chunk that was playing, so it only resumes the reader where they were while the
-     * article is one chunk: the rest of it is re-chunked at the new voice's rate, which leaves no index the position of
-     * the old chunk can be carried over to.
+     * The audio already made is in the previous voice, so it is thrown away rather than played to its end. The new
+     * voice reads at its own rate, so the same time is a different place in the text: playback carries on from the same
+     * place in the text instead.
      *
      * It takes over [voicesJob] rather than running beside it, so that a load still in flight cannot finish afterwards
      * and put the engine back on the voice it had chosen for itself.
@@ -440,7 +439,17 @@ class ListenMiddleware(
 
         voicesJob?.cancel()
         voicesJob = scope.launch {
-            val resumeAtMs = playbackController.currentPositionMs()
+            val progress = state.articleProgress
+            val textPositionAfterVoiceChanged =
+                state.articleMeasurements
+                    ?.getTextPositionAfterVoiceChanged(progress.positionMs, progress.chunkDurationsMs)
+                    ?.takeIf { progress.durationMs > 0 }
+
+            // The voice before stops at once, rather than reading on until the new one is ready.
+            if (textPositionAfterVoiceChanged != null) {
+                playbackController.stopAndBufferAt(progress.positionMs)
+                dispatch(ListenAction.Playback.PlaybackWaiting)
+            }
 
             // Only this article's audio goes: the playback and the engine are kept, because the new voice reads over
             // what is playing and reads with the engine already bound.
@@ -455,8 +464,26 @@ class ListenMiddleware(
 
             withContext(ioDispatcher) { synthesizer().setVoice(voice) }
 
-            synthesizeAndPlay(state.tabId, resumeAtMs)
+            synthesizeAndPlay(state.tabId, updatedPosition = textPositionAfterVoiceChanged)
         }
+    }
+
+    /** Starts the playlist again where [VoiceChangeStarted] put the article, in audio of the voice just set. */
+    private fun ListenStore.resumeInNewVoice(queue: SynthesisQueue) {
+        val progress = state.articleProgress
+        scope.launch { playbackController.setArticleDuration(progress.shownDurationMs()) }
+
+        if (progress.durationMs > 0 && progress.positionMs >= progress.durationMs) {
+            finishArticle()
+            return
+        }
+
+        val targetPosition = progress.chunkDurationsMs.chunkPositionAt(progress.positionMs) ?: return
+        val lock = synthesisJobPriorityLock.tryClaim(PlaybackIntent.Seek) ?: return
+        dispatch(PlaylistAction.SeekStarted(progress.articlePositionOf(targetPosition), targetPosition.chunkIndex))
+
+        // Always made and restarted on, since the player still holds the chunks of the voice before.
+        remakeAndRestartAt(targetPosition, lock, queue)
     }
 
     /**
@@ -464,9 +491,9 @@ class ListenMiddleware(
      *
      * @param tabId The tab the live session is reading. A session that has already ended may still have written its
      *   article to the field, so anything extracted for a different tab is ignored.
-     * @param resumeAtMs Where to move the new audio to once it plays, or `0` to play it from the start.
+     * @param updatedPosition How far through the text a new voice carries on from, or `null` to play from the top.
      */
-    private fun ListenStore.synthesizeAndPlay(tabId: String?, resumeAtMs: Long = 0L) {
+    private fun ListenStore.synthesizeAndPlay(tabId: String?, updatedPosition: Float? = null) {
         val article = article?.takeIf { it.tabId == tabId } ?: return
         val firstChunkIndex = 0
 
@@ -496,16 +523,22 @@ class ListenMiddleware(
                         speechRate = queue.speechRate,
                     )
                 )
-                playbackController.startArticle(
-                    chunk = ChunkFile(firstChunkIndex, opening, queue.durationMs(firstChunkIndex)),
-                    articleDisplayData = article.displayData,
-                    tabId = article.tabId,
-                    positionMs = resumeAtMs,
-                )
-                dispatch(PlaylistAction.ChunkQueued(firstChunkIndex))
+                if (updatedPosition != null) {
+                    state.articleMeasurements?.chunkIndexAtTextPosition(updatedPosition)?.let { queue.audioFor(it) }
+                    dispatch(VoiceChangeStarted(updatedPosition))
+                } else {
+                    playbackController.startArticle(
+                        chunk = ChunkFile(firstChunkIndex, opening, queue.durationMs(firstChunkIndex)),
+                        articleDisplayData = article.displayData,
+                        tabId = article.tabId,
+                    )
+                    dispatch(PlaylistAction.ChunkQueued(firstChunkIndex))
+                }
             } finally {
                 lock.release()
             }
+
+            if (updatedPosition != null) return@synthesizing resumeInNewVoice(queue)
 
             // Runs ahead of the opening while it plays, so the chunk after it is queued behind it rather than started
             // when the opening ends. A chunk that arrives after the opening has finished cannot be joined onto it.

@@ -201,6 +201,13 @@ sealed interface ListenAction : Action {
  */
 internal data class PlayerReportReceived(val report: PlaybackState) : ListenAction.Playback
 
+/**
+ * The article was split again for a new voice, so its progress moves to the same share of the length it now has.
+ *
+ * @property positionInArticle How far through the article playback had got in the voice before, between 0 and 1.
+ */
+internal data class VoiceChangeStarted(val positionInArticle: Float) : ListenAction.Playback
+
 /** Actions recording what has been handed to the player, which its reports are read against. */
 internal sealed interface PlaylistAction : ListenAction {
     /** A new article is starting at its top, so nothing is queued, and a seek in the article before it is forgotten. */
