@@ -266,7 +266,7 @@ add_task(async function test_form_validation() {
       await ContentTaskUtils.waitForCondition(
         () => {
           const pills = cardShadow.querySelectorAll(
-            ".page-pills-row smartwindow-chip"
+            ".page-pills-row ai-website-chip"
           );
           return pills && Boolean(pills.length);
         },
@@ -277,7 +277,7 @@ add_task(async function test_form_validation() {
 
       // Check that URL pill exists
       const pagePill = cardShadow.querySelector(
-        ".page-pills-row smartwindow-chip"
+        ".page-pills-row ai-website-chip"
       );
       Assert.ok(pagePill, "URL pill should exist");
 
@@ -394,7 +394,7 @@ add_task(async function test_monitor_creation() {
         // Wait for URL pill to appear
         await ContentTaskUtils.waitForCondition(() => {
           const pills = cardShadow.querySelectorAll(
-            ".page-pills-row smartwindow-chip"
+            ".page-pills-row ai-website-chip"
           );
           return pills && Boolean(pills.length);
         }, "URL pill should appear");
@@ -671,7 +671,7 @@ add_task(async function test_added_page_chip_shows_open_tab_title() {
         card.shadowRoot.querySelector(".add-page-btn").click();
 
         const chip = () =>
-          card.shadowRoot.querySelector(".page-pills-row smartwindow-chip");
+          card.shadowRoot.querySelector(".page-pills-row ai-website-chip");
         await ContentTaskUtils.waitForCondition(
           () => chip()?.getAttribute("label") === title,
           "Wait for the open tab's title to reach the added page's chip"

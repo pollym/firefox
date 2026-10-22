@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { html } from "chrome://global/content/vendor/lit.all.mjs";
-import "chrome://browser/content/aiwindow/components/smartwindow-chip.mjs";
+import "chrome://browser/content/aiwindow/components/ai-website-chip.mjs";
 
 export default {
-  title: "Domain-specific UI Widgets/AI Window/Smart Window Chip",
-  component: "smartwindow-chip",
+  title: "Domain-specific UI Widgets/AI Window/Website Chip",
+  component: "ai-website-chip",
   argTypes: {
     type: {
       control: "select",
@@ -74,7 +74,7 @@ const Template = ({
   removable,
 }) => html`
   ${isTabGroup ? tabGroupTokens : ""}
-  <smartwindow-chip
+  <ai-website-chip
     .type=${type}
     .size=${size}
     .label=${label}
@@ -83,7 +83,7 @@ const Template = ({
     .isTabGroup=${isTabGroup ?? false}
     .tabGroupColor=${tabGroupColor || ""}
     .removable=${removable ?? false}
-  ></smartwindow-chip>
+  ></ai-website-chip>
 `;
 
 export const InLineDefault = Template.bind({});
@@ -102,12 +102,12 @@ InLineEmpty.args = {
 
 export const InLineCollection = () => html`
   <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-    <smartwindow-chip
+    <ai-website-chip
       type="in-line"
       label="mozilla.org"
       iconSrc="chrome://branding/content/icon16.png"
-    ></smartwindow-chip>
-    <smartwindow-chip type="in-line" label=""></smartwindow-chip>
+    ></ai-website-chip>
+    <ai-website-chip type="in-line" label=""></ai-website-chip>
   </div>
 `;
 
@@ -130,26 +130,26 @@ ContextChipSmall.args = {
 
 export const MixedCollection = () => html`
   <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-    <smartwindow-chip
+    <ai-website-chip
       type="in-line"
       label="mozilla.org"
       iconSrc="chrome://branding/content/icon16.png"
-    ></smartwindow-chip>
-    <smartwindow-chip type="in-line" label=""></smartwindow-chip>
-    <smartwindow-chip
+    ></ai-website-chip>
+    <ai-website-chip type="in-line" label=""></ai-website-chip>
+    <ai-website-chip
       type="context-chip"
       label="example.com"
       iconSrc="chrome://branding/content/about-logo.svg"
       href="https://example.com"
       .removable=${true}
-    ></smartwindow-chip>
-    <smartwindow-chip
+    ></ai-website-chip>
+    <ai-website-chip
       type="context-chip"
       size="small"
       label="example.com"
       iconSrc="chrome://branding/content/icon16.png"
       href="https://example.com"
-    ></smartwindow-chip>
+    ></ai-website-chip>
   </div>
 `;
 
@@ -185,13 +185,13 @@ export const TabGroupColors = () => html`
       "yellow",
     ].map(
       color =>
-        html`<smartwindow-chip
+        html`<ai-website-chip
           type="context-chip"
           .label=${color}
           .isTabGroup=${true}
           .tabGroupColor=${color}
           .removable=${true}
-        ></smartwindow-chip>`
+        ></ai-website-chip>`
     )}
   </div>
 `;

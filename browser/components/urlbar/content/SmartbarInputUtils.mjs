@@ -354,7 +354,7 @@ function setupMentionsPlugin(editorElement, panelList) {
       node.attrs.label,
     ],
     nodeView: node => [
-      "smartwindow-chip",
+      "ai-website-chip",
       {
         ...(node.attrs.type == CONTEXT_MENTION_TYPE.TAB_GROUP
           ? { isTabGroup: true, tabGroupColor: node.attrs.color ?? "" }
@@ -521,7 +521,7 @@ function setupMentionsPlugin(editorElement, panelList) {
     capture: true,
   });
   editorElement.addEventListener(
-    "smartwindow-chip:disconnected",
+    "ai-website-chip:disconnected",
     handleChipDisconnected
   );
 

@@ -147,20 +147,20 @@ panel-item::part(label) {
   white-space: nowrap;
 }
 
-/* Style `smartwindow-chip` to behave like a `panel-item`. */
+/* Style `ai-website-chip` to behave like a `panel-item`. */
 /* stylelint-disable-next-line stylelint-plugin-mozilla/no-has-selector */
-panel-list:has(smartwindow-chip) {
+panel-list:has(ai-website-chip) {
   padding-block: 0;
 }
 
-panel-list smartwindow-chip {
+panel-list ai-website-chip {
   box-sizing: border-box;
   display: flex;
   padding: var(--space-xsmall);
   width: 100%;
 }
 
-panel-list smartwindow-chip::part(chip) {
+panel-list ai-website-chip::part(chip) {
   --background-color-hover: light-dark(color-mix(in srgb, var(--color-violet-50) 15%, transparent), var(--color-violet-110));
   --background-color-box: transparent;
 
@@ -169,17 +169,17 @@ panel-list smartwindow-chip::part(chip) {
   width: 100%;
 }
 
-panel-list smartwindow-chip::part(chip):hover {
+panel-list ai-website-chip::part(chip):hover {
   --background-color-box: var(--background-color-hover);
 }
 
-panel-list smartwindow-chip::part(chip):focus-visible {
+panel-list ai-website-chip::part(chip):focus-visible {
   outline: var(--focus-outline);
   outline-offset: var(--focus-outline-inset);
 }
 
 @media -moz-pref("browser.nova.enabled") {
-  panel-list smartwindow-chip::part(chip) {
+  panel-list ai-website-chip::part(chip) {
     --background-color-hover: light-dark(color-mix(in srgb, var(--color-violet-desaturated-10) 70%, transparent), var(--color-violet-desaturated-60));
   }
 }

@@ -34,7 +34,7 @@ import "chrome://browser/content/aiwindow/components/tab-group-icon.mjs";
  * @property {string} tabGroupColor - Tab group color name, tinting that icon
  * @property {string} tabGroupId - Id of the tab group to open when clicked
  */
-export class SmartwindowChip extends MozLitElement {
+export class AIWebsiteChip extends MozLitElement {
   // Forward focus to the inner element for keyboard navigation.
   static shadowRootOptions = {
     ...MozLitElement.shadowRootOptions,
@@ -84,7 +84,7 @@ export class SmartwindowChip extends MozLitElement {
     // the user and not due to the parent unmounting.
     if (this.#parentHost?.isConnected) {
       this.#parentHost.dispatchEvent(
-        new CustomEvent("smartwindow-chip:disconnected", {
+        new CustomEvent("ai-website-chip:disconnected", {
           bubbles: true,
           composed: true,
           detail: {
@@ -116,7 +116,7 @@ export class SmartwindowChip extends MozLitElement {
       );
     }
     this.dispatchEvent(
-      new CustomEvent("smartwindow-chip:click", {
+      new CustomEvent("ai-website-chip:click", {
         bubbles: true,
         composed: true,
         detail: { label: this.label },
@@ -128,7 +128,7 @@ export class SmartwindowChip extends MozLitElement {
     e.stopPropagation();
     e.preventDefault();
     this.dispatchEvent(
-      new CustomEvent("smartwindow-chip:remove", {
+      new CustomEvent("ai-website-chip:remove", {
         bubbles: true,
         composed: true,
         detail: { label: this.label },
@@ -234,11 +234,11 @@ export class SmartwindowChip extends MozLitElement {
     return html`
       <link
         rel="stylesheet"
-        href="chrome://browser/content/aiwindow/components/smartwindow-chip.css"
+        href="chrome://browser/content/aiwindow/components/ai-website-chip.css"
       />
       ${chipElement}
     `;
   }
 }
 
-customElements.define("smartwindow-chip", SmartwindowChip);
+customElements.define("ai-website-chip", AIWebsiteChip);

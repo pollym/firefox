@@ -6,7 +6,7 @@ import { html, nothing } from "chrome://global/content/vendor/lit.all.mjs";
 import { MozLitElement } from "chrome://global/content/lit-utils.mjs";
 import { httpUrl } from "chrome://browser/content/aiwindow/modules/AITabUtils.mjs";
 // eslint-disable-next-line import/no-unassigned-import
-import "chrome://browser/content/aiwindow/components/smartwindow-chip.mjs";
+import "chrome://browser/content/aiwindow/components/ai-website-chip.mjs";
 
 /** @typedef {{ favicon?: string, title?: string, href: string }} SourceLink */
 
@@ -40,14 +40,14 @@ export class AITabHighlights extends MozLitElement {
   }
 
   #renderSource(source, url) {
-    return html`<smartwindow-chip
+    return html`<ai-website-chip
       type="context-chip"
       size="small"
       .label=${source.title || url.hostname}
       .href=${url.href}
       .iconSrc=${source.favicon || `page-icon:${url.href}`}
       openLinkEvent="AITab:OpenLink"
-    ></smartwindow-chip>`;
+    ></ai-website-chip>`;
   }
 
   #renderSources(sources) {

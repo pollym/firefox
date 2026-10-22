@@ -25,11 +25,11 @@
 .citations {
   gap: var(--space-xsmall);
 
-  smartwindow-chip::part(chip):hover {
+  ai-website-chip::part(chip):hover {
     background-color: var(--citations-background-color-hover);
   }
 
-  smartwindow-chip::part(chip):focus-visible {
+  ai-website-chip::part(chip):focus-visible {
     outline: var(--focus-outline);
     outline-offset: var(--focus-outline-offset);
 

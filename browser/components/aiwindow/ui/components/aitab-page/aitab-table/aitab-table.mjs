@@ -6,7 +6,7 @@ import { html, nothing } from "chrome://global/content/vendor/lit.all.mjs";
 import { MozLitElement } from "chrome://global/content/lit-utils.mjs";
 import { httpUrl } from "chrome://browser/content/aiwindow/modules/AITabUtils.mjs";
 // eslint-disable-next-line import/no-unassigned-import
-import "chrome://browser/content/aiwindow/components/smartwindow-chip.mjs";
+import "chrome://browser/content/aiwindow/components/ai-website-chip.mjs";
 
 /**
  * A column of the table, as described by the RankedTable `Field` schema in
@@ -193,7 +193,7 @@ export class AITabTable extends MozLitElement {
     if (!url) {
       return nothing;
     }
-    return html`<smartwindow-chip
+    return html`<ai-website-chip
       class="aitab-table-source"
       type="context-chip"
       size="small"
@@ -201,7 +201,7 @@ export class AITabTable extends MozLitElement {
       .href=${url.href}
       .iconSrc=${`page-icon:${url.href}`}
       openLinkEvent="AITab:OpenLink"
-    ></smartwindow-chip>`;
+    ></ai-website-chip>`;
   }
 
   #renderRow(row, { title, subtitles, details }) {
