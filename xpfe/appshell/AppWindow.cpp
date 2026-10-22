@@ -1717,11 +1717,12 @@ nsresult AppWindow::MaybeSaveEarlyWindowPersistentValues(
 
   Element* navbar = doc->GetElementById(u"nav-bar"_ns);
 
-  Element* searchbarEl = doc->GetElementById(u"searchbar"_ns);
+  // The container holds whichever search bar is shown.
+  Element* searchContainerEl = doc->GetElementById(u"search-container"_ns);
   CSSPixelSpan searchbar;
-  if (navbar->Contains(searchbarEl)) {
+  if (navbar->Contains(searchContainerEl)) {
     RefPtr<dom::DOMRect> searchbarRect;
-    rv = utils->GetBoundsWithoutFlushing(searchbarEl,
+    rv = utils->GetBoundsWithoutFlushing(searchContainerEl,
                                          getter_AddRefs(searchbarRect));
     if (NS_WARN_IF(NS_FAILED(rv))) {
       return rv;
