@@ -2378,7 +2378,9 @@ export class TelemetryFeed {
       privateMetrics.followedSections = followed;
     }
     const surfaceId = this._prefs.get(PREF_SURFACE_ID);
-    privateMetrics.surfaceId = surfaceId;
+    if (surfaceId) {
+      privateMetrics.surfaceId = surfaceId;
+    }
 
     const curCountry = lazy.Region.home;
     if (PRIVATE_PING_SURFACE_COUNTRY_MAP[surfaceId]) {
@@ -2392,7 +2394,10 @@ export class TelemetryFeed {
         : PRIVATE_PING_SURFACE_COUNTRY_MAP[surfaceId][0];
     }
 
-    if (prefs?.inferredPersonalizationConfig?.normalized_time_zone_offset) {
+    if (
+      prefs?.inferredPersonalizationConfig?.normalized_time_zone_offset &&
+      surfaceId
+    ) {
       privateMetrics.utcOffset = lazy.NewTabUtils.getUtcOffset(surfaceId);
     }
     // To prevent fingerprinting we only send one current experiment / branch
