@@ -6058,11 +6058,6 @@ html {
   max-width: none;
   min-width: 0;
 }
-@media only screen and (width <= 890px) and (width >= 788px) {
-  .multistage-newtab-wrapper:has(.screen[pos=card-stack]) {
-    width: 80%;
-  }
-}
 .multistage-newtab-wrapper.card-stack-animated:not(.card-stack-exiting) .onboardingContainer:not(.transition-out) .screen[pos=card-stack] {
   animation: card-stack-enter var(--card-stack-duration) ease-out;
 }
