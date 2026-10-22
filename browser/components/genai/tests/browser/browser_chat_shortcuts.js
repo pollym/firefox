@@ -2638,10 +2638,11 @@ add_task(async function test_more_actions_menu_layout() {
 });
 
 /**
- * Check that Manage settings opens the Highlight to Search settings and closes
- * the menu.
+ * Check that Manage settings opens the Highlight to Search settings, closes
+ * the menu and records the click.
  */
 add_task(async function test_more_actions_manage_settings() {
+  Services.fog.testResetFOG();
   await SpecialPowers.pushPrefEnv({ set: MORE_ACTIONS_PREFS });
   const openPreferencesStub = sinon.stub(window, "openPreferences");
 
@@ -2663,6 +2664,10 @@ add_task(async function test_more_actions_manage_settings() {
         "Opened the Highlight to Search settings"
       );
       Assert.equal(moreActionsPanel.state, "closed", "Menu closed");
+
+      const clicks = Glean.selectionMenu.menuClick.testGetValue();
+      Assert.equal(clicks?.length, 1, "The click was recorded");
+      Assert.equal(clicks[0].extra.item, "settings", "It names the entry");
     });
   } finally {
     openPreferencesStub.restore();

@@ -822,6 +822,7 @@ export const GenAI = {
     );
     manageSettingsButton.iconSrc = "chrome://global/skin/icons/settings.svg";
     manageSettingsButton.addEventListener("click", () => {
+      Glean.selectionMenu.menuClick.record({ item: "settings" });
       document.defaultView.openPreferences("general-highlight-to-search");
       panel.hide();
     });
