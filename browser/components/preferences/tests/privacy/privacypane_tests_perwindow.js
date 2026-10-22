@@ -39,10 +39,10 @@ async function test_dependent_elements_redesigned(win) {
   ok(customButton.parentDisabled, "button is disabled in remember mode");
 
   // setting the mode to custom shouldn't change anything
-  await selectRedesignedHistoryMode(win, "custom");
+  await selectHistoryMode(win, "custom");
   ok(!customButton.parentDisabled, "button is enabled in custom mode");
 
-  await selectRedesignedHistoryMode(win, "remember");
+  await selectHistoryMode(win, "remember");
   ok(customButton.parentDisabled, "button is disabled in remember mode");
 }
 
@@ -67,7 +67,7 @@ function test_historymode_retention(mode, expect) {
       );
     }
 
-    await selectRedesignedHistoryMode(win, mode);
+    await selectHistoryMode(win, mode);
   };
 }
 
@@ -84,7 +84,7 @@ function test_custom_retention(controlToChange, expect) {
       );
     }
 
-    await selectRedesignedHistoryMode(win, "custom");
+    await selectHistoryMode(win, "custom");
 
     // Navigate to the custom subpane
     let paneChange = waitForPaneChange("history");
