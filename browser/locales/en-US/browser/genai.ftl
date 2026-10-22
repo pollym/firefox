@@ -88,6 +88,9 @@ genai-shortcut-search-button =
 genai-shortcut-copy-button =
     .tooltiptext = Copy selected text
     .aria-label = Copy selected text
+# Shown briefly after clicking the Copy action in the text selection menu,
+# confirming the selection was copied to the clipboard.
+genai-shortcut-copy-confirmation = Copied
 genai-shortcut-more-actions-button =
     .tooltiptext = More options
     .aria-label = More options
@@ -253,6 +256,11 @@ highlight-to-search-settings-ask-generic =
 # with the default search engine.
 highlight-to-search-settings-search =
     .label = Search
+# Checkbox label for one of the actions in the menu that appears when selecting
+# text on a page. "Copy" is a verb: the action copies the selected text to the
+# clipboard.
+highlight-to-search-settings-copy =
+    .label = Copy
 
 # Title that appears when user is shown the opt-in flow for link previews
 link-preview-optin-title = See more with AI?

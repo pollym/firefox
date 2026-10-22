@@ -143,6 +143,13 @@ XPCOMUtils.defineLazyPreferenceGetter(
 );
 XPCOMUtils.defineLazyPreferenceGetter(
   lazy,
+  "highlightToSearchCopyEnabled",
+  "browser.highlightToSearch.copy.enabled",
+  null,
+  (_pref, _old, val) => Glean.selectionMenu.copyEnabled.set(val)
+);
+XPCOMUtils.defineLazyPreferenceGetter(
+  lazy,
   "highlightToSearchSearchEnabled",
   "browser.highlightToSearch.search.enabled",
   null,
@@ -166,6 +173,12 @@ XPCOMUtils.defineLazyServiceGetter(
   "parserUtils",
   "@mozilla.org/parserutils;1",
   Ci.nsIParserUtils
+);
+XPCOMUtils.defineLazyServiceGetter(
+  lazy,
+  "ClipboardHelper",
+  "@mozilla.org/widget/clipboardhelper;1",
+  Ci.nsIClipboardHelper
 );
 
 function recordSelectionMenuEnabled() {
@@ -343,11 +356,24 @@ export const GenAI = {
   /**
    * @returns {bool} can show
    */
+  get canShowCopyAction() {
+    return (
+      lazy.highlightToSearchFeatureGate &&
+      lazy.highlightToSearchEnabled &&
+      lazy.highlightToSearchCopyEnabled
+    );
+  },
+
+  /**
+   * @returns {bool} can show
+   */
   get canShowSelectionMenu() {
     if (lazy.highlightToSearchFeatureGate) {
       return (
         lazy.highlightToSearchEnabled &&
-        (this.canShowAIAction || lazy.highlightToSearchSearchEnabled)
+        (this.canShowAIAction ||
+          lazy.highlightToSearchSearchEnabled ||
+          lazy.highlightToSearchCopyEnabled)
       );
     }
     return lazy.chatShortcuts && this.canShowChatEntrypoint;
@@ -436,6 +462,7 @@ export const GenAI = {
     Glean.genaiChatbot.shortcuts.set(lazy.chatShortcuts);
     Glean.genaiChatbot.shortcutsCustom.set(lazy.chatShortcutsCustom);
     Glean.genaiChatbot.sidebar.set(lazy.chatSidebar);
+    Glean.selectionMenu.copyEnabled.set(lazy.highlightToSearchCopyEnabled);
     Glean.selectionMenu.searchEnabled.set(lazy.highlightToSearchSearchEnabled);
     recordSelectionMenuEnabled();
   },
@@ -569,6 +596,73 @@ export const GenAI = {
       );
       return engine;
     };
+
+    const copyActionButton = panel.querySelector("#copy-action-button");
+    const copyConfirmation = panel.querySelector("#copy-action-confirmation");
+    const copyConfirmationText = copyConfirmation.querySelector(
+      ".copy-action-confirmation-text"
+    );
+    let copyConfirmationTimer = null;
+    let copyGeneration = 0;
+
+    panel.setCopyButtonVisibility = visible => {
+      copyActionButton.hidden = !visible;
+    };
+
+    panel.resetCopyConfirmation = () => {
+      copyGeneration++;
+      document.defaultView.clearTimeout(copyConfirmationTimer);
+      copyConfirmation.removeAttribute("copied");
+      panel.removeAttribute("copy-fading");
+      copyConfirmationText.removeAttribute("data-l10n-id");
+      copyConfirmationText.textContent = "";
+    };
+    panel.addEventListener("popuphidden", event => {
+      if (event.target == panel) {
+        panel.resetCopyConfirmation();
+      }
+    });
+
+    copyActionButton.addEventListener("click", async () => {
+      lazy.ClipboardHelper.copyString(
+        panel.selectionData.selection,
+        panel.selectionData.browser.browsingContext.currentWindowContext
+      );
+
+      Glean.selectionMenu.actionClick.record({
+        action: "copy",
+        selection: panel.selectionData.selection.length,
+        smart_window: lazy.AIWindow.isAIWindowActive(document.defaultView),
+      });
+
+      const generation = ++copyGeneration;
+      document.l10n.setAttributes(
+        copyConfirmationText,
+        "genai-shortcut-copy-confirmation"
+      );
+      await document.l10n.translateElements([copyConfirmationText]);
+      if (generation != copyGeneration) {
+        if (!copyConfirmationText.hasAttribute("data-l10n-id")) {
+          copyConfirmationText.textContent = "";
+        }
+        return;
+      }
+      if (panel.state != "open") {
+        panel.resetCopyConfirmation();
+        return;
+      }
+      copyConfirmation.setAttribute("copied", "true");
+      panel.removeAttribute("copy-fading");
+
+      document.defaultView.clearTimeout(copyConfirmationTimer);
+      copyConfirmationTimer = document.defaultView.setTimeout(() => {
+        panel.setAttribute("copy-fading", "");
+        copyConfirmationTimer = document.defaultView.setTimeout(
+          () => panel.hide(),
+          240
+        );
+      }, 850);
+    });
 
     searchActionButton.addEventListener("click", () => {
       const { selection, principal, policyContainer } = panel.selectionData;
@@ -854,10 +948,11 @@ export const GenAI = {
       }
       case "GenAI:ShowShortcuts": {
         // Save the latest selection so it can be used by popup
-        shortcutPanel.selectionData = data;
+        shortcutPanel.selectionData = { ...data, browser };
+        shortcutPanel.resetCopyConfirmation();
 
         // Smart Window has its own separate gate above and only ever offers
-        // the AI action; don't let the Search action leak in there, and don't
+        // the AI action; don't let Search or Copy leak in there, and don't
         // touch the AI button's visibility on that path either.
         let searchEngine = null;
         if (!isSmartWindow) {
@@ -869,12 +964,16 @@ export const GenAI = {
             data.selection,
             browser
           );
-          if (!aiVisible && !searchEngine) {
+          const copyVisible = this.canShowCopyAction;
+          shortcutPanel.setCopyButtonVisibility(copyVisible);
+          if (!aiVisible && !searchEngine && !copyVisible) {
             // Nothing to offer: don't open an empty menu or log an impression
             // of one, and close any menu left from the previous selection.
             shortcutPanel.hide();
             return;
           }
+        } else {
+          shortcutPanel.setCopyButtonVisibility(false);
         }
 
         // Clear any CSS hide from a prior selectionchange so the panel
