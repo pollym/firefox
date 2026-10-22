@@ -51,6 +51,8 @@ import mozilla.components.lib.state.ext.flowScoped
  * @param mainDispatcher Dispatcher for store observation; must be a main-thread dispatcher.
  * @param encodingDispatcher Dispatcher used to off-load artwork PNG encoding off the main thread.
  * @param looper Looper for [SimpleBasePlayer]; must be the same thread backing [mainDispatcher].
+ * @param onPlay Invoked with the active media tab when Media3 asks to play. The tab is told to play only if it returns
+ *   true.
  */
 @UnstableApi
 internal class BrowserStorePlayer(
@@ -59,6 +61,7 @@ internal class BrowserStorePlayer(
     mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
     private val encodingDispatcher: CoroutineDispatcher = Dispatchers.Default,
     looper: Looper = Looper.getMainLooper(),
+    private val onPlay: (SessionState) -> Boolean = { true },
 ) : SimpleBasePlayer(looper) {
 
     @VisibleForTesting internal var cachedArtwork: Pair<String, ByteArray>? = null
@@ -140,12 +143,11 @@ internal class BrowserStorePlayer(
     }
 
     override fun handleSetPlayWhenReady(playWhenReady: Boolean): ListenableFuture<*> {
-        val controller =
-            store.state.findActiveMediaTab()?.mediaSessionState?.controller ?: return Futures.immediateVoidFuture()
-        if (playWhenReady) {
-            controller.play()
-        } else {
-            controller.pause()
+        val tab = store.state.findActiveMediaTab()
+        val controller = tab?.mediaSessionState?.controller ?: return Futures.immediateVoidFuture()
+        when {
+            !playWhenReady -> controller.pause()
+            onPlay(tab) -> controller.play()
         }
         return Futures.immediateVoidFuture()
     }
