@@ -255,7 +255,7 @@ export class AIChatMessage extends MozLitElement {
 
   /**
    * Replaces "website mention" markdown links rendered as anchors with an
-   * <ai-website-chip> custom element.
+   * <smartwindow-chip> custom element.
    *
    * Example markdown that produces such an anchor:
    *
@@ -269,7 +269,7 @@ export class AIChatMessage extends MozLitElement {
    *
    * into:
    *
-   *   <ai-website-chip type="in-line" ...></ai-website-chip>
+   *   <smartwindow-chip type="in-line" ...></smartwindow-chip>
    *
    *
    * `mention:?` is intentional: the substring after it is a query string.
@@ -305,7 +305,7 @@ export class AIChatMessage extends MozLitElement {
       const label = a.textContent || linkHref;
 
       // Create Website Chip
-      const chip = root.ownerDocument.createElement("ai-website-chip");
+      const chip = root.ownerDocument.createElement("smartwindow-chip");
       chip.type = "in-line";
       chip.label = label;
 

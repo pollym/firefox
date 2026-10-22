@@ -952,7 +952,7 @@ async function getSmartbarContextChipLabels(browser, expectedUrl) {
       );
     }
 
-    const chips = chipContainer.shadowRoot.querySelectorAll("ai-website-chip");
+    const chips = chipContainer.shadowRoot.querySelectorAll("smartwindow-chip");
     const chipLabels = Array.from(chips).map(
       chip => chip.shadowRoot?.querySelector(".chip-label")?.textContent ?? ""
     );
@@ -1355,10 +1355,10 @@ async function waitForMentionInserted(browser) {
     await ContentTaskUtils.waitForMutationCondition(
       editor.shadowRoot,
       { childList: true, subtree: true },
-      () => editor.shadowRoot.querySelector("ai-website-chip") !== null
+      () => editor.shadowRoot.querySelector("smartwindow-chip") !== null
     );
 
-    return !!editor.shadowRoot.querySelector("ai-website-chip");
+    return !!editor.shadowRoot.querySelector("smartwindow-chip");
   });
 }
 
@@ -1452,7 +1452,7 @@ async function removeSmartbarContextChip(browser, label) {
       .shadowRoot.querySelector("#ai-window-smartbar");
     const container = smartbar.querySelector(".smartbar-context-chips-header");
     const chip = () =>
-      [...container.shadowRoot.querySelectorAll("ai-website-chip")].find(
+      [...container.shadowRoot.querySelectorAll("smartwindow-chip")].find(
         c => c.label === chipLabel
       );
     await ContentTaskUtils.waitForMutationCondition(
@@ -1792,7 +1792,7 @@ async function getUserMessageChipLabels(sidebarBrowser, messageIndex = 0) {
 
     const chips = await ContentTaskUtils.waitForCondition(() => {
       const found =
-        chipContainer.shadowRoot.querySelectorAll("ai-website-chip");
+        chipContainer.shadowRoot.querySelectorAll("smartwindow-chip");
       return found.length ? found : null;
     }, "Wait for context chips to render");
 

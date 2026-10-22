@@ -27,7 +27,7 @@ import {
 // eslint-disable-next-line import/no-unassigned-import
 import "chrome://browser/content/aiwindow/components/smartwindow-smartbar-glow.mjs";
 // eslint-disable-next-line import/no-unassigned-import
-import "chrome://browser/content/aiwindow/components/ai-website-chip.mjs";
+import "chrome://browser/content/aiwindow/components/smartwindow-chip.mjs";
 // eslint-disable-next-line import/no-unassigned-import
 import "chrome://browser/content/aiwindow/components/input-cta.mjs";
 // eslint-disable-next-line import/no-unassigned-import
@@ -468,7 +468,7 @@ ${
         this
       );
       this._inputCta.addEventListener("shown", this);
-      this.addEventListener("ai-website-chip:remove", this);
+      this.addEventListener("smartwindow-chip:remove", this);
       this.#findWebsiteContextChipsContainer();
       this.#updateContextChips();
     }
@@ -726,7 +726,7 @@ ${
         this
       );
       this._inputCta.removeEventListener("shown", this);
-      this.removeEventListener("ai-website-chip:remove", this);
+      this.removeEventListener("smartwindow-chip:remove", this);
     }
 
     this.#removeContextMenuItems();
@@ -1612,8 +1612,8 @@ ${
       return;
     }
 
-    // Handle website chip remove events.
-    if (event.type === "ai-website-chip:remove") {
+    // Handle smartwindow chip remove events.
+    if (event.type === "smartwindow-chip:remove") {
       const { url, groupId } = /** @type {CustomEvent} */ (event).detail;
       this.removeContextMention(groupId ?? url);
       const { chat_id, message_seq } = this.conversationTelemetryInfo;

@@ -37,7 +37,7 @@
 }
 
 /* Fade the overflow edge to indicate more content, swapping sides in
- * RTL - matches the pattern in ai-website-chip.css. */
+ * RTL - matches the pattern in smartwindow-chip.css. */
 :host([mode="fullpage"]) {
   --sw-prompts-fade-size: var(--space-xlarge);
 }
