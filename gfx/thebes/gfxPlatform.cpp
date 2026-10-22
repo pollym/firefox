@@ -1995,9 +1995,6 @@ void gfxPlatform::InitializeCMS() {
      bug 444661 for details. */
   qcms_profile_precache_output_transform(mCMSOutputProfile);
 
-  // Create the p3 profile
-  mCMSDisplayP3Profile = qcms_profile_displayP3();
-
   // Create the RGB transform.
   mCMSRGBTransform =
       qcms_transform_create(mCMSsRGBProfile, QCMS_DATA_RGB_8, mCMSOutputProfile,
@@ -2017,16 +2014,6 @@ void gfxPlatform::InitializeCMS() {
   mCMSBGRATransform = qcms_transform_create(mCMSsRGBProfile, QCMS_DATA_BGRA_8,
                                             mCMSOutputProfile, QCMS_DATA_BGRA_8,
                                             QCMS_INTENT_PERCEPTUAL);
-
-  // Create the RGB -> P3 transform
-  mCMSRGBP3Transform = qcms_transform_create(
-      mCMSsRGBProfile, QCMS_DATA_RGBA_8, mCMSDisplayP3Profile, QCMS_DATA_RGBA_8,
-      QCMS_INTENT_DEFAULT);
-
-  // Create the P3 -> RGB transform
-  mCMSP3RGBTransform = qcms_transform_create(
-      mCMSDisplayP3Profile, QCMS_DATA_RGBA_8, mCMSsRGBProfile, QCMS_DATA_RGBA_8,
-      QCMS_INTENT_DEFAULT);
 
   // FIXME: We only enable iccv4 after we create the platform profile, to
   // wallpaper over bug 1697787.
@@ -2079,14 +2066,6 @@ void gfxPlatform::ShutdownCMS() {
     qcms_transform_release(mCMSBGRATransform);
     mCMSBGRATransform = nullptr;
   }
-  if (mCMSRGBP3Transform) {
-    qcms_transform_release(mCMSRGBP3Transform);
-    mCMSRGBP3Transform = nullptr;
-  }
-  if (mCMSP3RGBTransform) {
-    qcms_transform_release(mCMSP3RGBTransform);
-    mCMSP3RGBTransform = nullptr;
-  }
   if (mCMSOutputProfile) {
     // handle the aliased case
     if (mCMSsRGBProfile == mCMSOutputProfile) {
@@ -2099,10 +2078,6 @@ void gfxPlatform::ShutdownCMS() {
   if (mCMSsRGBProfile) {
     qcms_profile_release(mCMSsRGBProfile);
     mCMSsRGBProfile = nullptr;
-  }
-  if (mCMSDisplayP3Profile) {
-    qcms_profile_release(mCMSDisplayP3Profile);
-    mCMSDisplayP3Profile = nullptr;
   }
 
   // Reset the state variables
