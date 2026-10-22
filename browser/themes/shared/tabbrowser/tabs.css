@@ -148,8 +148,6 @@
   }
 
   --tab-group-label-text-dark: var(--color-gray-100);
-  /* 5px of padding-block are adding to .tabbrowser-tab */
-  --tab-height-with-margin-padding: calc(5px + var(--tab-min-height) + (2 * var(--tab-margin-block)));
 
   @media -moz-pref("sidebar.verticalTabs") {
     --tab-min-height: max(32px, calc(var(--tab-label-line-height) * 1em));
@@ -2948,6 +2946,8 @@ tab-group {
       --tab-padding-block-end: 0px;
     }
   }
+
+  --tab-height-with-margin-padding: calc(var(--tab-padding-block-start) + var(--tab-padding-block-end) + var(--tab-min-height) + 2 * var(--tab-margin-block));
 
   min-height: 0;
   display: flex;
