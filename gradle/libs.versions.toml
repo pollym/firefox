@@ -39,7 +39,7 @@ media3 = "1.11.1"
 navigation = "2.10.2"
 navigation3 = "1.2.0"
 paging = "3.5.3"
-palette = "1.0.0"
+palette = "1.1.0"
 preference = "1.2.1"
 profileinstaller = "1.4.1"
 recyclerview = "1.4.0"
@@ -194,7 +194,7 @@ androidx-navigation-ui = { module = "androidx.navigation:navigation-ui", version
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 androidx-paging = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
-androidx-palette = { module = "androidx.palette:palette-ktx", version.ref = "palette" }
+androidx-palette = { module = "androidx.palette:palette", version.ref = "palette" }
 androidx-preference = { module = "androidx.preference:preference", version.ref = "preference" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
