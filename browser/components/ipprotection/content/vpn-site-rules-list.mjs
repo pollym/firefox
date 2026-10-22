@@ -224,7 +224,7 @@ export default class VPNSiteRulesList extends MozLitElement {
       <div class="vpn-site-rules-empty-content">
         <img
           class="vpn-site-rules-empty-illustration"
-          src="chrome://global/skin/icons/settings.svg"
+          src="chrome://browser/content/ipprotection/assets/vpn-website-rules-settings-empty-state.svg"
           alt=""
         />
         <span
