@@ -112,9 +112,11 @@ web_notification:
         description: >
           The state of the application before the notification was clicked.
           One of `foreground`, `background_with_window`,
-          `background_no_window` or `unknown`. Only determined on Windows and
-          macOS. `background_no_window` means no browser windows were open,
-          and is only reported on macOS.
+          `background_no_window`, `closed` or `unknown`. Only determined on
+          Windows and macOS. `background_no_window` means Firefox was running
+          with no browser windows open. `closed` means the click launched
+          Firefox because it wasn't running, and is only reported on Windows,
+          as macOS removes Firefox's notifications when it quits.
         type: string
     bugs:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=2046221
