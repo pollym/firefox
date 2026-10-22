@@ -491,12 +491,12 @@ upload-symbols-linux64:
         add-prefix: upload-symbols-cli/
 
 7zz:
-    description: 7-zip 26.03 source code
+    description: 7-zip 26.05 source code
     fetch:
         type: static-url
-        url: https://github.com/ip7z/7zip/releases/download/26.03/7z2603-src.tar.xz
-        sha256: 9cbde5099c6deb73691b0579063da5827522ccbbcba3f0020fd04e8c8c16c0d4
-        size: 1552200
+        url: https://github.com/ip7z/7zip/releases/download/26.05/7z2605-src.tar.xz
+        sha256: 0b6080b8c3e7a579161d2d495224c0e51c467576cb4c7048b0ab485ef44cc22e
+        size: 1565688
         artifact-name: 7z-src.tar.zst
         add-prefix: 7zz/
 
