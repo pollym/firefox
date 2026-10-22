@@ -1,9 +1,7 @@
 /* Any copyright is dedicated to the Public Domain.
  * https://creativecommons.org/publicdomain/zero/1.0/ */
 
-// This file tests the Firefox VPN site rules sub-pane. The sub-pane only
-// exists in the settings redesign, so this test is registered in
-// browser-srd.toml only.
+// This file tests the Firefox VPN site rules sub-pane.
 
 "use strict";
 
