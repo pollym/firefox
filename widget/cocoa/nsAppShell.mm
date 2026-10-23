@@ -258,6 +258,14 @@ static bool PiPPlayerHandlesAccessibilityFrontmost() {
 
 - (void)sendEvent:(NSEvent*)anEvent {
   mozilla::BackgroundHangMonitor().NotifyActivity();
+  if (anEvent.type == NSEventTypeApplicationDefined &&
+      anEvent.subtype == kEventSubtypeNativeTest) {
+    if (nsCOMPtr<nsIObserverService> obs =
+            mozilla::services::GetObserverService()) {
+      obs->NotifyObservers(nullptr, "appshell-native-test-event", nullptr);
+    }
+    return;
+  }
   [super sendEvent:anEvent];
 }
 
@@ -815,6 +823,7 @@ bool nsAppShell::ProcessNextNativeEvent(bool aMayWait) {
     NS_ASSERTION(mAutoreleasePools && ::CFArrayGetCount(mAutoreleasePools),
                  "No autorelease pool for native event");
 
+    uint32_t wakeupsBeforeWait = mNativeWakeups;
     if (aMayWait && [[GeckoNSApplication sharedApplication] didLaunch]) {
       currentMode = [currentRunLoop currentMode];
       if (!currentMode) currentMode = NSDefaultRunLoopMode;
@@ -888,6 +897,9 @@ bool nsAppShell::ProcessNextNativeEvent(bool aMayWait) {
       ReleaseEvent(currentEvent);
       eventProcessed = true;
 #endif
+    }
+    if (mRunningEventLoop && mNativeWakeups != wakeupsBeforeWait) {
+      ++mLostNativeWakeups;
     }
   } while (mRunningEventLoop);
 
@@ -1060,6 +1072,34 @@ nsAppShell::OnProcessNextEvent(nsIThreadInternal* aThread, bool aMayWait) {
   return nsBaseAppShell::OnProcessNextEvent(aThread, aMayWait);
 
   NS_OBJC_END_TRY_BLOCK_RETURN(NS_ERROR_FAILURE);
+}
+
+NS_IMPL_ISUPPORTS_INHERITED(nsAppShell, nsBaseAppShell,
+                            nsICocoaAppShellTestUtils)
+
+NS_IMETHODIMP
+nsAppShell::PostNativeTestEvent() {
+  NS_OBJC_BEGIN_TRY_BLOCK_RETURN;
+
+  [NSApp postEvent:[NSEvent otherEventWithType:NSEventTypeApplicationDefined
+                                      location:NSMakePoint(0, 0)
+                                 modifierFlags:0
+                                     timestamp:0
+                                  windowNumber:0
+                                       context:nullptr
+                                       subtype:kEventSubtypeNativeTest
+                                         data1:0
+                                         data2:0]
+           atStart:NO];
+  return NS_OK;
+
+  NS_OBJC_END_TRY_BLOCK_RETURN(NS_ERROR_FAILURE);
+}
+
+NS_IMETHODIMP
+nsAppShell::GetLostNativeWakeups(uint32_t* aResult) {
+  *aResult = mLostNativeWakeups;
+  return NS_OK;
 }
 
 // AfterProcessNextEvent
