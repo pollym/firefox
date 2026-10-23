@@ -439,8 +439,14 @@ class CommonBackend(BuildBackend):
             )
             write_l10n_manifest(manifest, pathlib.Path(topobjdir, "l10n-manifest.json"))
 
+        test_crates = set()
         for path, command in self._rust_commands():
             self._write_rust_command(path, command)
+            if command.kind == "test":
+                test_crates.update(command.names)
+
+        with self._write_file(mozpath.join(topobjdir, "rust-tests.json")) as fh:
+            json.dump({"crates": sorted(test_crates)}, fh, sort_keys=True, indent=2)
 
     def _expand_libs(self, input_bin):
         os_libs = []
