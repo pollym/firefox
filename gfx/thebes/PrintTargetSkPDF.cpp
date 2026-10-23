@@ -218,8 +218,7 @@ class GkSkWStream final : public SkWStream {
 };
 
 PrintTargetSkPDF::PrintTargetSkPDF(UniquePtr<GkSkWStream> aStream)
-    : PrintTarget(/* not using cairo_surface_t */ nullptr),
-      mState(new SkPDFDocState(std::move(aStream))),
+    : mState(new SkPDFDocState(std::move(aStream))),
       mRefState(new SkPDFDocState(std::make_unique<GkSkWStream>())) {}
 
 PrintTargetSkPDF::~PrintTargetSkPDF() {
@@ -310,9 +309,6 @@ nsresult PrintTargetSkPDF::EndPrinting() {
 
 already_AddRefed<DrawTarget> PrintTargetSkPDF::MakeDrawTarget(
     const IntSize& aSize, DrawEventRecorder* aRecorder) {
-  if (aRecorder) {
-    return PrintTarget::MakeDrawTarget(aSize, aRecorder);
-  }
   if (!mState->mCanvas) {
     return nullptr;
   }
@@ -321,6 +317,9 @@ already_AddRefed<DrawTarget> PrintTargetSkPDF::MakeDrawTarget(
   if (!mPageDT) {
     mState->mCanvas = nullptr;
     return nullptr;
+  }
+  if (aRecorder) {
+    return CreateRecordingDrawTarget(aRecorder, mPageDT);
   }
   return do_AddRef(mPageDT);
 }

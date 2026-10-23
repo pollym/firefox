@@ -4,12 +4,11 @@
 
 #include "PrintTargetRecording.h"
 
-#include "cairo.h"
 #include "mozilla/gfx/2D.h"
 
 namespace mozilla::gfx {
 
-PrintTargetRecording::PrintTargetRecording() : PrintTarget(nullptr) {}
+PrintTargetRecording::PrintTargetRecording() = default;
 
 /* static */
 already_AddRefed<PrintTargetRecording> PrintTargetRecording::CreateOrNull() {

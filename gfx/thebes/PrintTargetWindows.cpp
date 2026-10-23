@@ -26,15 +26,22 @@ namespace mozilla {
 namespace gfx {
 
 PrintTargetWindows::PrintTargetWindows(cairo_surface_t* aCairoSurface, HDC aDC)
-    : PrintTarget(aCairoSurface), mDC(aDC) {
+    : mDC(aDC), mCairoSurface(aCairoSurface) {
+  MOZ_ASSERT(aCairoSurface);
+  // CreateOrNull hands over ownership of aCairoSurface, so we don't call
+  // cairo_surface_reference(aSurface) here.
+  // This code was copied from gfxASurface::Init:
+  if (cairo_surface_get_content(mCairoSurface) != CAIRO_CONTENT_COLOR) {
+    cairo_surface_set_subpixel_antialiasing(
+        mCairoSurface, CAIRO_SUBPIXEL_ANTIALIASING_DISABLED);
+  }
   // TODO: At least add basic memory reporting.
   // 4 * mSize.width * mSize.height + sizeof(PrintTargetWindows) ?
 }
 
 PrintTargetWindows::PrintTargetWindows(
     std::unique_ptr<SkGDI::Document> aDocument, HDC aDC)
-    : PrintTarget(/* not using cairo_surface_t */ nullptr),
-      mDC(aDC),
+    : mDC(aDC),
       mDocument(std::move(aDocument)),
       mRecorder(MakeRefPtr<DrawEventRecorderMemory>()) {
   // Printing always records with glyph source text, since the content
@@ -48,7 +55,21 @@ PrintTargetWindows::PrintTargetWindows(
   mTranslator = MakeUnique<InlineTranslator>(refDT);
 }
 
-PrintTargetWindows::~PrintTargetWindows() = default;
+PrintTargetWindows::~PrintTargetWindows() {
+  if (mCairoSurface) {
+    cairo_surface_destroy(mCairoSurface);
+  }
+}
+
+void PrintTargetWindows::Finish() {
+  if (mIsFinished) {
+    return;
+  }
+  mIsFinished = true;
+  if (mCairoSurface) {
+    cairo_surface_finish(mCairoSurface);
+  }
+}
 
 /* static */
 already_AddRefed<PrintTargetWindows> PrintTargetWindows::CreateOrNull(HDC aDC) {
@@ -243,23 +264,57 @@ nsresult PrintTargetWindows::EndPage() {
 
 already_AddRefed<DrawTarget> PrintTargetWindows::MakeDrawTarget(
     const IntSize& aSize, DrawEventRecorder* aRecorder) {
-  if (!mDocument || aRecorder) {
-    return PrintTarget::MakeDrawTarget(aSize, aRecorder);
-  }
+  // This should not be called outside of BeginPage()/EndPage() calls since
+  // some backends can only provide a valid DrawTarget at that time.
   MOZ_ASSERT(mHasActivePage, "We can't guarantee a valid DrawTarget");
-  RefPtr<DrawTarget> refDT = GetReferenceDrawTarget();
-  return Factory::CreateRecordingDrawTarget(mRecorder, refDT,
+
+  RefPtr<DrawTarget> dt;
+  if (mDocument) {
+    RefPtr<DrawTarget> refDT = GetReferenceDrawTarget();
+    dt = Factory::CreateRecordingDrawTarget(mRecorder, refDT,
                                             IntRect(IntPoint(), aSize));
+  } else {
+    if (cairo_surface_status(mCairoSurface)) {
+      return nullptr;
+    }
+    // Note than aSize may not be the same as the size of mCairoSurface. If the
+    // sizes are different a clip will be applied to mCairoSurface.
+    dt = Factory::CreateDrawTargetForCairoSurface(mCairoSurface, aSize);
+  }
+  if (!dt || !dt->IsValid()) {
+    return nullptr;
+  }
+  if (aRecorder) {
+    return CreateRecordingDrawTarget(aRecorder, dt);
+  }
+  return dt.forget();
 }
 
 already_AddRefed<DrawTarget> PrintTargetWindows::GetReferenceDrawTarget() {
-  if (!mDocument) {
-    return PrintTarget::GetReferenceDrawTarget();
+  if (mRefDT) {
+    return do_AddRef(mRefDT);
   }
-  if (!mRefDT) {
-    mRefDT = Factory::CreateDrawTarget(BackendType::SKIA, IntSize(1, 1),
+  const IntSize size(1, 1);
+  if (mDocument) {
+    mRefDT = Factory::CreateDrawTarget(BackendType::SKIA, size,
                                        SurfaceFormat::B8G8R8A8);
+    return do_AddRef(mRefDT);
   }
+
+  cairo_surface_t* similar = cairo_surface_create_similar(
+      mCairoSurface, cairo_surface_get_content(mCairoSurface), size.width,
+      size.height);
+  if (cairo_surface_status(similar)) {
+    return nullptr;
+  }
+  RefPtr<DrawTarget> dt =
+      Factory::CreateDrawTargetForCairoSurface(similar, size);
+  // The DT addrefs the surface, so we need drop our own reference to it:
+  cairo_surface_destroy(similar);
+  if (!dt || !dt->IsValid()) {
+    return nullptr;
+  }
+  mRefDT = std::move(dt);
   return do_AddRef(mRefDT);
 }
 

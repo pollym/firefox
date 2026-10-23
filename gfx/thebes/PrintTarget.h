@@ -18,10 +18,6 @@ class DrawEventRecorder;
 /**
  * A class that is used to draw output that is to be sent to a printer or print
  * preview.
- *
- * This class wraps a cairo_surface_t* and provides access to it via a
- * DrawTarget.  The various checkpointing methods manage the state of the
- * platform specific cairo_surface_t*.
  */
 class PrintTarget {
  public:
@@ -67,7 +63,7 @@ class PrintTarget {
    * Note that any DrawTarget obtained from this PrintTarget will no longer be
    * useful after this method has been called.
    */
-  virtual void Finish();
+  virtual void Finish() {}
 
   /**
    * Makes a DrawTarget to draw the printer output to, or returns null on
@@ -99,14 +95,14 @@ class PrintTarget {
    * use STL classes and mozilla::RefCounted<> so the can be moved to Moz2D.
    */
   virtual already_AddRefed<DrawTarget> MakeDrawTarget(
-      const IntSize& aSize, DrawEventRecorder* aRecorder = nullptr);
+      const IntSize& aSize, DrawEventRecorder* aRecorder = nullptr) = 0;
 
   /**
    * Returns a reference DrawTarget. Unlike MakeDrawTarget, this method is not
    * restricted to being called between BeginPage()/EndPage() calls, and the
    * returned DrawTarget is still valid to use after EndPage() has been called.
    */
-  virtual already_AddRefed<DrawTarget> GetReferenceDrawTarget();
+  virtual already_AddRefed<DrawTarget> GetReferenceDrawTarget() = 0;
 
   static void AdjustPrintJobNameForIPP(const nsAString& aJobName,
                                        nsCString& aAdjustedJobName);
@@ -115,18 +111,16 @@ class PrintTarget {
 
  protected:
   // Only created via subclass's constructors
-  explicit PrintTarget(cairo_surface_t* aCairoSurface);
+  PrintTarget() = default;
 
   // Protected because we're refcounted
-  virtual ~PrintTarget();
+  virtual ~PrintTarget() = default;
 
   static already_AddRefed<DrawTarget> CreateRecordingDrawTarget(
       DrawEventRecorder* aRecorder, DrawTarget* aDrawTarget);
 
-  cairo_surface_t* mCairoSurface;
   RefPtr<DrawTarget> mRefDT;  // reference DT
 
-  bool mIsFinished = false;
 #ifdef DEBUG
   bool mHasActivePage = false;
 #endif

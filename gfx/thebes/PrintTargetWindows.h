@@ -41,6 +41,7 @@ class PrintTargetWindows final : public PrintTarget {
   nsresult AbortPrinting() override;
   nsresult BeginPage(const IntSize& aSizeInPoints) override;
   nsresult EndPage() override;
+  void Finish() override;
 
   already_AddRefed<DrawTarget> MakeDrawTarget(
       const IntSize& aSize, DrawEventRecorder* aRecorder = nullptr) final;
@@ -52,6 +53,10 @@ class PrintTargetWindows final : public PrintTarget {
   ~PrintTargetWindows() override;
 
   HDC mDC;
+
+  // Only used for cairo printing.
+  cairo_surface_t* mCairoSurface = nullptr;
+  bool mIsFinished = false;
 
   // Only used for Skia printing. The document draws into mDC, but needs to
   // draw each page multiple times, so pages are recorded with mRecorder, and
