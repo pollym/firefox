@@ -889,6 +889,18 @@ bool WarpOracle::addFuseDependency(RealmFuses::FuseIndex fuseIndex) {
                               CompilationDependency::Type::RegExpPrototype>;
       return addDep(Dependency());
     }
+    case RealmFuses::FuseIndex::ObjectProtoHasNoIndexedPropsFuse: {
+      using Dependency = RealmFuseDependency<
+          &RealmFuses::objectProtoHasNoIndexedPropsFuse,
+          CompilationDependency::Type::ObjectProtoHasNoIndexedProps>;
+      return addDep(Dependency());
+    }
+    case RealmFuses::FuseIndex::ArrayProtoHasNoIndexedPropsFuse: {
+      using Dependency = RealmFuseDependency<
+          &RealmFuses::arrayProtoHasNoIndexedPropsFuse,
+          CompilationDependency::Type::ArrayProtoHasNoIndexedProps>;
+      return addDep(Dependency());
+    }
     default:
       MOZ_CRASH("Unexpected invalidating fuse");
   }

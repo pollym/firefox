@@ -24,6 +24,8 @@ struct CompilationDependency : public TempObject {
     ArraySpecies,
     TypedArraySpecies,
     RegExpPrototype,
+    ObjectProtoHasNoIndexedProps,
+    ArrayProtoHasNoIndexedProps,
     EmulatesUndefined,
     ArrayExceedsInt32Length,
     ObjectFuseProperty,
