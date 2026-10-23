@@ -12,15 +12,18 @@
   fill: var(--toolbarbutton-icon-fill);
 }
 
-@media (forced-colors) {
-  toolbar .toolbarbutton-1 {
-    :root:not([customizing]) &[disabled],
-    &:is(#nav-bar-overflow-button, #PanelUI-menu-button)[disabled] {
-      color: var(--button-text-color-disabled);
+toolbar .toolbarbutton-1 {
+  :root:not([customizing]) &[disabled],
+  &:is(#nav-bar-overflow-button, #PanelUI-menu-button)[disabled] {
+    color: var(--button-text-color-ghost-disabled);
+
+    @media (forced-colors) {
       fill: var(--toolbarbutton-icon-fill-disabled);
     }
   }
+}
 
+@media (forced-colors) {
   toolbar .toolbarbutton-1:not([disabled]) {
     &:hover {
       fill: var(--toolbarbutton-icon-fill-hover);
