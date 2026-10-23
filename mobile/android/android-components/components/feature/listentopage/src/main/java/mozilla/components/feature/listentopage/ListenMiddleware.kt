@@ -201,6 +201,12 @@ class ListenMiddleware(
             launch {
                 playbackController.seekRequests.collect { store.seekFromNotification(it) }
             }
+            launch {
+                playbackController.sessionEnded.first()
+                store.dispatch(
+                    ListenAction.Session.StopRequested(ListenAction.Session.StopSource.MediaSessionEndedOutsideApp)
+                )
+            }
             playbackController.status.collect { store.reportPlayback(it) }
         }
     }

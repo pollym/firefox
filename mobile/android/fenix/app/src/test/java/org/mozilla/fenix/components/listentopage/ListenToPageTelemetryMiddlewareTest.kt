@@ -309,6 +309,18 @@ class ListenToPageTelemetryMiddlewareTest {
     }
 
     @Test
+    fun `WHEN the media session ended outside the app THEN record stopped with media_session_ended_outside_app`() {
+        val store = createStore(phase = PlaybackPhase.Paused)
+
+        store.dispatch(ListenAction.Session.StopRequested(ListenAction.Session.StopSource.MediaSessionEndedOutsideApp))
+
+        assertEquals(
+            "media_session_ended_outside_app",
+            ListenToPage.stopped.testGetValue()!!.single().extra?.get("source"),
+        )
+    }
+
+    @Test
     fun `WHEN no offline voice is available THEN record no_offline_voice with the language`() {
         val store = createStore(phase = PlaybackPhase.Idle, languageTag = "en-US")
 

@@ -189,6 +189,7 @@ class FakeAudioFileCache : AudioFileCache {
  * @property chunksResumedAfterPlaybackEnded Every chunk it moved on to by itself, as the real controller does when
  *   audio is queued after the playback ran out, in order.
  * @property seekRequests Emit into it to stand in for a seek from outside the app.
+ * @property sessionEnded Emit into it to stand in for the playback ending outside the app.
  * @property seekedChunkPositions Every chunk it was asked to seek into, with the position into the article it was asked
  *   to seek to, in order.
  * @property restartedFiles Every file it was restarted on, in order.
@@ -225,6 +226,8 @@ class FakePlaybackController(private val shouldReportSeek: Boolean = false) : Pl
     override val status = MutableStateFlow(PlaybackState())
 
     override val seekRequests = MutableSharedFlow<Long>(extraBufferCapacity = 1)
+
+    override val sessionEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     override suspend fun setArticleDuration(durationMs: Long) {
         articleDurationsMs.add(durationMs)

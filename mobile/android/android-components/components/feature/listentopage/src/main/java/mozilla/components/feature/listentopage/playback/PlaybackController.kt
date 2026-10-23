@@ -76,6 +76,13 @@ interface PlaybackController {
     val seekRequests: Flow<Long>
         get() = emptyFlow()
 
+    /**
+     * Emits when the playback ends without [release] ending it, such as when the app is removed from the recent apps or
+     * the notification is dismissed.
+     */
+    val sessionEnded: Flow<Unit>
+        get() = emptyFlow()
+
     /** Tells the notification how long the whole article lasts. Does nothing while no playback is connected. */
     suspend fun setArticleDuration(durationMs: Long)
 
@@ -186,6 +193,10 @@ internal constructor(
     private val _seekRequests =
         MutableSharedFlow<Long>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val seekRequests: SharedFlow<Long> = _seekRequests.asSharedFlow()
+
+    private val _sessionEnded =
+        MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    override val sessionEnded: SharedFlow<Unit> = _sessionEnded.asSharedFlow()
 
     // The length of the article last given to the session, which a restart carries on.
     private var articleDurationMs = 0L
@@ -398,8 +409,11 @@ internal constructor(
                         // service once the article ends with nobody commanding it. Commands sent to a disconnected
                         // controller are dropped without a word, so the next request has to build a new one.
                         override fun onDisconnected(controller: MediaController) {
+                            // A connection still kept here means the session ended without being asked to.
+                            val isConnected = connection != null
                             connection = null
                             forgetStatus()
+                            if (isConnected) _sessionEnded.tryEmit(Unit)
                         }
 
                         override fun onCustomCommand(

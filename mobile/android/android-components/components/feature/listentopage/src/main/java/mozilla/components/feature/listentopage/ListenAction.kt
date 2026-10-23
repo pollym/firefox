@@ -41,6 +41,12 @@ sealed interface ListenAction : Action {
 
             /** The user left reader mode on the listened tab. */
             ReaderModeClosed,
+
+            /**
+             * The media session ended outside the app, such as when the app was removed from the recent apps or the
+             * notification was dismissed.
+             */
+            MediaSessionEndedOutsideApp,
         }
     }
 
