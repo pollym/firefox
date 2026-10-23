@@ -248,7 +248,7 @@ export class FormAutofillHandler {
   }
 
   #clearVisibilityObserver() {
-    this.#visibilityObserver.disconnect();
+    this.#visibilityObserver?.disconnect();
     this.#visibilityObserver = null;
     this.#visibilityStateObserverByElement = new WeakMap();
   }
