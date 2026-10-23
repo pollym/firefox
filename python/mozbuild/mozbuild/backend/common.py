@@ -193,12 +193,18 @@ class CommonBackend(BuildBackend):
     def _rust_tests_command(self, tests, profile_suffix=""):
         """Build a Cargo test command using the directory's Cargo profile."""
         rustflags = ()
+        substs = self.environment.substs
         # Test executables load shared libraries from dist/bin. Other platforms
         # use an rpath, while Windows stages the libraries next to the test
         # binaries.
-        if self.environment.substs.get("OS_TARGET") != "WINNT":
+        if substs.get("OS_TARGET") != "WINNT":
             dist_bin = mozpath.join(self.environment.topobjdir, "dist", "bin")
             rustflags = ("-C", f"link-arg=-Wl,-rpath,{dist_bin}")
+        # Some crates reference Gecko or breakpad functions that their tests
+        # never call. `-FORCE:UNRESOLVED` lets every clang-cl test binary link
+        # with unresolved symbols, and a test that calls one crashes.
+        elif substs.get("CC_TYPE") == "clang-cl":
+            rustflags = ("-C", "link-arg=-FORCE:UNRESOLVED")
         return CargoCommand(
             kind="test",
             manifest_path=mozpath.normsep(mozpath.join(tests.srcdir, "Cargo.toml")),
