@@ -866,10 +866,9 @@ export class FormAutofillHandler {
             if (mutation.type == "childList") {
               if (HTMLSelectElement.isInstance(mutation.target)) {
                 changedSelectElements.add(mutation.target);
-              } else if (mutation.addedNodes.length) {
-                addedNodes.add(...mutation.addedNodes);
-              } else if (mutation.removedNodes.length) {
-                removedNodes.add(...mutation.removedNodes);
+              } else {
+                mutation.addedNodes.forEach(node => addedNodes.add(node));
+                mutation.removedNodes.forEach(node => removedNodes.add(node));
               }
             }
           });
