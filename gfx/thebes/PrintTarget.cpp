@@ -26,26 +26,9 @@
 namespace mozilla::gfx {
 
 PrintTarget::PrintTarget(cairo_surface_t* aCairoSurface, const IntSize& aSize)
-    : mCairoSurface(aCairoSurface),
-      mSize(aSize),
-      mIsFinished(false)
-#ifdef DEBUG
-      ,
-      mHasActivePage(false)
-#endif
-
-{
-#if 0
-  // aCairoSurface is null when our PrintTargetThebes subclass's ctor calls us.
-  // Once PrintTargetThebes is removed, enable this assertion.
-  MOZ_ASSERT(aCairoSurface && !cairo_surface_status(aCairoSurface),
-             "CreateOrNull factory methods should not call us without a "
-             "valid cairo_surface_t*");
-#endif
-
-  // CreateOrNull factory methods hand over ownership of aCairoSurface,
-  // so we don't call cairo_surface_reference(aSurface) here.
-
+    : mCairoSurface(aCairoSurface), mSize(aSize) {
+  // CreateOrNull factory methods hand over ownership of aCairoSurface, so we
+  // don't call cairo_surface_reference(aSurface) here.
   // This code was copied from gfxASurface::Init:
   if (mCairoSurface &&
       cairo_surface_get_content(mCairoSurface) != CAIRO_CONTENT_COLOR) {

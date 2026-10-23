@@ -138,9 +138,9 @@ class PrintTarget {
   RefPtr<DrawTarget> mRefDT;  // reference DT
 
   IntSize mSize;
-  bool mIsFinished;
+  bool mIsFinished = false;
 #ifdef DEBUG
-  bool mHasActivePage;
+  bool mHasActivePage = false;
 #endif
 };
 
