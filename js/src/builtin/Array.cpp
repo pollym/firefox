@@ -5454,8 +5454,28 @@ static JSObject* CreateArrayConstructor(JSContext* cx, JSProtoKey key) {
 
 static JSObject* CreateArrayPrototype(JSContext* cx, JSProtoKey key) {
   MOZ_ASSERT(key == JSProto_Array);
+
   RootedObject proto(cx, &cx->global()->getObjectPrototype());
-  return NewArrayWithProto<0>(cx, 0, proto, TenuredObject);
+  Rooted<SharedShape*> shape(cx, GetArrayShapeWithProto(cx, proto));
+  if (!shape) {
+    return nullptr;
+  }
+
+  // Use an alloc kind without space for fixed elements so the element capacity
+  // starts at zero. This ensures that adding the first dense element goes
+  // through growElements, where we pop ArrayProtoHasNoIndexedPropsFuse.
+  constexpr gc::AllocKind allocKind = gc::GetGCArrayKind(0);
+  AutoSetNewObjectMetadata metadata(cx);
+  ArrayObject* arr =
+      ArrayObject::create(cx, allocKind, gc::Heap::Tenured, shape,
+                          /* length = */ 0, /* slotSpan = */ 0, metadata);
+  if (!arr) {
+    return nullptr;
+  }
+  MOZ_ASSERT(arr->getDenseCapacity() == 0);
+
+  probes::CreateObject(cx, arr);
+  return arr;
 }
 
 static bool array_proto_finish(JSContext* cx, JS::HandleObject ctor,
