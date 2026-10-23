@@ -2415,7 +2415,7 @@ export const tokensTable = {
     {
       value: {
         default: "inherit",
-        prefersContrast: "var(--button-text-color-disabled)",
+        prefersContrast: "inherit",
         forcedColors: "var(--button-text-color-disabled)",
       },
       name: "--button-text-color-ghost-disabled",
@@ -2459,6 +2459,7 @@ export const tokensTable = {
     {
       value: {
         default: "var(--button-text-color-ghost)",
+        prefersContrast: "inherit",
         forcedColors: "MenuText",
       },
       name: "--button-text-color-menu",
@@ -3407,17 +3408,19 @@ export const tokensTable = {
     },
     {
       value: {
-        light: "var(--color-gray-70)",
-        dark: "var(--color-gray-0)",
+        light: "color-mix(in srgb, currentColor 69%, transparent)",
+        dark: "currentColor",
         nativeTheme: "currentColor",
         forcedColors: "var(--button-text-color)",
-        default: "light-dark(var(--color-gray-70), var(--color-gray-0))",
+        default:
+          "light-dark(color-mix(in srgb, currentColor 69%, transparent), currentColor)",
         platform: {
           default: "currentColor",
           browserTheme: {
-            light: "var(--color-gray-70)",
-            dark: "var(--color-gray-0)",
-            default: "light-dark(var(--color-gray-70), var(--color-gray-0))",
+            light: "color-mix(in srgb, currentColor 69%, transparent)",
+            dark: "currentColor",
+            default:
+              "light-dark(color-mix(in srgb, currentColor 69%, transparent), currentColor)",
           },
         },
       },
@@ -4365,7 +4368,7 @@ export const variableLookupTable = {
   },
   "button-text-color-ghost-disabled": {
     default: "inherit",
-    prefersContrast: "var(--button-text-color-disabled)",
+    prefersContrast: "inherit",
     forcedColors: "var(--button-text-color-disabled)",
   },
   "button-text-color-ghost-hover": {
@@ -4387,6 +4390,7 @@ export const variableLookupTable = {
   },
   "button-text-color-menu": {
     default: "var(--button-text-color-ghost)",
+    prefersContrast: "inherit",
     forcedColors: "MenuText",
   },
   "button-text-color-menu-active": {
@@ -4909,17 +4913,19 @@ export const variableLookupTable = {
   "toolbarbutton-padding-inner-touch": "9px",
   "toolbarbutton-padding-inner-touch-narrow": "8px",
   "toolbarbutton-icon-fill": {
-    light: "var(--color-gray-70)",
-    dark: "var(--color-gray-0)",
+    light: "color-mix(in srgb, currentColor 69%, transparent)",
+    dark: "currentColor",
     nativeTheme: "currentColor",
     forcedColors: "var(--button-text-color)",
-    default: "light-dark(var(--color-gray-70), var(--color-gray-0))",
+    default:
+      "light-dark(color-mix(in srgb, currentColor 69%, transparent), currentColor)",
     platform: {
       default: "currentColor",
       browserTheme: {
-        light: "var(--color-gray-70)",
-        dark: "var(--color-gray-0)",
-        default: "light-dark(var(--color-gray-70), var(--color-gray-0))",
+        light: "color-mix(in srgb, currentColor 69%, transparent)",
+        dark: "currentColor",
+        default:
+          "light-dark(color-mix(in srgb, currentColor 69%, transparent), currentColor)",
       },
     },
   },

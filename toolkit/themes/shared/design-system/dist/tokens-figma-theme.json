@@ -1030,8 +1030,8 @@
     "forcedColors": "transparent"
   },
   "toolbarbutton/icon/fill": {
-    "light": "{Colors$color/gray/70}",
-    "dark": "{Colors$color/gray/0}",
+    "light": "color-mix(in srgb, currentColor 69%, transparent)",
+    "dark": "currentColor",
     "forcedColors": "{Theme$button/text/color}"
   },
   "toolbarbutton/icon/fill/hover": {
