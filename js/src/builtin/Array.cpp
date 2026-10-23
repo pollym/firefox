@@ -104,12 +104,7 @@ bool js::PrototypeMayHaveIndexedProperties(NativeObject* obj) {
   } while (true);
 }
 
-/*
- * Whether obj may have indexed properties anywhere besides its dense
- * elements. This includes other indexed properties in its shape hierarchy, and
- * indexed properties or elements along its prototype chain.
- */
-bool js::ObjectMayHaveExtraIndexedProperties(JSObject* obj) {
+bool js::ObjectMayHaveExtraIndexedPropertiesSlow(JSObject* obj) {
   MOZ_ASSERT_IF(obj->hasDynamicPrototype(), !obj->is<NativeObject>());
 
   if (ObjectMayHaveExtraIndexedOwnProperties(obj)) {
