@@ -152,12 +152,13 @@ export class TemporalSuggestions extends SuggestProvider {
     return new lazy.UrlbarResult({
       type: lazy.UrlbarShared.RESULT_TYPE.SEARCH,
       source: lazy.UrlbarShared.RESULT_SOURCE.SEARCH,
-      isSuggestedIndexRelativeToGroup: true,
-      suggestedIndex: -1,
+      group: lazy.UrlbarShared.RESULT_GROUP.TEMPORAL_SUGGESTION,
       hideRowLabel: true,
       payload: {
         engine: suggestion.engine,
         suggestion: query,
+        lowerCaseSuggestion: query.toLocaleLowerCase(),
+        trending: false,
         title: query,
         icon: lazy.UrlbarShared.ICON.SEARCH_GLASS,
       },

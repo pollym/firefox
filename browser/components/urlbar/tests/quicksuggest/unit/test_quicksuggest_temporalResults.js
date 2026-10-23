@@ -94,10 +94,6 @@ function makeExpectedResult(query) {
     engineIconUri: UrlbarShared.ICON.SEARCH_GLASS,
     providerName: UrlbarProviderQuickSuggest.name,
   });
-  delete result.payload.lowerCaseSuggestion;
-  delete result.payload.trending;
-  result.suggestedIndex = -1;
-  result.isSuggestedIndexRelativeToGroup = true;
   Object.assign(result.payload, {
     source: "rust",
     provider: "Dynamic",
@@ -113,8 +109,7 @@ function makeExpectedResult(query) {
  * queries.
  *
  * @param {string[]} expectedQueries
- *   The expected queries in pick order. Each result has a suggested index of
- *   -1, so they're shown in reverse pick order.
+ *   The expected queries in pick order.
  * @param {object} [options]
  * @param {string} [options.searchString]
  * @param {object} [options.properties]
@@ -130,18 +125,18 @@ async function checkQuery(
       isPrivate: false,
       ...properties,
     }),
-    matches: expectedQueries.map(makeExpectedResult).reverse(),
+    matches: expectedQueries.map(makeExpectedResult),
   });
 }
 
 // A zero prefix query returns `temporal.rowCount` temporal search results.
 add_task(async function results() {
   gFeature._reset();
-  await checkQuery(["q1", "q2", "q3"]);
+  await checkQuery(["q1", "q2", "q3", "q4", "q5"]);
 
   gFeature._reset();
-  UrlbarPrefs.set("temporal.rowCount", 5);
-  await checkQuery(["q1", "q2", "q3", "q4", "q5"]);
+  UrlbarPrefs.set("temporal.rowCount", 3);
+  await checkQuery(["q1", "q2", "q3"]);
   UrlbarPrefs.clear("temporal.rowCount");
 });
 
@@ -150,9 +145,9 @@ add_task(async function results() {
 // over.
 add_task(async function rotation() {
   gFeature._reset();
-  await checkQuery(["q1", "q2", "q3"]);
-  await checkQuery(["q4", "q5", "q6"]);
-  await checkQuery(["q7", "q1", "q2"]);
+  await checkQuery(["q1", "q2", "q3", "q4", "q5"]);
+  await checkQuery(["q6", "q7", "q1", "q2", "q3"]);
+  await checkQuery(["q4", "q5", "q1", "q2", "q3"]);
 });
 
 // No results are returned when there's a search string, in private windows,
@@ -185,7 +180,7 @@ add_task(async function notShown() {
   UrlbarPrefs.set("suggest.searches", true);
   await QuickSuggestTestUtils.forceSync();
   gFeature._reset();
-  await checkQuery(["q1", "q2", "q3"]);
+  await checkQuery(["q1", "q2", "q3", "q4", "q5"]);
 
   info("Engine mismatch");
   await setRecords({ engines: ["google"] });
@@ -312,8 +307,8 @@ add_task(async function dismissal() {
 add_task(async function dateBoundaries() {
   for (let [now, expected] of [
     ["2026-11-11T23:59[America/New_York]", []],
-    ["2026-11-12T00:00[America/New_York]", ["q1", "q2", "q3"]],
-    ["2026-11-27T23:59[America/New_York]", ["q1", "q2", "q3"]],
+    ["2026-11-12T00:00[America/New_York]", ["q1", "q2", "q3", "q4", "q5"]],
+    ["2026-11-27T23:59[America/New_York]", ["q1", "q2", "q3", "q4", "q5"]],
     ["2026-11-28T00:00[America/New_York]", []],
   ]) {
     info(`Checking now: ${now}`);

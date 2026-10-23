@@ -114,12 +114,12 @@ async function getTemporalQueries(win = window) {
   return (await getTemporalRows(win)).map(r => r.result.payload.suggestion);
 }
 
-// Three temporal rows appear after the top sites, using the search glass icon.
+// Five temporal rows appear after the top sites, using the search glass icon.
 add_task(async function rowsBelowTopSites() {
   gFeature._reset();
   await openZeroPrefix();
   let rows = await getTemporalRows();
-  Assert.equal(rows.length, 3, "Three temporal rows");
+  Assert.equal(rows.length, 5, "Five temporal rows");
 
   let firstIndex = rows[0].index;
   Assert.greater(firstIndex, 0, "Temporal rows come after other rows");
@@ -147,7 +147,7 @@ add_task(async function rotation() {
   gFeature._reset();
   await openZeroPrefix();
   let first = await getTemporalQueries();
-  Assert.equal(first.length, 3, "Three temporal rows");
+  Assert.equal(first.length, 5, "Five temporal rows");
 
   await UrlbarTestUtils.promiseAutocompleteResultPopup({
     window,
@@ -159,10 +159,10 @@ add_task(async function rotation() {
 
   await openZeroPrefix();
   let second = await getTemporalQueries();
-  Assert.equal(second.length, 3, "Three temporal rows after refocus");
+  Assert.equal(second.length, 5, "Five temporal rows after refocus");
   Assert.ok(
-    second.every(q => !first.includes(q)),
-    "Refocusing rotates to a different set"
+    QUERIES.filter(q => !first.includes(q)).every(q => second.includes(q)),
+    "Refocusing rotates to the queries that weren't shown"
   );
   await closeView();
 });
