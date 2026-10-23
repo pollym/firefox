@@ -1045,7 +1045,7 @@ selection_menu:
     bugs:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=2069144
     data_reviews:
-      - https://bugzilla.mozilla.org/show_bug.cgi?id=2069144
+      - https://phabricator.services.mozilla.com/D328221
     data_sensitivity:
       - interaction
     expires: never
@@ -1072,7 +1072,7 @@ selection_menu:
     bugs:
       - https://bugzilla.mozilla.org/show_bug.cgi?id=2069144
     data_reviews:
-      - https://bugzilla.mozilla.org/show_bug.cgi?id=2069144
+      - https://phabricator.services.mozilla.com/D328221
     data_sensitivity:
       - interaction
     expires: never
@@ -1088,6 +1088,34 @@ selection_menu:
       selection:
         type: quantity
         description: Selected text length.
+      smart_window:
+        type: boolean
+        description: Whether the menu was shown in Smart Window.
+
+  dismissed:
+    type: event
+    description: >
+      The text selection actions menu was closed. Paired one-to-one with
+      displayed.
+    bugs:
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=2083259
+    data_reviews:
+      - https://phabricator.services.mozilla.com/D334905
+    data_sensitivity:
+      - interaction
+    expires: never
+    notification_emails:
+      - scunnane@mozilla.com
+      - fx-search-telemetry@mozilla.com
+    send_in_pings:
+      - events
+    extra_keys:
+      interacted:
+        type: boolean
+        description: Whether the user completed an action from the menu.
+      duration:
+        type: quantity
+        description: Milliseconds the menu was shown.
       smart_window:
         type: boolean
         description: Whether the menu was shown in Smart Window.

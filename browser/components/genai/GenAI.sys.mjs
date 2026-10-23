@@ -666,6 +666,7 @@ export const GenAI = {
         selection: panel.selectionData.selection.length,
         smart_window: lazy.AIWindow.isAIWindowActive(document.defaultView),
       });
+      panel.markInteracted();
 
       const generation = ++copyGeneration;
       document.l10n.setAttributes(
@@ -713,6 +714,7 @@ export const GenAI = {
         selection: selection.length,
         smart_window: lazy.AIWindow.isAIWindowActive(document.defaultView),
       });
+      panel.markInteracted();
       panel.hide();
     });
     const buttonActiveState = "icon";
@@ -728,6 +730,36 @@ export const GenAI = {
       moreActionsPanel.hidePopup();
       panel.hidePopup();
     };
+    panel.startDisplay = smartWindow => {
+      panel.display = {
+        start: ChromeUtils.now(),
+        smartWindow,
+        interacted: false,
+      };
+    };
+    panel.markInteracted = () => {
+      if (panel.display) {
+        panel.display.interacted = true;
+      }
+    };
+    // Idempotent - only the first call after startDisplay records.
+    panel.recordDismissed = () => {
+      if (!panel.display) {
+        return;
+      }
+      const { start, smartWindow, interacted } = panel.display;
+      panel.display = null;
+      Glean.selectionMenu.dismissed.record({
+        interacted,
+        duration: Math.round(ChromeUtils.now() - start),
+        smart_window: smartWindow,
+      });
+    };
+    panel.addEventListener("popuphidden", event => {
+      if (event.target == panel) {
+        panel.recordDismissed();
+      }
+    });
     aiActionButton.setAttribute("type", buttonDefaultState);
     aiActionButton.ariaHasPopup = "menu";
     aiActionButton.ariaExpanded = "false";
@@ -947,7 +979,10 @@ export const GenAI = {
           return button;
         },
         "shortcuts",
-        panel.hide
+        () => {
+          panel.markInteracted();
+          panel.hide();
+        }
       );
 
       // Add custom textarea box if configured
@@ -970,6 +1005,7 @@ export const GenAI = {
         textAreaEl.addEventListener("keydown", event => {
           if (event.key == "Enter" && !event.shiftKey) {
             this.handleAskChat({ value: textAreaEl.value }, context);
+            panel.markInteracted();
             panel.hide();
           }
         });
@@ -1107,7 +1143,9 @@ export const GenAI = {
         // Any other hide reason closes the panel normally.
         const imeHiding = data === "selectionchange-ime";
         shortcutPanel.toggleAttribute("ime-hiding", imeHiding);
-        if (!imeHiding) {
+        if (imeHiding) {
+          shortcutPanel.recordDismissed();
+        } else {
           shortcutPanel.hide();
         }
         break;
@@ -1135,6 +1173,7 @@ export const GenAI = {
         // is visible when it opens for the new selection.
         shortcutPanel.removeAttribute("ime-hiding");
 
+        shortcutPanel.recordDismissed();
         Glean.genaiChatbot.shortcutsDisplayed.record({
           delay: data.delay,
           inputType: data.inputType,
@@ -1152,6 +1191,7 @@ export const GenAI = {
             "text_selection"
           );
         }
+        shortcutPanel.startDisplay(isSmartWindow);
 
         // Position the shortcuts relative to the browser's top-left corner
         const screenYBase = data.screenYDevPx / devicePixelRatio;
