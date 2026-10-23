@@ -22,7 +22,7 @@ use thin_vec::ThinVec;
 pub struct SkrifaFontRef<'a>(skrifa::FontRef<'a>);
 
 /// Create a SkrifaFontRef object for the given font data; returns null on failure.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_new<'a>(data: *const u8, length: usize) -> *mut SkrifaFontRef<'a> {
     let data = unsafe { slice::from_raw_parts(data, length) };
     if let Ok(font) = skrifa::FontRef::<'a>::new(data) {
@@ -33,7 +33,7 @@ pub extern "C" fn skrifa_font_new<'a>(data: *const u8, length: usize) -> *mut Sk
 }
 
 /// Create a SkrifaFontRef object for the face with the given index in a collection; returns null on failure.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_new_from_index<'a>(
     data: *const u8,
     length: usize,
@@ -48,7 +48,7 @@ pub extern "C" fn skrifa_font_new_from_index<'a>(
 }
 
 /// Delete a SkrifaFontRef object.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_delete<'a>(font: *mut SkrifaFontRef) {
     if !font.is_null() {
         unsafe { drop(Box::from_raw(font)) };
@@ -56,7 +56,7 @@ pub extern "C" fn skrifa_font_delete<'a>(font: *mut SkrifaFontRef) {
 }
 
 /// Map the given unicode codepoint to a glyph ID; returns 0 for unsupported codepoints.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_map_char_to_glyph(font: &SkrifaFontRef, unicode: u32) -> u32 {
     let charmap = font.0.charmap();
     charmap.map(unicode).unwrap_or(GlyphId::NOTDEF).into()
@@ -64,7 +64,7 @@ pub extern "C" fn skrifa_font_map_char_to_glyph(font: &SkrifaFontRef, unicode: u
 
 /// Get a name (identified by OpenType name ID) from a Skrifa font as a Gecko string.
 /// Returns false if unable to find a name for the given name_id.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_get_preferred_name(
     font: &SkrifaFontRef,
     name_id: u16,
@@ -91,7 +91,7 @@ pub struct SkrifaFontTable {
 
 /// Get a (read-only) reference to the table with the given tag.
 /// Returns an empty (0-length) table if the tag is not present.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_get_table(font: &SkrifaFontRef, tag: u32) -> SkrifaFontTable {
     if let Some(data) = font.0.table_data(skrifa::Tag::from_u32(tag)) {
         SkrifaFontTable {
@@ -109,7 +109,7 @@ pub extern "C" fn skrifa_font_get_table(font: &SkrifaFontRef, tag: u32) -> Skrif
 /// Check whether a given table is present.
 /// Note that a table that appears in the directory, but has zero length,
 /// is considered to be missing.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_has_table(font: &SkrifaFontRef, tag: u32) -> bool {
     font.0
         .table_data(skrifa::Tag::from_u32(tag))
@@ -122,7 +122,7 @@ use style::values::generics::font::FontTag;
 
 pub struct SkrifaLocation(skrifa::instance::Location);
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_resolve_variations_to_location(
     font: &SkrifaFontRef,
     settings: &ThinVec<gfxFontVariation>,
@@ -132,7 +132,7 @@ pub extern "C" fn skrifa_font_resolve_variations_to_location(
     ))))
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_location_delete(location: *mut SkrifaLocation) {
     if !location.is_null() {
         unsafe { drop(Box::from_raw(location)) };
@@ -142,12 +142,12 @@ pub extern "C" fn skrifa_location_delete(location: *mut SkrifaLocation) {
 // VARIATION AXES AND INSTANCES
 use style::gecko_bindings::structs::gfxFontVariationAxis;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_axes_count(font: &SkrifaFontRef) -> usize {
     font.0.axes().len()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_copy_axes(
     font: &SkrifaFontRef,
     axes: &mut ThinVec<gfxFontVariationAxis>,
@@ -173,12 +173,12 @@ pub extern "C" fn skrifa_font_copy_axes(
     axes.len()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_instances_count(font: &SkrifaFontRef) -> usize {
     font.0.named_instances().len()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_instance_settings_count(font: &SkrifaFontRef, index: usize) -> usize {
     font.0
         .named_instances()
@@ -186,7 +186,7 @@ pub extern "C" fn skrifa_font_instance_settings_count(font: &SkrifaFontRef, inde
         .map_or_else(|| 0, |instance| instance.user_coords().count())
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_copy_instance(
     font: &SkrifaFontRef,
     index: usize,
@@ -240,7 +240,7 @@ pub struct SkrifaMetrics {
     y_max: f32,
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_get_metrics(
     font: &SkrifaFontRef,
     size: f32,
@@ -310,7 +310,7 @@ pub extern "C" fn skrifa_font_get_metrics(
 // GLYPH METRICS
 pub struct SkrifaGlyphMetrics<'a>(skrifa::metrics::GlyphMetrics<'a>);
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_font_create_glyph_metrics<'a>(
     font: &'a SkrifaFontRef<'a>,
     size: f32,
@@ -323,7 +323,7 @@ pub extern "C" fn skrifa_font_create_glyph_metrics<'a>(
     ))))
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_glyph_metrics_delete(metrics: *mut SkrifaGlyphMetrics) {
     if !metrics.is_null() {
         unsafe { drop(Box::from_raw(metrics)) };
@@ -331,7 +331,7 @@ pub extern "C" fn skrifa_glyph_metrics_delete(metrics: *mut SkrifaGlyphMetrics) 
 }
 
 // Get glyph advance width; returns zero for out-of-range glyph ids.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_metrics_get_glyph_advance(
     glyph_metrics: &SkrifaGlyphMetrics,
     gid: u32,
@@ -362,7 +362,7 @@ impl From<skrifa::metrics::BoundingBox> for BoundingBox {
 }
 
 // Get glyph bounding box. Returns true if successful, false if bbox not available.
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn skrifa_metrics_get_glyph_bounds(
     glyph_metrics: &SkrifaGlyphMetrics,
     gid: u32,
