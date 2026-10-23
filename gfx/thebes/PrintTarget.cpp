@@ -25,8 +25,8 @@
 
 namespace mozilla::gfx {
 
-PrintTarget::PrintTarget(cairo_surface_t* aCairoSurface, const IntSize& aSize)
-    : mCairoSurface(aCairoSurface), mSize(aSize) {
+PrintTarget::PrintTarget(cairo_surface_t* aCairoSurface)
+    : mCairoSurface(aCairoSurface) {
   // CreateOrNull factory methods hand over ownership of aCairoSurface, so we
   // don't call cairo_surface_reference(aSurface) here.
   // This code was copied from gfxASurface::Init:
@@ -56,9 +56,8 @@ already_AddRefed<DrawTarget> PrintTarget::MakeDrawTarget(
     return nullptr;
   }
 
-  // Note than aSize may not be the same as mSize (the size of mCairoSurface).
-  // See the comments in our header.  If the sizes are different a clip will
-  // be applied to mCairoSurface.
+  // Note than aSize may not be the same as the size of mCairoSurface. If the
+  // sizes are different a clip will be applied to mCairoSurface.
   RefPtr<DrawTarget> dt =
       Factory::CreateDrawTargetForCairoSurface(mCairoSurface, aSize);
   if (!dt || !dt->IsValid()) {

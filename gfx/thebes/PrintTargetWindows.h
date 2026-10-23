@@ -47,10 +47,8 @@ class PrintTargetWindows final : public PrintTarget {
   already_AddRefed<DrawTarget> GetReferenceDrawTarget() final;
 
  private:
-  PrintTargetWindows(cairo_surface_t* aCairoSurface, const IntSize& aSize,
-                     HDC aDC);
-  PrintTargetWindows(std::unique_ptr<SkGDI::Document> aDocument,
-                     const IntSize& aSize, HDC aDC);
+  PrintTargetWindows(cairo_surface_t* aCairoSurface, HDC aDC);
+  PrintTargetWindows(std::unique_ptr<SkGDI::Document> aDocument, HDC aDC);
   ~PrintTargetWindows() override;
 
   HDC mDC;

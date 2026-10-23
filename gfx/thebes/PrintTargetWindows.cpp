@@ -25,16 +25,15 @@
 namespace mozilla {
 namespace gfx {
 
-PrintTargetWindows::PrintTargetWindows(cairo_surface_t* aCairoSurface,
-                                       const IntSize& aSize, HDC aDC)
-    : PrintTarget(aCairoSurface, aSize), mDC(aDC) {
+PrintTargetWindows::PrintTargetWindows(cairo_surface_t* aCairoSurface, HDC aDC)
+    : PrintTarget(aCairoSurface), mDC(aDC) {
   // TODO: At least add basic memory reporting.
   // 4 * mSize.width * mSize.height + sizeof(PrintTargetWindows) ?
 }
 
 PrintTargetWindows::PrintTargetWindows(
-    std::unique_ptr<SkGDI::Document> aDocument, const IntSize& aSize, HDC aDC)
-    : PrintTarget(/* not using cairo_surface_t */ nullptr, aSize),
+    std::unique_ptr<SkGDI::Document> aDocument, HDC aDC)
+    : PrintTarget(/* not using cairo_surface_t */ nullptr),
       mDC(aDC),
       mDocument(std::move(aDocument)),
       mRecorder(MakeRefPtr<DrawEventRecorderMemory>()) {
@@ -53,9 +52,8 @@ PrintTargetWindows::~PrintTargetWindows() = default;
 
 /* static */
 already_AddRefed<PrintTargetWindows> PrintTargetWindows::CreateOrNull(HDC aDC) {
-  // Figure out the paper size, the actual surface size will be the printable
-  // area which is likely smaller, but the size here is later used to create the
-  // draw target where the full page size is needed.
+  // Sanity-check the paper size, the actual surface size will be the printable
+  // area which is likely smaller.
   // Note: we only scale the printing using the LOGPIXELSY,
   // so we use that when calculating the surface width as well as the height.
   int32_t heightDPI = ::GetDeviceCaps(aDC, LOGPIXELSY);
@@ -79,7 +77,7 @@ already_AddRefed<PrintTargetWindows> PrintTargetWindows::CreateOrNull(HDC aDC) {
     if (!doc) {
       return nullptr;
     }
-    return do_AddRef(new PrintTargetWindows(std::move(doc), size, aDC));
+    return do_AddRef(new PrintTargetWindows(std::move(doc), aDC));
   }
 
   cairo_surface_t* surface = cairo_win32_printing_surface_create(aDC);
@@ -89,8 +87,7 @@ already_AddRefed<PrintTargetWindows> PrintTargetWindows::CreateOrNull(HDC aDC) {
   }
 
   // The new object takes ownership of our surface reference.
-  RefPtr<PrintTargetWindows> target =
-      new PrintTargetWindows(surface, size, aDC);
+  RefPtr<PrintTargetWindows> target = new PrintTargetWindows(surface, aDC);
 
   return target.forget();
 }

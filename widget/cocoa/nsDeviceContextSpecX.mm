@@ -327,27 +327,7 @@ nsresult nsDeviceContextSpecX::PrintPDFViaPrintSession(CFURLRef aPDFURL) {
   NS_OBJC_END_TRY_BLOCK_RETURN(NS_ERROR_FAILURE);
 }
 
-void nsDeviceContextSpecX::GetPaperRect(double* aTop, double* aLeft,
-                                        double* aBottom, double* aRight) {
-  NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
-
-  PMRect paperRect;
-  ::PMGetAdjustedPaperRect(mPageFormat, &paperRect);
-
-  *aTop = paperRect.top;
-  *aLeft = paperRect.left;
-  *aBottom = paperRect.bottom;
-  *aRight = paperRect.right;
-
-  NS_OBJC_END_TRY_IGNORE_BLOCK;
-}
-
 already_AddRefed<PrintTarget> nsDeviceContextSpecX::MakePrintTarget() {
-  double top, left, bottom, right;
-  GetPaperRect(&top, &left, &bottom, &right);
-  const double width = right - left;
-  const double height = bottom - top;
-  IntSize size = IntSize::Ceil(width, height);
   auto stream = [&]() -> nsCOMPtr<nsIOutputStream> {
     if (mOutputStream) {
       return mOutputStream;
@@ -390,5 +370,5 @@ already_AddRefed<PrintTarget> nsDeviceContextSpecX::MakePrintTarget() {
     }
     return stream;
   }();
-  return PrintTargetSkPDF::CreateOrNull(stream, size);
+  return PrintTargetSkPDF::CreateOrNull(stream);
 }

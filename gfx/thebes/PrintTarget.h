@@ -69,8 +69,6 @@ class PrintTarget {
    */
   virtual void Finish();
 
-  const IntSize& GetSize() const { return mSize; }
-
   /**
    * Makes a DrawTarget to draw the printer output to, or returns null on
    * failure.
@@ -84,15 +82,6 @@ class PrintTarget {
    * NOTE: this should only be called between BeginPage()/EndPage() calls, and
    * the returned DrawTarget should not be drawn to after EndPage() has been
    * called.
-   *
-   * XXX For consistency with the old code this takes a size parameter even
-   * though we already have the size passed to our subclass's CreateOrNull
-   * factory methods.  The size passed to the factory method comes from
-   * nsIDeviceContextSpec::MakePrintTarget overrides, whereas the size
-   * passed to us comes from nsDeviceContext::CreateRenderingContext.  In at
-   * least one case (nsDeviceContextSpecAndroid::MakePrintTarget) these are
-   * different.  At some point we should align the two sources and get rid of
-   * this method's size parameter.
    *
    * XXX For consistency with the old code this returns a new DrawTarget for
    * each call.  Perhaps we can create and cache a DrawTarget in our subclass's
@@ -126,7 +115,7 @@ class PrintTarget {
 
  protected:
   // Only created via subclass's constructors
-  explicit PrintTarget(cairo_surface_t* aCairoSurface, const IntSize& aSize);
+  explicit PrintTarget(cairo_surface_t* aCairoSurface);
 
   // Protected because we're refcounted
   virtual ~PrintTarget();
@@ -137,7 +126,6 @@ class PrintTarget {
   cairo_surface_t* mCairoSurface;
   RefPtr<DrawTarget> mRefDT;  // reference DT
 
-  IntSize mSize;
   bool mIsFinished = false;
 #ifdef DEBUG
   bool mHasActivePage = false;

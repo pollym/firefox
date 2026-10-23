@@ -9,16 +9,11 @@
 
 namespace mozilla::gfx {
 
-PrintTargetRecording::PrintTargetRecording(const IntSize& aSize)
-    : PrintTarget(nullptr, aSize) {}
+PrintTargetRecording::PrintTargetRecording() : PrintTarget(nullptr) {}
 
 /* static */
-already_AddRefed<PrintTargetRecording> PrintTargetRecording::CreateOrNull(
-    const IntSize& aSize) {
-  if (!Factory::CheckSurfaceSize(aSize)) {
-    return nullptr;
-  }
-  return do_AddRef(new PrintTargetRecording(aSize));
+already_AddRefed<PrintTargetRecording> PrintTargetRecording::CreateOrNull() {
+  return do_AddRef(new PrintTargetRecording());
 }
 
 already_AddRefed<DrawTarget> PrintTargetRecording::MakeDrawTarget(
