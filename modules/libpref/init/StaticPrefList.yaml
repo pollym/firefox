@@ -17749,7 +17749,7 @@
 # Enable HTTP Compression Dictionary support
 - name: network.http.dictionaries.enable
   type: RelaxedAtomicBool
-  value: @IS_NIGHTLY_BUILD@
+  value: true
   mirror: always
 
 # Whether to collect telemetry about Akamai responses and Akamai WAF blocks.
