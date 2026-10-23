@@ -87,6 +87,9 @@ class nsAppShell : public nsBaseAppShell {
   bool mSkippedNativeCallback;
   bool mRunningCocoaEmbedded;
 
+  // Incremented whenever ProcessGeckoEvents() wakes a waiting native loop.
+  uint32_t mNativeWakeups = 0;
+
   int32_t mNativeEventCallbackDepth;
   // Can be set from different threads, so must be modified atomically
   int32_t mNativeEventScheduledDepth;

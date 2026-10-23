@@ -589,6 +589,7 @@ void nsAppShell::ProcessGeckoEvents(void* aInfo) {
 
   if (self->mRunningEventLoop) {
     self->mRunningEventLoop = false;
+    ++self->mNativeWakeups;
 
     // The run loop may be sleeping -- [NSRunLoop runMode:...]
     // won't return until it's given a reason to wake up.  Awaken it by
@@ -789,6 +790,7 @@ bool nsAppShell::ProcessNextNativeEvent(bool aMayWait) {
   }
 
   bool wasRunningEventLoop = mRunningEventLoop;
+  uint32_t wakeupsAtEntry = mNativeWakeups;
   mRunningEventLoop = aMayWait;
   NSDate* waitUntil = nil;
   if (aMayWait) waitUntil = [NSDate distantFuture];
@@ -897,7 +899,9 @@ bool nsAppShell::ProcessNextNativeEvent(bool aMayWait) {
     moreEvents = !!nextEvent;
   }
 
-  mRunningEventLoop = wasRunningEventLoop;
+  // A wake-up consumed by this nested loop was also meant for any enclosing
+  // native loop, so don't let it go back to waiting.
+  mRunningEventLoop = wasRunningEventLoop && mNativeWakeups == wakeupsAtEntry;
 
   NS_OBJC_END_TRY_IGNORE_BLOCK;
 
