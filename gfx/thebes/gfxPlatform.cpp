@@ -3642,6 +3642,17 @@ void gfxPlatform::GetCMSSupportInfo(mozilla::widget::InfoObject& aObj) {
   }();
   aObj.DefineProperty("CMSOutputProfileInUse", inUse);
 
+  if (mCMSOutputProfileStatus == CMSOutputProfileStatus::Loaded) {
+    size_t descriptionLength = 0;
+    const char* description =
+        qcms_profile_get_description(mCMSOutputProfile, &descriptionLength);
+    if (description) {
+      aObj.DefineProperty(
+          "CMSOutputProfileDescription",
+          NS_ConvertUTF8toUTF16(Span(description, descriptionLength)));
+    }
+  }
+
   qcms_CIE_xyYTRIPLE primaries;
   qcms_CIE_xyY white;
   if (mCMSOutputProfileStatus == CMSOutputProfileStatus::Loaded &&
