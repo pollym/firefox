@@ -4345,6 +4345,8 @@ class Document : public nsINode,
   static void ClearCrossDocViewTransitionParams(
       uint64_t aBrowserId,
       Maybe<uint64_t> aProducerBrowsingContextId = Nothing());
+  // Whether this top-level document will take stored params at its reveal.
+  bool HasPendingInboundCrossDocumentViewTransition();
 
   // Returns some ViewTransition or Nothing if skip transition.
   // https://drafts.csswg.org/css-view-transitions-2/#resolve-inbound-cross-document-view-transition
@@ -5512,6 +5514,9 @@ class Document : public nsINode,
 
   // https://html.spec.whatwg.org/#has-been-revealed
   bool mHasBeenRevealed : 1;
+
+  // Whether the next reveal is the first one after a BFCache restore.
+  bool mRevealAfterBFCacheRestore : 1;
 
   // Last value sent to the parent via SetMayHaveViewTransitionOptIn, so we only
   // send on change. See UpdateOutboundViewTransitionOptIn.

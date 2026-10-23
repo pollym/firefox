@@ -1082,12 +1082,13 @@ child:
     // captures its state in the next rendering update. The reply comes after
     // the capture, or right away if there is nothing to capture.
     // aSnapshotTargetTab is the tab of a document restored from BFCache that
-    // takes the snapshots, or 0.
+    // takes the snapshots, or 0. captured is true if the old document captured
+    // its state.
     async BeginOutboundCrossDocumentViewTransition(
         MaybeDiscardedBrowsingContext aContext,
         SessionHistoryInfo? aPageSwapTargetInfo,
         NavigationType aNavigationType,
-        TabId aSnapshotTargetTab) returns (bool unused);
+        TabId aSnapshotTargetTab) returns (bool captured);
     async ReactivateDocuments(MaybeDiscardedBrowsingContext aContext,
                               SessionHistoryInfo? aReactivatedEntry,
                               SessionHistoryInfo[] aNewSHEs,

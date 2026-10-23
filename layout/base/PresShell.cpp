@@ -4347,12 +4347,12 @@ void PresShell::UnsuppressAndInvalidate() {
   }
 
   if (mPresContext->IsRootContentDocumentCrossProcess()) {
-    if (auto* bc = BrowserChild::GetFrom(mDocument->GetDocShell())) {
-      if (mDocument->IsInitialDocument()) {
-        bc->SendDidUnsuppressPaintingNormalPriority();
-      } else {
-        bc->SendDidUnsuppressPainting();
-      }
+    // Deferred for an inbound view transition, see Document::Reveal.
+    // TODO(bug 1971055): Defer also for other navigations.
+    if (mDocument->HasPendingInboundCrossDocumentViewTransition()) {
+      mPresContext->DeferReadyToReplaceRetainedPaint();
+    } else {
+      mPresContext->SendReadyToReplaceRetainedPaint();
     }
   }
 

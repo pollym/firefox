@@ -1587,6 +1587,7 @@ Document::Document(const char* aContentType,
       mHasPolicyWithRequireTrustedTypesForDirective(false),
       mClipboardCopyTriggered(false),
       mHasBeenRevealed(false),
+      mRevealAfterBFCacheRestore(false),
       mSentMayHaveViewTransitionOptIn(false),
       mOutboundViewTransitionOptInDirty(false),
       mAutoSizesEnabled(StaticPrefs::dom_image_sizes_auto_enabled()),
@@ -13099,6 +13100,7 @@ void Document::OnPageShow(bool aPersisted, EventTarget* aDispatchStartTarget,
       // We're coming out of bfcache, clear the revealed flag per
       // https://html.spec.whatwg.org/#reactivate-a-document 4.2.
       mHasBeenRevealed = false;
+      mRevealAfterBFCacheRestore = true;
       MaybeScheduleRenderingPhases({RenderingPhase::Reveal});
     }
 
@@ -17893,6 +17895,8 @@ void Document::Reveal() {
 
   // Step 2
   mHasBeenRevealed = true;
+  const bool restoredFromBFCache = mRevealAfterBFCacheRestore;
+  mRevealAfterBFCacheRestore = false;
 
   UpdateOutboundViewTransitionOptIn();
 
@@ -17902,6 +17906,13 @@ void Document::Reveal() {
 
   RefPtr<nsGlobalWindowInner> win = nsGlobalWindowInner::Cast(GetInnerWindow());
   if (!win) {
+    if (nsPresContext* pc = GetPresContext()) {
+      if (restoredFromBFCache) {
+        pc->SendReadyToReplaceRetainedPaint();
+      } else {
+        pc->FlushDeferredReadyToReplaceRetainedPaint();
+      }
+    }
     return;
   }
 
@@ -17921,6 +17932,10 @@ void Document::Reveal() {
           TakeCrossDocViewTransitionParams(bc->BrowserId());
     }
   }
+
+  // The parent can still paint the previous document, see
+  // ReadyToReplaceRetainedPaint.
+  const bool tookParams = !!mInboundViewTransitionParams;
 
   // Use only params that a same-origin document captured, since cross-site
   // documents can share a content process.
@@ -17944,6 +17959,16 @@ void Document::Reveal() {
       PageRevealEvent::Constructor(win, u"pagereveal"_ns, init);
   event->SetTrusted(true);
   win->DispatchEvent(*event);
+
+  if (nsPresContext* pc = GetPresContext();
+      pc && (tookParams || restoredFromBFCache ||
+             pc->IsReadyToReplaceRetainedPaintDeferred())) {
+    if (vt.isSome()) {
+      pc->SendReadyToReplaceRetainedPaintAfterNextComposite();
+    } else {
+      pc->SendReadyToReplaceRetainedPaint();
+    }
+  }
 
   // Step 5, If transition is not null, then: Activate transition.
   if (vt.isSome()) {
@@ -20209,6 +20234,15 @@ UniquePtr<ViewTransitionParams> Document::TakeCrossDocViewTransitionParams(
   Maybe<UniquePtr<ViewTransitionParams>> extracted =
       sCrossDocVTParams->Extract(aBrowserId);
   return extracted ? std::move(*extracted) : nullptr;
+}
+
+bool Document::HasPendingInboundCrossDocumentViewTransition() {
+  if (mHasBeenRevealed || !sCrossDocVTParams ||
+      !StaticPrefs::dom_viewTransitions_cross_document_enabled()) {
+    return false;
+  }
+  BrowsingContext* bc = GetBrowsingContext();
+  return bc && bc->IsTop() && sCrossDocVTParams->Contains(bc->BrowserId());
 }
 
 void Document::ClearCrossDocViewTransitionParams(
