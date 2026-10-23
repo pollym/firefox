@@ -9547,6 +9547,7 @@ dependencies = [
  "objc2-io-surface",
  "objc2-metal",
  "parking_lot",
+ "scopeguard",
  "serde",
  "serde_json",
  "static_prefs",
