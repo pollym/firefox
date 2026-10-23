@@ -153,7 +153,7 @@ export class TemporalSuggestions extends SuggestProvider {
       type: lazy.UrlbarShared.RESULT_TYPE.SEARCH,
       source: lazy.UrlbarShared.RESULT_SOURCE.SEARCH,
       group: lazy.UrlbarShared.RESULT_GROUP.TEMPORAL_SUGGESTION,
-      hideRowLabel: true,
+      rowLabel: { id: "urlbar-group-temporal-seasonal" },
       payload: {
         engine: suggestion.engine,
         suggestion: query,

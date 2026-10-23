@@ -119,14 +119,22 @@ async function checkQuery(
   expectedQueries,
   { searchString = "", properties = {} } = {}
 ) {
+  let context = createContext(searchString, {
+    providers: [UrlbarProviderQuickSuggest.name, "UrlbarProviderTopSites"],
+    isPrivate: false,
+    ...properties,
+  });
   await check_results({
-    context: createContext(searchString, {
-      providers: [UrlbarProviderQuickSuggest.name, "UrlbarProviderTopSites"],
-      isPrivate: false,
-      ...properties,
-    }),
+    context,
     matches: expectedQueries.map(makeExpectedResult),
   });
+  for (let result of context.results) {
+    Assert.deepEqual(
+      result.rowLabel,
+      { id: "urlbar-group-temporal-seasonal" },
+      "Row label"
+    );
+  }
 }
 
 // A zero prefix query returns `temporal.rowCount` temporal search results.

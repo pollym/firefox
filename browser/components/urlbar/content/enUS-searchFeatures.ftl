@@ -335,3 +335,11 @@ urlbar-result-dismissal-acknowledgment-sports = Thanks for your feedback. You wo
 # This a11y label is read by screen readers when an item in the row is selected.
 urlbar-result-aria-group-sports =
   .aria-label = Sports suggestions
+
+## These strings are used for temporal search suggestions in the urlbar.
+## Temporal search suggestions are curated searches related to the time of year,
+## like a holiday, shown when the urlbar is focused.
+
+# A label shown above temporal search suggestions.
+urlbar-group-temporal-seasonal =
+  .label = Seasonal searches

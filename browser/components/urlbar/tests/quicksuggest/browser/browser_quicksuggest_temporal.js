@@ -11,6 +11,7 @@ ChromeUtils.defineESModuleGetters(this, {
 
 SearchUITestUtils.init(this);
 
+const LABEL = "Seasonal searches";
 const QUERIES = ["q1", "q2", "q3", "q4", "q5", "q6", "q7"];
 const TOP_SITES = [
   "https://example-1.com/",
@@ -114,6 +115,30 @@ async function getTemporalQueries(win = window) {
   return (await getTemporalRows(win)).map(r => r.result.payload.suggestion);
 }
 
+async function checkLabel(rows) {
+  let { row } = rows[0].element;
+  await TestUtils.waitForCondition(
+    () => row.getAttribute("label") == LABEL,
+    "Waiting for the label on the first temporal row"
+  );
+  Assert.equal(
+    getComputedStyle(row, "::before").content,
+    `"${LABEL}"`,
+    "The label is rendered"
+  );
+  let groupAriaLabel = row.querySelector(".urlbarView-group-aria-label");
+  await TestUtils.waitForCondition(
+    () => groupAriaLabel?.getAttribute("aria-label") == LABEL,
+    "Waiting for the aria label"
+  );
+  for (let other of rows.slice(1)) {
+    Assert.ok(
+      !other.element.row.hasAttribute("label"),
+      "Other temporal rows have no label"
+    );
+  }
+}
+
 // Five temporal rows appear after the top sites, using the search glass icon.
 add_task(async function rowsBelowTopSites() {
   gFeature._reset();
@@ -139,6 +164,51 @@ add_task(async function rowsBelowTopSites() {
     );
   }
   await closeView();
+});
+
+// The first temporal row is labeled, unless group labels are disabled.
+add_task(async function label() {
+  gFeature._reset();
+  await openZeroPrefix();
+  let rows = await getTemporalRows();
+  Assert.greater(rows[0].index, 0, "Temporal rows come after other rows");
+  await checkLabel(rows);
+  await closeView();
+
+  await SpecialPowers.pushPrefEnv({
+    set: [["browser.urlbar.groupLabels.enabled", false]],
+  });
+  await openZeroPrefix();
+  rows = await getTemporalRows();
+  Assert.ok(
+    !rows[0].element.row.hasAttribute("label"),
+    "No label when group labels are disabled"
+  );
+  await closeView();
+  await SpecialPowers.popPrefEnv();
+});
+
+// The first temporal row is still labeled when it's the first row in the view.
+add_task(async function labelWithoutPrecedingRows() {
+  gFeature._reset();
+  await SpecialPowers.pushPrefEnv({
+    set: [["browser.newtabpage.activity-stream.default.sites", ""]],
+  });
+  await updateTopSites(sites => !sites?.length);
+
+  await openZeroPrefix();
+  let rows = await getTemporalRows();
+  Assert.equal(rows.length, 5, "Five temporal rows");
+  Assert.equal(rows[0].index, 0, "Temporal rows come first");
+  await checkLabel(rows);
+  await closeView();
+
+  await SpecialPowers.pushPrefEnv({
+    set: [
+      ["browser.newtabpage.activity-stream.default.sites", TOP_SITES.join(",")],
+    ],
+  });
+  await updateTopSites(sites => sites?.length);
 });
 
 // Temporal rows are hidden while typing, and refocusing rotates to a different
