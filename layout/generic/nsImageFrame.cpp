@@ -2887,7 +2887,7 @@ nsresult nsImageFrame::HandleEvent(nsPresContext* aPresContext,
           NS_ENSURE_SUCCESS(rv, rv);
 
           spec += nsPrintfCString("?%d,%d", p.x.value, p.y.value);
-          rv = NS_MutateURI(uri).SetSpec(spec).Finalize(uri);
+          rv = NS_NewURI(getter_AddRefs(uri), spec);
           NS_ENSURE_SUCCESS(rv, rv);
 
           if (aEvent->mMessage == ePointerClick &&
