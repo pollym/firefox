@@ -269,12 +269,36 @@ static bool PiPPlayerHandlesAccessibilityFrontmost() {
   if (expiration) {
     mozilla::BackgroundHangMonitor().NotifyWait();
   }
-  NSEvent* nextEvent = [super nextEventMatchingMask:mask
-                                          untilDate:expiration
-                                             inMode:mode
-                                            dequeue:flag];
-  if (expiration) {
-    mozilla::BackgroundHangMonitor().NotifyActivity();
+  NSEvent* nextEvent = nil;
+  @try {
+    nextEvent = [super nextEventMatchingMask:mask
+                                   untilDate:expiration
+                                      inMode:mode
+                                     dequeue:flag];
+  } @catch (NSException* exception) {
+    // All nested AppKit event loops we host (context menus, popup
+    // menus, modal dialogs, sheets, file pickers, color and print
+    // panels, drag-and-drop sessions, NSWindow resize/move tracking,
+    // NSAlert, ...) re-enter -[NSApplication nextEventMatchingMask:...],
+    // so this is the lowest layer at which a standard NSException
+    // raised inside one of those loops can be intercepted. Catching
+    // here centralizes nsObjCExceptionLog and the
+    // ShouldIgnoreObjCException allow-list (currently the
+    // "Missing Touches" case from bug 1694000).
+    //
+    // This does not help with exceptions that do not carry standard
+    // ObjC type info (see bug 2041942 and bug 2042800 comment 1+).
+    // Those bypass every @catch (NSException*) on the stack, including
+    // this one, and need a different lever.
+    nsObjCExceptionLog(exception);
+    if (!ShouldIgnoreObjCException(exception)) {
+      @throw;
+    }
+    // Suppressed: drop this event tick; Apple's loop iterates again.
+  } @finally {
+    if (expiration) {
+      mozilla::BackgroundHangMonitor().NotifyActivity();
+    }
   }
   return nextEvent;
 }
