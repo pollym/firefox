@@ -134,6 +134,20 @@ async function checkQuery(
       { id: "urlbar-group-temporal-seasonal" },
       "Row label"
     );
+    Assert.deepEqual(
+      result.commands,
+      [
+        {
+          name: "dismiss",
+          l10n: { id: "urlbar-result-menu-dismiss-suggestion2" },
+        },
+        {
+          name: "not_interested",
+          l10n: { id: "urlbar-result-menu-dont-show-temporal-seasonal" },
+        },
+      ],
+      "Commands"
+    );
   }
 }
 
@@ -285,11 +299,6 @@ add_task(async function dismissal() {
   await newController().startQuery(context);
   let result = context.results.find(r => r.payload.suggestion == "q1");
   Assert.ok(result, "q1 is shown before dismissal");
-  Assert.deepEqual(
-    gFeature.getResultCommands(result).map(c => c.name),
-    ["dismiss"],
-    "Result commands"
-  );
 
   let changedPromise = TestUtils.topicObserved(
     "quicksuggest-dismissals-changed"
@@ -325,4 +334,54 @@ add_task(async function dateBoundaries() {
     await checkQuery(expected);
   }
   UrlbarTestUtils.stubNowZonedDateTime("2026-11-15T12:00[America/New_York]");
+});
+
+add_task(async function notInterested() {
+  gFeature._reset();
+  let context = createContext("", {
+    providers: [UrlbarProviderQuickSuggest.name, "UrlbarProviderTopSites"],
+    isPrivate: false,
+  });
+  let controller = newController();
+  await controller.startQuery(context);
+  let results = context.results;
+  Assert.equal(results.length, 5, "Has results");
+
+  let parentController = controller.parentController;
+  let removeResultStub = sinon.stub(parentController, "removeResult");
+  let engaged = results[1];
+  gFeature.onEngagement(context, parentController, {
+    result: engaged,
+    selType: "not_interested",
+  });
+
+  Assert.ok(
+    !UrlbarPrefs.get("suggest.temporal.seasonal"),
+    "suggest.temporal.seasonal is false"
+  );
+  Assert.ok(UrlbarPrefs.get("suggest.temporal"), "suggest.temporal is true");
+  Assert.equal(
+    removeResultStub.callCount,
+    results.length,
+    "All results are removed"
+  );
+  let lastCall = removeResultStub.lastCall;
+  Assert.equal(lastCall.args[0], engaged, "Engaged result is removed last");
+  Assert.deepEqual(
+    lastCall.args[1],
+    {
+      acknowledgeDismissalL10n: {
+        id: "urlbar-temporal-seasonal-dismissal-acknowledgment",
+      },
+    },
+    "Acknowledgment is shown for the engaged result"
+  );
+  for (let call of removeResultStub.getCalls().slice(0, -1)) {
+    Assert.notEqual(call.args[0], engaged, "Other result");
+    Assert.equal(call.args[1], undefined, "No acknowledgment");
+  }
+
+  removeResultStub.restore();
+  UrlbarPrefs.clear("suggest.temporal.seasonal");
+  await QuickSuggestTestUtils.forceSync();
 });
