@@ -5780,6 +5780,8 @@ class Document : public nsINode,
   // will allow us to flush out any pending stuff from the sink even if
   // EndLoad() has already happened.
   nsWeakPtr mWeakSink;
+  // Keeps the sink alive while render-blocking defers the start of layout.
+  nsCOMPtr<nsIContentSink> mRenderBlockedSink;
 
   // Our update nesting level
   uint32_t mUpdateNestLevel;
