@@ -4864,6 +4864,24 @@ AttachDecision SetPropIRGenerator::tryAttachSetDenseElement(
   return AttachDecision::Attach;
 }
 
+// Guard that the prototype chain of |obj| doesn't have indexed properties that
+// would affect adding an element to |obj|.
+static void GuardProtoChainForAddElement(JSContext* cx, CacheIRWriter& writer,
+                                         NativeObject* obj,
+                                         ObjOperandId objId) {
+  // Note: unlike GeneratePrototypeHoleGuards, we don't need to guard that the
+  // prototype chain has no dense elements. Only two kinds of properties on a
+  // prototype object can prevent adding an element:
+  //
+  // - Accessor properties: never stored in dense elements.
+  // - Non-writable properties (can't be shadowed through SetElem): only stored
+  //   in dense elements when ObjectFlag::FrozenElements is set.
+  //
+  // See also CanAttachAddElement.
+  GuardProtoChainHasNoIndexedProps(cx, writer, obj, objId,
+                                   /* allowDenseElements = */ true);
+}
+
 static bool CanAttachAddElement(NativeObject* obj, bool isInit,
                                 AllowIndexedReceiver allowIndexedReceiver) {
   MOZ_ASSERT(!obj->is<TypedArrayObject>());
@@ -4987,9 +5005,9 @@ AttachDecision SetPropIRGenerator::tryAttachSetDenseElementHole(
 
   TestMatchingNativeReceiver(writer, nobj, objId);
 
-  // Also shape guard the proto chain, unless this is an InitElem.
+  // Also guard the proto chain, unless this is an InitElem.
   if (IsPropertySetOp(op)) {
-    ShapeGuardProtoChain(writer, nobj, objId);
+    GuardProtoChainForAddElement(cx_, writer, nobj, objId);
   }
 
   writer.storeDenseElementHole(objId, indexId, rhsId, isAdd);
@@ -5078,7 +5096,7 @@ AttachDecision SetPropIRGenerator::tryAttachAddOrUpdateSparseElement(
   // only be data properties, so our specialized Set handler is ok to bind
   // to them.
   if (IsPropertySetOp(op)) {
-    ShapeGuardProtoChain(writer, nobj, objId);
+    GuardProtoChainForAddElement(cx_, writer, nobj, objId);
   }
 
   // Ensure that if we're adding an element to the object, the object's
@@ -6714,8 +6732,8 @@ AttachDecision InlinableNativeIRGenerator::tryAttachArrayPush() {
   // Guard that the shape matches.
   TestMatchingNativeReceiver(writer, thisarray, thisObjId);
 
-  // Guard proto chain shapes.
-  ShapeGuardProtoChain(writer, thisarray, thisObjId);
+  // Guard the proto chain.
+  GuardProtoChainForAddElement(cx_, writer, thisarray, thisObjId);
 
   // arr.push(x) is equivalent to arr[arr.length] = x for regular arrays.
   ValOperandId argId = loadArgument(calleeId, ArgumentKind::Arg0);
