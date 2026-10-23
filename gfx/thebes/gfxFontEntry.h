@@ -768,8 +768,7 @@ class gfxFontEntry {
     if (!mSkrifaFontInitialized) {
       mozilla::AutoWriteLock lock(mLock);
       if (!mSkrifaFontInitialized) {
-        if (mozilla::StaticPrefs::
-                gfx_font_rendering_fontations_enabled_AtStartup()) {
+        if (mozilla::StaticPrefs::gfx_font_rendering_fontations_enabled()) {
           InitSkrifaFontFace();
         }
         mSkrifaFontInitialized = true;

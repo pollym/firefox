@@ -8028,9 +8028,9 @@
   # Note that this is only checked at startup; toggling it requires a restart
   # to take effect.
 -   name: gfx.font_rendering.fontations.enabled
-    type: bool
+    type: RelaxedAtomicBool
     value: false
-    mirror: once
+    mirror: always
 #endif
 
 #if defined(XP_DARWIN)
