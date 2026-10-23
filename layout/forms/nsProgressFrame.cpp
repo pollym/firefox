@@ -159,12 +159,6 @@ void nsProgressFrame::ReflowChildFrame(nsIFrame* aChild,
     xoffset += parentPhysicalSize.Width() - size;
   }
 
-  // Vertical bars begin at the inline-start side if the writing mode is also
-  // vertical, and at the bottom otherwise.
-  const bool startAtBottom =
-      vertical &&
-      (!wm.IsVertical() || wm.PhysicalSide(LogicalSide::IStart) == eSideBottom);
-
   // The bar size is fixed in these cases:
   // - the progress position is determined: the bar size is fixed according
   //   to it's value.
@@ -174,9 +168,8 @@ void nsProgressFrame::ReflowChildFrame(nsIFrame* aChild,
   // native), the bar size isn't fixed and can be set by the author.
   if (position != -1 || ShouldUseNativeStyle()) {
     if (vertical) {
-      if (startAtBottom) {
-        yoffset += parentPhysicalSize.Height() - size;
-      }
+      // We want the bar to begin at the bottom.
+      yoffset += parentPhysicalSize.Height() - size;
       size -= reflowInput.ComputedPhysicalMargin().TopBottom() +
               reflowInput.ComputedPhysicalBorderPadding().TopBottom();
       size = std::max(size, 0);
@@ -187,7 +180,7 @@ void nsProgressFrame::ReflowChildFrame(nsIFrame* aChild,
       size = std::max(size, 0);
       reflowInput.SetComputedWidth(size);
     }
-  } else if (startAtBottom) {
+  } else if (vertical) {
     // For vertical progress bars, we need to position the bar specifically when
     // the width isn't constrained (position == -1 and !ShouldUseNativeStyle())
     // because parentPhysiscalSize.Height() - size == 0.
