@@ -10,7 +10,9 @@ extern crate thin_vec;
 use nsstring::nsCString;
 use skrifa::metrics::GlyphMetrics;
 use skrifa::prelude::*;
+use skrifa::raw::TableProvider;
 use skrifa::raw::collections::int_set::Domain; // for Tag::to_u32()
+use skrifa::raw::tables::os2::SelectionFlags;
 use skrifa::string::StringId;
 use std::slice;
 use thin_vec::ThinVec;
@@ -253,6 +255,24 @@ pub extern "C" fn skrifa_font_get_metrics(
     result.max_ascent = metrics.ascent;
     result.max_descent = metrics.descent;
     result.external_leading = metrics.leading;
+
+    // Hack around broken Nimbus font metrics, see bug 2082557
+    if font
+        .0
+        .localized_strings(StringId::FAMILY_NAME)
+        .english_or_first()
+        .is_some_and(|name| name.to_string().starts_with("Nimbus "))
+        && let Ok(os2) = font.0.os2()
+        && !os2
+            .fs_selection()
+            .contains(SelectionFlags::USE_TYPO_METRICS)
+        && os2.s_typo_line_gap() > 0
+        && os2.us_win_ascent() != 0
+    {
+        result.max_ascent = os2.us_win_ascent() as f32 * result.scale_factor;
+        result.max_descent = -(os2.us_win_descent() as f32 * result.scale_factor);
+        result.external_leading = 0.0;
+    }
 
     // We return 0.0 for these metrics if unavailable; gfxFont::SanitizeMetrics
     // will fix them up to reasonable defaults.

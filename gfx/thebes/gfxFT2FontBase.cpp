@@ -355,7 +355,18 @@ bool gfxFT2FontBase::InitMetricsFromPlatform() {
 
   TT_OS2* os2 = static_cast<TT_OS2*>(FT_Get_Sfnt_Table(face, ft_sfnt_os2));
 
-  if (os2 && os2->sTypoAscender && yScale > 0.0) {
+  const uint16_t kUseTypoMetricsMask = 1 << 7;
+  // Hack around broken Nimbus font metrics, see bug 2082557
+  if (face->family_name &&
+      StringBeginsWith(nsDependentCString(face->family_name), "Nimbus "_ns) &&
+      os2 && yScale > 0.0 && !(os2->fsSelection & kUseTypoMetricsMask) &&
+      os2->sTypoLineGap > 0 && os2->usWinAscent) {
+    mMetrics.maxAscent = mMetrics.emAscent =
+        NS_round(os2->usWinAscent * yScale);
+    mMetrics.maxDescent = mMetrics.emDescent =
+        NS_round(os2->usWinDescent * yScale);
+    lineHeight = mMetrics.maxAscent + mMetrics.maxDescent;
+  } else if (os2 && os2->sTypoAscender && yScale > 0.0) {
     mMetrics.emAscent = os2->sTypoAscender * yScale;
     mMetrics.emDescent = -os2->sTypoDescender * yScale;
     FT_Short typoHeight =
@@ -364,7 +375,6 @@ bool gfxFT2FontBase::InitMetricsFromPlatform() {
 
     // If the OS/2 fsSelection USE_TYPO_METRICS bit is set,
     // set maxAscent/Descent from the sTypo* fields instead of hhea.
-    const uint16_t kUseTypoMetricsMask = 1 << 7;
     if ((os2->fsSelection & kUseTypoMetricsMask) ||
         // maxAscent/maxDescent get used for frame heights, and some fonts
         // don't have the HHEA table ascent/descent set (bug 279032).
