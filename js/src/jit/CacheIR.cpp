@@ -2814,18 +2814,30 @@ AttachDecision GetPropIRGenerator::tryAttachStringChar(ValOperandId valId,
     return AttachDecision::NoAction;
   }
 
-  // Can't attach for out-of-bounds access without guarding that indexed
-  // properties aren't present along the prototype chain of |String.prototype|.
-  if (attach == AttachStringChar::OutOfBounds) {
+  // We can optimize out-of-bounds reads if there are no indexed properties on
+  // String.prototype and idVal_ >= 0. Negative integers aren't array indices
+  // and aren't covered by StringProtoHasNoIndexedPropsFuse.
+  if (attach == AttachStringChar::OutOfBounds &&
+      (idVal_.toInt32() < 0 ||
+       !cx_->realm()->realmFuses.stringProtoHasNoIndexedPropsFuse.intact())) {
     return AttachDecision::NoAction;
   }
 
   StringOperandId strId = writer.guardToString(valId);
   Int32OperandId int32IndexId = EmitGuardToInt32Index(writer, idVal_, indexId);
-  if (attach == AttachStringChar::Linearize) {
+
+  if (attach == AttachStringChar::OutOfBounds) {
+    writer.guardInt32IsNonNegative(int32IndexId);
+    writer.guardFuse(RealmFuses::FuseIndex::StringProtoHasNoIndexedPropsFuse);
+    // LoadStringAtResult with |handleOOB| requires a linear string.
     strId = writer.linearizeForCharAccess(strId, int32IndexId);
+    writer.loadStringAtResult(strId, int32IndexId, /* handleOOB = */ true);
+  } else {
+    if (attach == AttachStringChar::Linearize) {
+      strId = writer.linearizeForCharAccess(strId, int32IndexId);
+    }
+    writer.loadStringCharResult(strId, int32IndexId, /* handleOOB = */ false);
   }
-  writer.loadStringCharResult(strId, int32IndexId, /* handleOOB = */ false);
 
   trackAttached("GetProp.StringChar");
   return AttachDecision::Attach;

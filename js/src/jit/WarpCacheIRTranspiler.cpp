@@ -494,6 +494,7 @@ bool WarpCacheIRTranspiler::emitGuardFuse(RealmFuses::FuseIndex fuseIndex) {
     case RealmFuses::FuseIndex::OptimizeRegExpPrototypeFuse:
     case RealmFuses::FuseIndex::ObjectProtoHasNoIndexedPropsFuse:
     case RealmFuses::FuseIndex::ArrayProtoHasNoIndexedPropsFuse:
+    case RealmFuses::FuseIndex::StringProtoHasNoIndexedPropsFuse:
       // This is a no-op because WarpOracle has added a compilation dependency.
       MOZ_ASSERT(RealmFuses::isInvalidatingFuse(fuseIndex));
       return true;

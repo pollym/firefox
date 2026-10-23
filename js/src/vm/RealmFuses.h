@@ -351,6 +351,18 @@ struct ArrayProtoHasNoIndexedPropsFuse final : public InvalidatingRealmFuse {
   virtual bool checkInvariant(JSContext* cx) override;
 };
 
+// If this fuse is intact, the following invariants must hold:
+// - String.prototype has no indexed properties (no dense elements and no
+//   sparse indexed properties).
+// - String.prototype's [[Prototype]] is Object.prototype.
+// - The Object.prototype fuse (ObjectProtoHasNoIndexedPropsFuse) is intact.
+struct StringProtoHasNoIndexedPropsFuse final : public InvalidatingRealmFuse {
+  virtual const char* name() override {
+    return "StringProtoHasNoIndexedPropsFuse";
+  }
+  virtual bool checkInvariant(JSContext* cx) override;
+};
+
 #define FOR_EACH_REALM_FUSE(FUSE)                                              \
   FUSE(OptimizeGetIteratorFuse, optimizeGetIteratorFuse)                       \
   FUSE(OptimizeGetIteratorBytecodeFuse, optimizeGetIteratorBytecodeFuse)       \
@@ -379,7 +391,8 @@ struct ArrayProtoHasNoIndexedPropsFuse final : public InvalidatingRealmFuse {
   FUSE(OptimizeWeakMapPrototypeSetFuse, optimizeWeakMapPrototypeSetFuse)       \
   FUSE(OptimizeWeakSetPrototypeAddFuse, optimizeWeakSetPrototypeAddFuse)       \
   FUSE(ObjectProtoHasNoIndexedPropsFuse, objectProtoHasNoIndexedPropsFuse)     \
-  FUSE(ArrayProtoHasNoIndexedPropsFuse, arrayProtoHasNoIndexedPropsFuse)
+  FUSE(ArrayProtoHasNoIndexedPropsFuse, arrayProtoHasNoIndexedPropsFuse)       \
+  FUSE(StringProtoHasNoIndexedPropsFuse, stringProtoHasNoIndexedPropsFuse)
 
 struct RealmFuses {
   RealmFuses() = default;
