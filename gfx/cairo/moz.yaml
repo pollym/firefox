@@ -31,6 +31,16 @@ vendoring:
   # to transfer.
   tolerate-git-fsck-errors: true
 
+  # Our own versions of files that upstream's Meson build generates or that
+  # upstream no longer ships. We build cairo with moz.build files instead of
+  # Meson, so we need them in the tree.
+  keep:
+    - src/cairo-features.h
+    - src/cairo-platform.h
+    - src/cairo-rename.h
+    - src/config.h
+    - src/pixman-rename.h
+
   exclude:
     - boilerplate
     - build
@@ -66,7 +76,7 @@ vendoring:
     - patches/0026-Revert-cairo-quartz-.-ch-to-the-pre-1.18.0-Mozilla-m.patch
     - patches/0027-Bug-2029325-Reject-negative-sub_num-during-CFF-subse.patch
     - patches/0028-Bug-2029463-Range-check-string-id-during-subsetting..patch
-    - patches/0029-Add-configuration-files-needed-for-Firefox-s-mozbuil.patch
+    - patches/0029-Stop-ignoring-cairo-features.h.patch
     - patches/0030-Bug-2027883-Fix-integer-overflow-in-cairo-PDF-surfac.patch
     - patches/0033-Bug-2036587-No-component-alpha-for-dwrite-glyph-surfaces.patch
     - patches/0038-pcf-row_bytes.patch
