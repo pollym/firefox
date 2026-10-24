@@ -61,7 +61,6 @@ vendoring:
     - patches/0015-Guard-FT_COLOR_H-and-related-FreeType-fontconfig-sym.patch
     - patches/0016-Adapt-cairo-quartz-for-iOS-builds.patch
     - patches/0017-Don-t-prematurely-clear-cairo_quartz_image_surface_t.patch
-    - patches/0018-Add-ifdef-guards-around-mingw-specific-__CRT_UUID_DE.patch
     - patches/0019-Add-cairo_win32_surface-APIs-wanted-for-gecko.patch
     - patches/0020-Handle-CAIRO_FORMAT_A8-in-_cairo_surface_to_cgimage-.patch
     - patches/0026-Revert-cairo-quartz-.-ch-to-the-pre-1.18.0-Mozilla-m.patch
