@@ -73,7 +73,6 @@ vendoring:
     - patches/0031-Bug-2029910-Cairo-avoid-overflow-rendering-FreeType-.patch
     - patches/0032-Bug-2033610-Check-cairo-image-surface-for-error.patch
     - patches/0033-Bug-2036587-No-component-alpha-for-dwrite-glyph-surfaces.patch
-    - patches/0036-cff-operator-bounds.patch
     - patches/0038-pcf-row_bytes.patch
     - patches/0040-Bug-2048799-flip-polarity-of-a-bounds-check.patch
     - patches/0041-fdselect-checks.patch
