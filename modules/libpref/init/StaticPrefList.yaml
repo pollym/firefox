@@ -8099,7 +8099,7 @@
 # Whether to hide legacy font formats (Type 1 and PCF) from the font list.
 -   name: gfx.font_rendering.fontconfig.skip_legacy_fonts
     type: RelaxedAtomicBool
-    value: @IS_NIGHTLY_BUILD@
+    value: true
     mirror: always
 #endif
 
