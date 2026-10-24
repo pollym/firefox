@@ -71,29 +71,29 @@ vendoring:
     - patches/0015-Guard-FT_COLOR_H-and-related-FreeType-fontconfig-sym.patch
     - patches/0016-Adapt-cairo-quartz-for-iOS-builds.patch
     - patches/0017-Don-t-prematurely-clear-cairo_quartz_image_surface_t.patch
-    - patches/0019-Add-cairo_win32_surface-APIs-wanted-for-gecko.patch
-    - patches/0020-Handle-CAIRO_FORMAT_A8-in-_cairo_surface_to_cgimage-.patch
-    - patches/0026-Revert-cairo-quartz-.-ch-to-the-pre-1.18.0-Mozilla-m.patch
-    - patches/0027-Bug-2029325-Reject-negative-sub_num-during-CFF-subse.patch
-    - patches/0028-Bug-2029463-Range-check-string-id-during-subsetting..patch
-    - patches/0029-Stop-ignoring-cairo-features.h.patch
-    - patches/0030-Bug-2027883-Fix-integer-overflow-in-cairo-PDF-surfac.patch
-    - patches/0033-Bug-2036587-No-component-alpha-for-dwrite-glyph-surfaces.patch
-    - patches/0038-pcf-row_bytes.patch
-    - patches/0040-Bug-2048799-flip-polarity-of-a-bounds-check.patch
-    - patches/0041-fdselect-checks.patch
-    - patches/0042-gid-range-check.patch
-    - patches/0043-type1-stack-check.patch
-    - patches/0044-win32-printing-linear-pattern.patch
-    - patches/0045-Bug-2045711-records-size-check.patch
-    - patches/0046-Bug-2053599-glyph-index-bounds.patch
-    - patches/0047-Bug-2050228-win32-print-tiny-dash.patch
-    - patches/0048-Bug-2054626-type2-decode-integer.patch
-    - patches/0049-Bug-2054627-skip-token-check.patch
-    - patches/0050-Bug-2068367-bitmap-surface-tmp-buffer.patch
-    - patches/0051-Bug-2068420-skip-head-sentinel.patch
-    - patches/0052-Bug-2082006-lock-sharedftface.patch
-    - patches/0053-Detect-IDWriteFactory8-from-the-SDK-headers.patch
+    - patches/0018-Add-cairo_win32_surface-APIs-wanted-for-gecko.patch
+    - patches/0019-Handle-CAIRO_FORMAT_A8-in-_cairo_surface_to_cgimage-.patch
+    - patches/0020-Revert-cairo-quartz-.-ch-to-the-pre-1.18.0-Mozilla-m.patch
+    - patches/0021-Bug-2029325-Reject-negative-sub_num-during-CFF-subse.patch
+    - patches/0022-Bug-2029463-Range-check-string-id-during-subsetting..patch
+    - patches/0023-Stop-ignoring-cairo-features.h.patch
+    - patches/0024-Bug-2027883-Fix-integer-overflow-in-cairo-PDF-surfac.patch
+    - patches/0025-Bug-2036587-No-component-alpha-for-dwrite-glyph-surfaces.patch
+    - patches/0026-pcf-row_bytes.patch
+    - patches/0027-Bug-2048799-flip-polarity-of-a-bounds-check.patch
+    - patches/0028-fdselect-checks.patch
+    - patches/0029-gid-range-check.patch
+    - patches/0030-type1-stack-check.patch
+    - patches/0031-win32-printing-linear-pattern.patch
+    - patches/0032-Bug-2045711-records-size-check.patch
+    - patches/0033-Bug-2053599-glyph-index-bounds.patch
+    - patches/0034-Bug-2050228-win32-print-tiny-dash.patch
+    - patches/0035-Bug-2054626-type2-decode-integer.patch
+    - patches/0036-Bug-2054627-skip-token-check.patch
+    - patches/0037-Bug-2068367-bitmap-surface-tmp-buffer.patch
+    - patches/0038-Bug-2068420-skip-head-sentinel.patch
+    - patches/0039-Bug-2082006-lock-sharedftface.patch
+    - patches/0040-Detect-IDWriteFactory8-from-the-SDK-headers.patch
 
 updatebot:
   maintainer-phab: "#gfx-reviewers"
