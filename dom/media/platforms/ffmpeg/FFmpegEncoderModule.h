@@ -30,6 +30,10 @@ class FFmpegEncoderModule final : public PlatformEncoderModule {
 
   const char* GetName() const override { return "FFmpeg Encoder Module"; }
 
+  RefPtr<CreateEncoderPromise> AsyncCreateEncoder(
+      const EncoderConfig& aConfig,
+      const RefPtr<TaskQueue>& aTaskQueue) override;
+
   already_AddRefed<MediaDataEncoder> CreateVideoEncoder(
       const EncoderConfig& aConfig,
       const RefPtr<TaskQueue>& aTaskQueue) const override;
