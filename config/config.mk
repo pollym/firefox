@@ -238,12 +238,6 @@ endif
 
 DEPENDENCIES	= .md
 
-# Export to propagate to cl and submake for third-party code.
-# Eventually, we'll want to just use -I.
-ifdef INCLUDE
-export INCLUDE
-endif
-
 # Export to propagate to link.exe and submake for third-party code.
 # Eventually, we'll want to just use -LIBPATH.
 ifdef LIB
