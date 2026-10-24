@@ -2438,8 +2438,10 @@ function runTestHelperSync(aArgs) {
  * Creates a symlink for updater tests.
  */
 function createSymlink() {
+  let baseDir = do_get_tempdir().path;
   let args = [
     "setup-symlink",
+    baseDir,
     "moz-foo",
     "moz-bar",
     "target",
@@ -2452,6 +2454,7 @@ function createSymlink() {
   file.permissions = 0o666;
   args = [
     "setup-symlink",
+    baseDir,
     "moz-foo2",
     "moz-bar2",
     "target2",
@@ -2466,8 +2469,10 @@ function createSymlink() {
  * Removes a symlink for updater tests.
  */
 function removeSymlink() {
+  let baseDir = do_get_tempdir().path;
   let args = [
     "remove-symlink",
+    baseDir,
     "moz-foo",
     "moz-bar",
     "target",
@@ -2477,6 +2482,7 @@ function removeSymlink() {
   Assert.equal(exitValue, 0, "the helper process exit value should be 0");
   args = [
     "remove-symlink",
+    baseDir,
     "moz-foo2",
     "moz-bar2",
     "target2",
