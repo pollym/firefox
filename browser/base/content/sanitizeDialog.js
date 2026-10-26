@@ -582,7 +582,7 @@ var gSanitizePromptDialog = {
     [amount, unit] = this.cacheSize;
     document.l10n.setAttributes(
       this._cacheCheckbox,
-      "item-cached-content-with-size",
+      "item-cached-content-with-size2",
       { amount, unit }
     );
 

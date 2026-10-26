@@ -956,7 +956,7 @@ SettingGroupManager.registerGroups({
               "search-l10n-ids": `
                 clear-data-settings-label,
                 history-section-label,
-                item-history-and-downloads.label,
+                item-history-and-downloads2.label,
                 item-cookies.label,
                 item-active-logins.label,
                 item-cache.label,
@@ -1076,7 +1076,7 @@ SettingGroupManager.registerGroups({
                   "search-l10n-ids": `
                         clear-data-settings-label,
                         history-section-label,
-                        item-history-and-downloads.label,
+                        item-history-and-downloads2.label,
                         item-cookies.label,
                         item-active-logins.label,
                         item-cache.label,
