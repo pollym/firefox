@@ -926,7 +926,7 @@ export const PREFS_CONFIG = new Map([
     {
       title:
         "Whether the Picture of the day 'Set as wallpaper' feature/CTA is enabled",
-      value: false,
+      value: true,
     },
   ],
   [
