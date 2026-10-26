@@ -3,8 +3,6 @@
   "exclude": [
     "lib/ActivityStream.sys.mjs",
     "lib/ExternalComponentsFeed.sys.mjs",
-    "lib/InferredModel/FeatureModel.sys.mjs",
-    "lib/InferredPersonalizationFeed.sys.mjs",
     "lib/NewTabAttributionService.sys.mjs",
     "lib/NewTabContentPing.sys.mjs",
     "lib/SmartShortcutsRanker/RankShortcuts.mjs",

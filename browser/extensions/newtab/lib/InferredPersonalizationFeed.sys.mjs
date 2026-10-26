@@ -437,6 +437,7 @@ export class InferredPersonalizationFeed {
       applyPostProcessing: isClickModel,
     });
 
+    /** @type {{[key: string]: any}} */
     let result = interests;
     if (
       model.modelType === MODEL_TYPE.CLICK_IMP_PAIR ||
