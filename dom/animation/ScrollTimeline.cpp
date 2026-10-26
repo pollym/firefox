@@ -341,9 +341,11 @@ ScrollTimeline::StateSnapshot::StateSnapshot(
                            ? scrollStyles.mHorizontal
                            : scrollStyles.mVertical;
 
-  mAPZIsActiveForSource = gfxPlatform::AsyncPanZoomEnabled() &&
-                          !nsLayoutUtils::ShouldDisableApzForElement(e) &&
-                          DisplayPortUtils::HasNonMinimalNonZeroDisplayPort(e);
+  mAPZIsActiveForSource =
+      gfxPlatform::AsyncPanZoomEnabled() &&
+      !nsLayoutUtils::ShouldDisableApzForElement(e) &&
+      DisplayPortUtils::HasNonMinimalNonZeroDisplayPort(e) &&
+      scrollContainerFrame->IsMaybeAsynchronouslyScrolled();
 }
 
 layers::ScrollDirection ScrollTimeline::StateSnapshot::ComputePhysicalAxis()
