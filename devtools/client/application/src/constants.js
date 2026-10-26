@@ -12,6 +12,7 @@ const actionTypes = {
   RESET_MANIFEST: "RESET_MANIFEST",
   // page substate
   UPDATE_DOMAIN: "UPDATE_DOMAIN",
+  UPDATE_PREFETCH_STATUS: "UPDATE_PREFETCH_STATUS",
   // ui substate
   UPDATE_SELECTED_PAGE: "UPDATE_SELECTED_PAGE",
   // workers substate

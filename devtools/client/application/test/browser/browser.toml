@@ -25,6 +25,7 @@ support-files = [
   "resources/session-history/index.html",
   "resources/session-history/iframe.html",
   "resources/session-history/index_with_title.html",
+  "resources/speculative-loads/prefetch-status.sjs",
   "!/devtools/client/debugger/test/mochitest/shared-head.js",
   "!/devtools/client/shared/test/shared-head.js",
 ]
@@ -115,6 +116,11 @@ fail-if = [
 ]
 
 ["browser_application_panel_sidebar.js"]
+fail-if = [
+  "a11y_checks", # Bug 1849028 clicked element may not be focusable and/or labeled
+]
+
+["browser_application_panel_speculative-load-status.js"]
 fail-if = [
   "a11y_checks", # Bug 1849028 clicked element may not be focusable and/or labeled
 ]

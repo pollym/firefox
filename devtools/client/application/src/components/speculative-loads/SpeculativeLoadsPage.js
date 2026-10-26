@@ -4,6 +4,7 @@
 
 "use strict";
 
+const PropTypes = require("resource://devtools/client/shared/vendor/react-prop-types.mjs");
 const {
   createFactory,
   PureComponent,
@@ -24,10 +25,19 @@ const Localized = createFactory(FluentReact.Localized);
 
 class SpeculativeLoadsPage extends PureComponent {
   static get propTypes() {
-    return {};
+    return {
+      activatedFromNavigationalPrefetch: PropTypes.bool,
+    };
   }
 
   render() {
+    const { activatedFromNavigationalPrefetch } = this.props;
+    let status = "unknown";
+    if (typeof activatedFromNavigationalPrefetch === "boolean") {
+      status = activatedFromNavigationalPrefetch
+        ? "prefetched"
+        : "not-prefetched";
+    }
     return section(
       {
         className: "app-page js-speculative-loads-page",
@@ -44,13 +54,18 @@ class SpeculativeLoadsPage extends PureComponent {
           })
         ),
         p(
-          { className: "speculative-loads-status" },
+          {
+            className: "speculative-loads-status",
+            "data-prefetch-status": status,
+            role: "status",
+          },
           span({
             className: "status-icon",
+            "aria-hidden": true,
           }),
           Localized(
-            { id: "speculative-loads-no-speculative-prefetch-status" },
-            span({ class: "status-text" })
+            { id: `speculative-loads-prefetch-status-${status}` },
+            span({ className: "status-text" })
           )
         )
       ),
@@ -77,8 +92,11 @@ class SpeculativeLoadsPage extends PureComponent {
   }
 }
 
-function mapStateToProps() {
-  return {};
+function mapStateToProps(state) {
+  return {
+    activatedFromNavigationalPrefetch:
+      state.page.activatedFromNavigationalPrefetch,
+  };
 }
 
 // Exports

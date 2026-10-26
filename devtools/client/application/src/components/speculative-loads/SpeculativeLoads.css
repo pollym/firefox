@@ -33,3 +33,8 @@
   padding-inline-start: 5px;
   font-weight: bold;
 }
+
+.speculative-loads-status[data-prefetch-status="prefetched"] .status-icon {
+  color: var(--theme-icon-checked-color);
+  background-image: url("chrome://devtools/skin/images/check.svg");
+}
