@@ -6180,7 +6180,9 @@ void Element::ClearServoData(Document* aDoc) {
   if (HasServoData()) {
     Servo_Element_ClearData(this);
   } else {
-    UnsetFlags(kAllServoDescendantBits | NODE_NEEDS_FRAME);
+    // NOTE: Matches the flags cleared in GeckoElement::clear_data.
+    UnsetFlags(ELEMENT_HAS_SNAPSHOT | ELEMENT_HANDLED_SNAPSHOT |
+               kAllServoDescendantBits | NODE_NEEDS_FRAME);
   }
   // Since this element is losing its servo data, nothing under it may have
   // servo data either, so we can forget restyles rooted at this element. This
