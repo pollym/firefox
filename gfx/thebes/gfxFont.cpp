@@ -1057,8 +1057,17 @@ gfxFont::~gfxFont() {
 }
 
 void gfxFont::InitMetrics() {
+  // Apply any size-adjust from the font enty to the given size; this may be
+  // re-adjusted below if font-size-adjust is in effect.
+  mAdjustedSize = GetAdjustedSize();
+
   uint32_t upem = mFontEntry->UnitsPerEm();
-  if (upem < 16 || upem > 16384) {
+  const bool nonSfntResource = upem == gfxFontEntry::kInvalidUPEM;
+  if (nonSfntResource) {
+    // Not an 'sfnt' resource? mFUnitsConvFactor will not be used here;
+    // platform backend may update this if it needs it.
+    mFUnitsConvFactor = 0.0;
+  } else if (upem < gfxFontEntry::kMinUPEM || upem > gfxFontEntry::kMaxUPEM) {
     // See http://www.microsoft.com/typography/otspec/head.htm
 #ifdef DEBUG
     char warnBuf[1024];
@@ -1068,15 +1077,12 @@ void gfxFont::InitMetrics() {
     NS_WARNING(warnBuf);
 #endif
     return;
+  } else {
+    mFUnitsConvFactor = mAdjustedSize / upem;
   }
 
-  // Apply any size-adjust from the font enty to the given size; this may be
-  // re-adjusted below if font-size-adjust is in effect.
-  mAdjustedSize = GetAdjustedSize();
-  mFUnitsConvFactor = mAdjustedSize / upem;
-
 #if MOZ_FONTATIONS
-  if (InitMetricsFromSkrifa()) {
+  if (!nonSfntResource && InitMetricsFromSkrifa()) {
     mIsValid = true;
   }
 #endif
@@ -1127,7 +1133,7 @@ void gfxFont::InitMetrics() {
       memset(&mMetrics, 0, sizeof(mMetrics));
       mIsValid = false;
 #if MOZ_FONTATIONS
-      if (InitMetricsFromSkrifa()) {
+      if (!nonSfntResource && InitMetricsFromSkrifa()) {
         mIsValid = true;
       }
 #endif
