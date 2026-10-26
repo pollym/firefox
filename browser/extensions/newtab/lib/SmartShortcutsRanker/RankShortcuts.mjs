@@ -823,7 +823,7 @@ export class RankShortcutsProvider {
    * Get "frecency" features: frequency, recency, re-frecency, unique days visited
    *
    * @param {Array<object>} withGuid topsites we are building features for
-   * @returns {Promise<{}>} guid -> rece, freq, and refre features
+   * @returns {Promise<{[feature in "refre" | "rece" | "freq" | "unid"]: {[guid: string]: number}}>} guid -> rece, freq, and refre features
    */
   async fetchRefreFeatures(withGuid) {
     const raw_frec = await fetchLast10VisitsByGuid(

@@ -5,9 +5,7 @@
     "lib/ExternalComponentsFeed.sys.mjs",
     "lib/NewTabAttributionService.sys.mjs",
     "lib/NewTabContentPing.sys.mjs",
-    "lib/SmartShortcutsRanker/RankShortcuts.mjs",
-    "lib/SmartShortcutsRanker/RankShortcuts.worker.mjs",
-    "lib/SmartShortcutsRanker/RankShortcutsWorkerClass.mjs"
+    "lib/SmartShortcutsRanker/RankShortcuts.worker.mjs"
   ],
   "extends": "../../../tools/@types/tsconfig.json",
 
