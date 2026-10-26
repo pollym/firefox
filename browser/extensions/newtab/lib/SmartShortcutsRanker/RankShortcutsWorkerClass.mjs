@@ -13,7 +13,7 @@ import { thompsonSampleSort } from "resource://newtab/lib/SmartShortcutsRanker/T
  */
 export function interpolateWrappedHistogram(hist, t) {
   if (!hist.length) {
-    return hist;
+    return 0;
   }
   const n = hist.length;
   const lo = Math.floor(t) % n;

@@ -435,6 +435,12 @@ add_task(async function test_interpolateWrappedHistogram() {
     hist[2],
     "linear interpolation will wrap around to the last index"
   );
+
+  Assert.equal(
+    Ranker.interpolateWrappedHistogram([], 3),
+    0,
+    "an empty histogram interpolates to 0"
+  );
 });
 
 add_task(async function test_bayesHist() {
