@@ -1466,7 +1466,7 @@ class DesktopUnittest(TestingMixin, MercurialScript, MozbaseMixin, CodeCoverageM
                     final_env = copy.copy(env)
 
                     if self.per_test_coverage:
-                        self.set_coverage_env(final_env)
+                        final_env.update(self.coverage_env())
 
                     try:
                         with VideoTestRecorder(suite, self):
