@@ -6,6 +6,7 @@
 
 package org.mozilla.fenix.ipprotection.store
 
+import kotlin.reflect.KClass
 import kotlin.test.assertNotNull
 import mozilla.components.ExperimentalAndroidComponentsApi
 import mozilla.components.concept.engine.ipprotection.ServiceState
@@ -200,20 +201,93 @@ class IPProtectionTelemetryMiddlewareTest {
     }
 
     @Test
-    fun `GIVEN a failed toggle THEN the state at failure time is recorded`() {
-        val store =
-            createStore(
-                initialStatus = AccountStatus.EnrolledAndEntitled,
-                serviceStatus = ServiceState.Ready,
+    fun `GIVEN each service state WHEN the VPN toggle fails THEN the service state is recorded in snake case`() {
+        val expected =
+            mapOf(
+                ServiceState.Uninitialized to "uninitialized",
+                ServiceState.Unavailable to "unavailable",
+                ServiceState.Unauthenticated to "unauthenticated",
+                ServiceState.Ready to "ready",
             )
+        assertEquals(
+            "Each ServiceState records a service_state value. List it here and in every service_state " +
+                "description in the vpn category of app/metrics.yaml.",
+            ServiceState.entries.toSet(),
+            expected.keys,
+        )
 
-        store.dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate))
+        expected.keys.forEach { serviceStatus ->
+            createStore(serviceStatus = serviceStatus)
+                .dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate))
+        }
 
-        val extra = Vpn.errorEncountered.testGetValue()?.single()?.extra
-        assertNotNull(extra)
-        assertEquals("ready", extra["service_state"])
-        assertEquals("uninitialized", extra["proxy_state"])
-        assertEquals("enrolled_and_entitled", extra["account_state"])
+        val events = Vpn.errorEncountered.testGetValue()
+        assertNotNull(events)
+        assertEquals(expected.values.toList(), events.map { it.extra?.get("service_state") })
+    }
+
+    @Test
+    fun `GIVEN each proxy state WHEN the VPN toggle fails THEN the proxy state is recorded in snake case`() {
+        val expected =
+            mapOf(
+                Uninitialized to "uninitialized",
+                Authorized.Idle to "idle",
+                Authorized.Activating to "activating",
+                Authorized.Active to "active",
+                Authorized.DataLimitReached to "data_limit_reached",
+                Authorized.ConnectionError to "connection_error",
+            )
+        assertEquals(
+            "Each ProxyStatus records a proxy_state value. List it here and in every proxy_state " +
+                "description in the vpn category of app/metrics.yaml.",
+            ProxyStatus::class.objectInstances(),
+            expected.keys,
+        )
+
+        expected.keys.forEach { proxyStatus ->
+            createStore(proxyStatus = proxyStatus)
+                .dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate))
+        }
+
+        val events = Vpn.errorEncountered.testGetValue()
+        assertNotNull(events)
+        assertEquals(expected.values.toList(), events.map { it.extra?.get("proxy_state") })
+    }
+
+    @Test
+    fun `GIVEN each account state WHEN the VPN toggle fails THEN the account state is recorded in snake case`() {
+        val expected =
+            mapOf(
+                AccountStatus.Uninitialized to "uninitialized",
+                AccountStatus.WarmingUp to "warming_up",
+                AccountStatus.NoAccount to "no_account",
+                AccountStatus.NeedsAuthentication to "needs_authentication",
+                AccountStatus.RequestingAuthentication to "requesting_authentication",
+                AccountStatus.NeedsAuthorization to "needs_authorization",
+                AccountStatus.RequestingAuthorization to "requesting_authorization",
+                AccountStatus.AwaitingAuthentication to "awaiting_authentication",
+                AccountStatus.AwaitingAuthorization to "awaiting_authorization",
+                AccountStatus.AwaitingEnrollment to "awaiting_enrollment",
+                AccountStatus.AuthFailed to "auth_failed",
+                AccountStatus.Authenticated to "authenticated",
+                AccountStatus.EnrolledAndEntitled to "enrolled_and_entitled",
+                AccountStatus.TryAgain to "try_again",
+            )
+        assertEquals(
+            "Each AccountStatus records an account_state value. List it here and in every account_state " +
+                "description in the vpn category of app/metrics.yaml.",
+            AccountStatus.entries.toSet(),
+            expected.keys,
+        )
+
+        expected.keys.forEach { accountStatus ->
+            createStore(initialStatus = accountStatus)
+                .dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate))
+        }
+
+        val events = Vpn.errorEncountered.testGetValue()
+        assertNotNull(events)
+        assertEquals(expected.values.toList(), events.map { it.extra?.get("account_state") })
     }
 
     @Test
@@ -366,4 +440,10 @@ class IPProtectionTelemetryMiddlewareTest {
     private fun IPProtectionStore.transitionTo(status: AccountStatus) {
         dispatch(IPProtectionAction.AccountStateChanged(status))
     }
+
+    private fun KClass<out ProxyStatus>.objectInstances(): Set<ProxyStatus> =
+        sealedSubclasses.flatMapTo(mutableSetOf()) { subclass ->
+            subclass.objectInstance?.let(::setOf)
+                ?: if (subclass.isSealed) subclass.objectInstances() else error("$subclass is not an object")
+        }
 }
