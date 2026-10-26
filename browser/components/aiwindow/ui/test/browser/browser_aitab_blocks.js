@@ -431,7 +431,7 @@ add_task(async function test_highlights_source_chips() {
       await highlights.updateComplete;
 
       const chips = [...highlights.shadowRoot.querySelectorAll("li")].map(row =>
-        [...row.querySelectorAll("ai-website-chip")].map(chip => ({
+        [...row.querySelectorAll("smartwindow-chip")].map(chip => ({
           label: chip.label,
           href: chip.href,
           icon: chip.iconSrc,
@@ -566,7 +566,7 @@ add_task(async function test_text_block_references() {
         "Each reference becomes a chip, labelled by its href when untitled"
       );
 
-      // ai-website-chip is shared with chat and defaults to chat's event
+      // smartwindow-chip is shared with chat and defaults to chat's event
       // name, so without this the AITab actor would never hear about a click.
       Assert.ok(
         chips.every(chip => chip.openLinkEvent == "AITab:OpenLink"),

@@ -15,7 +15,7 @@ import {
 import { SmartwindowOverflowRowMixin } from "chrome://browser/content/aiwindow/components/SmartwindowOverflowRow.mjs";
 
 // eslint-disable-next-line import/no-unassigned-import
-import "chrome://browser/content/aiwindow/components/ai-website-chip.mjs";
+import "chrome://browser/content/aiwindow/components/smartwindow-chip.mjs";
 // eslint-disable-next-line import/no-unassigned-import
 import "chrome://browser/content/aiwindow/components/ai-grouped-chip-container.mjs";
 // eslint-disable-next-line import/no-unassigned-import
@@ -106,7 +106,7 @@ export class WebsiteChipContainer extends SmartwindowOverflowRowMixin(
   #onRemoveWebsite(website, event) {
     event.stopPropagation();
     this.dispatchEvent(
-      new CustomEvent("ai-website-chip:remove", {
+      new CustomEvent("smartwindow-chip:remove", {
         bubbles: true,
         composed: true,
         detail: {
@@ -119,7 +119,7 @@ export class WebsiteChipContainer extends SmartwindowOverflowRowMixin(
   }
 
   #renderStackedChips(website) {
-    return html`<ai-website-chip
+    return html`<smartwindow-chip
       .type=${this.chipType}
       .size=${this.chipSize}
       .label=${website.label}
@@ -129,8 +129,8 @@ export class WebsiteChipContainer extends SmartwindowOverflowRowMixin(
       .tabGroupColor=${website.color ?? ""}
       .tabGroupId=${website.groupId ?? ""}
       .removable=${this.removable}
-      @ai-website-chip:remove=${e => this.#onRemoveWebsite(website, e)}
-    ></ai-website-chip>`;
+      @smartwindow-chip:remove=${e => this.#onRemoveWebsite(website, e)}
+    ></smartwindow-chip>`;
   }
 
   #renderGroupedChips(chips) {

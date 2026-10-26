@@ -19,7 +19,7 @@ import "chrome://browser/content/aiwindow/components/monitor-icon.mjs";
 // eslint-disable-next-line import/no-unassigned-import
 import "chrome://browser/content/aiwindow/components/monitor-status-chip.mjs";
 // eslint-disable-next-line import/no-unassigned-import
-import "chrome://browser/content/aiwindow/components/ai-website-chip.mjs";
+import "chrome://browser/content/aiwindow/components/smartwindow-chip.mjs";
 import { monitorErrorL10nId } from "chrome://browser/content/aiwindow/components/monitor-error-copy.mjs";
 
 // What a finished check can say about the condition. A run that failed reports
@@ -774,15 +774,15 @@ export class AgentMonitorItem extends MozLitElement {
             ? html`<div class="page-pills-row">
                 ${this.pageUrls.map(
                   url =>
-                    html`<ai-website-chip
+                    html`<smartwindow-chip
                       type="context-chip"
                       size="small"
                       removable
                       label=${this.#titleFor(url) || this.#displayUrl(url)}
                       .iconSrc=${`page-icon:${url}`}
                       title=${url}
-                      @ai-website-chip:remove=${() => this.#removeUrl(url)}
-                    ></ai-website-chip>`
+                      @smartwindow-chip:remove=${() => this.#removeUrl(url)}
+                    ></smartwindow-chip>`
                 )}
               </div>`
             : nothing}
@@ -1144,7 +1144,7 @@ export class AgentMonitorItem extends MozLitElement {
                     <div class="url-chips">
                       ${agent.watchUrls.map(
                         url =>
-                          html`<ai-website-chip
+                          html`<smartwindow-chip
                             type="context-chip"
                             size="small"
                             label=${agent.watchUrlTitles?.[url] ??
@@ -1152,7 +1152,7 @@ export class AgentMonitorItem extends MozLitElement {
                             .iconSrc=${`page-icon:${url}`}
                             title=${url}
                             .href=${url}
-                          ></ai-website-chip>`
+                          ></smartwindow-chip>`
                       )}
                     </div>
                   </div>`
