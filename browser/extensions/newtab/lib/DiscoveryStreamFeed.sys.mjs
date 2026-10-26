@@ -2695,7 +2695,7 @@ export class DiscoveryStreamFeed {
       this.setupPrefs(false /* isStartup */);
     }
     if (action.data.name === "trainhopConfig") {
-      await this.onTrainhopConfigChanged(action);
+      await this.onTrainhopConfigChanged();
     }
   }
 
