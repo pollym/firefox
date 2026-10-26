@@ -105,7 +105,6 @@ browser/modules/webrtcUI.sys.mjs
 browser/themes/BuiltInThemeConfig.sys.mjs
 browser/themes/BuiltInThemes.sys.mjs
 browser/themes/ThemeVariableMap.sys.mjs
-dom/webauthn/WebAuthnRelatedOriginFetcher.sys.mjs
 js/xpconnect/loader/ComponentUtils.sys.mjs
 js/xpconnect/loader/XPCOMUtils.sys.mjs
 mobile/android/modules/geckoview/AndroidLog.sys.mjs
