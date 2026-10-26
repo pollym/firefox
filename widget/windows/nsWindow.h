@@ -507,6 +507,7 @@ class nsWindow final : public nsIWidget {
 
   // Manager for taskbar-hiding. No persistent state.
   class TaskbarConcealer;
+  friend class TaskbarConcealerTest;
 
   // A magic number to identify the FAKETRACKPOINTSCROLLABLE window created
   // when the trackpoint hack is enabled.
