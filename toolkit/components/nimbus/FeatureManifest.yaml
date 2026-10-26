@@ -753,6 +753,14 @@ urlbar:
       description: >-
         Whether or not to show calculator results when a user types a valid
         calculation string into the urlbar.
+    temporalFeatureGate:
+      type: boolean
+      setPref:
+        branch: user
+        pref: browser.urlbar.temporal.featureGate
+      description: >-
+        Feature gate that controls whether all aspects of the temporal search
+        suggestions feature are exposed to the user.
     trackerCountFeatureGate:
       type: boolean
       fallbackPref: browser.urlbar.trackerCount.featureGate
