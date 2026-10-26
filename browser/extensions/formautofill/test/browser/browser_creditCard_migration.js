@@ -76,6 +76,8 @@ const EXPECTED_FILL_AMEX = {
  * @param {boolean} rust Whether the Rust store should serve afterwards.
  */
 async function switchTo(rust) {
+  // The pref observer that runs the switch is added by initialize().
+  await formAutofillStorage.initialize();
   Services.prefs.setBoolPref(ENABLED_PREF, rust);
   await formAutofillStorage._creditCardSwitch;
   Assert.equal(
