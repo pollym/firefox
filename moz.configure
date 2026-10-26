@@ -177,7 +177,7 @@ option(
 @depends(moz_debug, "--with-debug-label")
 def debug_defines(debug, labels):
     if debug:
-        return ["DEBUG"] + ["DEBUG_%s" % label for label in labels]
+        return ["DEBUG"] + [f"DEBUG_{label}" for label in labels]
     return ["NDEBUG", "TRIMMED"]
 
 
@@ -337,7 +337,7 @@ def library_name_info_template(host_or_target):
                 obj=namespace(prefix="", suffix="o"),
             )
         elif so_version:
-            so = ".so.%s" % so_version
+            so = f".so.{so_version}"
         else:
             so = ".so"
 
@@ -362,12 +362,8 @@ set_config("LIB_PREFIX", library_name_info.lib.prefix)
 set_config("LIB_SUFFIX", library_name_info.lib.suffix)
 set_config("OBJ_SUFFIX", library_name_info.obj.suffix)
 set_config("IMPORT_LIB_SUFFIX", library_name_info.import_lib.suffix)
-set_define(
-    "MOZ_DLL_PREFIX", depends(library_name_info.dll.prefix)(lambda s: '"%s"' % s)
-)
-set_define(
-    "MOZ_DLL_SUFFIX", depends(library_name_info.dll.suffix)(lambda s: '"%s"' % s)
-)
+set_define("MOZ_DLL_PREFIX", depends(library_name_info.dll.prefix)(lambda s: f'"{s}"'))
+set_define("MOZ_DLL_SUFFIX", depends(library_name_info.dll.suffix)(lambda s: f'"{s}"'))
 set_config("HOST_LIB_PREFIX", host_library_name_info.lib.prefix)
 set_config("HOST_IMPORT_LIB_SUFFIX", host_library_name_info.import_lib.suffix)
 set_config("WASM_OBJ_SUFFIX", "wasm")
@@ -616,7 +612,7 @@ def build_backends_choices(_):
 @deprecated_option("--enable-build-backend", nargs="+", choices=build_backends_choices)
 def build_backend(backends):
     if backends:
-        return tuple("+%s" % b for b in backends)
+        return tuple(f"+{b}" for b in backends)
 
 
 imply_option("--build-backends", build_backend)
