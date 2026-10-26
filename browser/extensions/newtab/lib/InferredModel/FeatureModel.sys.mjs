@@ -704,6 +704,7 @@ export class FeatureModel {
    * @param {object} params.indexSchema - Schema that defines how interest indices should be computed.
    * @param {string} [params.model_id="unknown"] - Identifier for the model used to produce these vectors.
    * @param {boolean} [params.condensePrivateValues=true] - If true, condenses coarse private interest values into an array format.
+   * @param {boolean} [params.applyPostProcessing=false] - Whether to apply the model's log scaling, rescaling and normalization before thresholding.
    *
    * @returns {{inferredInterests: object, coarseInferredInterests?: object, coarsePrivateInferredInterests?: object | {values: Array<number>, model_id: string}}}
    *   inferredInterests is a dictionary of private inferred interest values, with `model_id`.
@@ -716,6 +717,7 @@ export class FeatureModel {
     indexSchema,
     model_id = "unknown",
     condensePrivateValues = true,
+    applyPostProcessing = false,
   }) {
     const result = {};
     let inferredInterests;
@@ -725,6 +727,7 @@ export class FeatureModel {
     inferredInterests = this.computeInterestVector({
       dataForIntervals,
       indexSchema,
+      applyPostProcessing,
     });
     result.inferredInterests = { ...inferredInterests };
 
@@ -732,6 +735,7 @@ export class FeatureModel {
       coarseInferredInterests = this.computeInterestVector({
         dataForIntervals,
         indexSchema,
+        applyPostProcessing,
         applyThresholding: true,
       });
       if (coarseInferredInterests) {
@@ -746,6 +750,7 @@ export class FeatureModel {
       coarsePrivateInferredInterests = this.computeInterestVector({
         dataForIntervals,
         indexSchema,
+        applyPostProcessing,
         applyThresholding: true,
         applyDifferentialPrivacy: true,
       });
