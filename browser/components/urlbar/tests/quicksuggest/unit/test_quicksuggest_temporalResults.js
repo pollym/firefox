@@ -245,13 +245,13 @@ add_task(async function makeResult_smartbar() {
   Assert.equal(await makeResultForContext(context), null);
 });
 
-// `makeResult()` returns a result in search mode for the default engine.
+// `makeResult()` returns null in search mode for the default engine.
 add_task(async function makeResult_searchMode_default() {
   let context = createContext("", {
     isPrivate: false,
     searchMode: { engineName: gEngine.name },
   });
-  Assert.ok(await makeResultForContext(context), "Returns a result");
+  Assert.equal(await makeResultForContext(context), null);
 });
 
 // `makeResult()` returns null in search mode for other engines.

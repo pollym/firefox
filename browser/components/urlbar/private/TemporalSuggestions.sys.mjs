@@ -142,13 +142,10 @@ export class TemporalSuggestions extends SuggestProvider {
   async makeResult(queryContext, suggestion) {
     // The Rust component is queried with the search string trimmed at the
     // start, so a whitespace-only search string matches the empty keyword.
-    // Eligibility is determined for the default engine, so only show results in
-    // search mode for that engine.
     if (
       queryContext.searchString ||
       queryContext.sapName != "urlbar" ||
-      (queryContext.searchMode &&
-        queryContext.searchMode.engineName != suggestion.engine)
+      queryContext.searchMode
     ) {
       return null;
     }
