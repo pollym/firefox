@@ -997,8 +997,7 @@ void ScriptPreloader::NoteStencil(const nsCString& url,
     MOZ_ASSERT(!script->HasArray());
 
     script->mSize = xdrData.Length();
-    script->mXDRData.construct<nsTArray<uint8_t>>(
-        std::forward<nsTArray<uint8_t>>(xdrData));
+    script->mXDRData.construct<nsTArray<uint8_t>>(std::move(xdrData));
 
     auto& data = script->Array();
     script->mXDRRange.emplace(data.Elements(), data.Length());
