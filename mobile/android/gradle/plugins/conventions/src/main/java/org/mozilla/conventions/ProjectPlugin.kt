@@ -4,7 +4,10 @@
 
 package org.mozilla.conventions
 
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
+import com.android.build.api.variant.FilterConfiguration
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -599,79 +602,38 @@ class ProjectPlugin : Plugin<Project> {
         project.pluginManager.withPlugin("com.android.application", action)
     }
 
-    @Suppress("UNCHECKED_CAST")
     private fun registerPrintVariantsTask(project: Project) {
         project.pluginManager.withPlugin("com.android.application") {
             val outputFile = project.file("build/printVariants.json")
             val variants = mutableListOf<Map<String, Any?>>()
 
-            // Only collect variant metadata when printVariants is actually being run. onVariants is a
-            // configuration-time callback (unlike the legacy applicationVariants collection, which we could
-            // wrap in a lazy provider resolved at execution), so gating its registration keeps the
-            // reflection out of every other build that configures this project.
+            // onVariants is a configuration-time callback, so only collect variant metadata when
+            // printVariants is actually being run.
             val wantsPrintVariants = project.gradle.startParameter.taskNames.any {
                 it.substringAfterLast(':') == "printVariants"
             }
             if (wantsPrintVariants) {
-                val androidComponents = project.extensions.getByName("androidComponents")
-                val android = project.extensions.getByName("android")
-                val buildTypes = android.javaClass.getMethod("getBuildTypes").invoke(android)
+                val buildTypes = project.extensions.getByType<ApplicationExtension>().buildTypes
+                val androidComponents = project.extensions.getByType<ApplicationAndroidComponentsExtension>()
 
-                // Collect variant metadata via the new androidComponents.onVariants API (the legacy
-                // applicationVariants API is removed in AGP 9). We go through reflection because this
-                // convention plugin has no runtime dependency on the Android Gradle plugin; its types are
-                // loaded from the consuming project's classloader. The APK file name is reconstructed from
-                // the flavor/ABI/build type since the new VariantOutput no longer exposes the output file.
-                val collectVariant = { variant: Any ->
-                    val variantName = variant.javaClass.getMethod("getName").invoke(variant) as String
-                    val buildType = variant.javaClass.getMethod("getBuildType").invoke(variant) as String?
-                    val flavorName = variant.javaClass.getMethod("getFlavorName").invoke(variant) as String?
-                    val flavorPrefix = if (!flavorName.isNullOrEmpty()) "$flavorName-" else ""
+                // The APK file name is reconstructed from the flavor/ABI/build type since VariantOutput
+                // does not expose the output file.
+                androidComponents.onVariants(androidComponents.selector().all()) { variant ->
+                    val buildType = variant.buildType
+                    val flavorPrefix = if (!variant.flavorName.isNullOrEmpty()) "${variant.flavorName}-" else ""
                     // AGP appends "-unsigned" to APKs whose build type has no signing config.
-                    val signed = buildTypes.javaClass.getMethod("getByName", String::class.java)
-                        .invoke(buildTypes, buildType)
-                        .let { it.javaClass.getMethod("getSigningConfig").invoke(it) != null }
+                    val signed = buildTypes.getByName(requireNotNull(buildType)).signingConfig != null
                     val signedSuffix = if (signed) "" else "-unsigned"
-                    val outputs = variant.javaClass.getMethod("getOutputs").invoke(variant) as Iterable<*>
 
-                    val apks = outputs.map { output ->
-                        val filters = output!!.javaClass.getMethod("getFilters").invoke(output) as Iterable<*>
-                        val abi = filters
-                            .firstOrNull { f ->
-                                val filterType = f!!.javaClass.getMethod("getFilterType").invoke(f)
-                                (filterType as Enum<*>).name == "ABI"
-                            }
-                            ?.let { f -> f!!.javaClass.getMethod("getIdentifier").invoke(f) as String }
+                    val apks = variant.outputs.map { output ->
+                        val abi = output.filters
+                            .firstOrNull { it.filterType == FilterConfiguration.FilterType.ABI }
+                            ?.identifier
                             ?: "universal"
                         mapOf("abi" to abi, "fileName" to "app-$flavorPrefix$abi-$buildType$signedSuffix.apk")
-                    }.sortedBy { it["abi"] as String }
-                    variants.add(mapOf("apks" to apks, "build_type" to buildType, "name" to variantName))
+                    }.sortedBy { it["abi"] }
+                    variants.add(mapOf("apks" to apks, "build_type" to buildType, "name" to variant.name))
                 }
-
-                val selector = androidComponents.javaClass.getMethod("selector").invoke(androidComponents)
-                val allSelector = selector.javaClass.getMethod("all").invoke(selector)
-                // onVariants(VariantSelector, (Variant) -> Unit). The callback is a Kotlin function type;
-                // build the proxy from the method's own parameter type so it is loaded by the same
-                // (Android Gradle plugin) classloader the method expects.
-                val onVariants = androidComponents.javaClass.methods.first {
-                    it.name == "onVariants" &&
-                        it.parameterCount == 2 &&
-                        it.parameterTypes[1].name == "kotlin.jvm.functions.Function1"
-                }
-                val callbackType = onVariants.parameterTypes[1]
-                val callback = java.lang.reflect.Proxy.newProxyInstance(
-                    callbackType.classLoader,
-                    arrayOf(callbackType),
-                ) { _, method, args ->
-                    when (method.name) {
-                        "invoke" -> { collectVariant(args!![0]!!); Unit }
-                        "equals" -> false
-                        "hashCode" -> 0
-                        "toString" -> "printVariantsCollector"
-                        else -> null
-                    }
-                }
-                onVariants.invoke(androidComponents, allSelector, callback)
             }
 
             project.tasks.register("printVariants") {
