@@ -66,10 +66,9 @@ nsFxrCommandLineHandler::Handle(nsICommandLine* aCmdLine) {
       MOZ_CRASH("--fxr not supported without e10s");
     }
 
-    MOZ_RELEASE_ASSERT(
-        mozilla::StaticPrefs::extensions_webextensions_remote(),
-        "Remote extensions are the only supported configuration on "
-        "desktop platforms");
+    MOZ_ASSERT(mozilla::StaticPrefs::extensions_webextensions_remote(),
+               "Remote extensions are the only supported configuration on "
+               "desktop platforms");
 
     aCmdLine->SetPreventDefault(true);
 
@@ -86,7 +85,7 @@ nsFxrCommandLineHandler::Handle(nsICommandLine* aCmdLine) {
         nullptr,                                        // aArguments
         getter_AddRefs(newWindow));
 
-    MOZ_RELEASE_ASSERT(result == NS_OK);
+    MOZ_ASSERT(result == NS_OK);
 
     nsPIDOMWindowOuter* newWindowOuter = nsPIDOMWindowOuter::From(newWindow);
     FxRWindowManager::GetInstance()->AddWindow(newWindowOuter);
@@ -108,8 +107,8 @@ nsFxrCommandLineHandler::Handle(nsICommandLine* aCmdLine) {
       HWND hwndWidget = (HWND)newWidget->GetNativeData(NS_NATIVE_WINDOW);
 
       // The CLH should populate these members first
-      MOZ_RELEASE_ASSERT(windowState.hwndFx == 0);
-      MOZ_RELEASE_ASSERT(windowState.textureFx == nullptr);
+      MOZ_ASSERT(windowState.hwndFx == 0);
+      MOZ_ASSERT(windowState.textureFx == nullptr);
       windowState.hwndFx = (uint64_t)hwndWidget;
 
       shmem.PushWindowState(windowState);

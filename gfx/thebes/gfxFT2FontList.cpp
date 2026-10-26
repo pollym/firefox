@@ -763,8 +763,8 @@ class FontNameCache {
   // Creates the object but does NOT load the cached data from the startup
   // cache; call Init() after creation to do that.
   FontNameCache() : mWriteNeeded(false) {
-    MOZ_RELEASE_ASSERT(XRE_IsParentProcess(),
-                       "FontNameCache should only be used in chrome process");
+    MOZ_ASSERT(XRE_IsParentProcess(),
+               "FontNameCache should only be used in chrome process");
     mCache = mozilla::scache::StartupCache::GetSingleton();
   }
 
@@ -1537,7 +1537,7 @@ void FT2FontFamily::FinalizeMemberList(bool aSortFaces) {
 }
 
 void gfxFT2FontList::FindFonts() {
-  MOZ_RELEASE_ASSERT(XRE_IsParentProcess());
+  MOZ_ASSERT(XRE_IsParentProcess());
 
   // Chrome process: get the cached list (if any)
   if (!mFontNameCache) {

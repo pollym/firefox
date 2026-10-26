@@ -133,7 +133,7 @@ already_AddRefed<PTextureParent> TextureHost::CreateIPDLActor(
     ReadLockDescriptor&& aReadLock, LayersBackend aLayersBackend,
     TextureFlags aFlags, const dom::ContentParentId& aContentId,
     uint64_t aSerial, const wr::MaybeExternalImageId& aExternalImageId) {
-  MOZ_RELEASE_ASSERT(!(aFlags & TextureFlags::DEALLOCATE_CLIENT));
+  MOZ_ASSERT(!(aFlags & TextureFlags::DEALLOCATE_CLIENT));
 
   TextureFlags flags = aFlags & ~TextureFlags::DEALLOCATE_CLIENT;
   auto actor = MakeRefPtr<TextureParent>(aAllocator, aContentId, aSerial,
@@ -171,7 +171,7 @@ dom::ContentParentId TextureHost::GetTextureContentId(PTextureParent* actor) {
 PTextureParent* TextureHost::GetIPDLActor() { return mActor; }
 
 void TextureHost::SetLastFwdTransactionId(uint64_t aTransactionId) {
-  MOZ_RELEASE_ASSERT(mFwdTransactionId <= aTransactionId);
+  MOZ_ASSERT(mFwdTransactionId <= aTransactionId);
   mFwdTransactionId = aTransactionId;
 }
 
@@ -248,7 +248,7 @@ already_AddRefed<TextureHost> TextureHost::Create(
   }
 
   if (result && WrapWithWebRenderTextureHost(aDeallocator, aBackend, aFlags)) {
-    MOZ_RELEASE_ASSERT(aExternalImageId.isSome());
+    MOZ_ASSERT(aExternalImageId.isSome());
     result = MakeRefPtr<WebRenderTextureHost>(aFlags, result,
                                               aExternalImageId.ref());
   }
@@ -339,9 +339,8 @@ already_AddRefed<TextureHost> CreateBackendIndependentTextureHost(
       break;
     }
     case SurfaceDescriptor::TSurfaceDescriptorGPUVideo: {
-      MOZ_RELEASE_ASSERT(
-          aDesc.get_SurfaceDescriptorGPUVideo().type() ==
-          SurfaceDescriptorGPUVideo::TSurfaceDescriptorRemoteDecoder);
+      MOZ_ASSERT(aDesc.get_SurfaceDescriptorGPUVideo().type() ==
+                 SurfaceDescriptorGPUVideo::TSurfaceDescriptorRemoteDecoder);
       result = GPUVideoTextureHost::CreateFromDescriptor(
           aDeallocator->GetContentId(), aFlags,
           aDesc.get_SurfaceDescriptorGPUVideo());
@@ -364,7 +363,7 @@ TextureHost::TextureHost(TextureHostType aType, TextureFlags aFlags)
       mReadLocked(false) {}
 
 TextureHost::~TextureHost() {
-  MOZ_RELEASE_ASSERT(mExternalImageId.isNothing());
+  MOZ_ASSERT(mExternalImageId.isNothing());
 
   if (mReadLocked) {
     // If we still have a ReadLock, unlock it. At this point we don't care about
@@ -394,8 +393,8 @@ void TextureHost::UnbindTextureSource() {
 }
 
 void TextureHost::RecycleTexture(TextureFlags aFlags) {
-  MOZ_RELEASE_ASSERT(GetFlags() & TextureFlags::RECYCLE);
-  MOZ_RELEASE_ASSERT(aFlags & TextureFlags::RECYCLE);
+  MOZ_ASSERT(GetFlags() & TextureFlags::RECYCLE);
+  MOZ_ASSERT(aFlags & TextureFlags::RECYCLE);
   mFlags = aFlags;
 }
 
@@ -404,7 +403,7 @@ void TextureHost::PrepareForUse() {}
 void TextureHost::NotifyNotUsed() {
   if (!mActor) {
     if ((mFlags & TextureFlags::REMOTE_TEXTURE) && AsSurfaceTextureHost()) {
-      MOZ_RELEASE_ASSERT(mExternalImageId.isSome());
+      MOZ_ASSERT(mExternalImageId.isSome());
       wr::RenderThread::Get()->NotifyNotUsed(*mExternalImageId);
     }
     return;
@@ -458,7 +457,7 @@ void TextureHost::EnsureRenderTexture(
       // The texture has already been created.
       return;
     }
-    MOZ_RELEASE_ASSERT(mExternalImageId.isNothing());
+    MOZ_ASSERT(mExternalImageId.isNothing());
     mExternalImageId = aExternalImageId;
   }
   CreateRenderTexture(mExternalImageId.ref());
@@ -474,8 +473,8 @@ BufferTextureHost::BufferTextureHost(const BufferDescriptor& aDesc,
   switch (mDescriptor.type()) {
     case BufferDescriptor::TYCbCrDescriptor: {
       const YCbCrDescriptor& ycbcr = mDescriptor.get_YCbCrDescriptor();
-      MOZ_RELEASE_ASSERT(gfx::IntRect(gfx::IntPoint(), ycbcr.ySize())
-                             .Contains(ycbcr.display()));
+      MOZ_ASSERT(gfx::IntRect(gfx::IntPoint(), ycbcr.ySize())
+                     .Contains(ycbcr.display()));
       mSize = ycbcr.display().Size();
       if (ycbcr.colorDepth() == gfx::ColorDepth::COLOR_8) {
         mFormat = gfx::SurfaceFormat::YUV420;
@@ -518,7 +517,7 @@ bool BufferTextureHost::IsYCbCr() const {
 
 void BufferTextureHost::CreateRenderTexture(
     const wr::ExternalImageId& aExternalImageId) {
-  MOZ_RELEASE_ASSERT(mExternalImageId.isSome());
+  MOZ_ASSERT(mExternalImageId.isSome());
 
   RefPtr<wr::RenderTextureHost> texture;
 #ifdef MOZ_WAYLAND
@@ -664,7 +663,7 @@ void TextureHost::SetReadLocked() {
   // If mReadLocked is true it means we haven't read unlocked yet and the
   // content side should not have been able to write into this texture and read
   // lock again!
-  MOZ_RELEASE_ASSERT(!mReadLocked);
+  MOZ_ASSERT(!mReadLocked);
   mReadLocked = true;
 }
 
@@ -848,7 +847,7 @@ ShmemTextureHost::ShmemTextureHost(const ipc::Shmem& aShmem,
                                    ISurfaceAllocator* aDeallocator,
                                    TextureFlags aFlags)
     : BufferTextureHost(aDesc, aFlags), mDeallocator(aDeallocator) {
-  MOZ_RELEASE_ASSERT(!(mFlags & TextureFlags::DEALLOCATE_CLIENT));
+  MOZ_ASSERT(!(mFlags & TextureFlags::DEALLOCATE_CLIENT));
 
   if (aShmem.IsReadable()) {
     UniquePtr<mozilla::ipc::Shmem> shmem = std::make_unique<ipc::Shmem>(aShmem);
@@ -902,7 +901,7 @@ ShmemTextureHost::ShmemDeallocRunnable::~ShmemDeallocRunnable() {
 
 void ShmemTextureHost::OnRenderTextureCreated(
     wr::RenderTextureHost* aRenderTexture) {
-  MOZ_RELEASE_ASSERT(aRenderTexture);
+  MOZ_ASSERT(aRenderTexture);
 
   if (!mShmemDeallocRunnable || !mShmemDeallocRunnable->GetShmem()) {
     return;
@@ -948,8 +947,8 @@ MemoryTextureHost::MemoryTextureHost(uint8_t* aBuffer,
 }
 
 MemoryTextureHost::~MemoryTextureHost() {
-  MOZ_RELEASE_ASSERT(!mBuffer || (mFlags & TextureFlags::DEALLOCATE_CLIENT),
-                     "Leaking our buffer");
+  MOZ_ASSERT(!mBuffer || (mFlags & TextureFlags::DEALLOCATE_CLIENT),
+             "Leaking our buffer");
   DeallocateDeviceData();
   MOZ_COUNT_DTOR(MemoryTextureHost);
 }
@@ -1001,7 +1000,7 @@ bool TextureParent::Init(const SurfaceDescriptor& aSharedData,
                          ReadLockDescriptor&& aReadLock,
                          const LayersBackend& aBackend,
                          const TextureFlags& aFlags) {
-  MOZ_RELEASE_ASSERT(mSurfaceAllocator);
+  MOZ_ASSERT(mSurfaceAllocator);
   mTextureHost =
       TextureHost::Create(aSharedData, std::move(aReadLock), mSurfaceAllocator,
                           aBackend, aFlags, mExternalImageId);

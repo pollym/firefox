@@ -45,6 +45,6 @@ bool FxRWindowManager::IsFxRWindow(const nsWindow* aWindow) const {
 }
 
 uint64_t FxRWindowManager::GetWindowID() const {
-  MOZ_RELEASE_ASSERT(mWindow);
+  MOZ_ASSERT(mWindow);
   return mWindow->WindowID();
 }

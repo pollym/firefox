@@ -44,8 +44,7 @@ nsDeviceContext::nsDeviceContext()
       mPrintingScale(1.0f),
       mPrintingTranslate(gfxPoint(0, 0)),
       mIsCurrentlyPrintingDoc(false) {
-  MOZ_RELEASE_ASSERT(NS_IsMainThread(),
-                     "nsDeviceContext must be created on the main thread");
+  MOZ_ASSERT(NS_IsMainThread(), "nsDeviceContext created off main thread");
 }
 
 nsDeviceContext::~nsDeviceContext() = default;

@@ -215,8 +215,8 @@ RefPtr<WebRenderAPI::CreatePromise> WebRenderAPI::Create(
     RefPtr<layers::CompositorBridgeParent> aBridge,
     RefPtr<widget::CompositorWidget> aWidget, const wr::WrWindowId& aWindowId,
     LayoutDeviceIntSize aSize, layers::WindowKind aWindowKind) {
-  MOZ_RELEASE_ASSERT(aBridge);
-  MOZ_RELEASE_ASSERT(aWidget);
+  MOZ_ASSERT(aBridge);
+  MOZ_ASSERT(aWidget);
   static_assert(
       sizeof(size_t) == sizeof(uintptr_t),
       "The FFI bindings assume size_t is the same size as uintptr_t!");
@@ -326,26 +326,13 @@ RefPtr<WebRenderAPI::CreatePromise> WebRenderAPI::Create(
           // wr_window_new puts a message into gfxCriticalNote if it returns
           // false
           MOZ_ASSERT(errorMessage);
-          if (!errorMessage) {
-            return CreatePromise::CreateAndReject(
-                "wr_window_new unknown error"_ns, __func__);
-          }
-
           error.AssignASCII(errorMessage);
           wr_api_free_error_msg(errorMessage);
           return CreatePromise::CreateAndReject(error, __func__);
         }
-
         MOZ_ASSERT(wrRenderer);
-        if (!wrRenderer) {
-          return CreatePromise::CreateAndReject(
-              "wr_window_new without wrRenderer"_ns, __func__);
-        }
         MOZ_ASSERT(docHandle);
-        if (!wrRenderer) {
-          return CreatePromise::CreateAndReject(
-              "wr_window_new without docHandle"_ns, __func__);
-        }
+
         const WebRenderBackend backend = compositor->BackendType();
         const WebRenderCompositor compositorType = compositor->CompositorType();
         const bool useANGLE = compositor->UseANGLE();
@@ -543,7 +530,7 @@ layers::AsyncImagePipelineOps* WebRenderAPI::GetPendingAsyncImagePipelineOps(
 
 bool WebRenderAPI::CheckIsRemoteTextureReady(
     layers::RemoteTextureInfoList* aList, const TimeStamp& aTimeStamp) {
-  MOZ_RELEASE_ASSERT(layers::CompositorThreadHolder::IsInCompositorThread());
+  MOZ_ASSERT(layers::CompositorThreadHolder::IsInCompositorThread());
   MOZ_ASSERT(aList);
 
   RefPtr<WebRenderAPI> self = this;
@@ -589,7 +576,7 @@ bool WebRenderAPI::CheckIsRemoteTextureReady(
 
 void WebRenderAPI::WaitRemoteTextureReady(
     layers::RemoteTextureInfoList* aList) {
-  MOZ_RELEASE_ASSERT(layers::CompositorThreadHolder::IsInCompositorThread());
+  MOZ_ASSERT(layers::CompositorThreadHolder::IsInCompositorThread());
   MOZ_ASSERT(aList);
 
   while (!aList->mList.empty()) {

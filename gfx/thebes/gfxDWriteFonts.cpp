@@ -140,7 +140,7 @@ bool gfxDWriteFont::InitDWriteSupport() {
 
 /* static */
 void gfxDWriteFont::UpdateSystemTextVars() {
-  MOZ_RELEASE_ASSERT(XRE_IsParentProcess());
+  MOZ_ASSERT(XRE_IsParentProcess());
 
   if (!gfxVars::IsInitialized()) {
     return;

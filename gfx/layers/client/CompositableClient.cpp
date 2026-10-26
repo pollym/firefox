@@ -25,7 +25,7 @@ namespace layers {
 using namespace mozilla::gfx;
 
 void CompositableClient::InitIPDL(const CompositableHandle& aHandle) {
-  MOZ_RELEASE_ASSERT(aHandle);
+  MOZ_ASSERT(aHandle);
 
   mForwarder->AssertInForwarderThread();
 
