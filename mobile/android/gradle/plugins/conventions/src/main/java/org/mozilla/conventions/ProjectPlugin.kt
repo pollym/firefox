@@ -599,14 +599,13 @@ class ProjectPlugin : Plugin<Project> {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
+    /**
+     * Applies the packaging resources exclusions for Android library and application projects
+     */
     private fun configurePackagingResourcesExcludes(project: Project) {
         val action = Action<AppliedPlugin> {
-            val android = project.extensions.getByName("android")
-            val packaging = android.javaClass.getMethod("getPackaging").invoke(android)
-            val resources = packaging.javaClass.getMethod("getResources").invoke(packaging)
-            val excludes = resources.javaClass.getMethod("getExcludes").invoke(resources) as MutableSet<String>
-            excludes.addAll(listOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md"))
+            val android = project.extensions.getByType<CommonExtension>()
+            android.packaging.resources.excludes.addAll(listOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md"))
         }
         project.pluginManager.withPlugin("com.android.library", action)
         project.pluginManager.withPlugin("com.android.application", action)
