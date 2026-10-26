@@ -3114,6 +3114,16 @@ MediaResult FFmpegVideoDecoder<LIBAV_VER>::AllocateHEVCExtraData() {
 }
 #  endif
 
+static void MediaCodecNativeWindowReleaseCallback(
+    struct AVHWDeviceContext* hwctx) {
+  auto* mediacodecctx = static_cast<AVMediaCodecDeviceContext*>(hwctx->hwctx);
+  if (mediacodecctx->native_window) {
+    ANativeWindow_release(
+        static_cast<ANativeWindow*>(mediacodecctx->native_window));
+    mediacodecctx->native_window = nullptr;
+  }
+}
+
 MediaResult FFmpegVideoDecoder<LIBAV_VER>::InitMediaCodecDecoder() {
   FFMPEG_LOG("Initialising MediaCodec FFmpeg decoder");
   StaticMutexAutoLock mon(sMutex);
@@ -3170,6 +3180,9 @@ MediaResult FFmpegVideoDecoder<LIBAV_VER>::InitMediaCodecDecoder() {
   AVHWDeviceContext* hwctx = (AVHWDeviceContext*)mMediaCodecDeviceContext->data;
   AVMediaCodecDeviceContext* mediacodecctx =
       (AVMediaCodecDeviceContext*)hwctx->hwctx;
+  // FFmpeg only releases native_window if it created it, so we must release
+  // the reference we hand to it when the device context is destroyed.
+  hwctx->free = MediaCodecNativeWindowReleaseCallback;
 
   if (XRE_IsGPUProcess() && gfx::gfxVars::ForceAImageReaderAndroid()) {
     MOZ_ASSERT(!mAndroidImageReader);
@@ -3199,8 +3212,8 @@ MediaResult FFmpegVideoDecoder<LIBAV_VER>::InitMediaCodecDecoder() {
     }
 
     mediacodecctx->surface = mImageReaderSurface.Get();
-    // Acquire a reference on the ANativeWindow.
-    // ANativeWindow_release() will be called on uninit the native_window.
+    // Acquire a reference on the ANativeWindow. It is released by
+    // MediaCodecNativeWindowReleaseCallback.
     ANativeWindow_acquire(window);
     mediacodecctx->native_window = window;
     mediacodecctx->create_window = 0;  // default -- useful when encoding?
