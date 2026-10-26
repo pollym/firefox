@@ -77,7 +77,6 @@ class ProjectPlugin : Plugin<Project> {
         configureKotlinCompilerMessageReformatting(project)
         configureKotlinWarningsAsErrors(project)
         configureAndroidBuildToolsVersion(project, substs)
-        configureKotlinJvmToolchain(project)
         configureAppServicesSubstitution(project, extraProperties, substs)
         configureGleanSubstitution(project, extraProperties)
         configureGleanVersionResolution(project)
@@ -350,21 +349,6 @@ class ProjectPlugin : Plugin<Project> {
         val buildToolsVersion = substs["ANDROID_BUILD_TOOLS_VERSION"] as String
         project.pluginManager.withPlugin("com.android.base") {
             project.extensions.getByType<CommonExtension>().buildToolsVersion = buildToolsVersion
-        }
-    }
-
-    // Reads rootProject extra properties; IsolatedProject does not expose extensions/extraProperties.
-    @Suppress("GradleProjectIsolation")
-    private fun configureKotlinJvmToolchain(project: Project) {
-        // Wait for Android plugin first to ensure Java plugin extension exists
-        project.pluginManager.withPlugin("com.android.base") {
-            project.pluginManager.withPlugin("org.jetbrains.kotlin.android") {
-                val kotlin = project.extensions.findByName("kotlin") ?: return@withPlugin
-                val config = project.rootProject.extensions.extraProperties["config"] ?: return@withPlugin
-                val jvmTargetCompatibility = config.javaClass.getField("jvmTargetCompatibility").get(config) as Int
-                kotlin::class.java.getMethod("jvmToolchain", Integer.TYPE)
-                    .invoke(kotlin, jvmTargetCompatibility)
-            }
         }
     }
 
