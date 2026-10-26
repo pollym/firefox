@@ -69,6 +69,7 @@ export class CustomKeysParent extends JSWindowActorParent {
           : "",
       isCustomized: !!CustomKeys.getDefaultKey(id),
       internal: keyEl.getAttribute("internal") == "true",
+      systemAssigned: CustomKeys.isSystemAssigned(keyEl),
     };
   }
 
