@@ -1,6 +1,23 @@
 /* Any copyright is dedicated to the Public Domain.
    http://creativecommons.org/publicdomain/zero/1.0/ */
 
+function focusEngineItem(win, popup, engineName) {
+  let itemCount = popup.querySelectorAll("panel-item").length;
+  for (
+    let i = 0;
+    i < itemCount &&
+    win.document.activeElement?.dataset?.engineName != engineName;
+    i++
+  ) {
+    EventUtils.synthesizeKey("KEY_ArrowDown", {}, win);
+  }
+  Assert.equal(
+    win.document.activeElement?.dataset?.engineName,
+    engineName,
+    `${engineName} is focused`
+  );
+}
+
 async function unloadSearchExtension(extension) {
   let settingsWritten = SearchTestUtils.promiseSearchNotification(
     "write-settings-to-disk-complete"
@@ -426,13 +443,7 @@ add_task(async function open_engine_page_directly() {
         newWin
       );
     } else {
-      let panelItems = Array.from(popup.querySelectorAll(`panel-item`));
-      let index = panelItems.findIndex(
-        item => item.dataset.engineName == "MozSearch"
-      );
-      for (let i = 0; i < index; i++) {
-        EventUtils.synthesizeKey("KEY_ArrowDown", {}, newWin);
-      }
+      focusEngineItem(newWin, popup, "MozSearch");
       EventUtils.synthesizeKey("KEY_Enter", { shiftKey: true }, newWin);
     }
 
@@ -551,13 +562,7 @@ add_task(async function open_engine_page_in_tab() {
           newWin
         );
       } else /* action == "key" */ {
-        let panelItems = Array.from(popup.querySelectorAll("panel-item"));
-        let index = panelItems.findIndex(
-          item => item.dataset.engineName == "MozSearch"
-        );
-        for (let i = 0; i < index; i++) {
-          EventUtils.synthesizeKey("KEY_ArrowDown", {}, newWin);
-        }
+        focusEngineItem(newWin, popup, "MozSearch");
         EventUtils.synthesizeKey("KEY_Enter", { accelKey: true }, newWin);
       }
 
