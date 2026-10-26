@@ -516,15 +516,10 @@ pref("browser.urlbar.trustPanel.featureGate", true);
 pref("browser.urlbar.trustPanel.breachAlerts.featureGate", true);
 pref("browser.urlbar.trustPanel.breachAlerts", true);
 
-#ifdef NIGHTLY_BUILD
-  // Whether or not Unified Search Button is shown always.
-  pref("browser.urlbar.unifiedSearchButton.always", true);
-  // Whether or not history is shown when in search mode.
-  pref("browser.urlbar.unifiedSearchButton.historyInSearchMode", true);
-#else
-  pref("browser.urlbar.unifiedSearchButton.always", false);
-  pref("browser.urlbar.unifiedSearchButton.historyInSearchMode", false);
-#endif
+// Whether or not Unified Search Button is shown always.
+pref("browser.urlbar.unifiedSearchButton.always", false);
+// Whether or not history is shown when in search mode.
+pref("browser.urlbar.unifiedSearchButton.historyInSearchMode", false);
 
 // Enable trending suggestions and recent searches.
 pref("browser.urlbar.trending.featureGate", true);
