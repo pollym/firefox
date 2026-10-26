@@ -1641,16 +1641,22 @@ def source_package(command_context, output, upload):
             f"--exclude=./{substs['DIST']}",
             f"--exclude={os.path.basename(command_context.topobjdir)}",
         ]
+        from mozbuild.action.package import is_gnu_tar
+
+        tar = substs["TAR"]
+        if is_gnu_tar(tar):
+            tar_flags = ["--mode=go-w", f"--transform=s,^./,{archive_prefix}/,"]
+        else:
+            tar_flags = ["-s", f",^./,{archive_prefix}/,"]
         command_context.run_process(
             [
-                "tar",
+                tar,
                 "-cJv",
                 "--owner=0",
                 "--group=0",
                 "--numeric-owner",
-                "--mode=go-w",
                 *excludes,
-                f"--transform=s,^./,{archive_prefix}/,",
+                *tar_flags,
                 "-f",
                 archive_path,
                 "./",

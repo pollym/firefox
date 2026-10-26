@@ -139,6 +139,8 @@ subsuite = "mozbuild"
 
 ["test_mach_cargo.py"]
 
+["test_mach_source_package.py"]
+
 ["test_makeutil.py"]
 
 ["test_manifest.py"]
