@@ -3117,8 +3117,7 @@ class PresShell final : public nsStubDocumentObserver,
           : mEventHandler(aEventHandler) {
         MOZ_DIAGNOSTIC_ASSERT(!mEventHandler.mCurrentEventInfoSetter);
         mEventHandler.mCurrentEventInfoSetter = this;
-        mEventHandler.mPresShell->PushCurrentEventInfo(
-            std::forward<EventTargetInfo>(aInfo));
+        mEventHandler.mPresShell->PushCurrentEventInfo(std::move(aInfo));
       }
       AutoCurrentEventInfoSetter(EventHandler& aEventHandler,
                                  EventMessage aEventMessage,
