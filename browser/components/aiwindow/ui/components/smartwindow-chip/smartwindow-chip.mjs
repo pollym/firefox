@@ -161,82 +161,97 @@ export class SmartwindowChip extends MozLitElement {
     );
   }
 
-  render() {
-    const isEmpty = this.#isEmpty;
-    const isRemovable = this.#isRemovable;
+  #renderIcon() {
+    if (this.#isEmpty) {
+      return html`<span class="chip-at">@</span>`;
+    }
 
-    let iconTemplate;
-    if (isEmpty) {
-      iconTemplate = html`<span class="chip-at">@</span>`;
-    } else if (this.isTabGroup) {
-      iconTemplate = html`<tab-group-icon
+    if (this.isTabGroup) {
+      return html`<tab-group-icon
         .label=${this.label}
         .color=${this.tabGroupColor}
       ></tab-group-icon>`;
-    } else {
-      iconTemplate = html`<img
-        class="chip-icon"
-        src=${this.iconSrc || "chrome://global/skin/icons/defaultFavicon.svg"}
-        @error=${e => {
-          e.target.src = "chrome://global/skin/icons/defaultFavicon.svg";
-        }}
-        alt=""
-      />`;
     }
 
-    const removeButton = isRemovable
-      ? html`<button
-          class="chip-remove"
-          @click=${this.#handleRemove}
-          data-l10n-id="aiwindow-website-chip-remove-button"
-        >
-          <img
-            class="chip-remove-icon"
-            src="chrome://global/skin/icons/close.svg"
-            alt=""
-          />
-        </button>`
-      : null;
+    return html`<img
+      class="chip-icon"
+      src=${this.iconSrc || "chrome://global/skin/icons/defaultFavicon.svg"}
+      @error=${e => {
+        e.target.src = "chrome://global/skin/icons/defaultFavicon.svg";
+      }}
+      alt=""
+    />`;
+  }
 
-    const labelTemplate = isEmpty
-      ? html`<span
-          class="chip-label"
-          data-l10n-id="aiwindow-website-chip-placeholder"
-        ></span>`
-      : html`<span class="chip-label">${this.label}</span>`;
+  #renderRemoveButton() {
+    if (!this.#isRemovable) {
+      return null;
+    }
 
+    return html`<button
+      class="chip-remove"
+      @click=${this.#handleRemove}
+      data-l10n-id="aiwindow-website-chip-remove-button"
+    >
+      <img
+        class="chip-remove-icon"
+        src="chrome://global/skin/icons/close.svg"
+        alt=""
+      />
+    </button>`;
+  }
+
+  #renderLabel() {
+    if (this.#isEmpty) {
+      return html`<span
+        class="chip-label"
+        data-l10n-id="aiwindow-website-chip-placeholder"
+      ></span>`;
+    }
+
+    return html`<span class="chip-label">${this.label}</span>`;
+  }
+
+  #renderChip() {
+    const iconTemplate = this.#renderIcon();
+    const removeButton = this.#renderRemoveButton();
+    const labelTemplate = this.#renderLabel();
     const chipContent = html`
       ${iconTemplate} ${removeButton} ${labelTemplate}
     `;
 
-    const chipElement = this.href
-      ? html`<a
-          class="chip"
-          part="chip"
-          role=${ifDefined(this.itemRole || undefined)}
-          ?data-removable=${isRemovable}
-          href=${this.href}
-          @click=${this.#handleAnchorClick}
-        >
-          ${chipContent}
-        </a>`
-      : html`<button
-          class="chip"
-          part="chip"
-          role=${ifDefined(this.itemRole || undefined)}
-          ?data-empty=${isEmpty}
-          ?data-removable=${isRemovable}
-          @click=${this.#handleClick}
-        >
-          ${chipContent}
-        </button>`;
+    if (this.href) {
+      return html`<a
+        class="chip"
+        part="chip"
+        role=${ifDefined(this.itemRole || undefined)}
+        ?data-removable=${this.#isRemovable}
+        href=${this.href}
+        @click=${this.#handleAnchorClick}
+      >
+        ${chipContent}
+      </a>`;
+    }
 
+    return html`<button
+      class="chip"
+      part="chip"
+      role=${ifDefined(this.itemRole || undefined)}
+      ?data-empty=${this.#isEmpty}
+      ?data-removable=${this.#isRemovable}
+      @click=${this.#handleClick}
+    >
+      ${chipContent}
+    </button>`;
+  }
+
+  render() {
     return html`
       <link
         rel="stylesheet"
         href="chrome://browser/content/aiwindow/components/smartwindow-chip.css"
       />
-      ${chipElement}
+      ${this.#renderChip()}
     `;
   }
 }
