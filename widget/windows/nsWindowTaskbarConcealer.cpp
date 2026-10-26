@@ -182,6 +182,7 @@ void nsWindow::TaskbarConcealer::UpdateAllState(
     HWND hwnd;
     HMONITOR monitor;
     bool isGkFullscreen;
+    bool isAlwaysOnTop;
   };
   const nsTArray<Item> windows = [&] {
     nsTArray<Item> windows;
@@ -189,8 +190,8 @@ void nsWindow::TaskbarConcealer::UpdateAllState(
     // USE OF UNDOCUMENTED BEHAVIOR: The EnumWindows family of functions
     // enumerates windows in Z-order, topmost first. (This has been true since
     // at least Windows 2000, and possibly since Windows 3.0.)
-    // UPDATE: Dialog windows like PIP may appear before fullscreen windows,
-    // so they are an exception that is specially handled below.
+    // UPDATE: Always-on-top windows like PIP may appear in front of fullscreen
+    // windows, so they are an exception; see GetWindowsHidingTaskbar().
     //
     // It's necessarily unreliable if windows are reordered while being
     // enumerated; but in that case we'll get a message informing us of that
@@ -212,9 +213,12 @@ void nsWindow::TaskbarConcealer::UpdateAllState(
       }
       const WindowState& state = *maybeState;
 
-      windows.AppendElement(Item{.hwnd = hwnd,
-                                 .monitor = state.monitor,
-                                 .isGkFullscreen = state.isGkFullscreen});
+      windows.AppendElement(
+          Item{.hwnd = hwnd,
+               .monitor = state.monitor,
+               .isGkFullscreen = state.isGkFullscreen,
+               .isAlwaysOnTop =
+                   !!(::GetWindowLongPtrW(hwnd, GWL_EXSTYLE) & WS_EX_TOPMOST)});
     });
 
     return windows;
@@ -239,28 +243,30 @@ void nsWindow::TaskbarConcealer::UpdateAllState(
     sKnownWindows.InsertOrUpdate(item.hwnd, item.monitor);
   }
 
-  // Finds the window on aMonitor that is responsible for hiding the taskbar,
-  // or else the uppermost window.  If a window is fullscreen then it is
-  // automatically responsible for hiding the taskbar, regardless of its
-  // position in this list.  (PIP windows may be listed before fullscreen
-  // windows.)
+  // Finds the uppermost window on aMonitor, ignoring always-on-top windows
+  // (such as PIP windows) that are not themselves fullscreen, since those
+  // float above a fullscreen window without displacing it.
   const auto FindUppermostWindowOn = [&windows](HMONITOR aMonitor) -> HWND {
-    HWND topmost;
     for (const Item& item : windows) {
-      if (item.monitor == aMonitor && (!topmost || item.isGkFullscreen)) {
-        MOZ_LOG(sTaskbarConcealerLog, LogLevel::Info,
-                ("on monitor %p, uppermost relevant HWND is %p", aMonitor,
-                 item.hwnd));
-        topmost = item.hwnd;
+      if (item.monitor != aMonitor) {
+        continue;
       }
-    }
-    if (topmost) {
-      return topmost;
+      if (item.isAlwaysOnTop && !item.isGkFullscreen) {
+        MOZ_LOG(sTaskbarConcealerLog, LogLevel::Debug,
+                ("on monitor %p, skipping always-on-top HWND %p", aMonitor,
+                 item.hwnd));
+        continue;
+      }
+      MOZ_LOG(sTaskbarConcealerLog, LogLevel::Info,
+              ("on monitor %p, uppermost relevant HWND is %p", aMonitor,
+               item.hwnd));
+      return item.hwnd;
     }
 
-    // This should never happen, since we're drawing our monitor-set from the
-    // set of relevant windows.
-    MOZ_LOG(sTaskbarConcealerLog, LogLevel::Warning,
+    // This can happen if the only windows on this monitor are always-on-top
+    // windows that are not fullscreen, in which case none should hide the
+    // taskbar.
+    MOZ_LOG(sTaskbarConcealerLog, LogLevel::Info,
             ("on monitor %p, no relevant windows were found", aMonitor));
     return nullptr;
   };
