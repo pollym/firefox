@@ -264,6 +264,7 @@ export class FeatureModel {
     modelType,
     rescale = false,
     logScale = false,
+    clickScale = false,
     normalize = false,
     normalizeL1 = false,
     privateFeatures = [],
@@ -275,6 +276,7 @@ export class FeatureModel {
     this.interestVectorModel = interestVectorModel;
     this.rescale = rescale;
     this.logScale = logScale;
+    this.clickScale = clickScale;
     this.normalize = normalize;
     this.normalizeL1 = normalizeL1;
     this.modelType = modelType;
