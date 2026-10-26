@@ -2185,7 +2185,8 @@ def add_github_checks_route(config, tasks):
         return
 
     for task in tasks:
-        if task.get("attributes", {}).get("code-review"):
+        attrs = task.get("attributes", {})
+        if attrs.get("code-review") or attrs.get("code-review-build-test"):
             routes = task.setdefault("routes", [])
             tier = task.get("treeherder", {}).get("tier", 3)
             if "checks" not in routes and tier == 1:
