@@ -100,27 +100,6 @@ export var ProcessHangMonitor = {
   },
 
   /**
-   * Start devtools debugger for JavaScript associated with the hang
-   * being reported for the selected browser in |win|.
-   */
-  debugScript(win) {
-    this.handleUserInput(win, report => {
-      function callback() {
-        report.endStartingDebugger();
-      }
-
-      this._recordTelemetryForReport(report, "debugging");
-      report.beginStartingDebugger();
-
-      let svc = Cc["@mozilla.org/dom/slow-script-debug;1"].getService(
-        Ci.nsISlowScriptDebug
-      );
-      let handler = svc.remoteActivationHandler;
-      handler.handleSlowScriptDebug(report.scriptBrowser, callback);
-    });
-  },
-
-  /**
    * Dismiss the browser notification and invoke an appropriate action based on
    * the hang type.
    */
@@ -546,21 +525,6 @@ export var ProcessHangMonitor = {
       notification.label = message;
       notification.setAttribute("notification-tag", notificationTag);
       return;
-    }
-
-    // Show the "debug script" button only if DevTools are opened on the slow tab.
-    // Never offer it when DevTools are disabled by policy, as debugging would be refused anyway.
-    if (
-      !Services.prefs.getBoolPref("devtools.policy.disabled", false) &&
-      report.scriptBrowser.browsingContext.watchedByDevTools
-    ) {
-      buttons.push({
-        label: bundle.getString("processHang.button_debug.label"),
-        accessKey: bundle.getString("processHang.button_debug.accessKey"),
-        callback() {
-          ProcessHangMonitor.debugScript(win);
-        },
-      });
     }
 
     // Sometimes the window may have closed already, in which case we won't
