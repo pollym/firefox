@@ -4,7 +4,7 @@
 
 // eslint-disable-next-line no-unused-vars
 import React, { useCallback } from "react";
-import { useSelector, batch } from "react-redux";
+import { useSelector } from "react-redux";
 import { actionCreators as ac, actionTypes as at } from "common/Actions.mjs";
 import { WIDGET_REGISTRY, resolveWidgetSize } from "common/WidgetsRegistry.mjs";
 import { WidgetMenuButton } from "../WidgetMenuButton";
@@ -61,22 +61,20 @@ const Horoscopes = ({
 
   const handleChangeSize = useCallback(
     size => {
-      batch(() => {
-        dispatch(
-          ac.OnlyToMain({
-            type: at.SET_PREF,
-            data: { name: HOROSCOPES_ENTRY.sizePref, value: size },
-          })
-        );
-        // `value` is action_value; `size` overrides the reported widget_size,
-        // which would otherwise still be the pre-change size.
-        recordUserAction(USER_ACTION_TYPES.CHANGE_SIZE, {
-          source: "context_menu",
-          value: size,
-          size,
-        });
-        handleInteraction();
+      dispatch(
+        ac.OnlyToMain({
+          type: at.SET_PREF,
+          data: { name: HOROSCOPES_ENTRY.sizePref, value: size },
+        })
+      );
+      // `value` is action_value; `size` overrides the reported widget_size,
+      // which would otherwise still be the pre-change size.
+      recordUserAction(USER_ACTION_TYPES.CHANGE_SIZE, {
+        source: "context_menu",
+        value: size,
+        size,
       });
+      handleInteraction();
     },
     [dispatch, recordUserAction, handleInteraction]
   );

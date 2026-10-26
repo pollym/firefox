@@ -10,7 +10,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useDispatch, useSelector, batch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { BaseContext } from "content-src/lib/BaseContext";
 // Bug 2034542: these per-widget imports can be removed once the non-Nova render
 // path (@nova-cleanup) is gone and all widgets render via WIDGET_ROW_COMPONENTS.
@@ -465,49 +465,47 @@ function Widgets({ widgetIds }) {
   }, [showsMozWidget]);
 
   function hideAllWidgets() {
-    batch(() => {
-      const targets = getHideAllTargets(widgets, prefs, widgetEnabledMap);
-      for (const target of targets) {
-        dispatch(ac.SetPref(target.enabledPref, false));
-      }
-      // @nova-cleanup(remove-conditional): Remove the !novaEnabled guard and this branch
-      if (!novaEnabled && weatherForecastEnabled) {
-        dispatch(ac.SetPref("showWeather", false));
-      }
+    const targets = getHideAllTargets(widgets, prefs, widgetEnabledMap);
+    for (const target of targets) {
+      dispatch(ac.SetPref(target.enabledPref, false));
+    }
+    // @nova-cleanup(remove-conditional): Remove the !novaEnabled guard and this branch
+    if (!novaEnabled && weatherForecastEnabled) {
+      dispatch(ac.SetPref("showWeather", false));
+    }
 
+    dispatch(
+      ac.OnlyToMain({
+        type: at.WIDGETS_HIDE_ALL,
+        data: { targets, widget_size: widgetSize },
+      })
+    );
+    // @nova-cleanup(remove-conditional): Remove once weatherForecastEnabled path is removed
+    if (!novaEnabled && weatherForecastEnabled) {
       dispatch(
         ac.OnlyToMain({
-          type: at.WIDGETS_HIDE_ALL,
-          data: { targets, widget_size: widgetSize },
+          type: at.WIDGETS_ENABLED,
+          data: {
+            widget_name: "weather",
+            widget_source: "widget",
+            enabled: false,
+            widget_size: widgetSize,
+          },
         })
       );
-      // @nova-cleanup(remove-conditional): Remove once weatherForecastEnabled path is removed
-      if (!novaEnabled && weatherForecastEnabled) {
-        dispatch(
-          ac.OnlyToMain({
-            type: at.WIDGETS_ENABLED,
-            data: {
-              widget_name: "weather",
-              widget_source: "widget",
-              enabled: false,
-              widget_size: widgetSize,
-            },
-          })
-        );
-      }
+    }
 
-      if (hideAllToastEnabled) {
-        dispatch(
-          ac.OnlyToOneContent(
-            {
-              type: at.SHOW_TOAST_MESSAGE,
-              data: { toastId: "hideWidgetsToast", showNotifications: true },
-            },
-            "ActivityStream:Content"
-          )
-        );
-      }
-    });
+    if (hideAllToastEnabled) {
+      dispatch(
+        ac.OnlyToOneContent(
+          {
+            type: at.SHOW_TOAST_MESSAGE,
+            data: { toastId: "hideWidgetsToast", showNotifications: true },
+          },
+          "ActivityStream:Content"
+        )
+      );
+    }
   }
 
   function handleHideAllWidgetsClick(e) {
@@ -558,15 +556,13 @@ function Widgets({ widgetIds }) {
       widget_size: newWidgetSize,
     };
 
-    batch(() => {
-      dispatch(ac.SetMultiplePrefs(prefUpdates));
-      dispatch(
-        ac.OnlyToMain({
-          type: at.WIDGETS_CONTAINER_ACTION,
-          data: telemetryData,
-        })
-      );
-    });
+    dispatch(ac.SetMultiplePrefs(prefUpdates));
+    dispatch(
+      ac.OnlyToMain({
+        type: at.WIDGETS_CONTAINER_ACTION,
+        data: telemetryData,
+      })
+    );
   }
 
   function handleToggleMaximizeClick(e) {
@@ -595,19 +591,17 @@ function Widgets({ widgetIds }) {
     if (container && !prefersReducedMotion) {
       rowToggleFromHeightRef.current = container.getBoundingClientRect().height;
     }
-    batch(() => {
-      dispatch(ac.SetPref(PREF_WIDGETS_ROW_EXPANDED, next));
-      dispatch(
-        ac.OnlyToMain({
-          type: at.WIDGETS_CONTAINER_ACTION,
-          data: {
-            action_type: CONTAINER_ACTION_TYPES.CHANGE_ROW_VISIBILITY,
-            action_value: next ? "expand_row" : "collapse_row",
-            widget_size: widgetSize,
-          },
-        })
-      );
-    });
+    dispatch(ac.SetPref(PREF_WIDGETS_ROW_EXPANDED, next));
+    dispatch(
+      ac.OnlyToMain({
+        type: at.WIDGETS_CONTAINER_ACTION,
+        data: {
+          action_type: CONTAINER_ACTION_TYPES.CHANGE_ROW_VISIBILITY,
+          action_value: next ? "expand_row" : "collapse_row",
+          widget_size: widgetSize,
+        },
+      })
+    );
   }
 
   function handleToggleRowExpandedClick(e) {
@@ -622,19 +616,17 @@ function Widgets({ widgetIds }) {
     rowToggleFromHeightRef.current =
       widgetsContainerRef.current?.getBoundingClientRect().height ?? null;
     setAutoCollapsed(false);
-    batch(() => {
-      dispatch(ac.SetPref(PREF_WIDGETS_AUTO_MINIMIZE_OVERRIDE, true));
-      dispatch(
-        ac.OnlyToMain({
-          type: at.WIDGETS_CONTAINER_ACTION,
-          data: {
-            action_type: CONTAINER_ACTION_TYPES.AUTO_MINIMIZE,
-            action_value: "expand_section",
-            widget_size: widgetSize,
-          },
-        })
-      );
-    });
+    dispatch(ac.SetPref(PREF_WIDGETS_AUTO_MINIMIZE_OVERRIDE, true));
+    dispatch(
+      ac.OnlyToMain({
+        type: at.WIDGETS_CONTAINER_ACTION,
+        data: {
+          action_type: CONTAINER_ACTION_TYPES.AUTO_MINIMIZE,
+          action_value: "expand_section",
+          widget_size: widgetSize,
+        },
+      })
+    );
   }
 
   function handleExpandAutoMinimizedClick(e) {
@@ -651,26 +643,24 @@ function Widgets({ widgetIds }) {
 
   function handleFeedbackClick(e) {
     e.preventDefault();
-    batch(() => {
-      dispatch(
-        ac.OnlyToMain({
-          type: at.OPEN_LINK,
-          data: {
-            url: feedbackUrl,
-            ...(novaEnabled ? { where: "tab" } : {}),
-          },
-        })
-      );
-      dispatch(
-        ac.OnlyToMain({
-          type: at.WIDGETS_CONTAINER_ACTION,
-          data: {
-            action_type: CONTAINER_ACTION_TYPES.FEEDBACK,
-            widget_size: widgetSize,
-          },
-        })
-      );
-    });
+    dispatch(
+      ac.OnlyToMain({
+        type: at.OPEN_LINK,
+        data: {
+          url: feedbackUrl,
+          ...(novaEnabled ? { where: "tab" } : {}),
+        },
+      })
+    );
+    dispatch(
+      ac.OnlyToMain({
+        type: at.WIDGETS_CONTAINER_ACTION,
+        data: {
+          action_type: CONTAINER_ACTION_TYPES.FEEDBACK,
+          widget_size: widgetSize,
+        },
+      })
+    );
   }
 
   function handleUserInteraction(widgetName) {
