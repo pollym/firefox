@@ -3539,6 +3539,12 @@ class Settings(
             default = { FxNimbus.features.accountSyncDecouple.value().enabled },
         )
 
+        var isQwacUiEnabled by
+    booleanPreference(
+        key = appContext.getPreferenceKey(R.string.pref_key_enable_qwac_ui),
+        default = false,
+    )
+
     private var powerSavingModeAutoPreference by
         booleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_power_saving_mode_auto_enabled),
