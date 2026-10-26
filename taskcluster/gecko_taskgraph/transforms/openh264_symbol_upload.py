@@ -46,6 +46,7 @@ def make_symbol_upload_description(config, jobs):
                 "max-run-time": 1200,
                 "env": {
                     "SYMBOL_SECRET": symbol_secret,
+                    "UPLOAD_SYMBOLS": "/builds/worker/fetches/upload-symbols-cli/upload-symbols",
                 },
             },
             "run": {
@@ -57,6 +58,7 @@ def make_symbol_upload_description(config, jobs):
                 "sparse-profile": "upload-symbols",
             },
             "dependencies": {"openh264": dep_job.label},
+            "fetches": {"fetch": ["upload-symbols-linux64"]},
             "attributes": copy_attributes_from_dependent_job(dep_job),
             "run-on-projects": dep_job.attributes.get("run_on_projects"),
             "run-on-repo-type": job.get("run-on-repo-type", ["hg"]),

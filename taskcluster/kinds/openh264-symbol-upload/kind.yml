@@ -5,6 +5,7 @@
 loader: taskgraph.loader.transform:loader
 
 kind-dependencies:
+    - fetch
     - openh264-plugin
 
 transforms:
@@ -17,4 +18,5 @@ transforms:
 tasks:
     openh264-symbol-upload:
         from-deps:
+            kinds: [openh264-plugin]
             group-by: single-with-filters
