@@ -15,6 +15,12 @@ const {
   h1,
   p,
   span,
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td,
 } = require("resource://devtools/client/shared/vendor/react-dom-factories.js");
 const {
   connect,
@@ -27,7 +33,64 @@ class SpeculativeLoadsPage extends PureComponent {
   static get propTypes() {
     return {
       activatedFromNavigationalPrefetch: PropTypes.bool,
+      speculations: PropTypes.arrayOf(
+        PropTypes.shape({
+          resourceId: PropTypes.number.isRequired,
+          url: PropTypes.string.isRequired,
+          action: PropTypes.string.isRequired,
+          status: PropTypes.string.isRequired,
+        })
+      ).isRequired,
     };
+  }
+
+  renderSpeculations() {
+    const { speculations } = this.props;
+    if (!speculations.length) {
+      return Localized(
+        { id: "speculative-loads-empty-list" },
+        p({ className: "js-speculations-empty" })
+      );
+    }
+
+    return table(
+      {
+        className: "speculations-table js-speculations-table",
+        "aria-labelledby": "speculations-heading",
+      },
+      thead(
+        {},
+        tr(
+          {},
+          ...["url", "action", "status"].map(column =>
+            Localized(
+              { id: `speculative-loads-column-${column}`, key: column },
+              th({ scope: "col" })
+            )
+          )
+        )
+      ),
+      tbody(
+        {},
+        ...speculations.map(({ resourceId, url, action, status }) =>
+          tr(
+            { key: resourceId, "data-status": status },
+            td(
+              { className: "speculation-url technical-text", title: url },
+              url
+            ),
+            Localized(
+              { id: `speculative-loads-action-${action}` },
+              td({ className: "speculation-action" })
+            ),
+            Localized(
+              { id: `speculative-loads-status-${status}` },
+              td({ className: "speculation-status" })
+            )
+          )
+        )
+      )
+    );
   }
 
   render() {
@@ -78,15 +141,10 @@ class SpeculativeLoadsPage extends PureComponent {
           { id: "speculative-loads-speculations-header" },
           h1({
             className: "app-page__title",
+            id: "speculations-heading",
           })
         ),
-        p(
-          { className: "" },
-          span(
-            {},
-            "// TODO: THIS SHOULD SHOW THE LIST OF INITIATED SPECUlATIONS"
-          )
-        )
+        this.renderSpeculations()
       )
     );
   }
@@ -96,6 +154,7 @@ function mapStateToProps(state) {
   return {
     activatedFromNavigationalPrefetch:
       state.page.activatedFromNavigationalPrefetch,
+    speculations: Object.values(state.speculativeLoads.requests),
   };
 }
 

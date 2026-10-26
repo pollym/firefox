@@ -17,3 +17,15 @@ speculative-loads-speculations-header = Speculations initiated by this page
 speculative-loads-prefetch-status-prefetched = Navigation used a prefetched document response
 speculative-loads-prefetch-status-not-prefetched = Navigation did not use a prefetched document response
 speculative-loads-prefetch-status-unknown = Prefetch reuse status unavailable
+
+speculative-loads-empty-list = No speculations have been observed for this page. Reload the page to capture requests made before Developer Tools were opened.
+
+speculative-loads-column-url = URL
+speculative-loads-column-action = Action
+speculative-loads-column-status = Status
+
+speculative-loads-action-prefetch = Prefetch
+
+speculative-loads-status-pending = Pending
+speculative-loads-status-success = Success
+speculative-loads-status-failure = Failure
