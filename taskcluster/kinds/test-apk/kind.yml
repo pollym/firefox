@@ -69,11 +69,12 @@ tasks:
             pre-gradlew:
                 - ["cd", "mobile/android/fenix"]
                 - ['java', '-version']
-            gradlew: ['clean', 'testDebugUnitTest']
+            gradlew: ['clean', 'testDebugUnitTest', '-PtestForks=3']
         treeherder:
             platform: 'fenix-android-all/opt'
             symbol: fenix-debug(T)
             tier: 1
+        worker-type: b-linux
         worker:
             artifacts:
                 - name: public/reports/test-reports.zip
