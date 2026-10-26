@@ -160,6 +160,11 @@ PER_PROJECT_PARAMETERS = {
         "target_tasks_method": "try_tasks",
         "release_type": "nightly",
     },
+    "firefox-dev-secure": {
+        "enable_always_target": True,
+        "target_tasks_method": "try_tasks",
+        "release_type": "nightly",
+    },
     "staging-firefox": {
         "target_tasks_method": "firefox_pull_request_tasks",
     },
