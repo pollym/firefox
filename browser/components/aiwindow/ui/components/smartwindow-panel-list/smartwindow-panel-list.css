@@ -161,16 +161,12 @@ panel-list smartwindow-chip {
 }
 
 panel-list smartwindow-chip::part(chip) {
-  --background-color-hover: light-dark(color-mix(in srgb, var(--color-violet-50) 15%, transparent), var(--color-violet-110));
-  --background-color-box: transparent;
+  --source-chip-background-color: transparent;
+  --source-chip-background-color-hover: light-dark(color-mix(in srgb, var(--color-violet-50) 15%, transparent), var(--color-violet-110));
 
   max-width: none;
   min-width: 0;
   width: 100%;
-}
-
-panel-list smartwindow-chip::part(chip):hover {
-  --background-color-box: var(--background-color-hover);
 }
 
 panel-list smartwindow-chip::part(chip):focus-visible {
@@ -180,7 +176,10 @@ panel-list smartwindow-chip::part(chip):focus-visible {
 
 @media -moz-pref("browser.nova.enabled") {
   panel-list smartwindow-chip::part(chip) {
-    --background-color-hover: light-dark(color-mix(in srgb, var(--color-violet-desaturated-10) 70%, transparent), var(--color-violet-desaturated-60));
+    --source-chip-background-color-hover: light-dark(
+      color-mix(in srgb, var(--color-violet-desaturated-10) 70%, transparent),
+      var(--color-violet-desaturated-60)
+    );
   }
 }
 

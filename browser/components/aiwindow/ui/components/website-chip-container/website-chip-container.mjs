@@ -33,12 +33,10 @@ export class WebsiteChipContainer extends SmartwindowOverflowRowMixin(
 ) {
   static properties = {
     websites: { type: Array },
-    chipType: { type: String },
     removable: { type: Boolean },
     shouldGroupChips: { type: Boolean }, // true if we want 3 or more chips to display as ai-grouped-chip-container
     autoOverflow: { type: Boolean },
     visibleChipCount: { type: Number },
-    chipSize: { type: String, attribute: "chip-size", reflect: true },
     isPanelOpen: { type: Boolean, state: true },
   };
 
@@ -46,12 +44,10 @@ export class WebsiteChipContainer extends SmartwindowOverflowRowMixin(
     super();
     /** @type {ContextWebsite[]} */
     this.websites = [];
-    this.chipType = "context-chip";
     this.removable = false;
     this.shouldGroupChips = false;
     this.autoOverflow = false;
     this.visibleChipCount = null;
-    this.chipSize = "default";
     this.isPanelOpen = false;
   }
 
@@ -120,8 +116,7 @@ export class WebsiteChipContainer extends SmartwindowOverflowRowMixin(
 
   #renderStackedChips(website) {
     return html`<smartwindow-chip
-      .type=${this.chipType}
-      .size=${this.chipSize}
+      type="context"
       .label=${website.label}
       .href=${website.url ?? ""}
       .iconSrc=${website.iconSrc ?? ""}

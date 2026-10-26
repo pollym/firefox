@@ -42,8 +42,7 @@ export class AITextBlock extends MozLitElement {
             .href=${chip.href}
             .label=${chip.title || chip.href}
             .iconSrc=${chip.favicon ?? ""}
-            type="context-chip"
-            size="small"
+            type="source"
             openLinkEvent="AITab:OpenLink"
           ></smartwindow-chip>`
       )}

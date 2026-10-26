@@ -120,7 +120,7 @@ add_task(async function test_website_chip_context_remove() {
   await SpecialPowers.spawn(browser, [], async () => {
     const chip = content.document.getElementById("test-context-chip");
 
-    Assert.equal(chip.type, "context-chip", "Chip type should be context-chip");
+    Assert.equal(chip.type, "context", "Chip type should be context");
     Assert.equal(
       chip.label,
       "Example Site",

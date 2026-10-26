@@ -8,31 +8,24 @@ import { MozLitElement } from "chrome://global/content/lit-utils.mjs";
 import "chrome://browser/content/aiwindow/components/tab-group-icon.mjs";
 
 /**
- * A website chip component for tagging and displaying websites.
+ * Three types of chips:
+ * - source (default): used to display citations links across smart window
+ * - in-line: used in the smartbar when typing "@" aka mentions
+ * - context: used in the smartbar header, added via the + button
  *
- * Two types:
- * - in-line: Supports empty state with "@" symbol + "Tag a tab or site" placeholder
- *   - default: favicon + text
- *   - hover: favicon + text (identical to default)
- *   - empty: "@" symbol + "Tag a tab or site" text
- * - context-chip: No empty state support
- *   - default: favicon + text
- *   - hover (removable): remove button + text
- *   - hover (non-removable): favicon + text (identical to default)
- *
- * @property {string} type - Type of chip: "in-line" or "context-chip"
- * @property {"default" | "small"} size - Chip size
+ * @property {string} type - Type of chip: "source", "in-line" or "context"
  * @property {string} label - The text content of the chip
  * @property {string} iconSrc - Favicon or icon URL
- * @property {string} href - URL for the link (used with context-chip type)
- * @property {boolean} removable - Whether the chip shows a remove button on hover (default false)
+ * @property {string} href - URL for the link
  * @property {string} itemRole - ARIA role for the inner element
  * @property {string} openLinkEvent - Event dispatched when a linked chip is
- *   clicked. Each host opens links itself, so it names the event it listens for.
- * @property {boolean} isTabGroup - Whether the chip stands for a tab group,
- *   which has no page and so shows a tab-group-icon instead of a favicon
+ * clicked. Each host opens links itself, so it names the event it listens for.
+ * @property {boolean} isTabGroup - Whether the chip stands for a tab group, which has no
+ * page and so shows a tab-group-icon instead of a favicon
  * @property {string} tabGroupColor - Tab group color name, tinting that icon
  * @property {string} tabGroupId - Id of the tab group to open when clicked
+ * @property {boolean} removable - Whether the chip shows a remove button on hover - only
+ * affects type context and source
  */
 export class SmartwindowChip extends MozLitElement {
   // Forward focus to the inner element for keyboard navigation.
@@ -43,31 +36,29 @@ export class SmartwindowChip extends MozLitElement {
 
   static properties = {
     type: { type: String, reflect: true },
-    size: { type: String, reflect: true },
     label: { type: String },
     iconSrc: { type: String },
     href: { type: String },
-    removable: { type: Boolean },
     itemRole: { type: String },
     // Each host opens links itself, so it names the event it listens for.
     openLinkEvent: { type: String },
     isTabGroup: { type: Boolean },
     tabGroupColor: { type: String },
     tabGroupId: { type: String },
+    removable: { type: Boolean, reflect: true },
   };
 
   #parentHost = null;
 
   constructor() {
     super();
-    this.type = "in-line";
-    this.size = "default";
+    this.type = "source";
     this.label = "";
     this.iconSrc = "";
     this.href = "";
-    this.removable = false;
     this.itemRole = "";
     this.openLinkEvent = "AIChatContent:OpenLink";
+    this.removable = false;
     this.isTabGroup = false;
     this.tabGroupColor = "";
     this.tabGroupId = "";
@@ -97,12 +88,12 @@ export class SmartwindowChip extends MozLitElement {
     this.#parentHost = null;
   }
 
-  get #isEmpty() {
+  get #isInlineAndEmpty() {
     return this.type === "in-line" && !this.label;
   }
 
-  get #isRemovable() {
-    return this.removable;
+  get #isRemovableAndNotInline() {
+    return this.type !== "in-line" && this.removable;
   }
 
   #handleClick() {
@@ -162,7 +153,7 @@ export class SmartwindowChip extends MozLitElement {
   }
 
   #renderIcon() {
-    if (this.#isEmpty) {
+    if (this.#isInlineAndEmpty) {
       return html`<span class="chip-at">@</span>`;
     }
 
@@ -184,7 +175,7 @@ export class SmartwindowChip extends MozLitElement {
   }
 
   #renderRemoveButton() {
-    if (!this.#isRemovable) {
+    if (!this.#isRemovableAndNotInline) {
       return null;
     }
 
@@ -202,7 +193,7 @@ export class SmartwindowChip extends MozLitElement {
   }
 
   #renderLabel() {
-    if (this.#isEmpty) {
+    if (this.#isInlineAndEmpty) {
       return html`<span
         class="chip-label"
         data-l10n-id="aiwindow-website-chip-placeholder"
@@ -225,7 +216,6 @@ export class SmartwindowChip extends MozLitElement {
         class="chip"
         part="chip"
         role=${ifDefined(this.itemRole || undefined)}
-        ?data-removable=${this.#isRemovable}
         href=${this.href}
         @click=${this.#handleAnchorClick}
       >
@@ -237,8 +227,7 @@ export class SmartwindowChip extends MozLitElement {
       class="chip"
       part="chip"
       role=${ifDefined(this.itemRole || undefined)}
-      ?data-empty=${this.#isEmpty}
-      ?data-removable=${this.#isRemovable}
+      ?data-empty=${this.#isInlineAndEmpty}
       @click=${this.#handleClick}
     >
       ${chipContent}

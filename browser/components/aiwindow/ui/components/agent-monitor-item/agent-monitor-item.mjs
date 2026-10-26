@@ -775,8 +775,7 @@ export class AgentMonitorItem extends MozLitElement {
                 ${this.pageUrls.map(
                   url =>
                     html`<smartwindow-chip
-                      type="context-chip"
-                      size="small"
+                      type="source"
                       removable
                       label=${this.#titleFor(url) || this.#displayUrl(url)}
                       .iconSrc=${`page-icon:${url}`}
@@ -1145,8 +1144,7 @@ export class AgentMonitorItem extends MozLitElement {
                       ${agent.watchUrls.map(
                         url =>
                           html`<smartwindow-chip
-                            type="context-chip"
-                            size="small"
+                            type="source"
                             label=${agent.watchUrlTitles?.[url] ??
                             this.#displayUrl(url)}
                             .iconSrc=${`page-icon:${url}`}

@@ -11,11 +11,7 @@ export default {
   argTypes: {
     type: {
       control: "select",
-      options: ["in-line", "context-chip"],
-    },
-    size: {
-      control: "select",
-      options: ["default", "small"],
+      options: ["in-line", "context", "source"],
     },
     label: {
       control: "text",
@@ -65,7 +61,6 @@ const tabGroupTokens = html`<link
 
 const Template = ({
   type,
-  size,
   label,
   iconSrc,
   href,
@@ -76,7 +71,6 @@ const Template = ({
   ${isTabGroup ? tabGroupTokens : ""}
   <smartwindow-chip
     .type=${type}
-    .size=${size}
     .label=${label}
     .iconSrc=${iconSrc}
     .href=${href || ""}
@@ -111,18 +105,25 @@ export const InLineCollection = () => html`
   </div>
 `;
 
-export const ContextChip = Template.bind({});
-ContextChip.args = {
-  type: "context-chip",
+export const ContextRemovable = Template.bind({});
+ContextRemovable.args = {
+  type: "context",
   label: "example.com",
   iconSrc: "chrome://branding/content/icon16.png",
   removable: true,
 };
 
-export const ContextChipSmall = Template.bind({});
-ContextChipSmall.args = {
-  type: "context-chip",
-  size: "small",
+export const ContextNonRemovable = Template.bind({});
+ContextNonRemovable.args = {
+  type: "context",
+  label: "example.com",
+  iconSrc: "chrome://branding/content/icon16.png",
+  removable: false,
+};
+
+export const SourceChip = Template.bind({});
+SourceChip.args = {
+  type: "source",
   label: "example.com",
   iconSrc: "chrome://branding/content/icon16.png",
   href: "https://example.com",
@@ -137,15 +138,14 @@ export const MixedCollection = () => html`
     ></smartwindow-chip>
     <smartwindow-chip type="in-line" label=""></smartwindow-chip>
     <smartwindow-chip
-      type="context-chip"
+      type="context"
       label="example.com"
       iconSrc="chrome://branding/content/about-logo.svg"
       href="https://example.com"
       .removable=${true}
     ></smartwindow-chip>
     <smartwindow-chip
-      type="context-chip"
-      size="small"
+      type="source"
       label="example.com"
       iconSrc="chrome://branding/content/icon16.png"
       href="https://example.com"
@@ -155,7 +155,7 @@ export const MixedCollection = () => html`
 
 export const TabGroupContextChip = Template.bind({});
 TabGroupContextChip.args = {
-  type: "context-chip",
+  type: "context",
   label: "Trip planning",
   isTabGroup: true,
   tabGroupColor: "purple",
@@ -186,7 +186,7 @@ export const TabGroupColors = () => html`
     ].map(
       color =>
         html`<smartwindow-chip
-          type="context-chip"
+          type="context"
           .label=${color}
           .isTabGroup=${true}
           .tabGroupColor=${color}

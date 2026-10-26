@@ -64,11 +64,6 @@
   }
 }
 
-:host([chip-size="small"]) .chip-container-scroller.smartwindow-overflow-row moz-button {
-  --button-border-radius: var(--border-radius-large);
-  --button-padding: var(--space-xxsmall) var(--space-small);
-}
-
 /* when the chip container is part of the chat bubble */
 :host(.chat-bubble-chips) .chip-container-scroller {
   align-items: flex-end;

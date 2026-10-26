@@ -41,8 +41,7 @@ export class AITabHighlights extends MozLitElement {
 
   #renderSource(source, url) {
     return html`<smartwindow-chip
-      type="context-chip"
-      size="small"
+      type="source"
       .label=${source.title || url.hostname}
       .href=${url.href}
       .iconSrc=${source.favicon || `page-icon:${url.href}`}

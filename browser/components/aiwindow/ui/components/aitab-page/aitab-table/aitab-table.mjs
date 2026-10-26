@@ -195,8 +195,7 @@ export class AITabTable extends MozLitElement {
     }
     return html`<smartwindow-chip
       class="aitab-table-source"
-      type="context-chip"
-      size="small"
+      type="source"
       .label=${url.hostname}
       .href=${url.href}
       .iconSrc=${`page-icon:${url.href}`}

@@ -99,8 +99,7 @@ export class ChatAssistantCitations extends SmartwindowOverflowRowMixin(
 
   #renderPill(citation, { itemRole, showTitle } = {}) {
     return html`<smartwindow-chip
-      type="context-chip"
-      size="small"
+      type="source"
       role=${itemRole ? "presentation" : nothing}
       .itemRole=${itemRole ?? ""}
       title=${showTitle ? this.#titleText(citation) : nothing}
