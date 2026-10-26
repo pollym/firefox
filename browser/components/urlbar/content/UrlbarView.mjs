@@ -2551,7 +2551,8 @@ export class UrlbarView {
       result.type == UrlbarShared.RESULT_TYPE.SEARCH &&
       !result.payload.providesSearchMode &&
       !result.payload.inPrivateWindow &&
-      result.providerName != "UrlbarProviderQuickSuggest"
+      (result.providerName != "UrlbarProviderQuickSuggest" ||
+        result.payload.suggestionObject?.suggestionType == "temporal")
     ) {
       item.setAttribute(
         "type",
