@@ -10,6 +10,7 @@
 #include "mozilla/WeakPtr.h"
 
 #include "nsHashKeys.h"
+#include "nsIDOMEventListener.h"
 #include "nsIObserver.h"
 #include "nsMenuBarX.h"
 #include "nsString.h"
@@ -43,7 +44,9 @@ enum {
 // The menu group owner observes DOM mutations, notifies registered
 // nsChangeObservers, and manages command registration. There is one owner per
 // menubar, and one per standalone native menu.
-class nsMenuGroupOwnerX : public nsMultiMutationObserver, public nsIObserver {
+class nsMenuGroupOwnerX : public nsMultiMutationObserver,
+                          public nsIObserver,
+                          public nsIDOMEventListener {
  public:
   // Both parameters can be null.
   nsMenuGroupOwnerX(mozilla::dom::Element* aElement,
@@ -59,6 +62,18 @@ class nsMenuGroupOwnerX : public nsMultiMutationObserver, public nsIObserver {
   void RegisterForLocaleChanges();
   void UnregisterForLocaleChanges();
 
+  // Listen for XUL key elements of the document running their command, to
+  // highlight the menu item that shows the shortcut.
+  void RegisterForKeyCommands();
+  void UnregisterForKeyCommands();
+
+  // Remember that aMenuItem shows the shortcut of aKeyElement. aMenuItem must
+  // unregister before it goes away.
+  void RegisterKeyElement(mozilla::dom::Element* aKeyElement,
+                          nsMenuItemX* aMenuItem);
+  void UnregisterKeyElement(mozilla::dom::Element* aKeyElement,
+                            nsMenuItemX* aMenuItem);
+
   // The representedObject that's used for all menu items under this menu group
   // owner.
   MOZMenuItemRepresentedObject* GetRepresentedObject() {
@@ -72,6 +87,7 @@ class nsMenuGroupOwnerX : public nsMultiMutationObserver, public nsIObserver {
   NS_DECL_ISUPPORTS
   NS_DECL_NSIOBSERVER
   NS_DECL_NSIMUTATIONOBSERVER
+  NS_DECL_NSIDOMEVENTLISTENER
 
  protected:
   virtual ~nsMenuGroupOwnerX();
@@ -91,6 +107,10 @@ class nsMenuGroupOwnerX : public nsMultiMutationObserver, public nsIObserver {
 
   // stores mapping of command IDs to menu objects
   nsTHashMap<nsUint32HashKey, nsMenuItemX*> mCommandToMenuObjectTable;
+
+  // The menu item that shows each key element's shortcut.
+  nsTHashMap<nsRefPtrHashKey<mozilla::dom::Element>, nsMenuItemX*>
+      mKeyElementToMenuItemTable;
 
   MOZMenuItemRepresentedObject* mRepresentedObject = nil;  // [strong]
   mozilla::WeakPtr<nsMenuBarX> mMenuBar;

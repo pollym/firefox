@@ -17,13 +17,17 @@
 
 #include "mozilla/dom/Document.h"
 #include "mozilla/dom/Element.h"
+#include "mozilla/dom/Event.h"
+#include "mozilla/dom/XULCommandEvent.h"
+#include "nsGkAtoms.h"
 #include "nsIWidget.h"
 
 #include "nsINode.h"
 
 using namespace mozilla;
 
-NS_IMPL_ISUPPORTS(nsMenuGroupOwnerX, nsIObserver, nsIMutationObserver)
+NS_IMPL_ISUPPORTS(nsMenuGroupOwnerX, nsIObserver, nsIMutationObserver,
+                  nsIDOMEventListener)
 
 nsMenuGroupOwnerX::nsMenuGroupOwnerX(mozilla::dom::Element* aElement,
                                      nsMenuBarX* aMenuBarIfMenuBar)
@@ -195,6 +199,64 @@ void nsMenuGroupOwnerX::UnregisterForLocaleChanges() {
   if (obs) {
     obs->RemoveObserver(this, "intl:app-locales-changed");
   }
+}
+
+void nsMenuGroupOwnerX::RegisterForKeyCommands() {
+  if (mContent) {
+    mContent->OwnerDoc()->AddSystemEventListener(u"command"_ns, this, true,
+                                                 false);
+  }
+}
+
+void nsMenuGroupOwnerX::UnregisterForKeyCommands() {
+  if (mContent) {
+    mContent->OwnerDoc()->RemoveSystemEventListener(u"command"_ns, this, true);
+  }
+}
+
+void nsMenuGroupOwnerX::RegisterKeyElement(dom::Element* aKeyElement,
+                                           nsMenuItemX* aMenuItem) {
+  mKeyElementToMenuItemTable.InsertOrUpdate(aKeyElement, aMenuItem);
+}
+
+void nsMenuGroupOwnerX::UnregisterKeyElement(dom::Element* aKeyElement,
+                                             nsMenuItemX* aMenuItem) {
+  if (auto entry = mKeyElementToMenuItemTable.Lookup(aKeyElement)) {
+    if (entry.Data() == aMenuItem) {
+      entry.Remove();
+    }
+  }
+}
+
+// A command run through a XUL key element reaches the document either as the
+// key element's own command event, or, when the key element names a command
+// element, as the command element's event whose source event chain starts at
+// the key element.
+NS_IMETHODIMP
+nsMenuGroupOwnerX::HandleEvent(dom::Event* aEvent) {
+  RefPtr<dom::Element> keyElement;
+  RefPtr<dom::Event> event = aEvent;
+  while (event) {
+    dom::Element* target =
+        dom::Element::FromEventTargetOrNull(event->GetOriginalTarget());
+    if (target && target->IsXULElement(nsGkAtoms::key)) {
+      keyElement = target;
+      break;
+    }
+    dom::XULCommandEvent* commandEvent = event->AsXULCommandEvent();
+    event = commandEvent ? commandEvent->GetSourceEvent() : nullptr;
+  }
+  if (!keyElement) {
+    return NS_OK;
+  }
+
+  if (nsMenuItemX* menuItem = mKeyElementToMenuItemTable.Get(keyElement)) {
+    nsMenuBarX::HighlightNativeMenuItem(menuItem->NativeNSMenuItem());
+  } else if (NSMenuItem* appMenuItem =
+                 nsMenuBarX::ApplicationMenuItemForKeyElement(keyElement)) {
+    nsMenuBarX::HighlightNativeMenuItem(appMenuItem);
+  }
+  return NS_OK;
 }
 
 NS_IMETHODIMP

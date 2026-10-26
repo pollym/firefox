@@ -44,8 +44,7 @@ class Element;
 @end
 
 // Objective-C class used for menu items to allow Gecko to override their
-// standard behavior in order to stop key equivalents from firing in certain
-// instances.
+// standard behavior in order to highlight an item without running its action.
 @interface GeckoNSMenuItem : NSMenuItem {
 }
 - (id)target;
@@ -54,7 +53,7 @@ class Element;
 @end
 
 // Objective-C class used to allow us to intervene with keyboard event handling,
-// particularly to stop key equivalents from firing in certain instances. We
+// particularly to leave key equivalents to the Gecko window that is key. We
 // allow mouse actions to work normally.
 @interface GeckoNSMenu : NSMenu {
 }
@@ -122,6 +121,16 @@ class nsMenuBarX : public nsMenuParentX,
   void ApplicationMenuOpened();
   bool PerformKeyEquivalent(NSEvent* aEvent);
   GeckoNSMenu* NativeNSMenu() { return mNativeMenu; }
+
+  // Highlights aItem in the menu bar the way AppKit does when a key equivalent
+  // runs an item, without running its action. Does nothing for an item that
+  // is not in the main menu, is hidden, or is disabled.
+  static void HighlightNativeMenuItem(NSMenuItem* aItem);
+
+  // The application menu item whose XUL node in aKeyElement's document has
+  // aKeyElement as its key, or nil.
+  static NSMenuItem* ApplicationMenuItemForKeyElement(
+      mozilla::dom::Element* aKeyElement);
 
   // nsMenuParentX
   void MenuChildChangedVisibility(const MenuChild& aChild,

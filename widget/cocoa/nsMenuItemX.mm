@@ -212,6 +212,8 @@ void nsMenuItemX::DetachFromGroupOwner() {
     }
     if (mKeyElement) {
       mMenuGroupOwner->UnregisterForContentChanges(mKeyElement);
+      mMenuGroupOwner->UnregisterKeyElement(mKeyElement, this);
+      mKeyElement = nullptr;
     }
     if (mImageElement) {
       mMenuGroupOwner->UnregisterForContentChanges(mImageElement);
@@ -330,9 +332,11 @@ void nsMenuItemX::SetKeyEquiv() {
     if (mMenuGroupOwner) {
       if (mKeyElement) {
         mMenuGroupOwner->UnregisterForContentChanges(mKeyElement);
+        mMenuGroupOwner->UnregisterKeyElement(mKeyElement, this);
       }
       if (keyContent) {
         mMenuGroupOwner->RegisterForContentChanges(keyContent, this);
+        mMenuGroupOwner->RegisterKeyElement(keyContent, this);
       }
     }
     mKeyElement = keyContent;
