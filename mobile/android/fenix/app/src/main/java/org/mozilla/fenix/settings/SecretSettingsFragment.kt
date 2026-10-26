@@ -412,6 +412,12 @@ class SecretSettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFra
             onPreferenceChangeListener = SharedPreferenceUpdater()
         }
 
+        requirePreference<SwitchPreferenceCompat>(R.string.pref_key_open_links_in_youtube_feature_enabled).apply {
+            isVisible = Config.channel.isDebug
+            isChecked = settings.openLinksInYoutubeFeatureEnabled
+            onPreferenceChangeListener = SharedPreferenceUpdater()
+        }
+
         requirePreference<SwitchPreferenceCompat>(R.string.pref_key_enable_homepage_customization).apply {
             isChecked = settings.enableHomepageCustomization
             onPreferenceChangeListener = SharedPreferenceUpdater()

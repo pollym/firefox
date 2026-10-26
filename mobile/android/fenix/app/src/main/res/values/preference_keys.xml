@@ -341,6 +341,12 @@
     <string name="pref_key_open_links_in_apps_always" translatable="false">pref_key_open_links_in_apps_always</string>
     <string name="pref_key_open_links_in_apps_ask" translatable="false">pref_key_open_links_in_apps_ask</string>
     <string name="pref_key_open_links_in_apps_never" translatable="false">pref_key_open_links_in_apps_never</string>
+    <string name="pref_key_media_category" translatable="false">pref_key_media_category</string>
+    <string name="pref_key_open_links_in_youtube_feature_enabled" translatable="false">pref_key_open_links_in_youtube_feature_enabled</string>
+    <string name="pref_key_open_links_in_youtube" translatable="false">pref_key_open_links_in_youtube</string>
+    <string name="pref_key_open_links_in_youtube_always" translatable="false">pref_key_open_links_in_youtube_always</string>
+    <string name="pref_key_open_links_in_youtube_ask" translatable="false">pref_key_open_links_in_youtube_ask</string>
+    <string name="pref_key_open_links_in_youtube_never" translatable="false">pref_key_open_links_in_youtube_never</string>
     <string name="pref_key_allow_screenshots_in_private_mode" translatable="false">pref_key_allow_screenshots_in_private_mode</string>
     <string name="pref_key_dev_debug_allow_capture_of_secure_screens" translatable="false">pref_key_dev_debug_allow_capture_of_secure_screens</string>
     <!-- This preference controls behaviour that corresponds to the private browsing mode lock feature being enabled. -->
