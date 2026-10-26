@@ -898,7 +898,7 @@ TextInputListener::HandleEvent(Event* aEvent) {
 
     RefPtr<nsAtom> eventTypeAtom =
         ShortcutKeys::ConvertEventToDOMEventType(widgetKeyEvent);
-    for (KeyEventHandler* handler = keyHandlers; handler;
+    for (RefPtr<KeyEventHandler> handler = keyHandlers; handler;
          handler = handler->GetNextHandler()) {
       if (!handler->EventTypeEquals(eventTypeAtom)) {
         continue;
