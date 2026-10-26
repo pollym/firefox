@@ -533,31 +533,23 @@ class ProjectPlugin : Plugin<Project> {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("DEPRECATION") // `sarifReport` and `sarifOutput` are deprecated
     private fun configureAndroidComponentsLint(project: Project, mozilla: ProjectExtension, topsrcdir: String) {
         val action = Action<AppliedPlugin> {
-            if (!mozilla.androidComponentsProject.get()) {
-                return@Action
-            }
-            val sarifOutput = File(
+            if (!mozilla.androidComponentsProject.get()) return@Action
+
+            val sarifOutputFile = File(
                 topsrcdir,
                 "mobile/android/android-components/build/reports/lint/lint-report-${project.name}.sarif.json",
             )
-            val android = project.extensions.getByName("android")
-            val lint = android.javaClass.getMethod("getLint").invoke(android)
-            lint.javaClass.getMethod("setBaseline", File::class.java)
-                .invoke(lint, project.file("lint-baseline.xml"))
-            lint.javaClass.getMethod("setWarningsAsErrors", Boolean::class.javaPrimitiveType)
-                .invoke(lint, true)
-            lint.javaClass.getMethod("setAbortOnError", Boolean::class.javaPrimitiveType)
-                .invoke(lint, false)
-            lint.javaClass.getMethod("setSarifReport", Boolean::class.javaPrimitiveType)
-                .invoke(lint, true)
-            lint.javaClass.getMethod("setSarifOutput", File::class.java)
-                .invoke(lint, sarifOutput)
-            val disable = lint.javaClass.getMethod("getDisable").invoke(lint) as MutableSet<String>
-            disable.addAll(
-                listOf(
+            val android = project.extensions.getByType<CommonExtension>()
+            with(android.lint) {
+                baseline = project.file("lint-baseline.xml")
+                warningsAsErrors = true
+                abortOnError = false
+                sarifReport = true
+                sarifOutput = sarifOutputFile
+                disable += listOf(
                     "MissingTranslation",
                     "ExtraTranslation",
                     "MissingDefaultResource",
@@ -570,8 +562,8 @@ class ProjectPlugin : Plugin<Project> {
                     // "We do not impose rules on locales"
                     // https://github.com/mozilla-mobile/android-components/pull/11069
                     "TypographyDashes",
-                ),
-            )
+                )
+            }
         }
         project.pluginManager.withPlugin("com.android.library", action)
         project.pluginManager.withPlugin("com.android.application", action)
