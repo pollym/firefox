@@ -3411,7 +3411,12 @@ static bool GetAtomMarkColor(JSContext* cx, unsigned argc, Value* vp) {
                           "Expected a positive integer as the second argument");
     return false;
   }
+
   size_t index = args[1].toInt32();
+  if (index % gc::MarkBitsPerCell != 0) {
+    ReportUsageErrorASCII(cx, callee, "Invalid atom reference bitmap index");
+    return false;
+  }
 
   gc::GCRuntime* gc = &cx->runtime()->gc;
   bool hasRef = gc->atomReferences.hasRefForIndex(zone, index);
