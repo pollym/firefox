@@ -3,7 +3,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React, { useEffect, useRef, useState } from "react";
-import { batch, useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { actionCreators as ac, actionTypes as at } from "common/Actions.mjs";
 
 // moz-input-search doesn't support <datalist>, so the suggestions are a bespoke listbox and need their own keyboard navigation
@@ -154,12 +154,10 @@ function LocationSearch({ outerClassName, onLocationSelected }) {
   }
 
   function handleUseCurrentLocation() {
-    batch(() => {
-      dispatch(ac.AlsoToMain({ type: at.WEATHER_USER_OPT_IN_LOCATION }));
-      dispatch(
-        ac.BroadcastToContent({ type: at.WEATHER_SEARCH_ACTIVE, data: false })
-      );
-    });
+    dispatch(ac.AlsoToMain({ type: at.WEATHER_USER_OPT_IN_LOCATION }));
+    dispatch(
+      ac.BroadcastToContent({ type: at.WEATHER_SEARCH_ACTIVE, data: false })
+    );
   }
 
   const isRTL = typeof document !== "undefined" && document.dir === "rtl";
