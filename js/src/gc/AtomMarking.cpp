@@ -378,7 +378,6 @@ template bool AtomRefRuntime::hasRef(Zone* zone, JS::Symbol* thing);
 
 bool AtomRefRuntime::hasRefForIndex(Zone* zone, size_t bitIndex) {
   MOZ_ASSERT(zone->runtimeFromAnyThread()->permanentAtomsPopulated());
-  MOZ_ASSERT(bitIndex % MarkBitsPerCell == 0);
 
   size_t blackBit = bitIndex + size_t(ColorBit::BlackBit);
 #ifdef DEBUG
