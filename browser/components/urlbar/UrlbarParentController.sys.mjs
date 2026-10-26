@@ -821,17 +821,13 @@ export class UrlbarParentController {
    *   The target browser's id. Only used if `where == current` and the call
    *   isn't coming from a content process. If it's not specified and
    *   `where == current`, the currently selected tab is used.
-   * @param {boolean} [tracksBounce]
-   *   Whether the caller tracks a bounce for this load. Any other load ends a
-   *   bounce tracked in the tab it navigates.
    */
   openSERP(
     engineId,
     searchTerms,
     where,
     inBackground = false,
-    browserId = null,
-    tracksBounce = false
+    browserId = null
   ) {
     let searchEngine = lazy.SearchService.getEngineById(engineId);
 
@@ -845,7 +841,6 @@ export class UrlbarParentController {
       this.browserWindow.gBrowser.selectedBrowser;
     lazy.URILoadingHelper.openTrustedLinkIn(this.browserWindow, url, where, {
       inBackground,
-      initiatedByURLBar: tracksBounce,
       postData,
       resolveOnContentBrowserCreated: claimBounceForLoad(browser),
       targetBrowser: where == "current" ? browser : null,
