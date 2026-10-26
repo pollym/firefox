@@ -4,6 +4,7 @@
 
 package org.mozilla.conventions
 
+import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -37,6 +38,7 @@ import org.gradle.api.tasks.testing.TestListener
 import org.gradle.api.tasks.testing.TestOutputEvent
 import org.gradle.api.tasks.testing.TestOutputListener
 import org.gradle.api.tasks.testing.TestResult
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.process.CommandLineArgumentProvider
 import org.mozilla.conventions.ktfmt.configureKtfmt
 import java.io.File
@@ -352,12 +354,8 @@ class ProjectPlugin : Plugin<Project> {
 
     private fun configureAndroidBuildToolsVersion(project: Project, substs: Map<String, Any>) {
         val buildToolsVersion = substs["ANDROID_BUILD_TOOLS_VERSION"] as String
-
-        // Use android plugin id string and reflection to avoid classloader isolation issues
         project.pluginManager.withPlugin("com.android.base") {
-            val android = project.extensions.findByName("android") ?: return@withPlugin
-            android::class.java.getMethod("setBuildToolsVersion", String::class.java)
-                .invoke(android, buildToolsVersion)
+            project.extensions.getByType<CommonExtension>().buildToolsVersion = buildToolsVersion
         }
     }
 
