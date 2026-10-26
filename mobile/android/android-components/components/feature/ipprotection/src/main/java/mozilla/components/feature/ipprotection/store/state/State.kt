@@ -13,8 +13,6 @@ import mozilla.components.concept.engine.ipprotection.IPProtectionHandler
 import mozilla.components.concept.engine.ipprotection.ServiceState
 import mozilla.components.lib.state.State
 
-const val BYTES_PER_GB = 1024 * 1024 * 1024f
-
 /**
  * State stored by the feature to drive UI and decisions.
  *
