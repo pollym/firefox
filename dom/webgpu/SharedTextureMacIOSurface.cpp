@@ -43,7 +43,7 @@ UniquePtr<SharedTextureMacIOSurface> SharedTextureMacIOSurface::Create(
   MOZ_ASSERT(fencesHolderMap);
   fencesHolderMap->Register(fencesHolderId);
 
-  return MakeUnique<SharedTextureMacIOSurface>(
+  return std::make_unique<SharedTextureMacIOSurface>(
       aParent, aDeviceId, aWidth, aHeight, aFormat, aUsage, std::move(surface),
       fencesHolderId);
 }

@@ -160,7 +160,7 @@ void RemoteTextureOwnerClient::PushTexture(
   MOZ_ASSERT(IsRegistered(aOwnerId));
 
   UniquePtr<TextureData> textureData =
-      MakeUnique<SharedSurfaceTextureData>(aDesc, aFormat, aSize);
+      std::make_unique<SharedSurfaceTextureData>(aDesc, aFormat, aSize);
 
   RefPtr<layers::TextureHost> textureHost =
       [&]() -> already_AddRefed<TextureHost> {
@@ -199,7 +199,7 @@ void RemoteTextureOwnerClient::PushTexture(
   MOZ_ASSERT(IsRegistered(aOwnerId));
 
   UniquePtr<TextureData> textureData =
-      MakeUnique<SharedSurfaceTextureData>(aDesc, aFormat, aSize);
+      std::make_unique<SharedSurfaceTextureData>(aDesc, aFormat, aSize);
 
   RefPtr<layers::TextureHost> textureHost =
       [&]() -> already_AddRefed<TextureHost> {
@@ -411,7 +411,7 @@ void RemoteTextureMap::PushTexture(
       gfxCriticalNoteOnce << "Texture pushed during context lost";
     }
 
-    auto textureData = MakeUnique<TextureDataHolder>(
+    auto textureData = std::make_unique<TextureDataHolder>(
         aTextureId, aTextureHost, std::move(aTextureData),
         std::move(aResourceWrapper));
 
@@ -631,7 +631,7 @@ void RemoteTextureMap::RegisterTextureOwner(
     MOZ_ASSERT_UNREACHABLE("unexpected to be called");
     return;
   }
-  auto owner = MakeUnique<TextureOwner>();
+  auto owner = std::make_unique<TextureOwner>();
   if (aRecycleBin) {
     owner->mRecycleBin = aRecycleBin;
   } else {
@@ -1234,7 +1234,8 @@ RefPtr<TextureHost> RemoteTextureMap::GetOrCreateRemoteTextureHostWrapper(
 
   auto wrapper = RemoteTextureHostWrapper::Create(aTextureId, aOwnerId, aForPid,
                                                   aSize, aFlags);
-  auto wrapperHolder = MakeUnique<RemoteTextureHostWrapperHolder>(wrapper);
+  auto wrapperHolder =
+      std::make_unique<RemoteTextureHostWrapperHolder>(wrapper);
 
   mRemoteTextureHostWrapperHolders.emplace(key, std::move(wrapperHolder));
 
@@ -1281,7 +1282,7 @@ bool RemoteTextureMap::CheckRemoteTextureReady(
 
     const auto key = std::pair(aInfo.mForPid, aInfo.mOwnerId);
     if (!mWaitingTextureOwners[key]) {
-      auto waitingOwner = MakeUnique<WaitingTextureOwner>();
+      auto waitingOwner = std::make_unique<WaitingTextureOwner>();
       mWaitingTextureOwners[key] = std::move(waitingOwner);
     }
 
@@ -1289,7 +1290,7 @@ bool RemoteTextureMap::CheckRemoteTextureReady(
 
     WaitingTextureOwner* waitingOwner = mWaitingTextureOwners[key].get();
 
-    auto callbackHolder = MakeUnique<RenderingReadyCallbackHolder>(
+    auto callbackHolder = std::make_unique<RenderingReadyCallbackHolder>(
         aInfo.mTextureId, std::move(aCallback));
     waitingOwner->mRenderingReadyCallbackHolders.push_back(
         std::move(callbackHolder));
@@ -1315,7 +1316,7 @@ bool RemoteTextureMap::CheckRemoteTextureReady(
     return true;
   }
 
-  auto callbackHolder = MakeUnique<RenderingReadyCallbackHolder>(
+  auto callbackHolder = std::make_unique<RenderingReadyCallbackHolder>(
       aInfo.mTextureId, std::move(aCallback));
   owner->mRenderingReadyCallbackHolders.push_back(std::move(callbackHolder));
 

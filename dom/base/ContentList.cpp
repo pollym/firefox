@@ -384,7 +384,7 @@ inline void ContentList::InsertElementInNamedItemsCache(nsIContent& aContent) {
     }
 
     if (!mNamedItemsCache) {
-      mNamedItemsCache = MakeUnique<NamedItemsCache>();
+      mNamedItemsCache = std::make_unique<NamedItemsCache>();
     }
 
     nsAtom* name = info.mValue->GetAtomValue();

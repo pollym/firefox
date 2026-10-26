@@ -186,7 +186,7 @@ nsDocShellLoadState::nsDocShellLoadState(
   mHasSpeculativeListener = aLoadState.HasSpeculativeListener();
   mIsMetaRefresh = aLoadState.IsMetaRefresh();
   if (aLoadState.loadingSessionHistoryInfo().isSome()) {
-    mLoadingSessionHistoryInfo = MakeUnique<LoadingSessionHistoryInfo>(
+    mLoadingSessionHistoryInfo = std::make_unique<LoadingSessionHistoryInfo>(
         aLoadState.loadingSessionHistoryInfo().ref());
   }
   mUnstrippedURI = aLoadState.UnstrippedURI();
@@ -395,7 +395,7 @@ nsDocShellLoadState::nsDocShellLoadState(const nsDocShellLoadState& aOther)
       !aOther.mHasSpeculativeListener && !aOther.mSpeculativeListener,
       "Cannot copy a load state with a speculative listener");
   if (aOther.mLoadingSessionHistoryInfo) {
-    mLoadingSessionHistoryInfo = MakeUnique<LoadingSessionHistoryInfo>(
+    mLoadingSessionHistoryInfo = std::make_unique<LoadingSessionHistoryInfo>(
         *aOther.mLoadingSessionHistoryInfo);
   }
 }
@@ -944,7 +944,7 @@ void nsDocShellLoadState::SetSHEntry(SessionHistoryEntry* aSHEntry) {
   mSHEntry = aSHEntry;
   if (aSHEntry) {
     mLoadingSessionHistoryInfo =
-        MakeUnique<LoadingSessionHistoryInfo>(aSHEntry);
+        std::make_unique<LoadingSessionHistoryInfo>(aSHEntry);
     mLoadingSessionHistoryInfo->mTriggeringNavigationType =
         NavigationUtils::NavigationTypeFromLoadType(LoadType());
     MOZ_ASSERT(mLoadingSessionHistoryInfo->mTriggeringNavigationType);
@@ -972,7 +972,7 @@ void nsDocShellLoadState::SetPreviousEntryForActivation(
 void nsDocShellLoadState::SetLoadingSessionHistoryInfo(
     const mozilla::dom::LoadingSessionHistoryInfo& aLoadingInfo) {
   SetLoadingSessionHistoryInfo(
-      MakeUnique<mozilla::dom::LoadingSessionHistoryInfo>(aLoadingInfo));
+      std::make_unique<mozilla::dom::LoadingSessionHistoryInfo>(aLoadingInfo));
 }
 
 void nsDocShellLoadState::SetLoadingSessionHistoryInfo(

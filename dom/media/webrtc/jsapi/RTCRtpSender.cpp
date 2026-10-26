@@ -222,7 +222,7 @@ nsTArray<RefPtr<dom::RTCStatsPromise>> RTCRtpSender::GetStatsInternal(
     promises.AppendElement(InvokeAsync(
         mPipeline->mCallThread, __func__,
         [conduit = mPipeline->mConduit, trackName]() mutable {
-          auto report = MakeUnique<dom::RTCStatsCollection>();
+          auto report = std::make_unique<dom::RTCStatsCollection>();
           Maybe<webrtc::Call::Stats> stats = conduit->GetCallStats();
           stats.apply([&](const auto aStats) {
             dom::RTCBandwidthEstimationInternal bw;
@@ -251,7 +251,7 @@ nsTArray<RefPtr<dom::RTCStatsPromise>> RTCRtpSender::GetStatsInternal(
        transportId = std::move(transportId),
        videoSsrcToRidMap = std::move(videoSsrcToRidMap), isSending,
        audioCodec = mAudioCodec.Ref()] {
-        auto report = MakeUnique<dom::RTCStatsCollection>();
+        auto report = std::make_unique<dom::RTCStatsCollection>();
         auto asAudio = pipeline->mConduit->AsAudioSessionConduit();
         auto asVideo = pipeline->mConduit->AsVideoSessionConduit();
 

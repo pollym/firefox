@@ -2486,7 +2486,7 @@ void HTMLInputElement::OpenDateTimePicker(const DateTimeValue& aInitialValue) {
     return;
   }
 
-  mDateTimeInputBoxValue = MakeUnique<DateTimeValue>(aInitialValue);
+  mDateTimeInputBoxValue = std::make_unique<DateTimeValue>(aInitialValue);
   nsContentUtils::DispatchChromeEvent(this, u"MozOpenDateTimePicker"_ns,
                                       CanBubble::eYes, Cancelable::eYes);
 }

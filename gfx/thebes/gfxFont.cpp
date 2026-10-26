@@ -811,7 +811,7 @@ gfxShapedText::DetailedGlyph* gfxShapedText::AllocateDetailedGlyphs(
   MOZ_ASSERT(aCount <= CompressedGlyph::GLYPH_COUNT_MASK);
 
   if (!mDetailedGlyphs) {
-    mDetailedGlyphs = MakeUnique<DetailedGlyphStore>();
+    mDetailedGlyphs = std::make_unique<DetailedGlyphStore>();
   }
 
   return mDetailedGlyphs->Allocate(aIndex, aCount);
@@ -2925,7 +2925,7 @@ bool gfxFont::RenderColorGlyph(DrawTarget* aDrawTarget, gfxContext* aContext,
       aDrawTarget->GetBackendType() != BackendType::WEBRENDER_TEXT) {
     AutoWriteLock lock(mLock);
     if (!mColorGlyphCache && useCache) {
-      mColorGlyphCache = MakeUnique<ColorGlyphCache>();
+      mColorGlyphCache = std::make_unique<ColorGlyphCache>();
     }
 
     Rect bounds;
@@ -3550,8 +3550,9 @@ bool gfxFont::ProcessShapedWordInternal(
     // We're going to cache the new shaped word, so lock for writing now.
     AutoWriteLock lock(mLock);
     if (!mWordCache) {
-      mWordCache = MakeUnique<HashMap<WordCacheKey, UniquePtr<gfxShapedWord>,
-                                      WordCacheKey::HashPolicy>>();
+      mWordCache =
+          std::make_unique<HashMap<WordCacheKey, UniquePtr<gfxShapedWord>,
+                                   WordCacheKey::HashPolicy>>();
     }
 
     // Update key so that it references the text stored in the newShapedWord,
@@ -5089,7 +5090,8 @@ void gfxFont::AddSizeOfIncludingThis(MallocSizeOf aMallocSizeOf,
 void gfxFont::AddGlyphChangeObserver(GlyphChangeObserver* aObserver) {
   AutoWriteLock lock(mLock);
   if (!mGlyphChangeObservers) {
-    mGlyphChangeObservers = MakeUnique<nsTHashSet<GlyphChangeObserver*>>();
+    mGlyphChangeObservers =
+        std::make_unique<nsTHashSet<GlyphChangeObserver*>>();
   }
   mGlyphChangeObservers->Insert(aObserver);
 }

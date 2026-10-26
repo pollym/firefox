@@ -705,7 +705,7 @@ bool IdentifierMapEntry::HasWindowNameElement() const {
 void IdentifierMapEntry::AddContentChangeCallback(
     Document::IDTargetObserver aCallback, void* aData, bool aForImage) {
   if (!mChangeCallbacks) {
-    mChangeCallbacks = MakeUnique<nsTHashtable<ChangeCallbackEntry>>();
+    mChangeCallbacks = std::make_unique<nsTHashtable<ChangeCallbackEntry>>();
   }
 
   ChangeCallback cc = {aCallback, aData, aForImage};
@@ -1170,7 +1170,7 @@ nsresult ExternalResourceMap::AddExternalResource(nsIURI* aURI,
   }
 
   ExternalResource* newResource =
-      mMap.InsertOrUpdate(aURI, MakeUnique<ExternalResource>()).get();
+      mMap.InsertOrUpdate(aURI, std::make_unique<ExternalResource>()).get();
 
   newResource->mDocument = doc;
   newResource->mViewer = aViewer;
@@ -7682,7 +7682,7 @@ void Document::SetHeaderData(nsAtom* aHeaderField, const nsAString& aData) {
 
   if (!mHeaderData) {
     if (!aData.IsEmpty()) {  // don't bother storing empty string
-      mHeaderData = MakeUnique<HeaderData>(aHeaderField, aData);
+      mHeaderData = std::make_unique<HeaderData>(aHeaderField, aData);
     }
   } else {
     HeaderData* data = mHeaderData.get();
@@ -7707,7 +7707,7 @@ void Document::SetHeaderData(nsAtom* aHeaderField, const nsAString& aData) {
 
     if (!aData.IsEmpty() && !found) {
       // didn't find, append
-      *lastPtr = MakeUnique<HeaderData>(aHeaderField, aData);
+      *lastPtr = std::make_unique<HeaderData>(aHeaderField, aData);
     }
   }
 
@@ -10589,7 +10589,7 @@ SMILAnimationController* Document::GetAnimationController() {
 
 SpeculationRulesManager* Document::EnsureSpeculationRulesManager() {
   if (!mSpeculationRulesManager) {
-    mSpeculationRulesManager = MakeUnique<SpeculationRulesManager>();
+    mSpeculationRulesManager = std::make_unique<SpeculationRulesManager>();
   }
   return mSpeculationRulesManager.get();
 }
@@ -13120,8 +13120,8 @@ void Document::OnPageShow(bool aPersisted, EventTarget* aDispatchStartTarget,
 }
 
 static void DispatchFullscreenChange(Document& aDocument, nsINode* aTarget) {
-  aDocument.AddPendingFullscreenEvent(
-      MakeUnique<PendingFullscreenEvent>(FullscreenEventType::Change, aTarget));
+  aDocument.AddPendingFullscreenEvent(std::make_unique<PendingFullscreenEvent>(
+      FullscreenEventType::Change, aTarget));
 }
 
 void Document::OnPageHide(bool aPersisted, EventTarget* aDispatchStartTarget,
@@ -14521,7 +14521,7 @@ void Document::ScrollToRef() {
 
 void Document::RegisterActivityObserver(nsISupports* aSupports) {
   if (!mActivityObservers) {
-    mActivityObservers = MakeUnique<nsTHashSet<nsISupports*>>();
+    mActivityObservers = std::make_unique<nsTHashSet<nsISupports*>>();
   }
   mActivityObservers->Insert(aSupports);
 }
@@ -14717,7 +14717,7 @@ static void CachePrintSelectionRanges(const Document& aSourceDoc,
 
   const uint32_t rangeCount =
       sourceDocIsStatic ? origRanges->Length() : origSelection->RangeCount();
-  auto printRanges = MakeUnique<nsTArray<RefPtr<Range>>>(rangeCount);
+  auto printRanges = std::make_unique<nsTArray<RefPtr<Range>>>(rangeCount);
 
   for (const uint32_t i : IntegerRange(rangeCount)) {
     MOZ_ASSERT_IF(!sourceDocIsStatic,
@@ -20477,7 +20477,7 @@ void Document::AddExpectedInternalResourceTarget(nsAtom* aFragment) {
   mExpectedInternalResourceTargets.LookupOrInsert(aFragment, 0) += 1;
   if (!mExpectedInternalResourceTargetsBloom) {
     mExpectedInternalResourceTargetsBloom =
-        MakeUnique<mozilla::CountingBloomFilter<8, nsAtom>>();
+        std::make_unique<mozilla::CountingBloomFilter<8, nsAtom>>();
   }
   mExpectedInternalResourceTargetsBloom->add(aFragment->hash());
 }

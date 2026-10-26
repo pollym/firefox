@@ -531,7 +531,7 @@ mozilla::ipc::IPCResult GMPChild::RecvStartPlugin(const nsString& aAdapter) {
   auto platformAPI = new GMPPlatformAPI();
   InitPlatformAPI(*platformAPI, this);
 
-  mGMPLoader = MakeUnique<GMPLoader>();
+  mGMPLoader = std::make_unique<GMPLoader>();
 #if defined(MOZ_SANDBOX) && !defined(XP_MACOSX)
   if (!mGMPLoader->CanSandbox()) {
     GMP_CHILD_LOG_DEBUG("{} Can't sandbox GMP, failing", __FUNCTION__);

@@ -1102,7 +1102,7 @@ auto FaviconHelper::ObtainCachedIconFileAsync(
             [useShortcutCacheDir, pageURI = std::move(pageURI),
              icoFile = std::move(icoFile),
              aIOThread = std::move(currentThread)]() {
-              auto holder = MakeUnique<
+              auto holder = std::make_unique<
                   MozPromiseHolder<ObtainCachedIconFileAsyncPromise>>();
               RefPtr<ObtainCachedIconFileAsyncPromise> promise =
                   holder->Ensure(__func__);
@@ -1266,7 +1266,7 @@ nsAutoRegion WinUtils::RegionToHRGN(const LayoutDeviceIntRegion& aRegion) {
   // See:
   // https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-rgndataheader
   // https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-extcreateregion
-  auto buffer = MakeUnique<char[]>(regionDataBytes);
+  auto buffer = std::make_unique<char[]>(regionDataBytes);
   auto* data = reinterpret_cast<RGNDATA*>(buffer.get());
   data->rdh.dwSize = sizeof(RGNDATAHEADER);
   data->rdh.iType = RDH_RECTANGLES;
@@ -1871,7 +1871,7 @@ bool WinUtils::GetAppInitDLLs(nsAString& aOutput) {
   }
   // Allocate the buffer and query for the actual data
   mozilla::UniquePtr<wchar_t[]> data =
-      mozilla::MakeUnique<wchar_t[]>(numBytes / sizeof(wchar_t));
+      std::make_unique<wchar_t[]>(numBytes / sizeof(wchar_t));
   status = RegQueryValueExW(hkey, kAppInitDLLs, nullptr, nullptr,
                             (LPBYTE)data.get(), &numBytes);
   if (status != ERROR_SUCCESS) {

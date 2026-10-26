@@ -221,7 +221,7 @@ TEST(Jemalloc, PtrInfo)
   ASSERT_TRUE(InfoEq(info, TagUnknown, nullptr, 0U, 0U));
 
   // Chunk header.
-  UniquePtr<int> p = MakeUnique<int>();
+  UniquePtr<int> p = std::make_unique<int>();
   size_t chunksizeMask = stats.chunksize - 1;
   char* chunk = (char*)(uintptr_t(p.get()) & ~chunksizeMask);
   size_t chunkHeaderSize =

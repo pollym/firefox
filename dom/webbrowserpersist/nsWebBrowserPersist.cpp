@@ -588,7 +588,8 @@ nsresult nsWebBrowserPersist::StartUpload(nsIInputStream* aInputStream,
 
   // add this to the upload list
   nsCOMPtr<nsISupports> keyPtr = do_QueryInterface(destChannel);
-  mUploadList.InsertOrUpdate(keyPtr, MakeUnique<UploadData>(aDestinationURI));
+  mUploadList.InsertOrUpdate(keyPtr,
+                             std::make_unique<UploadData>(aDestinationURI));
 
   return NS_OK;
 }
@@ -1518,8 +1519,8 @@ nsresult nsWebBrowserPersist::SaveChannelInternal(nsIChannel* aChannel,
   MutexAutoLock lock(mOutputMapMutex);
   // Add the output transport to the output map with the channel as the key
   nsCOMPtr<nsISupports> keyPtr = do_QueryInterface(aChannel);
-  mOutputMap.InsertOrUpdate(keyPtr,
-                            MakeUnique<OutputData>(aFile, mURI, aCalcFileExt));
+  mOutputMap.InsertOrUpdate(
+      keyPtr, std::make_unique<OutputData>(aFile, mURI, aCalcFileExt));
 
   return NS_OK;
 }
@@ -2712,7 +2713,7 @@ nsresult nsWebBrowserPersist::SaveSubframeContent(
   // We shouldn't use SaveDocumentInternal for the contents
   // of frames that are not documents, e.g. images.
   if (DocumentEncoderExists(contentType.get())) {
-    auto toWalk = mozilla::MakeUnique<WalkData>();
+    auto toWalk = std::make_unique<WalkData>();
     toWalk->mDocument = aFrameContent;
     toWalk->mFile = frameURI;
     toWalk->mDataPath = frameDataURI;

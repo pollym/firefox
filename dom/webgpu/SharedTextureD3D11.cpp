@@ -94,9 +94,9 @@ UniquePtr<SharedTextureD3D11> SharedTextureD3D11::Create(
   auto fencesHolderId = layers::CompositeProcessFencesHolderId::GetNext();
   fencesHolderMap->Register(fencesHolderId);
 
-  return MakeUnique<SharedTextureD3D11>(aWidth, aHeight, aFormat, aUsage,
-                                        texture, std::move(handle),
-                                        fencesHolderId, std::move(fence));
+  return std::make_unique<SharedTextureD3D11>(aWidth, aHeight, aFormat, aUsage,
+                                              texture, std::move(handle),
+                                              fencesHolderId, std::move(fence));
 }
 
 SharedTextureD3D11::SharedTextureD3D11(

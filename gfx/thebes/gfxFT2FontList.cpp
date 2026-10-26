@@ -5,12 +5,13 @@
 #include <android/log.h>
 #include <dirent.h>
 
+#include <memory>
+
 #include "gfxAndroidPlatform.h"
 #include "mozilla/Base64.h"
 #include "mozilla/EndianUtils.h"
 #include "mozilla/MemoryReporting.h"
 #include "mozilla/Omnijar.h"
-#include "mozilla/UniquePtr.h"
 #include "mozilla/UniquePtrExtensions.h"
 #include "mozilla/dom/ContentChild.h"
 #include "nsReadableUtils.h"
@@ -722,7 +723,7 @@ void gfxFT2FontList::CollectInitData(const FontListEntry& aFLE,
             mFamilyInitData.AppendElement(fontlist::Family::InitData{
                 key, aFLE.familyName(), fontlist::Family::kNoIndex,
                 aFLE.visibility()});
-            return MakeUnique<nsTArray<fontlist::Face::InitData>>();
+            return std::make_unique<nsTArray<fontlist::Face::InitData>>();
           })
       ->AppendElement(fontlist::Face::InitData{
           aFLE.filepath(), aFLE.index(), false,
@@ -1540,7 +1541,7 @@ void gfxFT2FontList::FindFonts() {
 
   // Chrome process: get the cached list (if any)
   if (!mFontNameCache) {
-    mFontNameCache = MakeUnique<FontNameCache>();
+    mFontNameCache = std::make_unique<FontNameCache>();
   }
   mFontNameCache->Init();
 

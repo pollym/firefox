@@ -105,7 +105,7 @@ bool ADTSTrackDemuxer::Init() {
   }
 
   if (!mInfo) {
-    mInfo = MakeUnique<AudioInfo>();
+    mInfo = std::make_unique<AudioInfo>();
   }
 
   mInfo->mRate = mSamplesPerSecond;
@@ -657,7 +657,7 @@ bool ADTSDemuxer::ADTSSniffer(const uint8_t* aData, const uint32_t aLength) {
   if (!ADTS::FrameHeader::MatchesSync(Span(aData, aLength))) {
     return false;
   }
-  auto parser = MakeUnique<ADTS::FrameParser>();
+  auto parser = std::make_unique<ADTS::FrameParser>();
 
   if (!parser->Parse(0, aData, aData + aLength)) {
     return false;

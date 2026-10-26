@@ -1671,7 +1671,7 @@ void RestyleManager::ProcessRestyledFrames(nsStyleChangeList& aChangeList) {
 
   MaybeClearDestroyedFrames maybeClear(mDestroyedFrames);
   if (!mDestroyedFrames) {
-    mDestroyedFrames = MakeUnique<nsTHashSet<const nsIFrame*>>();
+    mDestroyedFrames = std::make_unique<nsTHashSet<const nsIFrame*>>();
   }
 
   AUTO_PROFILER_LABEL("RestyleManager::ProcessRestyledFrames", LAYOUT);

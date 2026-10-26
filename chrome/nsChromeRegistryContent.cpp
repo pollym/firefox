@@ -60,7 +60,7 @@ void nsChromeRegistryContent::RegisterPackage(const ChromePackage& aPackage) {
     if (NS_FAILED(rv)) return;
   }
 
-  mozilla::UniquePtr<PackageEntry> entry = mozilla::MakeUnique<PackageEntry>();
+  mozilla::UniquePtr<PackageEntry> entry = std::make_unique<PackageEntry>();
   entry->flags = aPackage.flags;
   entry->contentBaseURI = std::move(content);
   entry->localeBaseURI = std::move(locale);

@@ -66,7 +66,8 @@ class APZCAxisLockTester : public APZCTreeManagerTester {
     CreateScrollData(treeShape, layerVisibleRect);
     SetScrollableFrameMetrics(root, START_SCROLL_ID, CSSRect(0, 0, 500, 500));
 
-    registration = MakeUnique<ScopedLayerTreeRegistration>(LayersId{0}, mcc);
+    registration =
+        std::make_unique<ScopedLayerTreeRegistration>(LayersId{0}, mcc);
 
     UpdateHitTestingTree();
   }
@@ -574,7 +575,8 @@ TEST_F(APZCAxisLockTester, TestScrollHandoffAxisLockConflict) {
                             CSSRect(0, 0, 500, 500));
   SetScrollHandoff(layers[1], root);
 
-  registration = MakeUnique<ScopedLayerTreeRegistration>(LayersId{0}, mcc);
+  registration =
+      std::make_unique<ScopedLayerTreeRegistration>(LayersId{0}, mcc);
 
   UpdateHitTestingTree();
 
@@ -660,7 +662,8 @@ TEST_P(APZCAxisLockCompatTester, TestPanGestureStart) {
   CreateScrollData(treeShape, layerVisibleRect);
   SetScrollableFrameMetrics(root, START_SCROLL_ID, CSSRect(0, 0, 500, 500));
 
-  registration = MakeUnique<ScopedLayerTreeRegistration>(LayersId{0}, mcc);
+  registration =
+      std::make_unique<ScopedLayerTreeRegistration>(LayersId{0}, mcc);
 
   UpdateHitTestingTree();
 
@@ -686,7 +689,8 @@ TEST_P(APZCAxisLockCompatTester, LockUnscrollableAxis) {
   CreateScrollData(treeShape, layerVisibleRect);
   SetScrollableFrameMetrics(root, START_SCROLL_ID, CSSRect(0, 0, 100, 500));
 
-  registration = MakeUnique<ScopedLayerTreeRegistration>(LayersId{0}, mcc);
+  registration =
+      std::make_unique<ScopedLayerTreeRegistration>(LayersId{0}, mcc);
 
   UpdateHitTestingTree();
 

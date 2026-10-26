@@ -1338,7 +1338,7 @@ void RenderThread::InitDeviceTask() {
   nsAutoCString err;
   CreateSingletonGL(err);
   if (gfx::gfxVars::UseWebRenderProgramBinaryDisk()) {
-    mProgramCache = MakeUnique<WebRenderProgramCache>(ThreadPool().Raw());
+    mProgramCache = std::make_unique<WebRenderProgramCache>(ThreadPool().Raw());
   }
   // Query the shared GL context to force the
   // lazy initialization to happen now.
@@ -1514,7 +1514,8 @@ gl::GLContext* RenderThread::SingletonGL(nsACString& aError) {
     mShaders = nullptr;
   }
   if (mSingletonGL && mSingletonGLIsForHardwareWebRender && !mShaders) {
-    mShaders = MakeUnique<WebRenderShaders>(mSingletonGL, mProgramCache.get());
+    mShaders =
+        std::make_unique<WebRenderShaders>(mSingletonGL, mProgramCache.get());
   }
 
   return mSingletonGL.get();

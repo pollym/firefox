@@ -349,7 +349,7 @@ void nsWindowWaylandToplevel::CreateCompositorVsyncDispatcher() {
   }
   if (!mCompositorVsyncDispatcherLock) {
     mCompositorVsyncDispatcherLock =
-        MakeUnique<Mutex>("mCompositorVsyncDispatcherLock");
+        std::make_unique<Mutex>("mCompositorVsyncDispatcherLock");
   }
   MutexAutoLock lock(*mCompositorVsyncDispatcherLock);
   if (!mCompositorVsyncDispatcher) {

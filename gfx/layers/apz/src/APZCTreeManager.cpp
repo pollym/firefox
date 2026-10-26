@@ -302,7 +302,7 @@ APZCTreeManager::APZCTreeManager(LayersId aRootLayersId,
   mApzcTreeLog.ConditionOnPrefFunction(StaticPrefs::apz_printtree);
 
   if (!mHitTester) {
-    mHitTester = MakeUnique<WRHitTester>();
+    mHitTester = std::make_unique<WRHitTester>();
   }
   mHitTester->Initialize(this);
 }
@@ -467,7 +467,7 @@ std::vector<LayersId> APZCTreeManager::UpdateHitTestingTree(
   const bool testLoggingEnabled = StaticPrefs::apz_test_logging_enabled();
   if (testLoggingEnabled) {
     MutexAutoLock lock(mTestDataLock);
-    UniquePtr<APZTestData> ptr = MakeUnique<APZTestData>();
+    UniquePtr<APZTestData> ptr = std::make_unique<APZTestData>();
     auto result =
         mTestData.insert(std::make_pair(aOriginatingLayersId, std::move(ptr)));
     testData = result.first->second.get();

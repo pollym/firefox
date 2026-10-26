@@ -141,7 +141,7 @@ bool MachChildProcessCheckIn(
                             mozilla::geckoargs::kMaxPassedMachReceiveRights) +
                        sizeof(mach_msg_trailer_t);
   mozilla::UniquePtr<uint8_t[]> buffer =
-      mozilla::MakeUnique<uint8_t[]>(buffer_size);
+      std::make_unique<uint8_t[]>(buffer_size);
 
   // Send a single descriptor - the process mach_task_self() port.
   MachSinglePortMessage* request =
@@ -267,7 +267,7 @@ MachHandleProcessCheckInSync(
                       sizeof(mach_msg_port_descriptor_t) *
                           (send_rights.size() + receive_rights.size());
   mozilla::UniquePtr<uint8_t[]> buffer =
-      mozilla::MakeUnique<uint8_t[]>(reply_size);
+      std::make_unique<uint8_t[]>(reply_size);
   mach_msg_base_t* reply = reinterpret_cast<mach_msg_base_t*>(buffer.get());
   reply->header.msgh_bits =
       MACH_MSGH_BITS(MACH_MSG_TYPE_MOVE_SEND_ONCE, 0) | MACH_MSGH_BITS_COMPLEX;

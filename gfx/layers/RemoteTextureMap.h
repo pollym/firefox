@@ -83,14 +83,14 @@ class SharedResourceWrapper {
 
   static UniquePtr<SharedResourceWrapper> SharedSurface(
       const std::shared_ptr<gl::SharedSurface>& aSharedSurface) {
-    return MakeUnique<SharedResourceWrapper>(Tag::SharedSurface,
-                                             aSharedSurface);
+    return std::make_unique<SharedResourceWrapper>(Tag::SharedSurface,
+                                                   aSharedSurface);
   }
 
   static UniquePtr<SharedResourceWrapper> SharedTexture(
       const std::shared_ptr<webgpu::SharedTexture>& aSharedTexture) {
-    return MakeUnique<SharedResourceWrapper>(Tag::SharedTexture,
-                                             aSharedTexture);
+    return std::make_unique<SharedResourceWrapper>(Tag::SharedTexture,
+                                                   aSharedTexture);
   }
 
   SharedResourceWrapper(

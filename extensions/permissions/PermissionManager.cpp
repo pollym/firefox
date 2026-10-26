@@ -4584,7 +4584,7 @@ nsresult PermissionManager::AddBrowserPermissionInternal(
   // Look up or create the map for this BC.
   UniquePtr<BrowserPermissionMap>& mapPtr =
       mBrowserPermissionTable.LookupOrInsert(
-          aBrowserId, MakeUnique<BrowserPermissionMap>());
+          aBrowserId, std::make_unique<BrowserPermissionMap>());
   BrowserPermissionMap* map = mapPtr.get();
 
   // If switching between DENY and non-DENY for the same type, remove old entry
@@ -5348,7 +5348,7 @@ PermissionManager::CopyBrowserPermissions(uint64_t aSrcBrowserId,
 
   UniquePtr<BrowserPermissionMap>& destMapPtr =
       mBrowserPermissionTable.LookupOrInsert(
-          aDestBrowserId, MakeUnique<BrowserPermissionMap>());
+          aDestBrowserId, std::make_unique<BrowserPermissionMap>());
   BrowserPermissionMap* destMap = destMapPtr.get();
 
   // Cancel any existing timers in the destination.

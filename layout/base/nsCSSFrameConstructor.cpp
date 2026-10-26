@@ -1496,10 +1496,11 @@ void nsCSSFrameConstructor::CreateGeneratedContent(
         CopyUTF8toUTF16(counters._1.AsString(), separator);
         style = &counters._2;
       }
-      auto node = MakeUnique<nsCounterUseNode>(
+      auto node = std::make_unique<nsCounterUseNode>(
           *style, std::move(separator), aContentIndex,
           /* aAllCounters = */ type == Type::Counters);
-      auto initializer = MakeUnique<nsGenConInitializer>(std::move(node), name);
+      auto initializer =
+          std::make_unique<nsGenConInitializer>(std::move(node), name);
       RefPtr c = CreateGenConTextNode(aState, u""_ns, std::move(initializer));
       aAddChild(c);
       return;
@@ -1508,9 +1509,9 @@ void nsCSSFrameConstructor::CreateGeneratedContent(
     case Type::CloseQuote:
     case Type::NoOpenQuote:
     case Type::NoCloseQuote: {
-      auto node = MakeUnique<nsQuoteNode>(type, aContentIndex);
+      auto node = std::make_unique<nsQuoteNode>(type, aContentIndex);
       auto initializer =
-          MakeUnique<nsGenConInitializer>(std::move(node), nullptr);
+          std::make_unique<nsGenConInitializer>(std::move(node), nullptr);
       RefPtr c = CreateGenConTextNode(aState, u""_ns, std::move(initializer));
       aAddChild(c);
       return;
@@ -1675,8 +1676,8 @@ void nsCSSFrameConstructor::CreateGeneratedContentFromListStyleType(
       break;
   }
 
-  auto node = MakeUnique<nsCounterUseNode>(nsCounterUseNode::ForLegacyBullet,
-                                           styleType);
+  auto node = std::make_unique<nsCounterUseNode>(
+      nsCounterUseNode::ForLegacyBullet, styleType);
   if (styleType.IsName()) {
     nsAtom* name = styleType.AsName().AsAtom();
     if (name == nsGkAtoms::disc || name == nsGkAtoms::circle ||
@@ -1696,8 +1697,8 @@ void nsCSSFrameConstructor::CreateGeneratedContentFromListStyleType(
     }
   }
 
-  auto initializer =
-      MakeUnique<nsGenConInitializer>(std::move(node), nsGkAtoms::list_item);
+  auto initializer = std::make_unique<nsGenConInitializer>(
+      std::move(node), nsGkAtoms::list_item);
   RefPtr<nsIContent> child =
       CreateGenConTextNode(aState, EmptyString(), std::move(initializer));
   aAddChild(child);

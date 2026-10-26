@@ -1816,7 +1816,8 @@ class ContentSandboxPolicy : public SandboxPolicyCommon {
 
 UniquePtr<sandbox::bpf_dsl::Policy> GetContentSandboxPolicy(
     SandboxBrokerClient* aMaybeBroker, ContentProcessSandboxParams&& aParams) {
-  return MakeUnique<ContentSandboxPolicy>(aMaybeBroker, std::move(aParams));
+  return std::make_unique<ContentSandboxPolicy>(aMaybeBroker,
+                                                std::move(aParams));
 }
 
 // The GeckoMediaPlugin seccomp-bpf policy is more delicate than the others,

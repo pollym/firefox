@@ -356,7 +356,7 @@ void HttpChannelChild::ProcessOnStartRequest(
   nsCOMPtr<nsIInputStream> altDataInputStream =
       DeserializeIPCStream(aAltData.altDataInputStream());
 
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpChannelChild>(this), aResponseHead,
              aUseResponseHead, aRequestHeaders, aArgs, altDataInputStream]() {
         self->mAltDataInputStream = altDataInputStream;
@@ -408,7 +408,7 @@ void HttpChannelChild::OnStartRequest(
   MOZ_ASSERT(!nsHttpResponseHead(aResponseHead).HasHeader(nsHttp::Set_Cookie));
 
   if (aUseResponseHead && !mCanceled) {
-    mResponseHead = MakeUnique<nsHttpResponseHead>(aResponseHead);
+    mResponseHead = std::make_unique<nsHttpResponseHead>(aResponseHead);
     CollectAkamaiResponseTelemetry();
   }
 
@@ -511,7 +511,7 @@ void HttpChannelChild::OnStartRequest(
 
     mEventQ->Suspend();
     mSuspendedByWaitingForCookies = true;
-    mEventQ->PrependEvent(MakeUnique<NeckoTargetChannelFunctionEvent>(
+    mEventQ->PrependEvent(std::make_unique<NeckoTargetChannelFunctionEvent>(
         this, [self = UnsafePtr<HttpChannelChild>(this)]() {
           self->DoOnStartRequest(self);
         }));
@@ -530,7 +530,7 @@ void HttpChannelChild::OnStartRequest(
 void HttpChannelChild::ProcessOnAfterLastPart(const nsresult& aStatus) {
   LOG(("HttpChannelChild::ProcessOnAfterLastPart [this=%p]\n", this));
   MOZ_ASSERT(OnSocketThread());
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpChannelChild>(this), aStatus]() {
         self->OnAfterLastPart(aStatus);
       }));
@@ -675,7 +675,7 @@ void HttpChannelChild::ProcessOnTransportAndData(
     const TimeStamp& aOnDataAvailableStartTime) {
   LOG(("HttpChannelChild::ProcessOnTransportAndData [this=%p]\n", this));
   MOZ_ASSERT(OnSocketThread());
-  mEventQ->RunOrEnqueue(MakeUnique<ChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<ChannelFunctionEvent>(
       [self = UnsafePtr<HttpChannelChild>(this)]() {
         return self->GetODATarget();
       },
@@ -923,7 +923,7 @@ void HttpChannelChild::ProcessOnStopRequest(
   mDecodedBodySize = aTiming.decodedBodySize();
 
   if (StaticPrefs::network_send_OnDataFinished()) {
-    mEventQ->RunOrEnqueue(MakeUnique<ChannelFunctionEvent>(
+    mEventQ->RunOrEnqueue(std::make_unique<ChannelFunctionEvent>(
         [self = UnsafePtr<HttpChannelChild>(this)]() {
           return self->GetODATarget();
         },
@@ -931,7 +931,7 @@ void HttpChannelChild::ProcessOnStopRequest(
           self->SendOnDataFinished(status);
         }));
   }
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpChannelChild>(this), aChannelStatus, aTiming,
              aResponseTrailers,
              consoleReports = CopyableTArray{aConsoleReports.Clone()},
@@ -949,7 +949,7 @@ void HttpChannelChild::ProcessOnConsoleReport(
   LOG(("HttpChannelChild::ProcessOnConsoleReport [this=%p]\n", this));
   MOZ_ASSERT(OnSocketThread());
 
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this,
       [self = UnsafePtr<HttpChannelChild>(this),
        consoleReports = CopyableTArray{aConsoleReports.Clone()}]() mutable {
@@ -1058,7 +1058,7 @@ void HttpChannelChild::OnStopRequest(
                                  now - mOnStopRequestStartTime);
   }
 
-  mResponseTrailers = MakeUnique<nsHttpHeaderArray>(aResponseTrailers);
+  mResponseTrailers = std::make_unique<nsHttpHeaderArray>(aResponseTrailers);
 
   DoPreOnStopRequest(aChannelStatus);
 
@@ -1444,7 +1444,7 @@ void HttpChannelChild::ProcessOnProgress(const int64_t& aProgress,
                                          const int64_t& aProgressMax) {
   MOZ_ASSERT(OnSocketThread());
   LOG(("HttpChannelChild::ProcessOnProgress [this=%p]\n", this));
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this,
       [self = UnsafePtr<HttpChannelChild>(this), aProgress, aProgressMax]() {
         AutoEventEnqueuer ensureSerialDispatch(self->mEventQ);
@@ -1455,7 +1455,7 @@ void HttpChannelChild::ProcessOnProgress(const int64_t& aProgress,
 void HttpChannelChild::ProcessOnStatus(const nsresult& aStatus) {
   MOZ_ASSERT(OnSocketThread());
   LOG(("HttpChannelChild::ProcessOnStatus [this=%p]\n", this));
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpChannelChild>(this), aStatus]() {
         AutoEventEnqueuer ensureSerialDispatch(self->mEventQ);
         self->DoOnStatus(self, aStatus);
@@ -1465,7 +1465,7 @@ void HttpChannelChild::ProcessOnStatus(const nsresult& aStatus) {
 mozilla::ipc::IPCResult HttpChannelChild::RecvFailedAsyncOpen(
     const nsresult& aStatus) {
   LOG(("HttpChannelChild::RecvFailedAsyncOpen [this=%p]\n", this));
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpChannelChild>(this), aStatus]() {
         self->FailedAsyncOpen(aStatus);
       }));
@@ -1551,7 +1551,7 @@ mozilla::ipc::IPCResult HttpChannelChild::RecvDeleteSelf() {
     mEventQ->Resume();
   }
 
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this,
       [self = UnsafePtr<HttpChannelChild>(this)]() { self->DeleteSelf(); }));
   return IPC_OK();
@@ -1597,7 +1597,7 @@ void HttpChannelChild::DoNotifyListener(bool aUseEventQueue) {
   StoreOnStartRequestCalled(true);
 
   if (aUseEventQueue) {
-    mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+    mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
         this, [self = UnsafePtr<HttpChannelChild>(this)] {
           self->ContinueDoNotifyListener();
         }));
@@ -1808,7 +1808,7 @@ mozilla::ipc::IPCResult HttpChannelChild::RecvRedirect1Begin(
   // Cookies headers should not be visible to the child process
   MOZ_ASSERT(!nsHttpResponseHead(aResponseHead).HasHeader(nsHttp::Set_Cookie));
 
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpChannelChild>(this), aRegistrarId,
              newUri = RefPtr{aNewUri}, aNewLoadFlags, aRedirectFlags,
              aLoadInfoForwarder, aResponseHead = std::move(aResponseHead),
@@ -1846,7 +1846,7 @@ nsresult HttpChannelChild::SetupRedirect(nsIURI* uri,
   NS_ENSURE_SUCCESS(rv, rv);
 
   // We won't get OnStartRequest, set cookies here.
-  mResponseHead = MakeUnique<nsHttpResponseHead>(*responseHead);
+  mResponseHead = std::make_unique<nsHttpResponseHead>(*responseHead);
 
   bool rewriteToGET = HttpBaseChannel::ShouldRewriteRedirectToGET(
       mResponseHead->Status(), mRequestHead.ParsedMethod());
@@ -1929,7 +1929,7 @@ mozilla::ipc::IPCResult HttpChannelChild::RecvRedirect3Complete() {
   nsCOMPtr<nsIChannel> redirectChannel =
       do_QueryInterface(mRedirectChannelChild);
   MOZ_ASSERT(redirectChannel);
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpChannelChild>(this), redirectChannel]() {
         nsresult rv = NS_OK;
         (void)self->GetStatus(&rv);
@@ -1970,7 +1970,7 @@ mozilla::ipc::IPCResult HttpChannelChild::RecvRedirectFailed(
     const nsresult& status) {
   LOG(("HttpChannelChild::RecvRedirectFailed this=%p status=%X\n", this,
        static_cast<uint32_t>(status)));
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpChannelChild>(this), status]() {
         nsCOMPtr<nsIRedirectResultListener> vetoHook;
         self->GetCallback(vetoHook);
@@ -2004,7 +2004,7 @@ void HttpChannelChild::ProcessNotifyClassificationFlags(
        static_cast<int>(aIsThirdParty), aClassificationFlags, this));
   MOZ_ASSERT(OnSocketThread());
 
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpChannelChild>(this), aClassificationFlags,
              aIsThirdParty]() {
         self->AddClassificationFlags(aClassificationFlags, aIsThirdParty);
@@ -2017,7 +2017,7 @@ void HttpChannelChild::ProcessSetClassifierMatchedInfo(
   LOG(("HttpChannelChild::ProcessSetClassifierMatchedInfo [this=%p]\n", this));
   MOZ_ASSERT(OnSocketThread());
 
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this,
       [self = UnsafePtr<HttpChannelChild>(this), aList = nsCString(aList),
        aProvider = nsCString(aProvider), aFullHash = nsCString(aFullHash)]() {
@@ -2039,7 +2039,7 @@ void HttpChannelChild::ProcessSetClassifierMatchedTrackingInfo(
     fullhashes.AppendElement(token);
   }
 
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpChannelChild>(this),
              lists = CopyableTArray{std::move(lists)},
              fullhashes = CopyableTArray{std::move(fullhashes)}]() {
@@ -2462,7 +2462,7 @@ HttpChannelChild::AsyncOpen(nsIStreamListener* aListener) {
                                                /*showThisProps=*/false);
       if (chars) {
         size_t len = strlen(chars.get());
-        mCallStack = mozilla::MakeUnique<char[]>(len + 1);
+        mCallStack = std::make_unique<char[]>(len + 1);
         memcpy(mCallStack.get(), chars.get(), len + 1);
       }
     }
@@ -3532,7 +3532,7 @@ void HttpChannelChild::CancelOnMainThread(nsresult aRv,
   // event in the front of mEventQ to make sure nsIStreamListener not receiving
   // any ODA/OnStopRequest callbacks.
   nsCString reason(aReason);
-  mEventQ->PrependEvent(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->PrependEvent(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this,
       [self = UnsafePtr<HttpChannelChild>(this), aRv,
        reason = std::move(reason)]() { self->CancelWithReason(aRv, reason); }));
@@ -3582,7 +3582,7 @@ void HttpChannelChild::ProcessAttachStreamFilter(
   LOG(("HttpChannelChild::ProcessAttachStreamFilter [this=%p]\n", this));
   MOZ_ASSERT(OnSocketThread());
 
-  mEventQ->RunOrEnqueue(MakeUnique<AttachStreamFilterEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<AttachStreamFilterEvent>(
       this, GetNeckoTarget(), std::move(aEndpoint)));
 }
 
@@ -3599,7 +3599,7 @@ void HttpChannelChild::ProcessDetachStreamFilters() {
   LOG(("HttpChannelChild::ProcessDetachStreamFilter [this=%p]\n", this));
   MOZ_ASSERT(OnSocketThread());
 
-  mEventQ->RunOrEnqueue(MakeUnique<NeckoTargetChannelFunctionEvent>(
+  mEventQ->RunOrEnqueue(std::make_unique<NeckoTargetChannelFunctionEvent>(
       this, [self = UnsafePtr<HttpChannelChild>(this)]() {
         self->OnDetachStreamFilters();
       }));

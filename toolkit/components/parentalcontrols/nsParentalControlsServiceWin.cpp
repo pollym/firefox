@@ -40,7 +40,7 @@ static nsAutoString GetUserSid() {
     return ret;
   }
 
-  UniquePtr<char[]> buf = MakeUnique<char[]>(bufLen);
+  UniquePtr<char[]> buf = std::make_unique<char[]>(bufLen);
   success = ::GetTokenInformation(token, TokenUser, buf.get(), bufLen, &bufLen);
   MOZ_ASSERT(success);
 

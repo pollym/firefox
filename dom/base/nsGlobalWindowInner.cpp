@@ -946,7 +946,7 @@ nsGlobalWindowInner::nsGlobalWindowInner(nsGlobalWindowOuter* aOuterWindow,
   // add this inner window to the outer window list of inners.
   PR_INSERT_AFTER(this, aOuterWindow);
 
-  mTimeoutManager = MakeUnique<dom::TimeoutManager>(
+  mTimeoutManager = std::make_unique<dom::TimeoutManager>(
       *this, StaticPrefs::dom_timeout_max_idle_defer_ms(),
       static_cast<nsISerialEventTarget*>(nsPIDOMWindowInner::From(this)
                                              ->GetBrowsingContextGroup()
@@ -7408,8 +7408,8 @@ already_AddRefed<Promise> nsGlobalWindowInner::PromiseDocumentFlushed(
     return nullptr;
   }
 
-  auto flushResolver =
-      MakeUnique<PromiseDocumentFlushedResolver>(resultPromise, aCallback);
+  auto flushResolver = std::make_unique<PromiseDocumentFlushedResolver>(
+      resultPromise, aCallback);
 
   if (!presShell->NeedStyleFlush() && !presShell->NeedLayoutFlush()) {
     flushResolver->Call();

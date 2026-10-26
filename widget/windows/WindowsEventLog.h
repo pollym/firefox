@@ -88,7 +88,7 @@ inline void WriteWindowsEventLogHresult(const wchar_t* eventSourceName,
   int bufferSize = _scwprintf(format, hr, sourceFile, sourceLine);
   ++bufferSize;  // Extra character for terminating null
   mozilla::UniquePtr<wchar_t[]> errorStr =
-      mozilla::MakeUnique<wchar_t[]>(bufferSize);
+      std::make_unique<wchar_t[]>(bufferSize);
 
   _snwprintf_s(errorStr.get(), bufferSize, _TRUNCATE, format, hr, sourceFile,
                sourceLine);
@@ -109,7 +109,7 @@ inline void WriteWindowsEventLogMessage(const wchar_t* eventSourceName,
   ++bufferSize;  // Extra character for terminating null
   va_end(ap);
   mozilla::UniquePtr<wchar_t[]> message =
-      mozilla::MakeUnique<wchar_t[]>(bufferSize);
+      std::make_unique<wchar_t[]>(bufferSize);
 
   va_start(ap, sourceLine);
   vswprintf(message.get(), bufferSize, messageFormat, ap);
@@ -120,7 +120,7 @@ inline void WriteWindowsEventLogMessage(const wchar_t* eventSourceName,
   bufferSize = _scwprintf(errorFormat, message.get(), sourceFile, sourceLine);
   ++bufferSize;  // Extra character for terminating null
   mozilla::UniquePtr<wchar_t[]> errorStr =
-      mozilla::MakeUnique<wchar_t[]>(bufferSize);
+      std::make_unique<wchar_t[]>(bufferSize);
 
   _snwprintf_s(errorStr.get(), bufferSize, _TRUNCATE, errorFormat,
                message.get(), sourceFile, sourceLine);

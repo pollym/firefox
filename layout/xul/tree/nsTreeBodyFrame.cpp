@@ -2202,7 +2202,7 @@ nsresult nsTreeBodyFrame::HandleEvent(nsPresContext* aPresContext,
     }
   } else if (aEvent->mMessage == eDragEnter) {
     if (!mSlots) {
-      mSlots = MakeUnique<Slots>();
+      mSlots = std::make_unique<Slots>();
     }
 
     // Cache several things we'll need throughout the course of our work. These

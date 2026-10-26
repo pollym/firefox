@@ -993,7 +993,7 @@ void nsHttpConnectionMgr::UpdateCoalescingForNewConn(
             coalescingKey.mHash,
             [] {
               LOG(("UpdateCoalescingForNewConn() need new list element\n"));
-              return MakeUnique<nsTArray<CoalescedConnection>>(1);
+              return std::make_unique<nsTArray<CoalescedConnection>>(1);
             })
         ->AppendElement(CoalescedConnection{
             do_GetWeakReference(

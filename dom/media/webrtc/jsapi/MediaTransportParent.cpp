@@ -277,7 +277,7 @@ mozilla::ipc::IPCResult MediaTransportParent::RecvGetIceStats(
             if (aResult.IsResolve()) {
               aResolve(aResult.ResolveValue());
             } else {
-              aResolve(MakeUnique<dom::RTCStatsCollection>());
+              aResolve(std::make_unique<dom::RTCStatsCollection>());
             }
           });
 

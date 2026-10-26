@@ -615,7 +615,7 @@ class MediaFormatReader::DemuxerProxy {
     if (!mData->mCrypto) {
       return nullptr;
     }
-    auto crypto = MakeUnique<EncryptionInfo>();
+    auto crypto = std::make_unique<EncryptionInfo>();
     *crypto = *mData->mCrypto;
     return crypto;
   }
@@ -1183,7 +1183,7 @@ MediaFormatReader::AsyncReadMetadata() {
   if (mInitDone) {
     // We are returning from dormant.
     MetadataHolder metadata;
-    metadata.mInfo = MakeUnique<MediaInfo>(mInfo);
+    metadata.mInfo = std::make_unique<MediaInfo>(mInfo);
     return MetadataPromise::CreateAndResolve(std::move(metadata), __func__);
   }
 
@@ -1213,7 +1213,7 @@ void MediaFormatReader::OnDemuxerInitDone(const MediaResult& aResult) {
 
   mDemuxerInitDone = true;
 
-  UniquePtr<MetadataTags> tags(MakeUnique<MetadataTags>());
+  UniquePtr<MetadataTags> tags(std::make_unique<MetadataTags>());
 
   const bool checkSupport = !IsWaitingOnCDMResource();
 
@@ -1248,7 +1248,7 @@ void MediaFormatReader::OnDemuxerInitDone(const MediaResult& aResult) {
         return;
       }
       mInfo.mVideo = *videoInfo->GetAsVideoInfo();
-      mVideo.mWorkingInfo = MakeUnique<VideoInfo>(mInfo.mVideo);
+      mVideo.mWorkingInfo = std::make_unique<VideoInfo>(mInfo.mVideo);
       for (const MetadataTag& tag : videoInfo->mTags) {
         tags->InsertOrUpdate(tag.mKey, tag.mValue);
       }
@@ -1280,7 +1280,7 @@ void MediaFormatReader::OnDemuxerInitDone(const MediaResult& aResult) {
 
     if (audioActive) {
       mInfo.mAudio = *audioInfo->GetAsAudioInfo();
-      mAudio.mWorkingInfo = MakeUnique<AudioInfo>(mInfo.mAudio);
+      mAudio.mWorkingInfo = std::make_unique<AudioInfo>(mInfo.mAudio);
       for (const MetadataTag& tag : audioInfo->mTags) {
         tags->InsertOrUpdate(tag.mKey, tag.mValue);
       }
@@ -1371,7 +1371,7 @@ void MediaFormatReader::MaybeResolveMetadataPromise() {
   }
 
   MetadataHolder metadata;
-  metadata.mInfo = MakeUnique<MediaInfo>(mInfo);
+  metadata.mInfo = std::make_unique<MediaInfo>(mInfo);
   metadata.mTags = mTags->Count() ? std::move(mTags) : nullptr;
 
   // We now have all the informations required to calculate the initial buffered
@@ -2226,9 +2226,11 @@ void MediaFormatReader::HandleDemuxedSamples(
     {
       MutexAutoLock lock(decoder.mMutex);
       if (aTrack == TrackInfo::kAudioTrack) {
-        decoder.mWorkingInfo = MakeUnique<AudioInfo>(*info->GetAsAudioInfo());
+        decoder.mWorkingInfo =
+            std::make_unique<AudioInfo>(*info->GetAsAudioInfo());
       } else if (aTrack == TrackInfo::kVideoTrack) {
-        decoder.mWorkingInfo = MakeUnique<VideoInfo>(*info->GetAsVideoInfo());
+        decoder.mWorkingInfo =
+            std::make_unique<VideoInfo>(*info->GetAsVideoInfo());
       }
       mWorkingInfoChanged = true;
     }

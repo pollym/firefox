@@ -163,7 +163,7 @@ nsMenuX::nsMenuX(nsMenuParentX* aParent, nsMenuGroupOwnerX* aMenuGroupOwner,
     NSApp.windowsMenu = mNativeMenu;
   }
 
-  mIcon = MakeUnique<nsMenuItemIconX>(this);
+  mIcon = std::make_unique<nsMenuItemIconX>(this);
 
   if (mVisible) {
     if (!isXULWindowMenu && !IsXULEditMenu(mContent)) {

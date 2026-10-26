@@ -379,7 +379,7 @@ void ProfiledThreadData::NotifyAboutToLoseJSContext(
   mozilla::UniquePtr<JITFrameInfo> jitFrameInfo =
       mJITFrameInfoForPreviousJSContexts
           ? std::move(mJITFrameInfoForPreviousJSContexts)
-          : mozilla::MakeUnique<JITFrameInfo>();
+          : std::make_unique<JITFrameInfo>();
 
   aBuffer.AddJITInfoForRange(*mBufferPositionWhenReceivedJSContext,
                              mThreadInfo.ThreadId(), aContext, *jitFrameInfo,

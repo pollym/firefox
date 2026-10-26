@@ -290,8 +290,8 @@ ScopedEvent PortAcceptedEvent::Deserialize(const PortName& port_name,
                                            uint64_t control_sequence_num,
                                            const void* buffer,
                                            size_t num_bytes) {
-  return mozilla::MakeUnique<PortAcceptedEvent>(port_name, from_port,
-                                                control_sequence_num);
+  return std::make_unique<PortAcceptedEvent>(port_name, from_port,
+                                             control_sequence_num);
 }
 
 size_t PortAcceptedEvent::GetSerializedDataSize() const { return 0; }
@@ -324,7 +324,7 @@ ScopedEvent ObserveProxyEvent::Deserialize(const PortName& port_name,
   }
 
   const auto* data = static_cast<const ObserveProxyEventData*>(buffer);
-  return mozilla::MakeUnique<ObserveProxyEvent>(
+  return std::make_unique<ObserveProxyEvent>(
       port_name, from_port, control_sequence_num, data->proxy_node_name,
       data->proxy_port_name, data->proxy_target_node_name,
       data->proxy_target_port_name);
@@ -348,7 +348,7 @@ ScopedEvent ObserveProxyEvent::CloneForBroadcast() const {
   if (port_name() != kInvalidPortName) {
     return nullptr;
   }
-  return mozilla::MakeUnique<ObserveProxyEvent>(
+  return std::make_unique<ObserveProxyEvent>(
       port_name(), from_port(), control_sequence_num(), proxy_node_name_,
       proxy_port_name_, proxy_target_node_name_, proxy_target_port_name_);
 }
@@ -373,7 +373,7 @@ ScopedEvent ObserveProxyAckEvent::Deserialize(const PortName& port_name,
   }
 
   const auto* data = static_cast<const ObserveProxyAckEventData*>(buffer);
-  return mozilla::MakeUnique<ObserveProxyAckEvent>(
+  return std::make_unique<ObserveProxyAckEvent>(
       port_name, from_port, control_sequence_num, data->last_sequence_num);
 }
 
@@ -406,7 +406,7 @@ ScopedEvent ObserveClosureEvent::Deserialize(const PortName& port_name,
   }
 
   const auto* data = static_cast<const ObserveClosureEventData*>(buffer);
-  return mozilla::MakeUnique<ObserveClosureEvent>(
+  return std::make_unique<ObserveClosureEvent>(
       port_name, from_port, control_sequence_num, data->last_sequence_num);
 }
 
@@ -440,7 +440,7 @@ ScopedEvent MergePortEvent::Deserialize(const PortName& port_name,
   }
 
   const auto* data = static_cast<const MergePortEventData*>(buffer);
-  return mozilla::MakeUnique<MergePortEvent>(
+  return std::make_unique<MergePortEvent>(
       port_name, from_port, control_sequence_num, data->new_port_name,
       data->new_port_descriptor);
 }
@@ -474,7 +474,7 @@ ScopedEvent UserMessageReadAckRequestEvent::Deserialize(
 
   const auto* data =
       static_cast<const UserMessageReadAckRequestEventData*>(buffer);
-  return mozilla::MakeUnique<UserMessageReadAckRequestEvent>(
+  return std::make_unique<UserMessageReadAckRequestEvent>(
       port_name, from_port, control_sequence_num,
       data->sequence_num_to_acknowledge);
 }
@@ -508,7 +508,7 @@ ScopedEvent UserMessageReadAckEvent::Deserialize(const PortName& port_name,
   }
 
   const auto* data = static_cast<const UserMessageReadAckEventData*>(buffer);
-  return mozilla::MakeUnique<UserMessageReadAckEvent>(
+  return std::make_unique<UserMessageReadAckEvent>(
       port_name, from_port, control_sequence_num,
       data->sequence_num_acknowledged);
 }
@@ -542,7 +542,7 @@ ScopedEvent UpdatePreviousPeerEvent::Deserialize(const PortName& port_name,
                                                  size_t num_bytes) {
   if (num_bytes < sizeof(UpdatePreviousPeerEventData)) return nullptr;
   const auto* data = static_cast<const UpdatePreviousPeerEventData*>(buffer);
-  return mozilla::MakeUnique<UpdatePreviousPeerEvent>(
+  return std::make_unique<UpdatePreviousPeerEvent>(
       port_name, from_port, control_sequence_num, data->new_node_name,
       data->new_port_name);
 }

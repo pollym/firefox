@@ -20402,1122 +20402,1122 @@ UniquePtr<UniffiSyncCallHandler> GetSyncCallHandler(uint64_t aId) {
   switch (aId) {
 
     case 0: {
-      return MakeUnique<ScaffoldingCallHandler0>();
+      return std::make_unique<ScaffoldingCallHandler0>();
     }
     case 1: {
-      return MakeUnique<ScaffoldingCallHandler1>();
+      return std::make_unique<ScaffoldingCallHandler1>();
     }
     case 2: {
-      return MakeUnique<ScaffoldingCallHandler2>();
+      return std::make_unique<ScaffoldingCallHandler2>();
     }
     case 3: {
-      return MakeUnique<ScaffoldingCallHandler3>();
+      return std::make_unique<ScaffoldingCallHandler3>();
     }
     case 4: {
-      return MakeUnique<ScaffoldingCallHandler4>();
+      return std::make_unique<ScaffoldingCallHandler4>();
     }
     case 5: {
-      return MakeUnique<ScaffoldingCallHandler5>();
+      return std::make_unique<ScaffoldingCallHandler5>();
     }
     case 6: {
-      return MakeUnique<ScaffoldingCallHandler6>();
+      return std::make_unique<ScaffoldingCallHandler6>();
     }
     case 7: {
-      return MakeUnique<ScaffoldingCallHandler7>();
+      return std::make_unique<ScaffoldingCallHandler7>();
     }
     case 8: {
-      return MakeUnique<ScaffoldingCallHandler8>();
+      return std::make_unique<ScaffoldingCallHandler8>();
     }
     case 9: {
-      return MakeUnique<ScaffoldingCallHandler9>();
+      return std::make_unique<ScaffoldingCallHandler9>();
     }
     case 10: {
-      return MakeUnique<ScaffoldingCallHandler10>();
+      return std::make_unique<ScaffoldingCallHandler10>();
     }
     case 11: {
-      return MakeUnique<ScaffoldingCallHandler11>();
+      return std::make_unique<ScaffoldingCallHandler11>();
     }
     case 12: {
-      return MakeUnique<ScaffoldingCallHandler12>();
+      return std::make_unique<ScaffoldingCallHandler12>();
     }
     case 13: {
-      return MakeUnique<ScaffoldingCallHandler13>();
+      return std::make_unique<ScaffoldingCallHandler13>();
     }
     case 14: {
-      return MakeUnique<ScaffoldingCallHandler14>();
+      return std::make_unique<ScaffoldingCallHandler14>();
     }
     case 15: {
-      return MakeUnique<ScaffoldingCallHandler15>();
+      return std::make_unique<ScaffoldingCallHandler15>();
     }
     case 16: {
-      return MakeUnique<ScaffoldingCallHandler16>();
+      return std::make_unique<ScaffoldingCallHandler16>();
     }
     case 17: {
-      return MakeUnique<ScaffoldingCallHandler17>();
+      return std::make_unique<ScaffoldingCallHandler17>();
     }
     case 18: {
-      return MakeUnique<ScaffoldingCallHandler18>();
+      return std::make_unique<ScaffoldingCallHandler18>();
     }
     case 19: {
-      return MakeUnique<ScaffoldingCallHandler19>();
+      return std::make_unique<ScaffoldingCallHandler19>();
     }
     case 20: {
-      return MakeUnique<ScaffoldingCallHandler20>();
+      return std::make_unique<ScaffoldingCallHandler20>();
     }
     case 21: {
-      return MakeUnique<ScaffoldingCallHandler21>();
+      return std::make_unique<ScaffoldingCallHandler21>();
     }
     case 22: {
-      return MakeUnique<ScaffoldingCallHandler22>();
+      return std::make_unique<ScaffoldingCallHandler22>();
     }
     case 23: {
-      return MakeUnique<ScaffoldingCallHandler23>();
+      return std::make_unique<ScaffoldingCallHandler23>();
     }
     case 24: {
-      return MakeUnique<ScaffoldingCallHandler24>();
+      return std::make_unique<ScaffoldingCallHandler24>();
     }
     case 25: {
-      return MakeUnique<ScaffoldingCallHandler25>();
+      return std::make_unique<ScaffoldingCallHandler25>();
     }
     case 26: {
-      return MakeUnique<ScaffoldingCallHandler26>();
+      return std::make_unique<ScaffoldingCallHandler26>();
     }
     case 27: {
-      return MakeUnique<ScaffoldingCallHandler27>();
+      return std::make_unique<ScaffoldingCallHandler27>();
     }
     case 28: {
-      return MakeUnique<ScaffoldingCallHandler28>();
+      return std::make_unique<ScaffoldingCallHandler28>();
     }
     case 29: {
-      return MakeUnique<ScaffoldingCallHandler29>();
+      return std::make_unique<ScaffoldingCallHandler29>();
     }
     case 30: {
-      return MakeUnique<ScaffoldingCallHandler30>();
+      return std::make_unique<ScaffoldingCallHandler30>();
     }
     case 31: {
-      return MakeUnique<ScaffoldingCallHandler31>();
+      return std::make_unique<ScaffoldingCallHandler31>();
     }
     case 32: {
-      return MakeUnique<ScaffoldingCallHandler32>();
+      return std::make_unique<ScaffoldingCallHandler32>();
     }
     case 33: {
-      return MakeUnique<ScaffoldingCallHandler33>();
+      return std::make_unique<ScaffoldingCallHandler33>();
     }
     case 34: {
-      return MakeUnique<ScaffoldingCallHandler34>();
+      return std::make_unique<ScaffoldingCallHandler34>();
     }
     case 35: {
-      return MakeUnique<ScaffoldingCallHandler35>();
+      return std::make_unique<ScaffoldingCallHandler35>();
     }
     case 37: {
-      return MakeUnique<ScaffoldingCallHandler37>();
+      return std::make_unique<ScaffoldingCallHandler37>();
     }
     case 38: {
-      return MakeUnique<ScaffoldingCallHandler38>();
+      return std::make_unique<ScaffoldingCallHandler38>();
     }
     case 39: {
-      return MakeUnique<ScaffoldingCallHandler39>();
+      return std::make_unique<ScaffoldingCallHandler39>();
     }
     case 40: {
-      return MakeUnique<ScaffoldingCallHandler40>();
+      return std::make_unique<ScaffoldingCallHandler40>();
     }
     case 41: {
-      return MakeUnique<ScaffoldingCallHandler41>();
+      return std::make_unique<ScaffoldingCallHandler41>();
     }
     case 42: {
-      return MakeUnique<ScaffoldingCallHandler42>();
+      return std::make_unique<ScaffoldingCallHandler42>();
     }
     case 43: {
-      return MakeUnique<ScaffoldingCallHandler43>();
+      return std::make_unique<ScaffoldingCallHandler43>();
     }
     case 44: {
-      return MakeUnique<ScaffoldingCallHandler44>();
+      return std::make_unique<ScaffoldingCallHandler44>();
     }
     case 45: {
-      return MakeUnique<ScaffoldingCallHandler45>();
+      return std::make_unique<ScaffoldingCallHandler45>();
     }
     case 46: {
-      return MakeUnique<ScaffoldingCallHandler46>();
+      return std::make_unique<ScaffoldingCallHandler46>();
     }
     case 47: {
-      return MakeUnique<ScaffoldingCallHandler47>();
+      return std::make_unique<ScaffoldingCallHandler47>();
     }
     case 48: {
-      return MakeUnique<ScaffoldingCallHandler48>();
+      return std::make_unique<ScaffoldingCallHandler48>();
     }
     case 49: {
-      return MakeUnique<ScaffoldingCallHandler49>();
+      return std::make_unique<ScaffoldingCallHandler49>();
     }
     case 50: {
-      return MakeUnique<ScaffoldingCallHandler50>();
+      return std::make_unique<ScaffoldingCallHandler50>();
     }
     case 51: {
-      return MakeUnique<ScaffoldingCallHandler51>();
+      return std::make_unique<ScaffoldingCallHandler51>();
     }
     case 52: {
-      return MakeUnique<ScaffoldingCallHandler52>();
+      return std::make_unique<ScaffoldingCallHandler52>();
     }
     case 53: {
-      return MakeUnique<ScaffoldingCallHandler53>();
+      return std::make_unique<ScaffoldingCallHandler53>();
     }
     case 54: {
-      return MakeUnique<ScaffoldingCallHandler54>();
+      return std::make_unique<ScaffoldingCallHandler54>();
     }
     case 55: {
-      return MakeUnique<ScaffoldingCallHandler55>();
+      return std::make_unique<ScaffoldingCallHandler55>();
     }
     case 56: {
-      return MakeUnique<ScaffoldingCallHandler56>();
+      return std::make_unique<ScaffoldingCallHandler56>();
     }
     case 57: {
-      return MakeUnique<ScaffoldingCallHandler57>();
+      return std::make_unique<ScaffoldingCallHandler57>();
     }
     case 58: {
-      return MakeUnique<ScaffoldingCallHandler58>();
+      return std::make_unique<ScaffoldingCallHandler58>();
     }
     case 59: {
-      return MakeUnique<ScaffoldingCallHandler59>();
+      return std::make_unique<ScaffoldingCallHandler59>();
     }
     case 60: {
-      return MakeUnique<ScaffoldingCallHandler60>();
+      return std::make_unique<ScaffoldingCallHandler60>();
     }
     case 61: {
-      return MakeUnique<ScaffoldingCallHandler61>();
+      return std::make_unique<ScaffoldingCallHandler61>();
     }
     case 62: {
-      return MakeUnique<ScaffoldingCallHandler62>();
+      return std::make_unique<ScaffoldingCallHandler62>();
     }
     case 63: {
-      return MakeUnique<ScaffoldingCallHandler63>();
+      return std::make_unique<ScaffoldingCallHandler63>();
     }
     case 64: {
-      return MakeUnique<ScaffoldingCallHandler64>();
+      return std::make_unique<ScaffoldingCallHandler64>();
     }
     case 65: {
-      return MakeUnique<ScaffoldingCallHandler65>();
+      return std::make_unique<ScaffoldingCallHandler65>();
     }
     case 66: {
-      return MakeUnique<ScaffoldingCallHandler66>();
+      return std::make_unique<ScaffoldingCallHandler66>();
     }
     case 67: {
-      return MakeUnique<ScaffoldingCallHandler67>();
+      return std::make_unique<ScaffoldingCallHandler67>();
     }
     case 68: {
-      return MakeUnique<ScaffoldingCallHandler68>();
+      return std::make_unique<ScaffoldingCallHandler68>();
     }
     case 69: {
-      return MakeUnique<ScaffoldingCallHandler69>();
+      return std::make_unique<ScaffoldingCallHandler69>();
     }
     case 70: {
-      return MakeUnique<ScaffoldingCallHandler70>();
+      return std::make_unique<ScaffoldingCallHandler70>();
     }
     case 71: {
-      return MakeUnique<ScaffoldingCallHandler71>();
+      return std::make_unique<ScaffoldingCallHandler71>();
     }
     case 72: {
-      return MakeUnique<ScaffoldingCallHandler72>();
+      return std::make_unique<ScaffoldingCallHandler72>();
     }
     case 73: {
-      return MakeUnique<ScaffoldingCallHandler73>();
+      return std::make_unique<ScaffoldingCallHandler73>();
     }
     case 74: {
-      return MakeUnique<ScaffoldingCallHandler74>();
+      return std::make_unique<ScaffoldingCallHandler74>();
     }
     case 75: {
-      return MakeUnique<ScaffoldingCallHandler75>();
+      return std::make_unique<ScaffoldingCallHandler75>();
     }
     case 76: {
-      return MakeUnique<ScaffoldingCallHandler76>();
+      return std::make_unique<ScaffoldingCallHandler76>();
     }
     case 77: {
-      return MakeUnique<ScaffoldingCallHandler77>();
+      return std::make_unique<ScaffoldingCallHandler77>();
     }
     case 78: {
-      return MakeUnique<ScaffoldingCallHandler78>();
+      return std::make_unique<ScaffoldingCallHandler78>();
     }
     case 79: {
-      return MakeUnique<ScaffoldingCallHandler79>();
+      return std::make_unique<ScaffoldingCallHandler79>();
     }
     case 80: {
-      return MakeUnique<ScaffoldingCallHandler80>();
+      return std::make_unique<ScaffoldingCallHandler80>();
     }
     case 81: {
-      return MakeUnique<ScaffoldingCallHandler81>();
+      return std::make_unique<ScaffoldingCallHandler81>();
     }
     case 82: {
-      return MakeUnique<ScaffoldingCallHandler82>();
+      return std::make_unique<ScaffoldingCallHandler82>();
     }
     case 83: {
-      return MakeUnique<ScaffoldingCallHandler83>();
+      return std::make_unique<ScaffoldingCallHandler83>();
     }
     case 84: {
-      return MakeUnique<ScaffoldingCallHandler84>();
+      return std::make_unique<ScaffoldingCallHandler84>();
     }
     case 85: {
-      return MakeUnique<ScaffoldingCallHandler85>();
+      return std::make_unique<ScaffoldingCallHandler85>();
     }
     case 86: {
-      return MakeUnique<ScaffoldingCallHandler86>();
+      return std::make_unique<ScaffoldingCallHandler86>();
     }
     case 87: {
-      return MakeUnique<ScaffoldingCallHandler87>();
+      return std::make_unique<ScaffoldingCallHandler87>();
     }
     case 88: {
-      return MakeUnique<ScaffoldingCallHandler88>();
+      return std::make_unique<ScaffoldingCallHandler88>();
     }
     case 89: {
-      return MakeUnique<ScaffoldingCallHandler89>();
+      return std::make_unique<ScaffoldingCallHandler89>();
     }
     case 90: {
-      return MakeUnique<ScaffoldingCallHandler90>();
+      return std::make_unique<ScaffoldingCallHandler90>();
     }
     case 91: {
-      return MakeUnique<ScaffoldingCallHandler91>();
+      return std::make_unique<ScaffoldingCallHandler91>();
     }
     case 92: {
-      return MakeUnique<ScaffoldingCallHandler92>();
+      return std::make_unique<ScaffoldingCallHandler92>();
     }
     case 93: {
-      return MakeUnique<ScaffoldingCallHandler93>();
+      return std::make_unique<ScaffoldingCallHandler93>();
     }
     case 94: {
-      return MakeUnique<ScaffoldingCallHandler94>();
+      return std::make_unique<ScaffoldingCallHandler94>();
     }
     case 95: {
-      return MakeUnique<ScaffoldingCallHandler95>();
+      return std::make_unique<ScaffoldingCallHandler95>();
     }
     case 96: {
-      return MakeUnique<ScaffoldingCallHandler96>();
+      return std::make_unique<ScaffoldingCallHandler96>();
     }
     case 97: {
-      return MakeUnique<ScaffoldingCallHandler97>();
+      return std::make_unique<ScaffoldingCallHandler97>();
     }
     case 98: {
-      return MakeUnique<ScaffoldingCallHandler98>();
+      return std::make_unique<ScaffoldingCallHandler98>();
     }
     case 99: {
-      return MakeUnique<ScaffoldingCallHandler99>();
+      return std::make_unique<ScaffoldingCallHandler99>();
     }
     case 100: {
-      return MakeUnique<ScaffoldingCallHandler100>();
+      return std::make_unique<ScaffoldingCallHandler100>();
     }
     case 101: {
-      return MakeUnique<ScaffoldingCallHandler101>();
+      return std::make_unique<ScaffoldingCallHandler101>();
     }
     case 102: {
-      return MakeUnique<ScaffoldingCallHandler102>();
+      return std::make_unique<ScaffoldingCallHandler102>();
     }
     case 103: {
-      return MakeUnique<ScaffoldingCallHandler103>();
+      return std::make_unique<ScaffoldingCallHandler103>();
     }
     case 104: {
-      return MakeUnique<ScaffoldingCallHandler104>();
+      return std::make_unique<ScaffoldingCallHandler104>();
     }
     case 105: {
-      return MakeUnique<ScaffoldingCallHandler105>();
+      return std::make_unique<ScaffoldingCallHandler105>();
     }
     case 106: {
-      return MakeUnique<ScaffoldingCallHandler106>();
+      return std::make_unique<ScaffoldingCallHandler106>();
     }
     case 107: {
-      return MakeUnique<ScaffoldingCallHandler107>();
+      return std::make_unique<ScaffoldingCallHandler107>();
     }
     case 108: {
-      return MakeUnique<ScaffoldingCallHandler108>();
+      return std::make_unique<ScaffoldingCallHandler108>();
     }
     case 109: {
-      return MakeUnique<ScaffoldingCallHandler109>();
+      return std::make_unique<ScaffoldingCallHandler109>();
     }
     case 110: {
-      return MakeUnique<ScaffoldingCallHandler110>();
+      return std::make_unique<ScaffoldingCallHandler110>();
     }
     case 111: {
-      return MakeUnique<ScaffoldingCallHandler111>();
+      return std::make_unique<ScaffoldingCallHandler111>();
     }
     case 112: {
-      return MakeUnique<ScaffoldingCallHandler112>();
+      return std::make_unique<ScaffoldingCallHandler112>();
     }
     case 113: {
-      return MakeUnique<ScaffoldingCallHandler113>();
+      return std::make_unique<ScaffoldingCallHandler113>();
     }
     case 114: {
-      return MakeUnique<ScaffoldingCallHandler114>();
+      return std::make_unique<ScaffoldingCallHandler114>();
     }
     case 115: {
-      return MakeUnique<ScaffoldingCallHandler115>();
+      return std::make_unique<ScaffoldingCallHandler115>();
     }
     case 116: {
-      return MakeUnique<ScaffoldingCallHandler116>();
+      return std::make_unique<ScaffoldingCallHandler116>();
     }
     case 117: {
-      return MakeUnique<ScaffoldingCallHandler117>();
+      return std::make_unique<ScaffoldingCallHandler117>();
     }
     case 118: {
-      return MakeUnique<ScaffoldingCallHandler118>();
+      return std::make_unique<ScaffoldingCallHandler118>();
     }
     case 119: {
-      return MakeUnique<ScaffoldingCallHandler119>();
+      return std::make_unique<ScaffoldingCallHandler119>();
     }
     case 120: {
-      return MakeUnique<ScaffoldingCallHandler120>();
+      return std::make_unique<ScaffoldingCallHandler120>();
     }
     case 121: {
-      return MakeUnique<ScaffoldingCallHandler121>();
+      return std::make_unique<ScaffoldingCallHandler121>();
     }
     case 122: {
-      return MakeUnique<ScaffoldingCallHandler122>();
+      return std::make_unique<ScaffoldingCallHandler122>();
     }
     case 123: {
-      return MakeUnique<ScaffoldingCallHandler123>();
+      return std::make_unique<ScaffoldingCallHandler123>();
     }
     case 124: {
-      return MakeUnique<ScaffoldingCallHandler124>();
+      return std::make_unique<ScaffoldingCallHandler124>();
     }
     case 125: {
-      return MakeUnique<ScaffoldingCallHandler125>();
+      return std::make_unique<ScaffoldingCallHandler125>();
     }
     case 126: {
-      return MakeUnique<ScaffoldingCallHandler126>();
+      return std::make_unique<ScaffoldingCallHandler126>();
     }
     case 127: {
-      return MakeUnique<ScaffoldingCallHandler127>();
+      return std::make_unique<ScaffoldingCallHandler127>();
     }
     case 128: {
-      return MakeUnique<ScaffoldingCallHandler128>();
+      return std::make_unique<ScaffoldingCallHandler128>();
     }
     case 129: {
-      return MakeUnique<ScaffoldingCallHandler129>();
+      return std::make_unique<ScaffoldingCallHandler129>();
     }
     case 130: {
-      return MakeUnique<ScaffoldingCallHandler130>();
+      return std::make_unique<ScaffoldingCallHandler130>();
     }
     case 134: {
-      return MakeUnique<ScaffoldingCallHandler134>();
+      return std::make_unique<ScaffoldingCallHandler134>();
     }
     case 135: {
-      return MakeUnique<ScaffoldingCallHandler135>();
+      return std::make_unique<ScaffoldingCallHandler135>();
     }
     case 136: {
-      return MakeUnique<ScaffoldingCallHandler136>();
+      return std::make_unique<ScaffoldingCallHandler136>();
     }
     case 137: {
-      return MakeUnique<ScaffoldingCallHandler137>();
+      return std::make_unique<ScaffoldingCallHandler137>();
     }
     case 138: {
-      return MakeUnique<ScaffoldingCallHandler138>();
+      return std::make_unique<ScaffoldingCallHandler138>();
     }
     case 139: {
-      return MakeUnique<ScaffoldingCallHandler139>();
+      return std::make_unique<ScaffoldingCallHandler139>();
     }
     case 140: {
-      return MakeUnique<ScaffoldingCallHandler140>();
+      return std::make_unique<ScaffoldingCallHandler140>();
     }
     case 141: {
-      return MakeUnique<ScaffoldingCallHandler141>();
+      return std::make_unique<ScaffoldingCallHandler141>();
     }
     case 142: {
-      return MakeUnique<ScaffoldingCallHandler142>();
+      return std::make_unique<ScaffoldingCallHandler142>();
     }
     case 143: {
-      return MakeUnique<ScaffoldingCallHandler143>();
+      return std::make_unique<ScaffoldingCallHandler143>();
     }
     case 144: {
-      return MakeUnique<ScaffoldingCallHandler144>();
+      return std::make_unique<ScaffoldingCallHandler144>();
     }
     case 145: {
-      return MakeUnique<ScaffoldingCallHandler145>();
+      return std::make_unique<ScaffoldingCallHandler145>();
     }
     case 146: {
-      return MakeUnique<ScaffoldingCallHandler146>();
+      return std::make_unique<ScaffoldingCallHandler146>();
     }
     case 147: {
-      return MakeUnique<ScaffoldingCallHandler147>();
+      return std::make_unique<ScaffoldingCallHandler147>();
     }
     case 148: {
-      return MakeUnique<ScaffoldingCallHandler148>();
+      return std::make_unique<ScaffoldingCallHandler148>();
     }
     case 149: {
-      return MakeUnique<ScaffoldingCallHandler149>();
+      return std::make_unique<ScaffoldingCallHandler149>();
     }
     case 150: {
-      return MakeUnique<ScaffoldingCallHandler150>();
+      return std::make_unique<ScaffoldingCallHandler150>();
     }
     case 151: {
-      return MakeUnique<ScaffoldingCallHandler151>();
+      return std::make_unique<ScaffoldingCallHandler151>();
     }
     case 152: {
-      return MakeUnique<ScaffoldingCallHandler152>();
+      return std::make_unique<ScaffoldingCallHandler152>();
     }
     case 153: {
-      return MakeUnique<ScaffoldingCallHandler153>();
+      return std::make_unique<ScaffoldingCallHandler153>();
     }
     case 154: {
-      return MakeUnique<ScaffoldingCallHandler154>();
+      return std::make_unique<ScaffoldingCallHandler154>();
     }
     case 155: {
-      return MakeUnique<ScaffoldingCallHandler155>();
+      return std::make_unique<ScaffoldingCallHandler155>();
     }
     case 156: {
-      return MakeUnique<ScaffoldingCallHandler156>();
+      return std::make_unique<ScaffoldingCallHandler156>();
     }
     case 157: {
-      return MakeUnique<ScaffoldingCallHandler157>();
+      return std::make_unique<ScaffoldingCallHandler157>();
     }
     case 158: {
-      return MakeUnique<ScaffoldingCallHandler158>();
+      return std::make_unique<ScaffoldingCallHandler158>();
     }
     case 159: {
-      return MakeUnique<ScaffoldingCallHandler159>();
+      return std::make_unique<ScaffoldingCallHandler159>();
     }
     case 160: {
-      return MakeUnique<ScaffoldingCallHandler160>();
+      return std::make_unique<ScaffoldingCallHandler160>();
     }
     case 161: {
-      return MakeUnique<ScaffoldingCallHandler161>();
+      return std::make_unique<ScaffoldingCallHandler161>();
     }
     case 162: {
-      return MakeUnique<ScaffoldingCallHandler162>();
+      return std::make_unique<ScaffoldingCallHandler162>();
     }
     case 163: {
-      return MakeUnique<ScaffoldingCallHandler163>();
+      return std::make_unique<ScaffoldingCallHandler163>();
     }
     case 164: {
-      return MakeUnique<ScaffoldingCallHandler164>();
+      return std::make_unique<ScaffoldingCallHandler164>();
     }
     case 165: {
-      return MakeUnique<ScaffoldingCallHandler165>();
+      return std::make_unique<ScaffoldingCallHandler165>();
     }
     case 166: {
-      return MakeUnique<ScaffoldingCallHandler166>();
+      return std::make_unique<ScaffoldingCallHandler166>();
     }
     case 167: {
-      return MakeUnique<ScaffoldingCallHandler167>();
+      return std::make_unique<ScaffoldingCallHandler167>();
     }
     case 168: {
-      return MakeUnique<ScaffoldingCallHandler168>();
+      return std::make_unique<ScaffoldingCallHandler168>();
     }
     case 169: {
-      return MakeUnique<ScaffoldingCallHandler169>();
+      return std::make_unique<ScaffoldingCallHandler169>();
     }
     case 170: {
-      return MakeUnique<ScaffoldingCallHandler170>();
+      return std::make_unique<ScaffoldingCallHandler170>();
     }
     case 171: {
-      return MakeUnique<ScaffoldingCallHandler171>();
+      return std::make_unique<ScaffoldingCallHandler171>();
     }
     case 172: {
-      return MakeUnique<ScaffoldingCallHandler172>();
+      return std::make_unique<ScaffoldingCallHandler172>();
     }
     case 173: {
-      return MakeUnique<ScaffoldingCallHandler173>();
+      return std::make_unique<ScaffoldingCallHandler173>();
     }
     case 174: {
-      return MakeUnique<ScaffoldingCallHandler174>();
+      return std::make_unique<ScaffoldingCallHandler174>();
     }
     case 175: {
-      return MakeUnique<ScaffoldingCallHandler175>();
+      return std::make_unique<ScaffoldingCallHandler175>();
     }
     case 176: {
-      return MakeUnique<ScaffoldingCallHandler176>();
+      return std::make_unique<ScaffoldingCallHandler176>();
     }
     case 177: {
-      return MakeUnique<ScaffoldingCallHandler177>();
+      return std::make_unique<ScaffoldingCallHandler177>();
     }
     case 178: {
-      return MakeUnique<ScaffoldingCallHandler178>();
+      return std::make_unique<ScaffoldingCallHandler178>();
     }
     case 179: {
-      return MakeUnique<ScaffoldingCallHandler179>();
+      return std::make_unique<ScaffoldingCallHandler179>();
     }
     case 180: {
-      return MakeUnique<ScaffoldingCallHandler180>();
+      return std::make_unique<ScaffoldingCallHandler180>();
     }
     case 181: {
-      return MakeUnique<ScaffoldingCallHandler181>();
+      return std::make_unique<ScaffoldingCallHandler181>();
     }
     case 182: {
-      return MakeUnique<ScaffoldingCallHandler182>();
+      return std::make_unique<ScaffoldingCallHandler182>();
     }
     case 183: {
-      return MakeUnique<ScaffoldingCallHandler183>();
+      return std::make_unique<ScaffoldingCallHandler183>();
     }
     case 184: {
-      return MakeUnique<ScaffoldingCallHandler184>();
+      return std::make_unique<ScaffoldingCallHandler184>();
     }
     case 185: {
-      return MakeUnique<ScaffoldingCallHandler185>();
+      return std::make_unique<ScaffoldingCallHandler185>();
     }
     case 186: {
-      return MakeUnique<ScaffoldingCallHandler186>();
+      return std::make_unique<ScaffoldingCallHandler186>();
     }
     case 187: {
-      return MakeUnique<ScaffoldingCallHandler187>();
+      return std::make_unique<ScaffoldingCallHandler187>();
     }
     case 188: {
-      return MakeUnique<ScaffoldingCallHandler188>();
+      return std::make_unique<ScaffoldingCallHandler188>();
     }
     case 189: {
-      return MakeUnique<ScaffoldingCallHandler189>();
+      return std::make_unique<ScaffoldingCallHandler189>();
     }
     case 190: {
-      return MakeUnique<ScaffoldingCallHandler190>();
+      return std::make_unique<ScaffoldingCallHandler190>();
     }
     case 191: {
-      return MakeUnique<ScaffoldingCallHandler191>();
+      return std::make_unique<ScaffoldingCallHandler191>();
     }
     case 192: {
-      return MakeUnique<ScaffoldingCallHandler192>();
+      return std::make_unique<ScaffoldingCallHandler192>();
     }
     case 193: {
-      return MakeUnique<ScaffoldingCallHandler193>();
+      return std::make_unique<ScaffoldingCallHandler193>();
     }
     case 194: {
-      return MakeUnique<ScaffoldingCallHandler194>();
+      return std::make_unique<ScaffoldingCallHandler194>();
     }
     case 195: {
-      return MakeUnique<ScaffoldingCallHandler195>();
+      return std::make_unique<ScaffoldingCallHandler195>();
     }
     case 196: {
-      return MakeUnique<ScaffoldingCallHandler196>();
+      return std::make_unique<ScaffoldingCallHandler196>();
     }
     case 197: {
-      return MakeUnique<ScaffoldingCallHandler197>();
+      return std::make_unique<ScaffoldingCallHandler197>();
     }
     case 198: {
-      return MakeUnique<ScaffoldingCallHandler198>();
+      return std::make_unique<ScaffoldingCallHandler198>();
     }
     case 199: {
-      return MakeUnique<ScaffoldingCallHandler199>();
+      return std::make_unique<ScaffoldingCallHandler199>();
     }
     case 200: {
-      return MakeUnique<ScaffoldingCallHandler200>();
+      return std::make_unique<ScaffoldingCallHandler200>();
     }
     case 201: {
-      return MakeUnique<ScaffoldingCallHandler201>();
+      return std::make_unique<ScaffoldingCallHandler201>();
     }
     case 202: {
-      return MakeUnique<ScaffoldingCallHandler202>();
+      return std::make_unique<ScaffoldingCallHandler202>();
     }
     case 203: {
-      return MakeUnique<ScaffoldingCallHandler203>();
+      return std::make_unique<ScaffoldingCallHandler203>();
     }
     case 204: {
-      return MakeUnique<ScaffoldingCallHandler204>();
+      return std::make_unique<ScaffoldingCallHandler204>();
     }
     case 205: {
-      return MakeUnique<ScaffoldingCallHandler205>();
+      return std::make_unique<ScaffoldingCallHandler205>();
     }
     case 206: {
-      return MakeUnique<ScaffoldingCallHandler206>();
+      return std::make_unique<ScaffoldingCallHandler206>();
     }
     case 207: {
-      return MakeUnique<ScaffoldingCallHandler207>();
+      return std::make_unique<ScaffoldingCallHandler207>();
     }
     case 208: {
-      return MakeUnique<ScaffoldingCallHandler208>();
+      return std::make_unique<ScaffoldingCallHandler208>();
     }
     case 209: {
-      return MakeUnique<ScaffoldingCallHandler209>();
+      return std::make_unique<ScaffoldingCallHandler209>();
     }
     case 210: {
-      return MakeUnique<ScaffoldingCallHandler210>();
+      return std::make_unique<ScaffoldingCallHandler210>();
     }
     case 211: {
-      return MakeUnique<ScaffoldingCallHandler211>();
+      return std::make_unique<ScaffoldingCallHandler211>();
     }
     case 212: {
-      return MakeUnique<ScaffoldingCallHandler212>();
+      return std::make_unique<ScaffoldingCallHandler212>();
     }
     case 213: {
-      return MakeUnique<ScaffoldingCallHandler213>();
+      return std::make_unique<ScaffoldingCallHandler213>();
     }
     case 214: {
-      return MakeUnique<ScaffoldingCallHandler214>();
+      return std::make_unique<ScaffoldingCallHandler214>();
     }
     case 215: {
-      return MakeUnique<ScaffoldingCallHandler215>();
+      return std::make_unique<ScaffoldingCallHandler215>();
     }
     case 216: {
-      return MakeUnique<ScaffoldingCallHandler216>();
+      return std::make_unique<ScaffoldingCallHandler216>();
     }
     case 217: {
-      return MakeUnique<ScaffoldingCallHandler217>();
+      return std::make_unique<ScaffoldingCallHandler217>();
     }
     case 218: {
-      return MakeUnique<ScaffoldingCallHandler218>();
+      return std::make_unique<ScaffoldingCallHandler218>();
     }
     case 219: {
-      return MakeUnique<ScaffoldingCallHandler219>();
+      return std::make_unique<ScaffoldingCallHandler219>();
     }
     case 220: {
-      return MakeUnique<ScaffoldingCallHandler220>();
+      return std::make_unique<ScaffoldingCallHandler220>();
     }
     case 221: {
-      return MakeUnique<ScaffoldingCallHandler221>();
+      return std::make_unique<ScaffoldingCallHandler221>();
     }
     case 222: {
-      return MakeUnique<ScaffoldingCallHandler222>();
+      return std::make_unique<ScaffoldingCallHandler222>();
     }
     case 223: {
-      return MakeUnique<ScaffoldingCallHandler223>();
+      return std::make_unique<ScaffoldingCallHandler223>();
     }
     case 224: {
-      return MakeUnique<ScaffoldingCallHandler224>();
+      return std::make_unique<ScaffoldingCallHandler224>();
     }
     case 225: {
-      return MakeUnique<ScaffoldingCallHandler225>();
+      return std::make_unique<ScaffoldingCallHandler225>();
     }
     case 226: {
-      return MakeUnique<ScaffoldingCallHandler226>();
+      return std::make_unique<ScaffoldingCallHandler226>();
     }
     case 227: {
-      return MakeUnique<ScaffoldingCallHandler227>();
+      return std::make_unique<ScaffoldingCallHandler227>();
     }
     case 228: {
-      return MakeUnique<ScaffoldingCallHandler228>();
+      return std::make_unique<ScaffoldingCallHandler228>();
     }
     case 229: {
-      return MakeUnique<ScaffoldingCallHandler229>();
+      return std::make_unique<ScaffoldingCallHandler229>();
     }
     case 230: {
-      return MakeUnique<ScaffoldingCallHandler230>();
+      return std::make_unique<ScaffoldingCallHandler230>();
     }
     case 231: {
-      return MakeUnique<ScaffoldingCallHandler231>();
+      return std::make_unique<ScaffoldingCallHandler231>();
     }
     case 232: {
-      return MakeUnique<ScaffoldingCallHandler232>();
+      return std::make_unique<ScaffoldingCallHandler232>();
     }
     case 233: {
-      return MakeUnique<ScaffoldingCallHandler233>();
+      return std::make_unique<ScaffoldingCallHandler233>();
     }
     case 234: {
-      return MakeUnique<ScaffoldingCallHandler234>();
+      return std::make_unique<ScaffoldingCallHandler234>();
     }
     case 235: {
-      return MakeUnique<ScaffoldingCallHandler235>();
+      return std::make_unique<ScaffoldingCallHandler235>();
     }
     case 236: {
-      return MakeUnique<ScaffoldingCallHandler236>();
+      return std::make_unique<ScaffoldingCallHandler236>();
     }
     case 237: {
-      return MakeUnique<ScaffoldingCallHandler237>();
+      return std::make_unique<ScaffoldingCallHandler237>();
     }
     case 238: {
-      return MakeUnique<ScaffoldingCallHandler238>();
+      return std::make_unique<ScaffoldingCallHandler238>();
     }
     case 239: {
-      return MakeUnique<ScaffoldingCallHandler239>();
+      return std::make_unique<ScaffoldingCallHandler239>();
     }
     case 240: {
-      return MakeUnique<ScaffoldingCallHandler240>();
+      return std::make_unique<ScaffoldingCallHandler240>();
     }
     case 241: {
-      return MakeUnique<ScaffoldingCallHandler241>();
+      return std::make_unique<ScaffoldingCallHandler241>();
     }
     case 242: {
-      return MakeUnique<ScaffoldingCallHandler242>();
+      return std::make_unique<ScaffoldingCallHandler242>();
     }
     case 243: {
-      return MakeUnique<ScaffoldingCallHandler243>();
+      return std::make_unique<ScaffoldingCallHandler243>();
     }
     case 244: {
-      return MakeUnique<ScaffoldingCallHandler244>();
+      return std::make_unique<ScaffoldingCallHandler244>();
     }
     case 245: {
-      return MakeUnique<ScaffoldingCallHandler245>();
+      return std::make_unique<ScaffoldingCallHandler245>();
     }
     case 246: {
-      return MakeUnique<ScaffoldingCallHandler246>();
+      return std::make_unique<ScaffoldingCallHandler246>();
     }
     case 247: {
-      return MakeUnique<ScaffoldingCallHandler247>();
+      return std::make_unique<ScaffoldingCallHandler247>();
     }
     case 248: {
-      return MakeUnique<ScaffoldingCallHandler248>();
+      return std::make_unique<ScaffoldingCallHandler248>();
     }
     case 249: {
-      return MakeUnique<ScaffoldingCallHandler249>();
+      return std::make_unique<ScaffoldingCallHandler249>();
     }
     case 250: {
-      return MakeUnique<ScaffoldingCallHandler250>();
+      return std::make_unique<ScaffoldingCallHandler250>();
     }
     case 251: {
-      return MakeUnique<ScaffoldingCallHandler251>();
+      return std::make_unique<ScaffoldingCallHandler251>();
     }
     case 252: {
-      return MakeUnique<ScaffoldingCallHandler252>();
+      return std::make_unique<ScaffoldingCallHandler252>();
     }
     case 253: {
-      return MakeUnique<ScaffoldingCallHandler253>();
+      return std::make_unique<ScaffoldingCallHandler253>();
     }
     case 254: {
-      return MakeUnique<ScaffoldingCallHandler254>();
+      return std::make_unique<ScaffoldingCallHandler254>();
     }
     case 255: {
-      return MakeUnique<ScaffoldingCallHandler255>();
+      return std::make_unique<ScaffoldingCallHandler255>();
     }
     case 256: {
-      return MakeUnique<ScaffoldingCallHandler256>();
+      return std::make_unique<ScaffoldingCallHandler256>();
     }
     case 257: {
-      return MakeUnique<ScaffoldingCallHandler257>();
+      return std::make_unique<ScaffoldingCallHandler257>();
     }
     case 258: {
-      return MakeUnique<ScaffoldingCallHandler258>();
+      return std::make_unique<ScaffoldingCallHandler258>();
     }
     case 259: {
-      return MakeUnique<ScaffoldingCallHandler259>();
+      return std::make_unique<ScaffoldingCallHandler259>();
     }
     case 260: {
-      return MakeUnique<ScaffoldingCallHandler260>();
+      return std::make_unique<ScaffoldingCallHandler260>();
     }
     case 261: {
-      return MakeUnique<ScaffoldingCallHandler261>();
+      return std::make_unique<ScaffoldingCallHandler261>();
     }
     case 262: {
-      return MakeUnique<ScaffoldingCallHandler262>();
+      return std::make_unique<ScaffoldingCallHandler262>();
     }
     case 263: {
-      return MakeUnique<ScaffoldingCallHandler263>();
+      return std::make_unique<ScaffoldingCallHandler263>();
     }
     case 264: {
-      return MakeUnique<ScaffoldingCallHandler264>();
+      return std::make_unique<ScaffoldingCallHandler264>();
     }
     case 265: {
-      return MakeUnique<ScaffoldingCallHandler265>();
+      return std::make_unique<ScaffoldingCallHandler265>();
     }
     case 266: {
-      return MakeUnique<ScaffoldingCallHandler266>();
+      return std::make_unique<ScaffoldingCallHandler266>();
     }
     case 267: {
-      return MakeUnique<ScaffoldingCallHandler267>();
+      return std::make_unique<ScaffoldingCallHandler267>();
     }
     case 268: {
-      return MakeUnique<ScaffoldingCallHandler268>();
+      return std::make_unique<ScaffoldingCallHandler268>();
     }
     case 269: {
-      return MakeUnique<ScaffoldingCallHandler269>();
+      return std::make_unique<ScaffoldingCallHandler269>();
     }
     case 270: {
-      return MakeUnique<ScaffoldingCallHandler270>();
+      return std::make_unique<ScaffoldingCallHandler270>();
     }
     case 271: {
-      return MakeUnique<ScaffoldingCallHandler271>();
+      return std::make_unique<ScaffoldingCallHandler271>();
     }
     case 272: {
-      return MakeUnique<ScaffoldingCallHandler272>();
+      return std::make_unique<ScaffoldingCallHandler272>();
     }
     case 273: {
-      return MakeUnique<ScaffoldingCallHandler273>();
+      return std::make_unique<ScaffoldingCallHandler273>();
     }
     case 274: {
-      return MakeUnique<ScaffoldingCallHandler274>();
+      return std::make_unique<ScaffoldingCallHandler274>();
     }
     case 275: {
-      return MakeUnique<ScaffoldingCallHandler275>();
+      return std::make_unique<ScaffoldingCallHandler275>();
     }
     case 276: {
-      return MakeUnique<ScaffoldingCallHandler276>();
+      return std::make_unique<ScaffoldingCallHandler276>();
     }
     case 277: {
-      return MakeUnique<ScaffoldingCallHandler277>();
+      return std::make_unique<ScaffoldingCallHandler277>();
     }
     case 278: {
-      return MakeUnique<ScaffoldingCallHandler278>();
+      return std::make_unique<ScaffoldingCallHandler278>();
     }
     case 279: {
-      return MakeUnique<ScaffoldingCallHandler279>();
+      return std::make_unique<ScaffoldingCallHandler279>();
     }
     case 280: {
-      return MakeUnique<ScaffoldingCallHandler280>();
+      return std::make_unique<ScaffoldingCallHandler280>();
     }
     case 281: {
-      return MakeUnique<ScaffoldingCallHandler281>();
+      return std::make_unique<ScaffoldingCallHandler281>();
     }
     case 282: {
-      return MakeUnique<ScaffoldingCallHandler282>();
+      return std::make_unique<ScaffoldingCallHandler282>();
     }
     case 283: {
-      return MakeUnique<ScaffoldingCallHandler283>();
+      return std::make_unique<ScaffoldingCallHandler283>();
     }
     case 284: {
-      return MakeUnique<ScaffoldingCallHandler284>();
+      return std::make_unique<ScaffoldingCallHandler284>();
     }
     case 285: {
-      return MakeUnique<ScaffoldingCallHandler285>();
+      return std::make_unique<ScaffoldingCallHandler285>();
     }
     case 286: {
-      return MakeUnique<ScaffoldingCallHandler286>();
+      return std::make_unique<ScaffoldingCallHandler286>();
     }
     case 287: {
-      return MakeUnique<ScaffoldingCallHandler287>();
+      return std::make_unique<ScaffoldingCallHandler287>();
     }
     case 288: {
-      return MakeUnique<ScaffoldingCallHandler288>();
+      return std::make_unique<ScaffoldingCallHandler288>();
     }
     case 290: {
-      return MakeUnique<ScaffoldingCallHandler290>();
+      return std::make_unique<ScaffoldingCallHandler290>();
     }
     case 291: {
-      return MakeUnique<ScaffoldingCallHandler291>();
+      return std::make_unique<ScaffoldingCallHandler291>();
     }
     case 292: {
-      return MakeUnique<ScaffoldingCallHandler292>();
+      return std::make_unique<ScaffoldingCallHandler292>();
     }
     case 293: {
-      return MakeUnique<ScaffoldingCallHandler293>();
+      return std::make_unique<ScaffoldingCallHandler293>();
     }
     case 294: {
-      return MakeUnique<ScaffoldingCallHandler294>();
+      return std::make_unique<ScaffoldingCallHandler294>();
     }
     case 295: {
-      return MakeUnique<ScaffoldingCallHandler295>();
+      return std::make_unique<ScaffoldingCallHandler295>();
     }
     case 296: {
-      return MakeUnique<ScaffoldingCallHandler296>();
+      return std::make_unique<ScaffoldingCallHandler296>();
     }
     case 297: {
-      return MakeUnique<ScaffoldingCallHandler297>();
+      return std::make_unique<ScaffoldingCallHandler297>();
     }
     case 298: {
-      return MakeUnique<ScaffoldingCallHandler298>();
+      return std::make_unique<ScaffoldingCallHandler298>();
     }
     case 299: {
-      return MakeUnique<ScaffoldingCallHandler299>();
+      return std::make_unique<ScaffoldingCallHandler299>();
     }
     case 300: {
-      return MakeUnique<ScaffoldingCallHandler300>();
+      return std::make_unique<ScaffoldingCallHandler300>();
     }
     case 301: {
-      return MakeUnique<ScaffoldingCallHandler301>();
+      return std::make_unique<ScaffoldingCallHandler301>();
     }
     case 302: {
-      return MakeUnique<ScaffoldingCallHandler302>();
+      return std::make_unique<ScaffoldingCallHandler302>();
     }
     case 303: {
-      return MakeUnique<ScaffoldingCallHandler303>();
+      return std::make_unique<ScaffoldingCallHandler303>();
     }
     case 304: {
-      return MakeUnique<ScaffoldingCallHandler304>();
+      return std::make_unique<ScaffoldingCallHandler304>();
     }
     case 305: {
-      return MakeUnique<ScaffoldingCallHandler305>();
+      return std::make_unique<ScaffoldingCallHandler305>();
     }
     case 306: {
-      return MakeUnique<ScaffoldingCallHandler306>();
+      return std::make_unique<ScaffoldingCallHandler306>();
     }
     case 307: {
-      return MakeUnique<ScaffoldingCallHandler307>();
+      return std::make_unique<ScaffoldingCallHandler307>();
     }
     case 308: {
-      return MakeUnique<ScaffoldingCallHandler308>();
+      return std::make_unique<ScaffoldingCallHandler308>();
     }
     case 309: {
-      return MakeUnique<ScaffoldingCallHandler309>();
+      return std::make_unique<ScaffoldingCallHandler309>();
     }
     case 310: {
-      return MakeUnique<ScaffoldingCallHandler310>();
+      return std::make_unique<ScaffoldingCallHandler310>();
     }
     case 311: {
-      return MakeUnique<ScaffoldingCallHandler311>();
+      return std::make_unique<ScaffoldingCallHandler311>();
     }
 
 #ifdef MOZ_UNIFFI_FIXTURES
     case 336: {
-      return MakeUnique<ScaffoldingCallHandler336>();
+      return std::make_unique<ScaffoldingCallHandler336>();
     }
     case 337: {
-      return MakeUnique<ScaffoldingCallHandler337>();
+      return std::make_unique<ScaffoldingCallHandler337>();
     }
     case 338: {
-      return MakeUnique<ScaffoldingCallHandler338>();
+      return std::make_unique<ScaffoldingCallHandler338>();
     }
     case 339: {
-      return MakeUnique<ScaffoldingCallHandler339>();
+      return std::make_unique<ScaffoldingCallHandler339>();
     }
     case 340: {
-      return MakeUnique<ScaffoldingCallHandler340>();
+      return std::make_unique<ScaffoldingCallHandler340>();
     }
     case 341: {
-      return MakeUnique<ScaffoldingCallHandler341>();
+      return std::make_unique<ScaffoldingCallHandler341>();
     }
     case 342: {
-      return MakeUnique<ScaffoldingCallHandler342>();
+      return std::make_unique<ScaffoldingCallHandler342>();
     }
     case 343: {
-      return MakeUnique<ScaffoldingCallHandler343>();
+      return std::make_unique<ScaffoldingCallHandler343>();
     }
     case 352: {
-      return MakeUnique<ScaffoldingCallHandler352>();
+      return std::make_unique<ScaffoldingCallHandler352>();
     }
     case 353: {
-      return MakeUnique<ScaffoldingCallHandler353>();
+      return std::make_unique<ScaffoldingCallHandler353>();
     }
     case 354: {
-      return MakeUnique<ScaffoldingCallHandler354>();
+      return std::make_unique<ScaffoldingCallHandler354>();
     }
     case 355: {
-      return MakeUnique<ScaffoldingCallHandler355>();
+      return std::make_unique<ScaffoldingCallHandler355>();
     }
     case 356: {
-      return MakeUnique<ScaffoldingCallHandler356>();
+      return std::make_unique<ScaffoldingCallHandler356>();
     }
     case 357: {
-      return MakeUnique<ScaffoldingCallHandler357>();
+      return std::make_unique<ScaffoldingCallHandler357>();
     }
     case 358: {
-      return MakeUnique<ScaffoldingCallHandler358>();
+      return std::make_unique<ScaffoldingCallHandler358>();
     }
     case 359: {
-      return MakeUnique<ScaffoldingCallHandler359>();
+      return std::make_unique<ScaffoldingCallHandler359>();
     }
     case 360: {
-      return MakeUnique<ScaffoldingCallHandler360>();
+      return std::make_unique<ScaffoldingCallHandler360>();
     }
     case 361: {
-      return MakeUnique<ScaffoldingCallHandler361>();
+      return std::make_unique<ScaffoldingCallHandler361>();
     }
     case 362: {
-      return MakeUnique<ScaffoldingCallHandler362>();
+      return std::make_unique<ScaffoldingCallHandler362>();
     }
     case 363: {
-      return MakeUnique<ScaffoldingCallHandler363>();
+      return std::make_unique<ScaffoldingCallHandler363>();
     }
     case 364: {
-      return MakeUnique<ScaffoldingCallHandler364>();
+      return std::make_unique<ScaffoldingCallHandler364>();
     }
     case 365: {
-      return MakeUnique<ScaffoldingCallHandler365>();
+      return std::make_unique<ScaffoldingCallHandler365>();
     }
     case 366: {
-      return MakeUnique<ScaffoldingCallHandler366>();
+      return std::make_unique<ScaffoldingCallHandler366>();
     }
     case 367: {
-      return MakeUnique<ScaffoldingCallHandler367>();
+      return std::make_unique<ScaffoldingCallHandler367>();
     }
     case 368: {
-      return MakeUnique<ScaffoldingCallHandler368>();
+      return std::make_unique<ScaffoldingCallHandler368>();
     }
     case 369: {
-      return MakeUnique<ScaffoldingCallHandler369>();
+      return std::make_unique<ScaffoldingCallHandler369>();
     }
     case 370: {
-      return MakeUnique<ScaffoldingCallHandler370>();
+      return std::make_unique<ScaffoldingCallHandler370>();
     }
     case 371: {
-      return MakeUnique<ScaffoldingCallHandler371>();
+      return std::make_unique<ScaffoldingCallHandler371>();
     }
     case 372: {
-      return MakeUnique<ScaffoldingCallHandler372>();
+      return std::make_unique<ScaffoldingCallHandler372>();
     }
     case 373: {
-      return MakeUnique<ScaffoldingCallHandler373>();
+      return std::make_unique<ScaffoldingCallHandler373>();
     }
     case 374: {
-      return MakeUnique<ScaffoldingCallHandler374>();
+      return std::make_unique<ScaffoldingCallHandler374>();
     }
     case 375: {
-      return MakeUnique<ScaffoldingCallHandler375>();
+      return std::make_unique<ScaffoldingCallHandler375>();
     }
     case 376: {
-      return MakeUnique<ScaffoldingCallHandler376>();
+      return std::make_unique<ScaffoldingCallHandler376>();
     }
     case 377: {
-      return MakeUnique<ScaffoldingCallHandler377>();
+      return std::make_unique<ScaffoldingCallHandler377>();
     }
     case 378: {
-      return MakeUnique<ScaffoldingCallHandler378>();
+      return std::make_unique<ScaffoldingCallHandler378>();
     }
     case 379: {
-      return MakeUnique<ScaffoldingCallHandler379>();
+      return std::make_unique<ScaffoldingCallHandler379>();
     }
     case 380: {
-      return MakeUnique<ScaffoldingCallHandler380>();
+      return std::make_unique<ScaffoldingCallHandler380>();
     }
     case 381: {
-      return MakeUnique<ScaffoldingCallHandler381>();
+      return std::make_unique<ScaffoldingCallHandler381>();
     }
     case 382: {
-      return MakeUnique<ScaffoldingCallHandler382>();
+      return std::make_unique<ScaffoldingCallHandler382>();
     }
     case 383: {
-      return MakeUnique<ScaffoldingCallHandler383>();
+      return std::make_unique<ScaffoldingCallHandler383>();
     }
     case 384: {
-      return MakeUnique<ScaffoldingCallHandler384>();
+      return std::make_unique<ScaffoldingCallHandler384>();
     }
     case 385: {
-      return MakeUnique<ScaffoldingCallHandler385>();
+      return std::make_unique<ScaffoldingCallHandler385>();
     }
     case 386: {
-      return MakeUnique<ScaffoldingCallHandler386>();
+      return std::make_unique<ScaffoldingCallHandler386>();
     }
     case 387: {
-      return MakeUnique<ScaffoldingCallHandler387>();
+      return std::make_unique<ScaffoldingCallHandler387>();
     }
     case 388: {
-      return MakeUnique<ScaffoldingCallHandler388>();
+      return std::make_unique<ScaffoldingCallHandler388>();
     }
     case 389: {
-      return MakeUnique<ScaffoldingCallHandler389>();
+      return std::make_unique<ScaffoldingCallHandler389>();
     }
     case 390: {
-      return MakeUnique<ScaffoldingCallHandler390>();
+      return std::make_unique<ScaffoldingCallHandler390>();
     }
     case 391: {
-      return MakeUnique<ScaffoldingCallHandler391>();
+      return std::make_unique<ScaffoldingCallHandler391>();
     }
     case 392: {
-      return MakeUnique<ScaffoldingCallHandler392>();
+      return std::make_unique<ScaffoldingCallHandler392>();
     }
     case 393: {
-      return MakeUnique<ScaffoldingCallHandler393>();
+      return std::make_unique<ScaffoldingCallHandler393>();
     }
     case 394: {
-      return MakeUnique<ScaffoldingCallHandler394>();
+      return std::make_unique<ScaffoldingCallHandler394>();
     }
     case 395: {
-      return MakeUnique<ScaffoldingCallHandler395>();
+      return std::make_unique<ScaffoldingCallHandler395>();
     }
     case 396: {
-      return MakeUnique<ScaffoldingCallHandler396>();
+      return std::make_unique<ScaffoldingCallHandler396>();
     }
     case 397: {
-      return MakeUnique<ScaffoldingCallHandler397>();
+      return std::make_unique<ScaffoldingCallHandler397>();
     }
     case 398: {
-      return MakeUnique<ScaffoldingCallHandler398>();
+      return std::make_unique<ScaffoldingCallHandler398>();
     }
     case 404: {
-      return MakeUnique<ScaffoldingCallHandler404>();
+      return std::make_unique<ScaffoldingCallHandler404>();
     }
     case 405: {
-      return MakeUnique<ScaffoldingCallHandler405>();
+      return std::make_unique<ScaffoldingCallHandler405>();
     }
     case 406: {
-      return MakeUnique<ScaffoldingCallHandler406>();
+      return std::make_unique<ScaffoldingCallHandler406>();
     }
     case 407: {
-      return MakeUnique<ScaffoldingCallHandler407>();
+      return std::make_unique<ScaffoldingCallHandler407>();
     }
     case 408: {
-      return MakeUnique<ScaffoldingCallHandler408>();
+      return std::make_unique<ScaffoldingCallHandler408>();
     }
     case 409: {
-      return MakeUnique<ScaffoldingCallHandler409>();
+      return std::make_unique<ScaffoldingCallHandler409>();
     }
     case 410: {
-      return MakeUnique<ScaffoldingCallHandler410>();
+      return std::make_unique<ScaffoldingCallHandler410>();
     }
     case 411: {
-      return MakeUnique<ScaffoldingCallHandler411>();
+      return std::make_unique<ScaffoldingCallHandler411>();
     }
     case 412: {
-      return MakeUnique<ScaffoldingCallHandler412>();
+      return std::make_unique<ScaffoldingCallHandler412>();
     }
     case 413: {
-      return MakeUnique<ScaffoldingCallHandler413>();
+      return std::make_unique<ScaffoldingCallHandler413>();
     }
 #endif /* MOZ_UNIFFI_FIXTURES */
 
@@ -21530,105 +21530,105 @@ UniquePtr<UniffiAsyncCallHandler> GetAsyncCallHandler(uint64_t aId) {
   switch (aId) {
 
     case 36: {
-      return MakeUnique<ScaffoldingCallHandler36>();
+      return std::make_unique<ScaffoldingCallHandler36>();
     }
     case 131: {
-      return MakeUnique<ScaffoldingCallHandler131>();
+      return std::make_unique<ScaffoldingCallHandler131>();
     }
     case 132: {
-      return MakeUnique<ScaffoldingCallHandler132>();
+      return std::make_unique<ScaffoldingCallHandler132>();
     }
     case 133: {
-      return MakeUnique<ScaffoldingCallHandler133>();
+      return std::make_unique<ScaffoldingCallHandler133>();
     }
     case 289: {
-      return MakeUnique<ScaffoldingCallHandler289>();
+      return std::make_unique<ScaffoldingCallHandler289>();
     }
 
 #ifdef MOZ_UNIFFI_FIXTURES
     case 321: {
-      return MakeUnique<ScaffoldingCallHandler321>();
+      return std::make_unique<ScaffoldingCallHandler321>();
     }
     case 322: {
-      return MakeUnique<ScaffoldingCallHandler322>();
+      return std::make_unique<ScaffoldingCallHandler322>();
     }
     case 323: {
-      return MakeUnique<ScaffoldingCallHandler323>();
+      return std::make_unique<ScaffoldingCallHandler323>();
     }
     case 324: {
-      return MakeUnique<ScaffoldingCallHandler324>();
+      return std::make_unique<ScaffoldingCallHandler324>();
     }
     case 325: {
-      return MakeUnique<ScaffoldingCallHandler325>();
+      return std::make_unique<ScaffoldingCallHandler325>();
     }
     case 326: {
-      return MakeUnique<ScaffoldingCallHandler326>();
+      return std::make_unique<ScaffoldingCallHandler326>();
     }
     case 327: {
-      return MakeUnique<ScaffoldingCallHandler327>();
+      return std::make_unique<ScaffoldingCallHandler327>();
     }
     case 328: {
-      return MakeUnique<ScaffoldingCallHandler328>();
+      return std::make_unique<ScaffoldingCallHandler328>();
     }
     case 329: {
-      return MakeUnique<ScaffoldingCallHandler329>();
+      return std::make_unique<ScaffoldingCallHandler329>();
     }
     case 330: {
-      return MakeUnique<ScaffoldingCallHandler330>();
+      return std::make_unique<ScaffoldingCallHandler330>();
     }
     case 331: {
-      return MakeUnique<ScaffoldingCallHandler331>();
+      return std::make_unique<ScaffoldingCallHandler331>();
     }
     case 332: {
-      return MakeUnique<ScaffoldingCallHandler332>();
+      return std::make_unique<ScaffoldingCallHandler332>();
     }
     case 333: {
-      return MakeUnique<ScaffoldingCallHandler333>();
+      return std::make_unique<ScaffoldingCallHandler333>();
     }
     case 334: {
-      return MakeUnique<ScaffoldingCallHandler334>();
+      return std::make_unique<ScaffoldingCallHandler334>();
     }
     case 335: {
-      return MakeUnique<ScaffoldingCallHandler335>();
+      return std::make_unique<ScaffoldingCallHandler335>();
     }
     case 344: {
-      return MakeUnique<ScaffoldingCallHandler344>();
+      return std::make_unique<ScaffoldingCallHandler344>();
     }
     case 345: {
-      return MakeUnique<ScaffoldingCallHandler345>();
+      return std::make_unique<ScaffoldingCallHandler345>();
     }
     case 346: {
-      return MakeUnique<ScaffoldingCallHandler346>();
+      return std::make_unique<ScaffoldingCallHandler346>();
     }
     case 347: {
-      return MakeUnique<ScaffoldingCallHandler347>();
+      return std::make_unique<ScaffoldingCallHandler347>();
     }
     case 348: {
-      return MakeUnique<ScaffoldingCallHandler348>();
+      return std::make_unique<ScaffoldingCallHandler348>();
     }
     case 349: {
-      return MakeUnique<ScaffoldingCallHandler349>();
+      return std::make_unique<ScaffoldingCallHandler349>();
     }
     case 350: {
-      return MakeUnique<ScaffoldingCallHandler350>();
+      return std::make_unique<ScaffoldingCallHandler350>();
     }
     case 351: {
-      return MakeUnique<ScaffoldingCallHandler351>();
+      return std::make_unique<ScaffoldingCallHandler351>();
     }
     case 399: {
-      return MakeUnique<ScaffoldingCallHandler399>();
+      return std::make_unique<ScaffoldingCallHandler399>();
     }
     case 400: {
-      return MakeUnique<ScaffoldingCallHandler400>();
+      return std::make_unique<ScaffoldingCallHandler400>();
     }
     case 401: {
-      return MakeUnique<ScaffoldingCallHandler401>();
+      return std::make_unique<ScaffoldingCallHandler401>();
     }
     case 402: {
-      return MakeUnique<ScaffoldingCallHandler402>();
+      return std::make_unique<ScaffoldingCallHandler402>();
     }
     case 403: {
-      return MakeUnique<ScaffoldingCallHandler403>();
+      return std::make_unique<ScaffoldingCallHandler403>();
     }
 #endif /* MOZ_UNIFFI_FIXTURES */
 
@@ -21880,7 +21880,7 @@ extern "C" void callback_interface_method_0_0(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod00>(aUniffiHandle, label, value);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod00>(aUniffiHandle, label, value);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler0);
 }
 /**
@@ -21944,7 +21944,7 @@ extern "C" void callback_interface_method_0_1(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod01>(aUniffiHandle, label, value);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod01>(aUniffiHandle, label, value);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler0);
 }
 /**
@@ -22000,7 +22000,7 @@ extern "C" void callback_interface_method_0_2(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod02>(aUniffiHandle, label);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod02>(aUniffiHandle, label);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler0);
 }
 /**
@@ -22064,7 +22064,7 @@ extern "C" void callback_interface_method_0_3(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod03>(aUniffiHandle, label, value);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod03>(aUniffiHandle, label, value);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler0);
 }
 /**
@@ -22128,7 +22128,7 @@ extern "C" void callback_interface_method_0_4(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod04>(aUniffiHandle, label, value);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod04>(aUniffiHandle, label, value);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler0);
 }
 
@@ -22137,7 +22137,7 @@ extern "C" void callback_free_0(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("MozAdsTelemetry.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("MozAdsTelemetry.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler0);
   }
 }
@@ -22218,7 +22218,7 @@ extern "C" void callback_interface_method_1_0(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod10>(aUniffiHandle, contextId, creationDate);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod10>(aUniffiHandle, contextId, creationDate);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler1);
 }
 /**
@@ -22274,7 +22274,7 @@ extern "C" void callback_interface_method_1_1(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod11>(aUniffiHandle, oldContextId);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod11>(aUniffiHandle, oldContextId);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler1);
 }
 
@@ -22283,7 +22283,7 @@ extern "C" void callback_free_1(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("ContextIdCallback.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("ContextIdCallback.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler1);
   }
 }
@@ -22345,7 +22345,7 @@ extern "C" void callback_interface_method_5_0(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod50>(aUniffiHandle);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod50>(aUniffiHandle);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler5);
 }
 
@@ -22354,7 +22354,7 @@ extern "C" void callback_free_5(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("ContainersCallback.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("ContainersCallback.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler5);
   }
 }
@@ -22423,7 +22423,7 @@ extern "C" void callback_interface_method_6_0(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod60>(aUniffiHandle, event);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod60>(aUniffiHandle, event);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler6);
 }
 
@@ -22432,7 +22432,7 @@ extern "C" void callback_free_6(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("EventSink.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("EventSink.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler6);
   }
 }
@@ -22554,7 +22554,7 @@ extern "C" void callback_free_2(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("EncryptorDecryptor.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("EncryptorDecryptor.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler2);
   }
 }
@@ -22618,7 +22618,7 @@ extern "C" void callback_free_3(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("KeyManager.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("KeyManager.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler3);
   }
 }
@@ -22707,7 +22707,7 @@ extern "C" void callback_interface_method_4_0(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod40>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod40>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -22787,7 +22787,7 @@ extern "C" void callback_interface_method_4_1(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod41>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod41>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -22867,7 +22867,7 @@ extern "C" void callback_interface_method_4_2(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod42>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod42>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -22880,7 +22880,7 @@ extern "C" void callback_free_4(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("PrimaryPasswordAuthenticator.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("PrimaryPasswordAuthenticator.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler4);
   }
 }
@@ -22987,7 +22987,7 @@ extern "C" void callback_interface_method_7_0(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod70>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod70>(
         aUniffiHandle,
         request,
         settings,
@@ -23002,7 +23002,7 @@ extern "C" void callback_free_7(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("Backend.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("Backend.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler7);
   }
 }
@@ -23093,7 +23093,7 @@ extern "C" void callback_interface_method_8_0(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod80>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod80>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -23173,7 +23173,7 @@ extern "C" void callback_interface_method_8_1(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod81>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod81>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -23261,7 +23261,7 @@ extern "C" void callback_interface_method_8_2(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod82>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod82>(
         aUniffiHandle,
         value,
         aUniffiForeignFutureCallback,
@@ -23350,7 +23350,7 @@ extern "C" void callback_interface_method_8_3(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod83>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod83>(
         aUniffiHandle,
         numbers,
         aUniffiForeignFutureCallback,
@@ -23364,7 +23364,7 @@ extern "C" void callback_free_8(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("TestAsyncCallbackInterface.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("TestAsyncCallbackInterface.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler8);
   }
 }
@@ -23571,7 +23571,7 @@ extern "C" void callback_free_9(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("TestCallbackInterface.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("TestCallbackInterface.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler9);
   }
 }
@@ -23635,7 +23635,7 @@ extern "C" void callback_interface_method_12_0(
   RustBuffer* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod120>(aUniffiHandle);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod120>(aUniffiHandle);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler12);
 }
 
@@ -23644,7 +23644,7 @@ extern "C" void callback_free_12(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("TestCallbackInterface.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("TestCallbackInterface.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler12);
   }
 }
@@ -23733,7 +23733,7 @@ extern "C" void callback_interface_method_10_0(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod100>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod100>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -23813,7 +23813,7 @@ extern "C" void callback_interface_method_10_1(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod101>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod101>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -23901,7 +23901,7 @@ extern "C" void callback_interface_method_10_2(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod102>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod102>(
         aUniffiHandle,
         value,
         aUniffiForeignFutureCallback,
@@ -23990,7 +23990,7 @@ extern "C" void callback_interface_method_10_3(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = MakeUnique<CallbackInterfaceMethod103>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod103>(
         aUniffiHandle,
         numbers,
         aUniffiForeignFutureCallback,
@@ -24004,7 +24004,7 @@ extern "C" void callback_free_10(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("AsyncTestTraitInterface.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("AsyncTestTraitInterface.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler10);
   }
 }
@@ -24211,7 +24211,7 @@ extern "C" void callback_free_11(uint64_t aUniffiHandle) {
    // Callback object handles are keys in a map stored in the JS handler. To
    // handle the free call, schedule a fire-and-forget JS call to remove the key.
    AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(
-      MakeUnique<CallbackFreeHandler>("TestTraitInterface.uniffi_free", aUniffiHandle),
+      std::make_unique<CallbackFreeHandler>("TestTraitInterface.uniffi_free", aUniffiHandle),
       &gUniffiCallbackHandler11);
   }
 }

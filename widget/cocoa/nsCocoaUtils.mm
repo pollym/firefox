@@ -504,7 +504,7 @@ nsresult nsCocoaUtils::CreateNSImageFromImageContainer(
 
     UniquePtr<SVGImageContext> svgContext;
     if (!aSVGContext) {
-      svgContext = MakeUnique<SVGImageContext>();
+      svgContext = std::make_unique<SVGImageContext>();
       aSVGContext = svgContext.get();
     }
 

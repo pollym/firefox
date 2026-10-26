@@ -1640,7 +1640,7 @@ nsresult TextControlState::PrepareEditor() {
       if (mPasswordMaskData) {
         passwordMaskData = std::move(mPasswordMaskData);
       } else {
-        passwordMaskData = MakeUnique<PasswordMaskData>();
+        passwordMaskData = std::make_unique<PasswordMaskData>();
       }
     } else {
       mPasswordMaskData = nullptr;

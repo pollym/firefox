@@ -6091,7 +6091,7 @@ UniquePtr<ScrollMetadata> nsDisplayScrollInfoLayer::ComputeScrollMetadata(
     aBuilder->AddScrollContainerFrameToNotify(scrollContainerFrame);
   }
 
-  return MakeUnique<ScrollMetadata>(metadata);
+  return std::make_unique<ScrollMetadata>(metadata);
 }
 
 bool nsDisplayScrollInfoLayer::UpdateScrollData(
@@ -6859,7 +6859,7 @@ const Matrix4x4& nsDisplayTransform::GetAccumulatedPreserved3DTransform(
     float scale = mFrame->PresContext()->AppUnitsPerDevPixel();
     uint32_t flags =
         INCLUDE_PRESERVE3D_ANCESTORS | INCLUDE_PERSPECTIVE | OFFSET_BY_ORIGIN;
-    mTransformPreserves3D = MakeUnique<Matrix4x4>(
+    mTransformPreserves3D = std::make_unique<Matrix4x4>(
         GetResultingTransformMatrix(mFrame, offset, scale, flags));
   }
 

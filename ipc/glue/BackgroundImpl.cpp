@@ -421,7 +421,7 @@ class ChildImpl final : public BackgroundChildImpl {
                                         PR_GetThreadPrivate(mThreadLocalIndex));
 
       if (!threadLocalInfo) {
-        auto newInfo = MakeUnique<ThreadLocalInfo>();
+        auto newInfo = std::make_unique<ThreadLocalInfo>();
 
         if (NS_IsMainThread()) {
           mMainThreadInfo = newInfo.get();
@@ -1280,7 +1280,7 @@ BackgroundChildImpl::ThreadLocal* ChildImpl::GetThreadLocalForCurrentThread() {
 
   if (!threadLocalInfo->mConsumerThreadLocal) {
     threadLocalInfo->mConsumerThreadLocal =
-        MakeUnique<BackgroundChildImpl::ThreadLocal>();
+        std::make_unique<BackgroundChildImpl::ThreadLocal>();
   }
 
   return threadLocalInfo->mConsumerThreadLocal.get();

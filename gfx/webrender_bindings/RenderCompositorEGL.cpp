@@ -50,7 +50,7 @@ UniquePtr<RenderCompositor> RenderCompositorEGL::Create(
     }
     return nullptr;
   }
-  return MakeUnique<RenderCompositorEGL>(aWidget, std::move(gl));
+  return std::make_unique<RenderCompositorEGL>(aWidget, std::move(gl));
 }
 
 EGLSurface RenderCompositorEGL::CreateEGLSurface() {

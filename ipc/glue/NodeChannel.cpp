@@ -126,16 +126,16 @@ void NodeChannel::SendEventMessage(UniquePtr<IPC::Message> aMessage) {
 
 void NodeChannel::RequestIntroduction(const NodeName& aPeerName) {
   MOZ_ASSERT(aPeerName != mojo::core::ports::kInvalidNodeName);
-  auto message = MakeUnique<IPC::Message>(MSG_ROUTING_CONTROL,
-                                          REQUEST_INTRODUCTION_MESSAGE_TYPE);
+  auto message = std::make_unique<IPC::Message>(
+      MSG_ROUTING_CONTROL, REQUEST_INTRODUCTION_MESSAGE_TYPE);
   IPC::MessageWriter writer(*message);
   WriteParam(&writer, aPeerName);
   SendMessage(std::move(message));
 }
 
 void NodeChannel::Introduce(Introduction aIntroduction) {
-  auto message =
-      MakeUnique<IPC::Message>(MSG_ROUTING_CONTROL, INTRODUCE_MESSAGE_TYPE);
+  auto message = std::make_unique<IPC::Message>(MSG_ROUTING_CONTROL,
+                                                INTRODUCE_MESSAGE_TYPE);
   IPC::MessageWriter writer(*message);
   WriteParam(&writer, std::move(aIntroduction));
   SendMessage(std::move(message));
@@ -151,8 +151,8 @@ void NodeChannel::AcceptInvite(const NodeName& aRealName,
                                const PortName& aInitialPort) {
   MOZ_ASSERT(aRealName != mojo::core::ports::kInvalidNodeName);
   MOZ_ASSERT(aInitialPort != mojo::core::ports::kInvalidPortName);
-  auto message =
-      MakeUnique<IPC::Message>(MSG_ROUTING_CONTROL, ACCEPT_INVITE_MESSAGE_TYPE);
+  auto message = std::make_unique<IPC::Message>(MSG_ROUTING_CONTROL,
+                                                ACCEPT_INVITE_MESSAGE_TYPE);
   IPC::MessageWriter writer(*message);
   WriteParam(&writer, aRealName);
   WriteParam(&writer, aInitialPort);

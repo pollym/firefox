@@ -2070,12 +2070,12 @@ void gfxDWriteFontList::AddSubstitute(const nsCString& aSubstituteName,
     }
     if (SharedFontList()->FindFamily(aActualFontName,
                                      /*aPrimaryNameOnly*/ true)) {
-      substitutions.InsertOrUpdate(aSubstituteName,
-                                   MakeUnique<nsCString>(aActualFontName));
+      substitutions.InsertOrUpdate(
+          aSubstituteName, std::make_unique<nsCString>(aActualFontName));
     } else if (substitutions.Get(aActualFontName)) {
       substitutions.InsertOrUpdate(
           aSubstituteName,
-          MakeUnique<nsCString>(*substitutions.Get(aActualFontName)));
+          std::make_unique<nsCString>(*substitutions.Get(aActualFontName)));
     } else {
       mNonExistingFonts.AppendElement(aSubstituteName);
     }
@@ -2126,10 +2126,10 @@ void gfxDWriteFontList::GetDirectWriteSubstitutes() {
       BuildKeyNameFromFontName(actualFontName);
       if (SharedFontList()->FindFamily(actualFontName,
                                        /*aPrimaryNameOnly*/ true)) {
-        mSubstitutions.InsertOrUpdate(substituteName,
-                                      MakeUnique<nsCString>(actualFontName));
+        mSubstitutions.InsertOrUpdate(
+            substituteName, std::make_unique<nsCString>(actualFontName));
         mHardcodedSubstitutions.InsertOrUpdate(
-            substituteName, MakeUnique<nsCString>(actualFontName));
+            substituteName, std::make_unique<nsCString>(actualFontName));
       } else {
         mNonExistingFonts.AppendElement(substituteName);
       }

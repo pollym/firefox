@@ -174,7 +174,7 @@ class SdpMediaSection {
 
   inline void SetDirection(const SdpDirectionAttribute::Direction direction) {
     GetAttributeList().SetAttribute(
-        MakeUnique<SdpDirectionAttribute>(direction));
+        std::make_unique<SdpDirectionAttribute>(direction));
   }
 
   inline SdpDirectionAttribute::Direction GetDirection() const {

@@ -7953,14 +7953,14 @@ uint64_t ConnectionPool::Start(
     MutexAutoLock lock(mDatabasesMutex);
 
     dbInfo = mDatabases
-                 .InsertOrUpdate(aDatabaseId,
-                                 MakeUnique<DatabaseInfo>(this, aDatabaseId))
+                 .InsertOrUpdate(aDatabaseId, std::make_unique<DatabaseInfo>(
+                                                  this, aDatabaseId))
                  .get();
   }
 
   MOZ_ASSERT(!mTransactions.Contains(transactionId));
   auto& transactionInfo = *mTransactions.InsertOrUpdate(
-      transactionId, MakeUnique<TransactionInfo>(
+      transactionId, std::make_unique<TransactionInfo>(
                          *dbInfo, aBackgroundChildLoggingId, aDatabaseId,
                          transactionId, aLoggingSerialNumber, aObjectStoreNames,
                          aIsWriteTransaction, aTransactionOp));
@@ -8072,7 +8072,7 @@ void ConnectionPool::WaitForDatabaseToComplete(const nsCString& aDatabaseId,
   }
 
   mCompleteCallbacks.EmplaceBack(
-      MakeUnique<DatabaseCompleteCallback>(aDatabaseId, aCallback));
+      std::make_unique<DatabaseCompleteCallback>(aDatabaseId, aCallback));
 }
 
 void ConnectionPool::Shutdown() {
@@ -16477,7 +16477,7 @@ void OpenDatabaseOp::EnsureDatabaseActor() {
     info = gLiveDatabaseHashtable
                ->InsertOrUpdate(
                    mDatabaseId.ref(),
-                   MakeUnique<DatabaseActorInfo>(
+                   std::make_unique<DatabaseActorInfo>(
                        mMetadata.clonePtr(),
                        WrapNotNullUnchecked(mDatabase.unsafeGetRawPtr())))
                .get();

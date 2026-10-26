@@ -12,7 +12,7 @@
 #include "mozilla/Logging.h"
 #include "mozilla/StaticMutex.h"
 #include "mozilla/StaticPtr.h"
-#include "mozilla/UniquePtr.h"
+
 #include <algorithm>
 #include <bit>
 #include <memory>
@@ -283,7 +283,7 @@ nsresult VariableLengthPrefixSet::SetPrefixes(PrefixStringMap& aPrefixMap) {
     }
 
     mVLPrefixSet.InsertOrUpdate(entry.GetKey(),
-                                MakeUnique<nsCString>(*entry.GetData()));
+                                std::make_unique<nsCString>(*entry.GetData()));
   }
 
   return NS_OK;
@@ -316,7 +316,7 @@ nsresult VariableLengthPrefixSet::GetPrefixes(PrefixStringMap& aPrefixMap) {
   // Copy variable-length prefix set
   for (const auto& entry : mVLPrefixSet) {
     aPrefixMap.InsertOrUpdate(entry.GetKey(),
-                              MakeUnique<nsCString>(*entry.GetData()));
+                              std::make_unique<nsCString>(*entry.GetData()));
   }
 
   return NS_OK;

@@ -5085,7 +5085,7 @@ nsresult Element::CopyInnerTo(Element* aDst) {
   // that CloneAndAdopt can use it for definition lookup.
   if (CustomElementData* data = GetCustomElementData()) {
     if (nsAtom* typeAtom = data->GetCustomElementType()) {
-      aDst->SetCustomElementData(MakeUnique<CustomElementData>(typeAtom));
+      aDst->SetCustomElementData(std::make_unique<CustomElementData>(typeAtom));
     }
   }
 
@@ -6253,14 +6253,14 @@ ElementAnimationData& Element::CreateAnimationData() {
   MOZ_ASSERT(!GetAnimationData());
   SetMayHaveAnimations();
   auto* slots = ExtendedDOMSlots();
-  slots->mAnimations = MakeUnique<ElementAnimationData>();
+  slots->mAnimations = std::make_unique<ElementAnimationData>();
   return *slots->mAnimations;
 }
 
 PopoverData& Element::CreatePopoverData() {
   MOZ_ASSERT(!GetPopoverData());
   auto* slots = ExtendedDOMSlots();
-  slots->mPopoverData = MakeUnique<PopoverData>();
+  slots->mPopoverData = std::make_unique<PopoverData>();
   return *slots->mPopoverData;
 }
 

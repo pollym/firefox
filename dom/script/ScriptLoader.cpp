@@ -1044,8 +1044,8 @@ nsresult ScriptLoader::PrepareIncrementalStreamLoader(
     ScriptLoadRequest* aRequest) {
   UniquePtr<mozilla::dom::SRICheckDataVerifier> sriDataVerifier;
   if (!aRequest->mIntegrity.IsEmpty()) {
-    sriDataVerifier = MakeUnique<SRICheckDataVerifier>(aRequest->mIntegrity,
-                                                       aChannel, mReporter);
+    sriDataVerifier = std::make_unique<SRICheckDataVerifier>(
+        aRequest->mIntegrity, aChannel, mReporter);
   }
 
   RefPtr<ScriptLoadHandler> handler =

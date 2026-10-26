@@ -2907,7 +2907,7 @@ static void DumpBeforePaintDisplayList(UniquePtr<std::stringstream>& aStream,
     // Flush stream now to avoid reordering dump output relative to
     // messages dumped by PaintRoot below.
     fprint_stderr(gfxUtils::sDumpPaintFile, *aStream);
-    aStream = MakeUnique<std::stringstream>();
+    aStream = std::make_unique<std::stringstream>();
   }
 }
 
@@ -3329,7 +3329,7 @@ void nsLayoutUtils::PaintFrame(gfxContext* aRenderingContext, nsIFrame* aFrame,
 
   UniquePtr<std::stringstream> ss;
   if (consoleNeedsDisplayList) {
-    ss = MakeUnique<std::stringstream>();
+    ss = std::make_unique<std::stringstream>();
     *ss << "Display list for " << uri << "\n";
     DumpBeforePaintDisplayList(ss, builder, list, visibleRect);
   }

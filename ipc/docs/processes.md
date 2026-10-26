@@ -589,7 +589,7 @@ UniquePtr<ProcessChild> process;
 switch (XRE_GetProcessType()) {
     // ...
     case GeckoProcessType_Demo:
-      process = MakeUnique<DemoChild::Process>(parentPID);
+      process = std::make_unique<DemoChild::Process>(parentPID);
       break;
 }
 ```

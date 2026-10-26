@@ -13,7 +13,6 @@
 #include "mozilla/UniquePtrExtensions.h"
 #include "mozilla/Vector.h"
 
-using mozilla::MakeUnique;
 using mozilla::UniqueFreePtr;
 using mozilla::UniquePtr;
 using mozilla::Vector;
@@ -491,25 +490,25 @@ struct Q {
 static int randomInt() { return 4; }
 
 static bool TestMakeUnique() {
-  UniquePtr<int> a1(MakeUnique<int>());
-  UniquePtr<long> a2(MakeUnique<long>(4));
+  UniquePtr<int> a1(std::make_unique<int>());
+  UniquePtr<long> a2(std::make_unique<long>(4));
 
   // no args, easy
-  UniquePtr<Q> q0(MakeUnique<Q>());
+  UniquePtr<Q> q0(std::make_unique<Q>());
 
   // temporary bound to const lval ref
-  UniquePtr<Q> q1(MakeUnique<Q>(Q()));
+  UniquePtr<Q> q1(std::make_unique<Q>(Q()));
 
   // passing through a non-const lval ref
-  UniquePtr<Q> q2(MakeUnique<Q>(*q1, 'c'));
+  UniquePtr<Q> q2(std::make_unique<Q>(*q1, 'c'));
 
   // pass by copying, forward a temporary, pass by value
-  UniquePtr<Q> q3(MakeUnique<Q>(Q(), UniquePtr<int>(), randomInt()));
+  UniquePtr<Q> q3(std::make_unique<Q>(Q(), UniquePtr<int>(), randomInt()));
 
   // various type mismatching to test "fuzzy" forwarding
-  UniquePtr<Q> q4(MakeUnique<Q>('s', 66LL, 3.141592654, &q3));
+  UniquePtr<Q> q4(std::make_unique<Q>('s', 66LL, 3.141592654, &q3));
 
-  UniquePtr<char[]> c1(MakeUnique<char[]>(5));
+  UniquePtr<char[]> c1(std::make_unique<char[]>(5));
 
   return true;
 }

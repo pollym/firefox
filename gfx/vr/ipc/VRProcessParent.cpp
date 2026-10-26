@@ -49,7 +49,7 @@ bool VRProcessParent::Launch() {
   geckoargs::ChildProcessArgs extraArgs;
   ProcessChild::AddPlatformBuildID(extraArgs);
 
-  mPrefSerializer = MakeUnique<ipc::SharedPreferenceSerializer>();
+  mPrefSerializer = std::make_unique<ipc::SharedPreferenceSerializer>();
   if (!mPrefSerializer->SerializeToSharedMemory(GeckoProcessType_VR,
                                                 /* remoteType */ {})) {
     return false;

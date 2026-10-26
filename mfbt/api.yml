@@ -901,7 +901,6 @@ UniquePtr.h:
   types:
     - UniquePtr
   functions:
-    - MakeUnique
     - WrapUnique
     - TempPtrToSetter
 

@@ -12329,7 +12329,8 @@ nsresult nsContentUtils::NewXULOrHTMLElement(
       } else {
         NS_IF_ADDREF(*aResult = nsXULElement::Construct(nodeInfo.forget()));
       }
-      (*aResult)->SetCustomElementData(MakeUnique<CustomElementData>(typeAtom));
+      (*aResult)->SetCustomElementData(
+          std::make_unique<CustomElementData>(typeAtom));
       if (synchronousCustomElements) {
         // 4.3. "If synchronousCustomElements is true, then run this step while
         //       catching any exceptions: Upgrade result using definition."
@@ -12427,7 +12428,7 @@ nsresult nsContentUtils::NewXULOrHTMLElement(
       NS_IF_ADDREF(*aResult = nsXULElement::Construct(nodeInfo.forget()));
     }
     (*aResult)->SetCustomElementData(
-        MakeUnique<CustomElementData>(definition->mType));
+        std::make_unique<CustomElementData>(definition->mType));
     // 5.2.2. "Enqueue a custom element upgrade reaction given result and
     //         definition."
     nsContentUtils::EnqueueUpgradeReaction(*aResult, definition);
@@ -12459,7 +12460,8 @@ nsresult nsContentUtils::NewXULOrHTMLElement(
   //       custom element name or is is non-null, then set result's custom
   //       element state to "undefined"."
   if (isCustomElement) {
-    (*aResult)->SetCustomElementData(MakeUnique<CustomElementData>(typeAtom));
+    (*aResult)->SetCustomElementData(
+        std::make_unique<CustomElementData>(typeAtom));
     if (aCustomElementRegistry.isSome()) {
       // When an explicit custom element registry is provided, register for
       // upgrade on that registry (if non-null), not the document's.

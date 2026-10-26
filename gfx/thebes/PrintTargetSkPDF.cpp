@@ -227,7 +227,8 @@ PrintTargetSkPDF::~PrintTargetSkPDF() {
 
 already_AddRefed<PrintTargetSkPDF> PrintTargetSkPDF::CreateOrNull(
     nsIOutputStream* aStream) {
-  return do_AddRef(new PrintTargetSkPDF(MakeUnique<GkSkWStream>(aStream)));
+  return do_AddRef(
+      new PrintTargetSkPDF(std::make_unique<GkSkWStream>(aStream)));
 }
 
 static SkPDF::Metadata GetDefaultMetadata() {

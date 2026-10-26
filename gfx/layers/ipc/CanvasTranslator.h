@@ -358,27 +358,28 @@ class CanvasTranslator final : public gfx::InlineTranslator,
     }
 
     static UniquePtr<CanvasTranslatorEvent> TranslateRecording() {
-      return MakeUnique<CanvasTranslatorEvent>(Tag::TranslateRecording);
+      return std::make_unique<CanvasTranslatorEvent>(Tag::TranslateRecording);
     }
 
     static UniquePtr<CanvasTranslatorEvent> AddBuffer(
         ipc::ReadOnlySharedMemoryHandle&& aBufferHandle) {
-      return MakeUnique<CanvasTranslatorEvent>(Tag::AddBuffer,
-                                               std::move(aBufferHandle));
+      return std::make_unique<CanvasTranslatorEvent>(Tag::AddBuffer,
+                                                     std::move(aBufferHandle));
     }
 
     static UniquePtr<CanvasTranslatorEvent> SetDataSurfaceBuffer(
         uint32_t aId, ipc::MutableSharedMemoryHandle&& aBufferHandle) {
-      return MakeUnique<CanvasTranslatorEvent>(Tag::SetDataSurfaceBuffer,
-                                               std::move(aBufferHandle), aId);
+      return std::make_unique<CanvasTranslatorEvent>(
+          Tag::SetDataSurfaceBuffer, std::move(aBufferHandle), aId);
     }
 
     static UniquePtr<CanvasTranslatorEvent> ClearCachedResources() {
-      return MakeUnique<CanvasTranslatorEvent>(Tag::ClearCachedResources);
+      return std::make_unique<CanvasTranslatorEvent>(Tag::ClearCachedResources);
     }
 
     static UniquePtr<CanvasTranslatorEvent> DropFreeBuffersWhenDormant() {
-      return MakeUnique<CanvasTranslatorEvent>(Tag::DropFreeBuffersWhenDormant);
+      return std::make_unique<CanvasTranslatorEvent>(
+          Tag::DropFreeBuffersWhenDormant);
     }
 
     ipc::ReadOnlySharedMemoryHandle TakeBufferHandle() {

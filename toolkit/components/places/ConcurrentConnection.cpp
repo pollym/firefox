@@ -445,8 +445,8 @@ void ConcurrentConnection::SetupConnection() {
     MutexAutoLock lock(mConnectionReadyMutex.Lock());
     mConnectionReadyMutex.NoteExclusiveAccess();
     // Create the statements caches.
-    mAsyncStatements = MakeUnique<AsyncStatementCache>(mConn);
-    mHelperThreadStatements = MakeUnique<StatementCache>(mConn);
+    mAsyncStatements = std::make_unique<AsyncStatementCache>(mConn);
+    mHelperThreadStatements = std::make_unique<StatementCache>(mConn);
     mIsConnectionReady = true;
   }
 

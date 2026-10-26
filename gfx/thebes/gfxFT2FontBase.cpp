@@ -130,7 +130,7 @@ uint32_t gfxFT2FontEntryBase::GetGlyph(uint32_t aCharCode,
   // one Unicode block.  This assumption is probably not so valid with
   // scripts with large character sets as used for East Asian languages.
   if (!mCmapCache) {
-    mCmapCache = mozilla::MakeUnique<CmapCacheSlot[]>(kNumCmapCacheSlots);
+    mCmapCache = std::make_unique<CmapCacheSlot[]>(kNumCmapCacheSlots);
 
     // Invalidate slot 0 by setting its char code to something that would
     // never end up in slot 0.  All other slots are already invalid
@@ -753,7 +753,7 @@ gfxFT2FontBase::GlyphMetrics gfxFT2FontBase::GetCachedGlyphMetrics(
   AutoWriteLock lock(mLock);
   if (!mGlyphMetrics) {
     mGlyphMetrics =
-        mozilla::MakeUnique<nsTHashMap<nsUint32HashKey, GlyphMetrics>>(128);
+        std::make_unique<nsTHashMap<nsUint32HashKey, GlyphMetrics>>(128);
   }
 
   return mGlyphMetrics->LookupOrInsertWith(aGID, [&] {
