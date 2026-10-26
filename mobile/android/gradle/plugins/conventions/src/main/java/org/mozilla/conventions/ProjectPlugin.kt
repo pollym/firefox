@@ -110,14 +110,10 @@ class ProjectPlugin : Plugin<Project> {
     // implicit behaviour. Our projects do not specify the `ndkVersion` for our main Android builds
     // and so stripping would otherwise fail with a warning. Note that gecko builds themselves will
     // already strip the *.so files when compiled as release targets.
-    @Suppress("UNCHECKED_CAST")
     private fun configureJniKeepDebugSymbols(project: Project) {
         val action = Action<AppliedPlugin> {
-            val android = project.extensions.getByName("android")
-            val packaging = android.javaClass.getMethod("getPackaging").invoke(android)
-            val jniLibs = packaging.javaClass.getMethod("getJniLibs").invoke(packaging)
-            val keepDebugSymbols = jniLibs.javaClass.getMethod("getKeepDebugSymbols").invoke(jniLibs)
-            (keepDebugSymbols as MutableSet<String>).add("**/*.so")
+            val android = project.extensions.getByType<CommonExtension>()
+            android.packaging.jniLibs.keepDebugSymbols.add("**/*.so")
         }
         project.pluginManager.withPlugin("com.android.library", action)
         project.pluginManager.withPlugin("com.android.application", action)
