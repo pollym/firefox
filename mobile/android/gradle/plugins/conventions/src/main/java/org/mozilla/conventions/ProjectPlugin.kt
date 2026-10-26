@@ -42,7 +42,9 @@ import org.gradle.api.tasks.testing.TestOutputEvent
 import org.gradle.api.tasks.testing.TestOutputListener
 import org.gradle.api.tasks.testing.TestResult
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.withType
 import org.gradle.process.CommandLineArgumentProvider
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.mozilla.conventions.ktfmt.configureKtfmt
 import java.io.File
 import java.util.concurrent.Callable
@@ -341,13 +343,10 @@ class ProjectPlugin : Plugin<Project> {
     }
 
     private fun configureKotlinWarningsAsErrors(project: Project) {
-        project.tasks.configureEach {
-            if (!this::class.java.name.startsWith("org.jetbrains.kotlin.gradle.tasks.KotlinCompile")) {
-                return@configureEach
+        project.tasks.withType<KotlinCompile>().configureEach {
+            compilerOptions {
+                allWarningsAsErrors.set(true)
             }
-            val compilerOptions = this::class.java.getMethod("getCompilerOptions").invoke(this)
-            val allWarningsAsErrors = compilerOptions::class.java.getMethod("getAllWarningsAsErrors").invoke(compilerOptions)
-            allWarningsAsErrors::class.java.getMethod("set", Any::class.java).invoke(allWarningsAsErrors, true)
         }
     }
 
