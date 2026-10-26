@@ -4153,7 +4153,7 @@ GCRuntime::IncrementalResult GCRuntime::resetIncrementalGC(
 
       // The gray marking state may not be valid. We don't do gray unmarking
       // when zones are in the Prepare state.
-      setGrayBitsInvalid();
+      setGrayBitsInvalidForReset();
 
       checkGCStateNotInUse();
       break;
@@ -4212,7 +4212,7 @@ GCRuntime::IncrementalResult GCRuntime::resetIncrementalGC(
       // The gray marking state may not be valid. We depend on the mark stack to
       // do gray unmarking in zones that are being marked by the GC and we've
       // just cancelled that part way through.
-      setGrayBitsInvalid();
+      setGrayBitsInvalidForReset();
 
 #ifdef DEBUG
       for (auto& marker : markers) {
@@ -4260,6 +4260,13 @@ GCRuntime::IncrementalResult GCRuntime::resetIncrementalGC(
   }
 
   return IncrementalResult::Reset;
+}
+
+void GCRuntime::setGrayBitsInvalidForReset() {
+  MOZ_ASSERT(state() < State::MarkRoots || state() > State::Sweep);
+  // Clear the GrayBitsInvalidatedInCurrentGC flag because we will skip
+  // GCRuntime::endSweepPhase.
+  grayBitsInvalid = GrayBitsInvalid;
 }
 
 void GCRuntime::setGrayBitsInvalid() {
