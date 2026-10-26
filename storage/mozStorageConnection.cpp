@@ -15,7 +15,6 @@
 #include "mozilla/AppShutdown.h"
 #include "mozilla/CheckedInt.h"
 #include "mozilla/glean/StorageMetrics.h"
-#include "mozilla/Telemetry.h"
 #include "mozilla/Mutex.h"
 #include "mozilla/CondVar.h"
 #include "mozilla/Attributes.h"
@@ -1785,7 +1784,9 @@ int Connection::stepStatement(sqlite3* aNativeConnection,
                                    ::sqlite3_sql(aStatement));
 
   bool checkedMainThread = false;
+#ifdef NIGHTLY_BUILD
   TimeStamp startTime = TimeStamp::Now();
+#endif  // NIGHTLY_BUILD
 
   // The connection may have been closed if the executing statement has been
   // created and cached after a call to asyncClose() but before the actual
@@ -1814,22 +1815,17 @@ int Connection::stepStatement(sqlite3* aNativeConnection,
     ::sqlite3_reset(aStatement);
   }
 
+#ifdef NIGHTLY_BUILD
   // Report very slow SQL statements to Telemetry
   TimeDuration duration = TimeStamp::Now() - startTime;
   const uint32_t threshold = NS_IsMainThread()
-                                 ? Telemetry::kSlowSQLThresholdForMainThread
-                                 : Telemetry::kSlowSQLThresholdForHelperThreads;
+                                 ? Service::kSlowSQLThresholdForMainThread
+                                 : Service::kSlowSQLThresholdForHelperThreads;
   if (duration.ToMilliseconds() >= threshold) {
-    nsDependentCString statementString(::sqlite3_sql(aStatement));
-    Telemetry::RecordSlowSQLStatement(
-        statementString, mTelemetryFilename,
-        static_cast<uint32_t>(duration.ToMilliseconds()));
-
-#ifdef NIGHTLY_BUILD
     mStorageService->RecordSlowStatement(aStatement, duration,
                                          mTelemetryFilename);
-#endif  // NIGHTLY_BUILD
   }
+#endif  // NIGHTLY_BUILD
 
   (void)::sqlite3_extended_result_codes(aNativeConnection, 0);
   // Drop off the extended result bits of the result code.
@@ -1894,22 +1890,9 @@ int Connection::executeSql(sqlite3* aNativeConnection, const char* aSqlString) {
 
   AUTO_PROFILER_LABEL_DYNAMIC_CSTR("Connection::executeSql", OTHER, aSqlString);
 
-  TimeStamp startTime = TimeStamp::Now();
   int srv =
       ::sqlite3_exec(aNativeConnection, aSqlString, nullptr, nullptr, nullptr);
   RecordQueryStatus(srv);
-
-  // Report very slow SQL statements to Telemetry
-  TimeDuration duration = TimeStamp::Now() - startTime;
-  const uint32_t threshold = NS_IsMainThread()
-                                 ? Telemetry::kSlowSQLThresholdForMainThread
-                                 : Telemetry::kSlowSQLThresholdForHelperThreads;
-  if (duration.ToMilliseconds() >= threshold) {
-    nsDependentCString statementString(aSqlString);
-    Telemetry::RecordSlowSQLStatement(
-        statementString, mTelemetryFilename,
-        static_cast<uint32_t>(duration.ToMilliseconds()));
-  }
 
   return srv;
 }
