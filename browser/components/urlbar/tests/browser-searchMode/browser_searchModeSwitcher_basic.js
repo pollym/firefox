@@ -1138,8 +1138,6 @@ add_task(async function search_engines_with_accel_updown() {
 add_task(
   {
     skip_if: () =>
-      // Proton has only one separator, so ignore this test.
-      !Services.prefs.getBoolPref("browser.nova.enabled", false) ||
       // Settings redesign changes means that the local search modes cannot be
       // hidden, hence this test doesn't apply.
       Services.prefs.getBoolPref("browser.settings-redesign.enabled", false),

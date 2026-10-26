@@ -2217,10 +2217,6 @@ export class UrlbarInputBaseTestUtils {
    * @returns {boolean}
    */
   isSeparatorVisible(separatorElement) {
-    if (!Services.prefs.getBoolPref("browser.nova.enabled", false)) {
-      return this.#isVisible(separatorElement);
-    }
-
     let before = separatorElement.documentGlobal.getComputedStyle(
       separatorElement,
       "::before"
