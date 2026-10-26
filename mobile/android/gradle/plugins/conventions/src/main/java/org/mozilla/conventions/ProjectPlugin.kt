@@ -301,11 +301,7 @@ class ProjectPlugin : Plugin<Project> {
             Regex("""([ew]): (.+): \((\d+), (\d+)\): (.*)"""),
         )
 
-        project.tasks.configureEach {
-            if (!this::class.java.name.startsWith("org.jetbrains.kotlin.gradle.tasks.KotlinCompile")) {
-                return@configureEach
-            }
-
+        project.tasks.withType<KotlinCompile>().configureEach {
             // Translate Kotlin messages like "w: ..." and "e: ..." into
             // "...: warning: ..." and "...: error: ...", to make Treeherder understand.
             val listener = StandardOutputListener { message ->
