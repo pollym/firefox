@@ -405,7 +405,7 @@ macosx1500-aarch64-shippable/opt:
         - macosx1500-64-tests
         - macosx1500-64-perftests
         - macosx1500-aarch64-tests
-        - awsy
+        - awsy-base
         - macosx64-talos
         - talos-profiling
         - web-platform-tests-backlog

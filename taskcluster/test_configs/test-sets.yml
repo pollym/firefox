@@ -169,6 +169,10 @@ awsy-pageload:
     - awsy-dmd
     - awsy-tp6
 
+awsy-base:
+    - awsy-base
+    - awsy-base-dmd
+
 ccov-code-coverage-tests:
     - test-coverage
     - test-coverage-wpt

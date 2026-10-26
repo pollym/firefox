@@ -80,7 +80,6 @@ AWSY tests consist of two types: TP6 and Base Memory Usage.
 
   * {ref}`test-macosx1500-aarch64-shippable/opt <hardware-mac-mini-m4>`
     * awsy-base-dmd: None
-    * awsy-dmd: None
 
   * {ref}`test-macosx1500-aarch64-vms-shippable/opt <hardware-tart-mac-mini-m4>`
     * awsy-dmd: None
@@ -119,7 +118,6 @@ AWSY tests consist of two types: TP6 and Base Memory Usage.
     * awsy-tp6: None
 
   * {ref}`test-macosx1500-aarch64-shippable/opt <hardware-mac-mini-m4>`
-    * awsy-tp6: trunk
 
   * {ref}`test-macosx1500-aarch64-vms-shippable/opt <hardware-tart-mac-mini-m4>`
     * awsy-tp6: trunk
