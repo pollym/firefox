@@ -4,9 +4,7 @@ prefs = [
 ]
 
 ["browser_animatedImageLeak.js"]
-skip-if = [
-  "opt",
-]
+run-if = ["debug"] # Relies on debug-only assertions to detect the leak.
 support-files = [
   "helper_animatedImageLeak.html"
 ]

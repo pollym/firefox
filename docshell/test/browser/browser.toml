@@ -169,9 +169,6 @@ skip-if = [
 
 ["browser_bug422543.js"]
 https_first_disabled = true
-skip-if = [
-  "asan", # Bug 1933429
-]
 
 ["browser_bug441169.js"]
 
@@ -267,14 +264,8 @@ skip-if = [
 ["browser_bug2002654.js"]
 
 ["browser_bug2004165.js"]
-skip-if = [
-  "debug", # bug 2005202
-]
 
 ["browser_bug2007897.js"]
-skip-if = [
-  "debug", # bug 2005202
-]
 
 ["browser_bug2011921.js"]
 

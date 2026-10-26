@@ -710,8 +710,6 @@ skip-if = [
 
 ["test_suppressed_microtasks.html"]
 skip-if = [
-  "asan",
-  "debug",
   "os == 'android'", # The test needs to run reasonably fast.
 ]
 

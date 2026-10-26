@@ -21,7 +21,6 @@ prefs = [
 
 ["browser_device_controls_menus.js"]
 skip-if = [
-  "debug", # bug 1369731
   "os == 'linux' && os_version == '22.04' && arch == 'x86_64' && display == 'wayland'", # Bug 2063469
 ]
 
@@ -48,14 +47,10 @@ skip-if = [
 
 ["browser_devices_get_user_media_in_frame.js"]
 https_first_disabled = true
-skip-if = [
-  "debug", # bug 1369731
-]
 
 ["browser_devices_get_user_media_in_xorigin_frame.js"]
 https_first_disabled = true
 skip-if = [
-  "debug", # bug 1369731
   "os == 'linux' && os_version == '22.04' && arch == 'x86_64' && opt", # Bug 2057534
 ]
 

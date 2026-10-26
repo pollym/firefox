@@ -116,7 +116,6 @@ run-if = [
 ["browser_contextmenu_spellcheck.js"]
 https_first_disabled = true
 skip-if = [
-  "debug", # bug 1798233 - this trips assertions that seem harmless in opt and unlikely to occur in practical use.
   "os == 'linux' && os_version == '22.04' && arch == 'x86_64' && display == 'wayland'",
 ]
 

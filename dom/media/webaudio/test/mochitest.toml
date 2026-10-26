@@ -147,9 +147,6 @@ run-if = [
 ["test_convolverNodeNormalization.html"]
 
 ["test_convolverNodeOOM.html"]
-skip-if = [
-  "asan",
-]
 
 ["test_convolverNodePassThrough.html"]
 

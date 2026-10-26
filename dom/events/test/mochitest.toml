@@ -609,7 +609,6 @@ skip-if = [
 ["test_mouse_enterleave_iframe.html"]
 support-files = ["file_mouse_enterleave.html"]
 skip-if = [
-  "asan", # Bug 1781668
   "http2",
   "http3",
   "opt", # Bug 1781668

@@ -146,9 +146,6 @@ https_first_disabled = true
 ["browser_formdata.js"]
 
 ["browser_formdata_cc.js"]
-skip-if = [
-  "asan", # test runs too long
-]
 
 ["browser_formdata_face.js"]
 
@@ -230,9 +227,6 @@ skip-if = [
 
 ["browser_reopen_all_windows.js"]
 https_first_disabled = true
-skip-if = [
-  "asan", # high memory
-]
 tags = "os_integration"
 
 ["browser_replace_load.js"]
@@ -375,9 +369,6 @@ run-if = [
 https_first_disabled = true
 
 ["browser_undoCloseById.js"]
-skip-if = [
-  "debug",
-]
 
 ["browser_undoCloseById_targetWindow.js"]
 
@@ -387,9 +378,6 @@ run-if = [
 ]
 
 ["browser_upgrade_backup.js"]
-skip-if = [
-  "asan",
-]
 
 ["browser_urlbarSearchMode.js"]
 
