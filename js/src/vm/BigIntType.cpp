@@ -261,6 +261,36 @@ using TwoDigit = uint64_t;
 using TwoDigit = __uint128_t;
 #endif
 
+inline BigInt::Digit BigInt::digitAdd3(Digit a, Digit b, Digit c,
+                                       Digit* carry) {
+#if defined(HAVE_TWO_DIGIT)
+  TwoDigit result = static_cast<TwoDigit>(a) + b + c;
+  *carry = result >> DigitBits;
+  return static_cast<Digit>(result);
+#else
+  Digit result = a + b;
+  *carry = result < a;
+  result += c;
+  *carry += result < c;
+  return result;
+#endif
+}
+
+inline BigInt::Digit BigInt::digitSub3(Digit a, Digit b, Digit c,
+                                       Digit* borrow) {
+#if defined(HAVE_TWO_DIGIT)
+  TwoDigit result = static_cast<TwoDigit>(a) - b - c;
+  *borrow = -static_cast<Digit>(result >> DigitBits);
+  return static_cast<Digit>(result);
+#else
+  Digit result = a - b;
+  *borrow = result > a;
+  Digit difference = result - c;
+  *borrow += difference > result;
+  return difference;
+#endif
+}
+
 inline BigInt::Digit BigInt::digitMul(Digit a, Digit b, Digit* high) {
 #if defined(HAVE_TWO_DIGIT)
   TwoDigit result = static_cast<TwoDigit>(a) * static_cast<TwoDigit>(b);
@@ -288,9 +318,9 @@ inline BigInt::Digit BigInt::digitMul(Digit a, Digit b, Digit* high) {
   Digit rMid2 = aHigh * bLow;
   Digit rHigh = aHigh * bHigh;
 
-  Digit carry = 0;
-  Digit low = digitAdd(rLow, rMid1 << HalfDigitBits, &carry);
-  low = digitAdd(low, rMid2 << HalfDigitBits, &carry);
+  Digit carry;
+  Digit low =
+      digitAdd3(rLow, rMid1 << HalfDigitBits, rMid2 << HalfDigitBits, &carry);
 
   *high = (rMid1 >> HalfDigitBits) + (rMid2 >> HalfDigitBits) + rHigh + carry;
 
@@ -403,19 +433,16 @@ void BigInt::internalMultiplyAdd(const BigInt* source, Digit factor,
   Digit high = 0;
   for (unsigned i = 0; i < n; i++) {
     Digit current = sourceDigits[i];
-    Digit newCarry = 0;
 
     // Compute this round's multiplication.
     Digit newHigh = 0;
     current = digitMul(current, factor, &newHigh);
 
     // Add last round's carryovers.
-    current = digitAdd(current, high, &newCarry);
-    current = digitAdd(current, carry, &newCarry);
+    current = digitAdd3(current, high, carry, &carry);
 
     // Store result and prepare for next round.
     resultDigits[i] = current;
-    carry = newCarry;
     high = newHigh;
   }
 
@@ -455,32 +482,26 @@ void BigInt::multiplyAccumulate(const BigInt* multiplicand, Digit multiplier,
   Digit carry = 0;
   Digit high = 0;
   for (unsigned i = 0; i < multiplicandDigits.size(); i++, accumulatorIndex++) {
-    Digit acc = accumulatorDigits[accumulatorIndex];
-    Digit newCarry = 0;
-
     // Add last round's carryovers.
-    acc = digitAdd(acc, high, &newCarry);
-    acc = digitAdd(acc, carry, &newCarry);
+    Digit acc =
+        digitAdd3(accumulatorDigits[accumulatorIndex], high, carry, &carry);
 
     // Compute this round's multiplication.
     Digit multiplicandDigit = multiplicandDigits[i];
     Digit low = digitMul(multiplier, multiplicandDigit, &high);
-    acc = digitAdd(acc, low, &newCarry);
+    Digit lowCarry;
+    acc = digitAdd(acc, low, &lowCarry);
+    carry += lowCarry;
 
     // Store result and prepare for next round.
     accumulatorDigits[accumulatorIndex] = acc;
-    carry = newCarry;
   }
 
   while (carry || high) {
     MOZ_ASSERT(accumulatorIndex < accumulatorDigits.size());
-    Digit acc = accumulatorDigits[accumulatorIndex];
-    Digit newCarry = 0;
-    acc = digitAdd(acc, high, &newCarry);
+    accumulatorDigits[accumulatorIndex] =
+        digitAdd3(accumulatorDigits[accumulatorIndex], high, carry, &carry);
     high = 0;
-    acc = digitAdd(acc, carry, &newCarry);
-    accumulatorDigits[accumulatorIndex] = acc;
-    carry = newCarry;
     accumulatorIndex++;
   }
 }
@@ -580,18 +601,11 @@ BigInt* BigInt::absoluteAdd(JSContext* cx, HandleBigInt x, HandleBigInt y,
     Digit carry = 0;
     unsigned i = 0;
     for (; i < rightDigits.size(); i++) {
-      Digit newCarry = 0;
-      Digit sum = digitAdd(leftDigits[i], rightDigits[i], &newCarry);
-      sum = digitAdd(sum, carry, &newCarry);
-      resultDigits[i] = sum;
-      carry = newCarry;
+      resultDigits[i] = digitAdd3(leftDigits[i], rightDigits[i], carry, &carry);
     }
 
     for (; i < leftDigits.size(); i++) {
-      Digit newCarry = 0;
-      Digit sum = digitAdd(leftDigits[i], carry, &newCarry);
-      resultDigits[i] = sum;
-      carry = newCarry;
+      resultDigits[i] = digitAdd(leftDigits[i], carry, &carry);
     }
 
     resultDigits[i] = carry;
@@ -635,18 +649,11 @@ BigInt* BigInt::absoluteSub(JSContext* cx, HandleBigInt x, HandleBigInt y,
     Digit borrow = 0;
     unsigned i = 0;
     for (; i < yDigits.size(); i++) {
-      Digit newBorrow = 0;
-      Digit difference = digitSub(xDigits[i], yDigits[i], &newBorrow);
-      difference = digitSub(difference, borrow, &newBorrow);
-      resultDigits[i] = difference;
-      borrow = newBorrow;
+      resultDigits[i] = digitSub3(xDigits[i], yDigits[i], borrow, &borrow);
     }
 
     for (; i < xDigits.size(); i++) {
-      Digit newBorrow = 0;
-      Digit difference = digitSub(xDigits[i], borrow, &newBorrow);
-      resultDigits[i] = difference;
-      borrow = newBorrow;
+      resultDigits[i] = digitSub(xDigits[i], borrow, &borrow);
     }
 
     MOZ_ASSERT(!borrow);
@@ -730,12 +737,8 @@ BigInt::Digit BigInt::absoluteInplaceAdd(const BigInt* summand,
   auto thisDigits = digits();
   auto summandDigits = summand->digits();
   for (unsigned i = 0; i < n; i++) {
-    Digit newCarry = 0;
-    Digit sum =
-        digitAdd(thisDigits[startIndex + i], summandDigits[i], &newCarry);
-    sum = digitAdd(sum, carry, &newCarry);
-    thisDigits[startIndex + i] = sum;
-    carry = newCarry;
+    thisDigits[startIndex + i] =
+        digitAdd3(thisDigits[startIndex + i], summandDigits[i], carry, &carry);
   }
 
   return carry;
@@ -755,12 +758,8 @@ BigInt::Digit BigInt::absoluteInplaceSub(const BigInt* subtrahend,
   auto thisDigits = digits();
   auto subtrahendDigits = subtrahend->digits();
   for (unsigned i = 0; i < n; i++) {
-    Digit newBorrow = 0;
-    Digit difference =
-        digitSub(thisDigits[startIndex + i], subtrahendDigits[i], &newBorrow);
-    difference = digitSub(difference, borrow, &newBorrow);
-    thisDigits[startIndex + i] = difference;
-    borrow = newBorrow;
+    thisDigits[startIndex + i] = digitSub3(
+        thisDigits[startIndex + i], subtrahendDigits[i], borrow, &borrow);
   }
 
   return borrow;
@@ -875,12 +874,10 @@ BigInt::Digit BigInt::digitDivByMultiplication(Digit high, Digit low,
   Digit q1;
   Digit q0 = digitMul(high, inverse, &q1);
   // 2. <q1, q0> ← <q1, q0> + <u1, u0>
-  Digit lowCarry = 0;
-  q0 = digitAdd(q0, low, &lowCarry);
-  Digit highCarry = 0;
-  q1 = digitAdd(q1, lowCarry, &highCarry);
-  q1 = digitAdd(q1, high, &highCarry);
-  MOZ_ASSERT(highCarry == 0);
+  Digit carry;
+  q0 = digitAdd(q0, low, &carry);
+  q1 = digitAdd3(q1, high, carry, &carry);
+  MOZ_ASSERT(carry == 0);
   // 3. q1 ← (q1 + 1) mod β
   q1++;
   // 4. r ← (u0 − q1*d) mod β
@@ -1174,9 +1171,7 @@ BigInt* BigInt::absoluteAddOne(JSContext* cx, HandleBigInt x,
     auto resultDigits = result->digits();
     Digit carry = 1;
     for (unsigned i = 0; i < inputLength; i++) {
-      Digit newCarry = 0;
-      resultDigits[i] = digitAdd(xDigits[i], carry, &newCarry);
-      carry = newCarry;
+      resultDigits[i] = digitAdd(xDigits[i], carry, &carry);
     }
     if (resultLength > inputLength) {
       MOZ_ASSERT(carry == 1);
@@ -1212,9 +1207,7 @@ BigInt* BigInt::absoluteSubOne(JSContext* cx, HandleBigInt x,
     auto resultDigits = result->digits();
     Digit borrow = 1;
     for (unsigned i = 0; i < length; i++) {
-      Digit newBorrow = 0;
-      resultDigits[i] = digitSub(xDigits[i], borrow, &newBorrow);
-      borrow = newBorrow;
+      resultDigits[i] = digitSub(xDigits[i], borrow, &borrow);
     }
     MOZ_ASSERT(!borrow);
   }
@@ -2938,35 +2931,24 @@ BigInt* BigInt::truncateAndSubFromPowerOfTwo(JSContext* cx, HandleBigInt x,
     Digit borrow = 0;
     // Take digits from `x` until its length is exhausted.
     for (size_t i = 0; i < std::min(resultLength - 1, xLength); i++) {
-      Digit newBorrow = 0;
-      Digit difference = digitSub(0, xDigits[i], &newBorrow);
-      difference = digitSub(difference, borrow, &newBorrow);
-      resultDigits[i] = difference;
-      borrow = newBorrow;
+      resultDigits[i] = digitSub3(0, xDigits[i], borrow, &borrow);
     }
     // Then simulate leading zeroes in `x` as needed.
     for (size_t i = xLength; i < resultLength - 1; i++) {
-      Digit newBorrow = 0;
-      Digit difference = digitSub(0, borrow, &newBorrow);
-      resultDigits[i] = difference;
-      borrow = newBorrow;
+      resultDigits[i] = digitSub(0, borrow, &borrow);
     }
 
     // The MSD might contain extra bits that we don't want.
     Digit xMSD = resultLength <= xLength ? xDigits[resultLength - 1] : 0;
     Digit resultMSD;
     if (bits % DigitBits == 0) {
-      Digit newBorrow = 0;
-      resultMSD = digitSub(0, xMSD, &newBorrow);
-      resultMSD = digitSub(resultMSD, borrow, &newBorrow);
+      resultMSD = digitSub3(0, xMSD, borrow, &borrow);
     } else {
       size_t drop = DigitBits - (bits % DigitBits);
       xMSD = (xMSD << drop) >> drop;
       Digit minuendMSD = Digit(1) << (DigitBits - drop);
-      Digit newBorrow = 0;
-      resultMSD = digitSub(minuendMSD, xMSD, &newBorrow);
-      resultMSD = digitSub(resultMSD, borrow, &newBorrow);
-      MOZ_ASSERT(newBorrow == 0, "result < 2^bits");
+      resultMSD = digitSub3(minuendMSD, xMSD, borrow, &borrow);
+      MOZ_ASSERT(borrow == 0, "result < 2^bits");
       // If all subtracted bits were zero, we have to get rid of the
       // materialized minuendMSD again.
       resultMSD &= (minuendMSD - 1);

@@ -479,19 +479,28 @@ class BigInt final : public js::gc::CellWithLengthAndFlags {
   static BigInt* absoluteSubOne(JSContext* cx, Handle<BigInt*> x,
                                 bool resultNegative = false);
 
-  // Return `a + b`, incrementing `*carry` if the addition overflows.
+  // Return `a + b`, setting `*carry` to the carry out of the addition.
   static inline Digit digitAdd(Digit a, Digit b, Digit* carry) {
     Digit result = a + b;
-    *carry += static_cast<Digit>(result < a);
+    *carry = static_cast<Digit>(result < a);
     return result;
   }
 
-  // Return `left - right`, incrementing `*borrow` if the addition overflows.
+  // Return `a + b + c`, setting `*carry` to the carry out of the addition,
+  // which is at most 2.
+  static Digit digitAdd3(Digit a, Digit b, Digit c, Digit* carry);
+
+  // Return `left - right`, setting `*borrow` to the borrow out of the
+  // subtraction.
   static inline Digit digitSub(Digit left, Digit right, Digit* borrow) {
     Digit result = left - right;
-    *borrow += static_cast<Digit>(result > left);
+    *borrow = static_cast<Digit>(result > left);
     return result;
   }
+
+  // Return `a - b - c`, setting `*borrow` to the borrow out of the
+  // subtraction, which is at most 2.
+  static Digit digitSub3(Digit a, Digit b, Digit c, Digit* borrow);
 
   // Compute `a * b`, returning the low half of the result and putting the
   // high half in `*high`.
