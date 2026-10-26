@@ -11421,6 +11421,11 @@
   mirror: always
   rust: true
 
+- name: layout.css.prefers-color-scheme.meta-tag.enabled
+  type: RelaxedAtomicBool
+  value: true
+  mirror: always
+
 # An override for prefers-color-scheme for content documents.
 #   0: Dark
 #   1: Light

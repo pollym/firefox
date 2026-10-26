@@ -857,10 +857,6 @@ void nsPresContext::AttachPresShell(mozilla::PresShell* aPresShell) {
 }
 
 Maybe<ColorScheme> nsPresContext::GetOverriddenOrEmbedderColorScheme() const {
-  if (Medium() == nsGkAtoms::print) {
-    return Some(ColorScheme::Light);
-  }
-
   switch (mOverriddenOrEmbedderColorScheme) {
     case dom::PrefersColorSchemeOverride::Dark:
       return Some(ColorScheme::Dark);
@@ -869,7 +865,6 @@ Maybe<ColorScheme> nsPresContext::GetOverriddenOrEmbedderColorScheme() const {
     case dom::PrefersColorSchemeOverride::None:
       break;
   }
-
   return Nothing();
 }
 

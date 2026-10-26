@@ -12210,8 +12210,9 @@ void Document::RecomputeColorScheme() {
   }
 
   if (nsPresContext* pc = GetPresContext()) {
-    // This affects system colors, which are inherited, so we need to recascade.
-    pc->RebuildAllStyleData(nsChangeHint(0), RestyleHint::RecascadeSubtree());
+    pc->MediaFeatureValuesChanged(
+        MediaFeatureChange::ForPreferredColorSchemeOrForcedColorsChange(),
+        MediaFeatureChangePropagation::JustThisDocument);
   }
 }
 
@@ -21751,12 +21752,30 @@ ColorScheme Document::DefaultColorScheme() const {
 }
 
 ColorScheme Document::PreferredColorScheme(IgnoreRFP aIgnoreRFP) const {
+  nsPresContext* pc = GetPresContext();
+  const bool printing = pc && pc->Medium() == nsGkAtoms::print;
+  if (auto flags = StyleColorSchemeFlags{GetColorSchemeBits()};
+      flags &&
+      (ChromeRulesEnabled() ||
+       StaticPrefs::layout_css_prefers_color_scheme_meta_tag_enabled())) {
+    const bool supportsDark(flags & StyleColorSchemeFlags::DARK);
+    const bool supportsLight(flags & StyleColorSchemeFlags::LIGHT);
+    const bool only(flags & StyleColorSchemeFlags::ONLY);
+    if (supportsDark != supportsLight && (!printing || only)) {
+      return supportsDark ? ColorScheme::Dark : ColorScheme::Light;
+    }
+  }
+
+  if (printing) {
+    return ColorScheme::Light;
+  }
+
   if (ShouldResistFingerprinting(RFPTarget::CSSPrefersColorScheme) &&
       aIgnoreRFP == IgnoreRFP::No) {
     return ColorScheme::Light;
   }
 
-  if (nsPresContext* pc = GetPresContext()) {
+  if (pc) {
     if (auto scheme = pc->GetOverriddenOrEmbedderColorScheme()) {
       return *scheme;
     }
