@@ -105,7 +105,7 @@ let gIntentEngineStub;
 // Version numbers must match FEATURE_MAJOR_VERSIONS in models/Utils.sys.mjs.
 const MOCK_RS_RECORDS = [
   ["chat", 12],
-  ["title-generation", 1],
+  ["title-generation", 2],
   ["tab-group-naming", 2],
   ["conversation-starters-sidebar-system", 1],
   ["conversation-suggestions-sidebar-starter", 3],
