@@ -692,7 +692,7 @@ bool ResolveChildProcessPathFromPlistForTesting(
 // static
 mozilla::BinPathType BaseProcessLauncher::GetPathToBinary(
     FilePath& exePath, GeckoProcessType processType,
-    SandboxingKind utilitySandbox) {
+    [[maybe_unused]] SandboxingKind utilitySandbox) {
   exePath = {};
   BinPathType pathType = XRE_GetChildProcBinPathType(processType);
 
@@ -1009,7 +1009,7 @@ bool GeckoChildProcessHost::AsyncLaunch(
   return true;
 }
 
-void GeckoChildProcessHost::OnProcessLaunchError(const LaunchError aError) {
+void GeckoChildProcessHost::OnProcessLaunchError(const LaunchError /*aError*/) {
   MonitorAutoLock lock(mMonitor);
   mProcessState = PROCESS_ERROR;
   lock.Notify();
@@ -1155,8 +1155,8 @@ class IPCLaunchThreadObserver final : public nsIObserver {
 NS_IMPL_ISUPPORTS(IPCLaunchThreadObserver, nsIObserver, nsISupports)
 
 NS_IMETHODIMP
-IPCLaunchThreadObserver::Observe(nsISupports* aSubject, const char* aTopic,
-                                 const char16_t* aData) {
+IPCLaunchThreadObserver::Observe(nsISupports* /*aSubject*/, const char* aTopic,
+                                 const char16_t* /*aData*/) {
   MOZ_RELEASE_ASSERT(strcmp(aTopic, "xpcom-shutdown-threads") == 0);
 
   nsCOMPtr<nsIThread> thread;
@@ -1197,7 +1197,7 @@ void
 AddAppDirToCommandLine(CommandLine& aCmdLine, nsIFile* aAppDir)
 #else
 AddAppDirToCommandLine(geckoargs::ChildProcessArgs& aCmdLine,
-                       nsIFile* aAppDir, nsIFile* aProfileDir)
+                       nsIFile* aAppDir, [[maybe_unused]] nsIFile* aProfileDir)
 #endif
 {
   // Content processes need access to application resources, so pass

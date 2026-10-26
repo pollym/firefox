@@ -333,7 +333,7 @@ class ChannelCountReporter final : public nsIMemoryReporter {
 
   NS_IMETHOD
   CollectReports(nsIHandleReportCallback* aHandleReport, nsISupports* aData,
-                 bool aAnonymize) override {
+                 bool /*aAnonymize*/) override {
     AutoTArray<std::pair<const char*, ChannelCounts>, 16> counts;
     {
       StaticMutexAutoLock countLock(sChannelCountMutex);
@@ -778,7 +778,7 @@ class BuildIDsMatchMessage : public IPC::Message {
  public:
   BuildIDsMatchMessage()
       : IPC::Message(MSG_ROUTING_NONE, BUILD_IDS_MATCH_MESSAGE_TYPE) {}
-  void Log(const std::string& aPrefix, FILE* aOutf) const {
+  void Log(const std::string& /*aPrefix*/, FILE* aOutf) const {
     fputs("(special `Build IDs match' message)", aOutf);
   }
 };
@@ -840,8 +840,8 @@ class CancelMessage : public IPC::Message {
       : IPC::Message(MSG_ROUTING_NONE, CANCEL_MESSAGE_TYPE) {
     set_transaction_id(transaction);
   }
-  static bool Read(const Message* msg) { return true; }
-  void Log(const std::string& aPrefix, FILE* aOutf) const {
+  static bool Read(const Message* /*msg*/) { return true; }
+  void Log(const std::string& /*aPrefix*/, FILE* aOutf) const {
     fputs("(special `Cancel' message)", aOutf);
   }
 };
@@ -2182,8 +2182,8 @@ void MessageChannel::PostErrorNotifyTask() {
 class GoodbyeMessage : public IPC::Message {
  public:
   GoodbyeMessage() : IPC::Message(MSG_ROUTING_NONE, GOODBYE_MESSAGE_TYPE) {}
-  static bool Read(const Message* msg) { return true; }
-  void Log(const std::string& aPrefix, FILE* aOutf) const {
+  static bool Read(const Message* /*msg*/) { return true; }
+  void Log(const std::string& /*aPrefix*/, FILE* aOutf) const {
     fputs("(special `Goodbye' message)", aOutf);
   }
 };

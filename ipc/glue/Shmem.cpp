@@ -34,7 +34,7 @@ class ShmemCreated : public IPC::Message {
     return IPC::ReadParam(aReader, aIPDLId) && IPC::ReadParam(aReader, aHandle);
   }
 
-  void Log(const std::string& aPrefix, FILE* aOutf) const {
+  void Log(const std::string& /*aPrefix*/, FILE* aOutf) const {
     fputs("(special ShmemCreated msg)", aOutf);
   }
 };
