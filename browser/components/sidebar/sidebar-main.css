@@ -55,7 +55,6 @@
   border: none;
   /* Overrides the default background-color for Win/Linux in splitter.css */
   background-color: transparent;
-  background-image: var(--sidebar-divider-image);
   background-size: var(--sidebar-divider-size);
   background-position: var(--sidebar-divider-position);
   background-repeat: no-repeat;
@@ -68,18 +67,11 @@
 
   &:hover {
     background-color: var(--focus-outline-color);
-    background-image: none;
     border-radius: var(--border-radius-medium);
   }
 
-  @media not -moz-pref("sidebar.visibility", "expand-on-hover") {
-    /* We need these rules to apply at all times when the sidebar.visibility
-    pref is not set to "expand-on-hover" as opposed to when the "sidebar-expand-on-hover" attribute
-    has not been added to root. There are certain scenarios when that attribute is temporarily
-    removed from root such as when toggling the sidebar to expand with the toolbar button. */
-    :host([expanded]) & {
-      background-image: none;
-    }
+  :host([tabs-overflow]:not([expanded])) &:not(:hover) {
+    background-image: var(--sidebar-divider-image);
   }
 }
 

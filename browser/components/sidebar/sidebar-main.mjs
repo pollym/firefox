@@ -148,6 +148,7 @@ export default class SidebarMain extends MozLitElement {
     window.addEventListener("SidebarItemRemoved", this);
 
     this.setCustomize();
+    this.createTabsObservers();
     this.createSplitter();
     this.createToolsObservers();
   }
@@ -166,6 +167,7 @@ export default class SidebarMain extends MozLitElement {
     window.removeEventListener("SidebarItemChanged", this);
     window.removeEventListener("SidebarItemRemoved", this);
 
+    this._tabsOverflowObserver?.disconnect();
     this._toolsIntersectionObserver?.disconnect();
     this._toolsResizeObserver?.disconnect();
     this.ownerDocument
@@ -175,6 +177,18 @@ export default class SidebarMain extends MozLitElement {
 
   get isToolsDragging() {
     return this.toolsSplitter.getAttribute("state") === "dragging";
+  }
+
+  createTabsObservers() {
+    let tabs = document.getElementById("tabbrowser-tabs");
+    let syncOverflow = () =>
+      this.toggleAttribute("tabs-overflow", tabs.hasAttribute("overflow"));
+    this._tabsOverflowObserver = new MutationObserver(syncOverflow);
+    this._tabsOverflowObserver.observe(tabs, {
+      attributes: true,
+      attributeFilter: ["overflow"],
+    });
+    syncOverflow();
   }
 
   createToolsObservers() {
