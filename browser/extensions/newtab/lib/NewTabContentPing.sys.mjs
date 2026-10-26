@@ -405,14 +405,7 @@ export class NewTabContentPing {
       dwell_id,
       ...result
     } = eventDataDict;
-    // @backward-compat { version 158 } variant_id and source_section_id were
-    // added as extra_keys to the newtab_content impression/click events in 158.
-    // A train-hopped XPI can run on older platform builds whose schema lacks
-    // them, which would throw a Glean error, so drop them below 158.
-    if (Services.vc.compare(AppConstants.MOZ_APP_VERSION, "158.0a1") < 0) {
-      delete result.variant_id;
-      delete result.source_section_id;
-    }
+
     // @backward-compat { version 158 } Bug 2067937: section_position was
     // removed from the newtab_content impression/click extra_keys in 157 and
     // restored in 159. Drop it on 157 and 158 builds to avoid a Glean error.
