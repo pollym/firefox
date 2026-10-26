@@ -70,9 +70,11 @@ class Element;
 - (void)_overrideClassOfMenuItem:(NSMenuItem*)aMenuItem;
 @end
 
-// Objective-C class used as action target for menu items.
+// Objective-C class used as action target for menu items. The single instance
+// also watches for menu item changes made by AppKit.
 @interface NativeMenuItemTarget : NSObject {
 }
+- (void)menuDidChangeItem:(NSNotification*)aNotification;
 - (IBAction)menuItemHit:(id)aSender;
 @end
 
@@ -132,6 +134,10 @@ class nsMenuBarX : public nsMenuParentX,
   static NSMenuItem* ApplicationMenuItemForKeyElement(
       mozilla::dom::Element* aKeyElement);
 
+  // Mirrors the shortcut AppKit reports for aItem into the key element behind
+  // it, in every window for an application menu item.
+  static void CopyUserKeyEquivalentOfItemToKeyElements(NSMenuItem* aItem);
+
   // nsMenuParentX
   void MenuChildChangedVisibility(const MenuChild& aChild,
                                   bool aIsVisible) override;
@@ -151,6 +157,10 @@ class nsMenuBarX : public nsMenuParentX,
                                       SEL aAction, int aTag,
                                       NativeMenuItemTarget* aTarget);
   void CreateApplicationMenu(nsMenuX* aMenu);
+  void CopyAllUserKeyEquivalentsToKeyElements();
+  // The application menu is shared by all menu bars, but each window has its
+  // own key elements for its items.
+  void CopyAppMenuUserKeyEquivalentsToKeyElements();
 
   // Calculates the index at which aChild's NSMenuItem should be inserted into
   // our NSMenu. The order of NSMenuItems in the NSMenu is the same as the order

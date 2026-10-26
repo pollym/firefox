@@ -284,9 +284,24 @@ void nsMenuX::AddMenuChild(const MenuChild& aChild) {
     RemovePlaceholderIfPresent();
     [mNativeMenu addItem:nativeItem];
     ++mVisibleItemsCount;
+    if (aChild.is<RefPtr<nsMenuItemX>>()) {
+      aChild.as<RefPtr<nsMenuItemX>>()->CopyUserKeyEquivalentToKeyElement();
+    }
   }
 
   NS_OBJC_END_TRY_ABORT_BLOCK;
+}
+
+void nsMenuX::CopyAllUserKeyEquivalentsToKeyElements() {
+  for (const MenuChild& child : mMenuChildren) {
+    child.match(
+        [](const RefPtr<nsMenuX>& aMenu) {
+          aMenu->CopyAllUserKeyEquivalentsToKeyElements();
+        },
+        [](const RefPtr<nsMenuItemX>& aMenuItem) {
+          aMenuItem->CopyUserKeyEquivalentToKeyElement();
+        });
+  }
 }
 
 void nsMenuX::InsertMenuChild(const MenuChild& aChild) {
@@ -1267,6 +1282,9 @@ void nsMenuX::MenuChildChangedVisibility(const MenuChild& aChild,
     NSInteger insertionPoint = CalculateNativeInsertionPoint(aChild);
     [mNativeMenu insertItem:nativeItem atIndex:insertionPoint];
     mVisibleItemsCount++;
+    if (aChild.is<RefPtr<nsMenuItemX>>()) {
+      aChild.as<RefPtr<nsMenuItemX>>()->CopyUserKeyEquivalentToKeyElement();
+    }
   } else {
     MOZ_RELEASE_ASSERT(
         [mNativeMenu indexOfItem:nativeItem] != -1,
