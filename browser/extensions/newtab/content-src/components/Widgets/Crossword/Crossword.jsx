@@ -10,7 +10,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, batch } from "react-redux";
 import { actionCreators as ac, actionTypes as at } from "common/Actions.mjs";
 import { useSizeSubmenu } from "../../../lib/utils";
 import {
@@ -301,28 +301,32 @@ function Crossword({
   );
 
   function handleCrosswordHide() {
-    dispatch(
-      ac.OnlyToMain({
-        type: at.SET_PREF,
-        data: { name: CROSSWORD_ENTRY.enabledPref, value: false },
-      })
-    );
-    recordEnabled(false, { source: "context_menu" });
+    batch(() => {
+      dispatch(
+        ac.OnlyToMain({
+          type: at.SET_PREF,
+          data: { name: CROSSWORD_ENTRY.enabledPref, value: false },
+        })
+      );
+      recordEnabled(false, { source: "context_menu" });
+    });
   }
 
   const handleChangeSize = useCallback(
     size => {
       handleInteraction();
-      dispatch(
-        ac.OnlyToMain({
-          type: at.SET_PREF,
-          data: { name: CROSSWORD_ENTRY.sizePref, value: size },
-        })
-      );
-      recordUserAction(USER_ACTION_TYPES.CHANGE_SIZE, {
-        source: "context_menu",
-        value: size,
-        size,
+      batch(() => {
+        dispatch(
+          ac.OnlyToMain({
+            type: at.SET_PREF,
+            data: { name: CROSSWORD_ENTRY.sizePref, value: size },
+          })
+        );
+        recordUserAction(USER_ACTION_TYPES.CHANGE_SIZE, {
+          source: "context_menu",
+          value: size,
+          size,
+        });
       });
     },
     [dispatch, handleInteraction, recordUserAction]
@@ -332,28 +336,32 @@ function Crossword({
 
   function handleLearnMore() {
     handleInteraction();
-    dispatch(
-      ac.OnlyToMain({
-        type: at.OPEN_LINK,
-        data: {
-          url: "https://support.mozilla.org/kb/firefox-new-tab-widgets",
-        },
-      })
-    );
-    recordUserAction("learn_more", { source: "context_menu" });
+    batch(() => {
+      dispatch(
+        ac.OnlyToMain({
+          type: at.OPEN_LINK,
+          data: {
+            url: "https://support.mozilla.org/kb/firefox-new-tab-widgets",
+          },
+        })
+      );
+      recordUserAction("learn_more", { source: "context_menu" });
+    });
   }
 
   function handlePoweredByParticle() {
     handleInteraction();
-    dispatch(
-      ac.OnlyToMain({
-        type: at.OPEN_LINK,
-        data: {
-          url: "https://particle.news",
-        },
-      })
-    );
-    recordUserAction("powered_by_particle", { source: "context_menu" });
+    batch(() => {
+      dispatch(
+        ac.OnlyToMain({
+          type: at.OPEN_LINK,
+          data: {
+            url: "https://particle.news",
+          },
+        })
+      );
+      recordUserAction("powered_by_particle", { source: "context_menu" });
+    });
   }
 
   return (

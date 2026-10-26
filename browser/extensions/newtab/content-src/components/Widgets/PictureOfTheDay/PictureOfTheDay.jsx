@@ -4,7 +4,7 @@
 
 // eslint-disable-next-line no-unused-vars
 import React, { useCallback, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, batch } from "react-redux";
 import { actionCreators as ac, actionTypes as at } from "common/Actions.mjs";
 import { useSizeSubmenu } from "../../../lib/utils";
 import { WIDGET_REGISTRY, resolveWidgetSize } from "common/WidgetsRegistry.mjs";
@@ -167,31 +167,35 @@ const PictureOfTheDay = ({
   const imageAlt = pictureData.description || fallbackAlt;
 
   const handleHide = () => {
-    dispatch(
-      ac.OnlyToMain({
-        type: at.SET_PREF,
-        data: { name: PICTURE_OF_THE_DAY_ENTRY.enabledPref, value: false },
-      })
-    );
-    // Disabling the widget is not an interaction, so it does not flip the
-    // interaction pref.
-    recordEnabled(false, { source: "context_menu" });
+    batch(() => {
+      dispatch(
+        ac.OnlyToMain({
+          type: at.SET_PREF,
+          data: { name: PICTURE_OF_THE_DAY_ENTRY.enabledPref, value: false },
+        })
+      );
+      // Disabling the widget is not an interaction, so it does not flip the
+      // interaction pref.
+      recordEnabled(false, { source: "context_menu" });
+    });
   };
 
   const handleChangeSize = useCallback(
     size => {
-      dispatch(
-        ac.OnlyToMain({
-          type: at.SET_PREF,
-          data: { name: PICTURE_OF_THE_DAY_ENTRY.sizePref, value: size },
-        })
-      );
-      recordUserAction("change_size", {
-        source: "context_menu",
-        value: size,
-        size,
+      batch(() => {
+        dispatch(
+          ac.OnlyToMain({
+            type: at.SET_PREF,
+            data: { name: PICTURE_OF_THE_DAY_ENTRY.sizePref, value: size },
+          })
+        );
+        recordUserAction("change_size", {
+          source: "context_menu",
+          value: size,
+          size,
+        });
+        handleInteraction();
       });
-      handleInteraction();
     },
     [dispatch, recordUserAction, handleInteraction]
   );
@@ -199,23 +203,27 @@ const PictureOfTheDay = ({
   const sizeSubmenuRef = useSizeSubmenu(handleChangeSize);
 
   const handleLearnMore = () => {
-    dispatch(
-      ac.OnlyToMain({
-        type: at.OPEN_LINK,
-        data: {
-          url: "https://support.mozilla.org/kb/firefox-new-tab-widgets",
-          where: "tab",
-        },
-      })
-    );
-    recordUserAction("learn_more", { source: "context_menu" });
-    handleInteraction();
+    batch(() => {
+      dispatch(
+        ac.OnlyToMain({
+          type: at.OPEN_LINK,
+          data: {
+            url: "https://support.mozilla.org/kb/firefox-new-tab-widgets",
+            where: "tab",
+          },
+        })
+      );
+      recordUserAction("learn_more", { source: "context_menu" });
+      handleInteraction();
+    });
   };
 
   const handleManageWallpaper = () => {
-    dispatch({ type: at.SHOW_PERSONALIZE });
-    recordUserAction("manage_wallpaper", { source: "context_menu" });
-    handleInteraction();
+    batch(() => {
+      dispatch({ type: at.SHOW_PERSONALIZE });
+      recordUserAction("manage_wallpaper", { source: "context_menu" });
+      handleInteraction();
+    });
   };
 
   const setDismissedDate = value =>
@@ -227,15 +235,19 @@ const PictureOfTheDay = ({
     );
 
   const handleHidePhoto = () => {
-    setDismissedDate(pictureDate);
-    recordUserAction("hide_photo", { source: "context_menu" });
-    handleInteraction();
+    batch(() => {
+      setDismissedDate(pictureDate);
+      recordUserAction("hide_photo", { source: "context_menu" });
+      handleInteraction();
+    });
   };
 
   const handleShow = (source = "widget") => {
-    setDismissedDate("");
-    recordUserAction("show_picture", { source });
-    handleInteraction();
+    batch(() => {
+      setDismissedDate("");
+      recordUserAction("show_picture", { source });
+      handleInteraction();
+    });
   };
 
   // The Merino image host doesn't send CORS headers, so the picture bytes can
@@ -248,14 +260,16 @@ const PictureOfTheDay = ({
     if (isSetAsWallpaper) {
       return;
     }
-    dispatch(
-      ac.OnlyToMain({
-        type: at.WIDGETS_PICTURE_SET_WALLPAPER,
-        data: { publishedDate: pictureData.publishedDate },
-      })
-    );
-    recordUserAction("set_wallpaper", { source: "widget" });
-    handleInteraction();
+    batch(() => {
+      dispatch(
+        ac.OnlyToMain({
+          type: at.WIDGETS_PICTURE_SET_WALLPAPER,
+          data: { publishedDate: pictureData.publishedDate },
+        })
+      );
+      recordUserAction("set_wallpaper", { source: "widget" });
+      handleInteraction();
+    });
     setJustSet(true);
     setSuppressExpand(true);
   };
@@ -265,16 +279,20 @@ const PictureOfTheDay = ({
   // navigation; the handler only records telemetry (mirrors the Weather widget).
   const canOpenSource = Boolean(pictureData.sourceUrl);
   const handleOpenSource = () => {
-    recordUserAction("open_source", { source: "widget" });
-    handleInteraction();
+    batch(() => {
+      recordUserAction("open_source", { source: "widget" });
+      handleInteraction();
+    });
   };
 
   // The license name is an anchor whose href opens the license terms (Creative
   // Commons) in the current tab, separate from the source page link above.
   const canOpenLicense = Boolean(pictureData.licenseUrl);
   const handleOpenLicense = () => {
-    recordUserAction("open_license", { source: "widget" });
-    handleInteraction();
+    batch(() => {
+      recordUserAction("open_license", { source: "widget" });
+      handleInteraction();
+    });
   };
 
   // Attribution line under the title: "© {author} / {source} / {license}".

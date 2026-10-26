@@ -4,7 +4,7 @@
 
 import { actionCreators as ac, actionTypes as at } from "common/Actions.mjs";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, batch } from "react-redux";
 import { WIDGET_REGISTRY, resolveWidgetSize } from "common/WidgetsRegistry.mjs";
 import { WidgetCelebration } from "../WidgetCelebration";
 import { useWidgetCelebration } from "../useWidgetCelebration";
@@ -241,14 +241,16 @@ export const FocusTimer = ({
         ? USER_ACTION_TYPES.TIMER_TOGGLE_BREAK
         : USER_ACTION_TYPES.TIMER_TOGGLE_FOCUS;
 
-    dispatch(
-      ac.AlsoToMain({
-        type: at.WIDGETS_TIMER_SET_TYPE,
-        data: { timerType: nextType },
-      })
-    );
+    batch(() => {
+      dispatch(
+        ac.AlsoToMain({
+          type: at.WIDGETS_TIMER_SET_TYPE,
+          data: { timerType: nextType },
+        })
+      );
 
-    recordUserAction(userAction, { source: "widget", legacy: true });
+      recordUserAction(userAction, { source: "widget", legacy: true });
+    });
 
     completeCelebration();
   }, [completeCelebration, dispatch, resetProgressCircle, recordUserAction]);
@@ -261,20 +263,22 @@ export const FocusTimer = ({
   // each render so the closure captures the latest values at fire time.
   const handleTimerEndRef = useRef(null);
   handleTimerEndRef.current = () => {
-    dispatch(
-      ac.AlsoToMain({
-        type: at.WIDGETS_TIMER_END,
-        data: {
-          timerType,
-          duration: initialTimerDuration,
-          initialDuration: initialTimerDuration,
-        },
-      })
-    );
+    batch(() => {
+      dispatch(
+        ac.AlsoToMain({
+          type: at.WIDGETS_TIMER_END,
+          data: {
+            timerType,
+            duration: initialTimerDuration,
+            initialDuration: initialTimerDuration,
+          },
+        })
+      );
 
-    recordUserAction(USER_ACTION_TYPES.TIMER_END, {
-      source: "widget",
-      legacy: true,
+      recordUserAction(USER_ACTION_TYPES.TIMER_END, {
+        source: "widget",
+        legacy: true,
+      });
     });
 
     completingTypeRef.current = timerType;
@@ -367,16 +371,18 @@ export const FocusTimer = ({
       totalSeconds > 0 &&
       totalSeconds !== duration
     ) {
-      dispatch(
-        ac.AlsoToMain({
-          type: at.WIDGETS_TIMER_SET_DURATION,
-          data: { timerType, duration: totalSeconds },
-        })
-      );
+      batch(() => {
+        dispatch(
+          ac.AlsoToMain({
+            type: at.WIDGETS_TIMER_SET_DURATION,
+            data: { timerType, duration: totalSeconds },
+          })
+        );
 
-      recordUserAction(USER_ACTION_TYPES.TIMER_SET, {
-        source: "widget",
-        legacy: true,
+        recordUserAction(USER_ACTION_TYPES.TIMER_SET, {
+          source: "widget",
+          legacy: true,
+        });
       });
     }
     handleTimerInteraction();
@@ -390,33 +396,37 @@ export const FocusTimer = ({
       return;
     }
     if (!isRunning && duration > 0) {
-      dispatch(
-        ac.AlsoToMain({
-          type: at.WIDGETS_TIMER_PLAY,
-          data: { timerType },
-        })
-      );
+      batch(() => {
+        dispatch(
+          ac.AlsoToMain({
+            type: at.WIDGETS_TIMER_PLAY,
+            data: { timerType },
+          })
+        );
 
-      recordUserAction(USER_ACTION_TYPES.TIMER_PLAY, {
-        source: "widget",
-        legacy: true,
+        recordUserAction(USER_ACTION_TYPES.TIMER_PLAY, {
+          source: "widget",
+          legacy: true,
+        });
       });
     } else if (isRunning) {
       // calculated to get the new baseline of the timer when it starts or resumes
       const remaining = calculateTimeRemaining(duration, startTime);
-      dispatch(
-        ac.AlsoToMain({
-          type: at.WIDGETS_TIMER_PAUSE,
-          data: {
-            timerType,
-            duration: remaining,
-          },
-        })
-      );
+      batch(() => {
+        dispatch(
+          ac.AlsoToMain({
+            type: at.WIDGETS_TIMER_PAUSE,
+            data: {
+              timerType,
+              duration: remaining,
+            },
+          })
+        );
 
-      recordUserAction(USER_ACTION_TYPES.TIMER_PAUSE, {
-        source: "widget",
-        legacy: true,
+        recordUserAction(USER_ACTION_TYPES.TIMER_PAUSE, {
+          source: "widget",
+          legacy: true,
+        });
       });
     }
     handleTimerInteraction();
@@ -429,20 +439,22 @@ export const FocusTimer = ({
     if (isCelebrating) {
       return;
     }
-    dispatch(
-      ac.AlsoToMain({
-        type: at.WIDGETS_TIMER_RESET,
-        data: {
-          timerType,
-          duration: initialTimerDuration,
-          initialDuration: initialTimerDuration,
-        },
-      })
-    );
+    batch(() => {
+      dispatch(
+        ac.AlsoToMain({
+          type: at.WIDGETS_TIMER_RESET,
+          data: {
+            timerType,
+            duration: initialTimerDuration,
+            initialDuration: initialTimerDuration,
+          },
+        })
+      );
 
-    recordUserAction(USER_ACTION_TYPES.TIMER_RESET, {
-      source: "widget",
-      legacy: true,
+      recordUserAction(USER_ACTION_TYPES.TIMER_RESET, {
+        source: "widget",
+        legacy: true,
+      });
     });
 
     // Reset progress value and gradient arc on the progress circle
@@ -456,40 +468,42 @@ export const FocusTimer = ({
     type => {
       const oldTypeRemaining = calculateTimeRemaining(duration, startTime);
 
-      // The type we are toggling away from automatically pauses
-      dispatch(
-        ac.AlsoToMain({
-          type: at.WIDGETS_TIMER_PAUSE,
-          data: {
-            timerType,
-            duration: oldTypeRemaining,
-          },
-        })
-      );
+      batch(() => {
+        // The type we are toggling away from automatically pauses
+        dispatch(
+          ac.AlsoToMain({
+            type: at.WIDGETS_TIMER_PAUSE,
+            data: {
+              timerType,
+              duration: oldTypeRemaining,
+            },
+          })
+        );
 
-      recordUserAction(USER_ACTION_TYPES.TIMER_PAUSE, {
-        source: "widget",
-        legacy: true,
-      });
+        recordUserAction(USER_ACTION_TYPES.TIMER_PAUSE, {
+          source: "widget",
+          legacy: true,
+        });
 
-      // Sets the current timer type so it persists when opening a new tab
-      dispatch(
-        ac.AlsoToMain({
-          type: at.WIDGETS_TIMER_SET_TYPE,
-          data: {
-            timerType: type,
-          },
-        })
-      );
+        // Sets the current timer type so it persists when opening a new tab
+        dispatch(
+          ac.AlsoToMain({
+            type: at.WIDGETS_TIMER_SET_TYPE,
+            data: {
+              timerType: type,
+            },
+          })
+        );
 
-      const toggleUserAction =
-        type === "focus"
-          ? USER_ACTION_TYPES.TIMER_TOGGLE_FOCUS
-          : USER_ACTION_TYPES.TIMER_TOGGLE_BREAK;
+        const toggleUserAction =
+          type === "focus"
+            ? USER_ACTION_TYPES.TIMER_TOGGLE_FOCUS
+            : USER_ACTION_TYPES.TIMER_TOGGLE_BREAK;
 
-      recordUserAction(toggleUserAction, {
-        source: "widget",
-        legacy: true,
+        recordUserAction(toggleUserAction, {
+          source: "widget",
+          legacy: true,
+        });
       });
       handleTimerInteraction();
     },
@@ -556,19 +570,21 @@ export const FocusTimer = ({
       // calculated to get the new baseline of the timer when it starts or resumes
       const remaining = calculateTimeRemaining(duration, startTime);
 
-      dispatch(
-        ac.AlsoToMain({
-          type: at.WIDGETS_TIMER_PAUSE,
-          data: {
-            timerType,
-            duration: remaining,
-          },
-        })
-      );
+      batch(() => {
+        dispatch(
+          ac.AlsoToMain({
+            type: at.WIDGETS_TIMER_PAUSE,
+            data: {
+              timerType,
+              duration: remaining,
+            },
+          })
+        );
 
-      recordUserAction(USER_ACTION_TYPES.TIMER_PAUSE, {
-        source: "widget",
-        legacy: true,
+        recordUserAction(USER_ACTION_TYPES.TIMER_PAUSE, {
+          source: "widget",
+          legacy: true,
+        });
       });
     }
 
@@ -599,16 +615,18 @@ export const FocusTimer = ({
 
   const handleChangeSize = useCallback(
     size => {
-      dispatch(
-        ac.OnlyToMain({
-          type: at.SET_PREF,
-          data: { name: PREF_FOCUS_TIMER_SIZE, value: size },
-        })
-      );
-      recordUserAction(USER_ACTION_TYPES.CHANGE_SIZE, {
-        source: "context_menu",
-        value: size,
-        size,
+      batch(() => {
+        dispatch(
+          ac.OnlyToMain({
+            type: at.SET_PREF,
+            data: { name: PREF_FOCUS_TIMER_SIZE, value: size },
+          })
+        );
+        recordUserAction(USER_ACTION_TYPES.CHANGE_SIZE, {
+          source: "context_menu",
+          value: size,
+          size,
+        });
       });
     },
     [dispatch, recordUserAction]
@@ -623,16 +641,18 @@ export const FocusTimer = ({
       if (totalSeconds === duration) {
         return;
       }
-      dispatch(
-        ac.AlsoToMain({
-          type: at.WIDGETS_TIMER_SET_DURATION,
-          data: { timerType, duration: totalSeconds },
-        })
-      );
+      batch(() => {
+        dispatch(
+          ac.AlsoToMain({
+            type: at.WIDGETS_TIMER_SET_DURATION,
+            data: { timerType, duration: totalSeconds },
+          })
+        );
 
-      recordUserAction(USER_ACTION_TYPES.TIMER_SET, {
-        source: "widget",
-        legacy: true,
+        recordUserAction(USER_ACTION_TYPES.TIMER_SET, {
+          source: "widget",
+          legacy: true,
+        });
       });
       handleTimerInteraction();
     },
@@ -663,16 +683,18 @@ export const FocusTimer = ({
       el.innerText = formatTime(totalSeconds);
       return;
     }
-    dispatch(
-      ac.AlsoToMain({
-        type: at.WIDGETS_TIMER_SET_DURATION,
-        data: { timerType, duration: totalSeconds },
-      })
-    );
+    batch(() => {
+      dispatch(
+        ac.AlsoToMain({
+          type: at.WIDGETS_TIMER_SET_DURATION,
+          data: { timerType, duration: totalSeconds },
+        })
+      );
 
-    recordUserAction(USER_ACTION_TYPES.TIMER_SET, {
-      source: "widget",
-      legacy: true,
+      recordUserAction(USER_ACTION_TYPES.TIMER_SET, {
+        source: "widget",
+        legacy: true,
+      });
     });
     handleTimerInteraction();
   }, [

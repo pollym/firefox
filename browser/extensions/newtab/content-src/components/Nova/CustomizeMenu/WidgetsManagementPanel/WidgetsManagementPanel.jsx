@@ -5,7 +5,7 @@
 // @nova-cleanup(move-directory): Move to components/CustomizeMenu/WidgetsManagementPanel/ after Nova ships
 
 import React, { useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { batch, useDispatch, useSelector } from "react-redux";
 import { actionCreators as ac, actionTypes as at } from "common/Actions.mjs";
 import {
   WIDGET_REGISTRY,
@@ -54,27 +54,29 @@ function WidgetsManagementPanel({ togglePanel, showPanel, setPref }) {
     e.stopPropagation();
     const value = e.target.pressed;
 
-    dispatch(
-      ac.UserEvent({
-        event: "PREF_CHANGED",
-        source: widget.customizeEventSource,
-        value: { status: value, menu_source: "CUSTOMIZE_MENU" },
-      })
-    );
+    batch(() => {
+      dispatch(
+        ac.UserEvent({
+          event: "PREF_CHANGED",
+          source: widget.customizeEventSource,
+          value: { status: value, menu_source: "CUSTOMIZE_MENU" },
+        })
+      );
 
-    dispatch(
-      ac.OnlyToMain({
-        type: at.WIDGETS_ENABLED,
-        data: {
-          widget_name: widget.telemetryName,
-          widget_source: "customize_panel",
-          enabled: value,
-          widget_size: resolveWidgetSize(widget, prefs),
-        },
-      })
-    );
+      dispatch(
+        ac.OnlyToMain({
+          type: at.WIDGETS_ENABLED,
+          data: {
+            widget_name: widget.telemetryName,
+            widget_source: "customize_panel",
+            enabled: value,
+            widget_size: resolveWidgetSize(widget, prefs),
+          },
+        })
+      );
 
-    setPref(widget.enabledPref, value);
+      setPref(widget.enabledPref, value);
+    });
   };
 
   const isRTL = typeof document !== "undefined" && document.dir === "rtl";
