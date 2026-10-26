@@ -22,6 +22,9 @@ skip-if = [
 
 ["test_restore_aiwindow.py"]
 
+["test_restore_counts.py"]
+skip-if = ["debug"] # StartupPerformance is not initialized in debug builds
+
 ["test_restore_last_session_window_mismatch.py"]
 
 ["test_restore_loading_tab.py"]
