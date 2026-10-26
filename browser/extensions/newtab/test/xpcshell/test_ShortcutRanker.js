@@ -2096,3 +2096,19 @@ add_task(async function test_rankTopSites_gates_runtime_thom_weight_and_eta() {
 
   sandbox.restore();
 });
+
+add_task(async function test_rankShortcutsWorker() {
+  const { BasePromiseWorker } = ChromeUtils.importESModule(
+    "resource://gre/modules/PromiseWorker.sys.mjs"
+  );
+  const worker = new BasePromiseWorker(
+    "resource://newtab/lib/SmartShortcutsRanker/RankShortcuts.worker.mjs",
+    { type: "module" }
+  );
+  Assert.deepEqual(
+    await worker.post("sumNorm", [[1, 3]]),
+    [0.25, 0.75],
+    "the worker dispatches to RankShortcutsWorker"
+  );
+  worker.terminate();
+});

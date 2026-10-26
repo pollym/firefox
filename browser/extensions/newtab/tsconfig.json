@@ -4,8 +4,7 @@
     "lib/ActivityStream.sys.mjs",
     "lib/ExternalComponentsFeed.sys.mjs",
     "lib/NewTabAttributionService.sys.mjs",
-    "lib/NewTabContentPing.sys.mjs",
-    "lib/SmartShortcutsRanker/RankShortcuts.worker.mjs"
+    "lib/NewTabContentPing.sys.mjs"
   ],
   "extends": "../../../tools/@types/tsconfig.json",
 
