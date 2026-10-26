@@ -1563,7 +1563,7 @@ class ConnectionPool::CloseConnectionRunnable final
 };
 
 struct ConnectionPool::DatabaseInfo final {
-  friend mozilla::DefaultDelete<DatabaseInfo>;
+  friend std::default_delete<DatabaseInfo>;
 
   RefPtr<ConnectionPool> mConnectionPool;
   const nsCString mDatabaseId;
@@ -1604,7 +1604,7 @@ struct ConnectionPool::DatabaseInfo final {
 };
 
 struct ConnectionPool::DatabaseCompleteCallback final {
-  friend DefaultDelete<DatabaseCompleteCallback>;
+  friend std::default_delete<DatabaseCompleteCallback>;
 
   nsCString mDatabaseId;
   nsCOMPtr<nsIRunnable> mCallback;
@@ -1666,7 +1666,7 @@ class ConnectionPool::TransactionRunnable final : public Runnable {
 #endif
 
 class ConnectionPool::TransactionInfo final {
-  friend mozilla::DefaultDelete<TransactionInfo>;
+  friend std::default_delete<TransactionInfo>;
 
   nsTHashSet<TransactionInfo*> mBlocking;
   nsTArray<NotNull<TransactionInfo*>> mBlockingOrdered;
@@ -4799,7 +4799,7 @@ class Utils final : public PBackgroundIndexedDBUtilsParent {
  ******************************************************************************/
 
 struct DatabaseActorInfo final {
-  friend mozilla::DefaultDelete<DatabaseActorInfo>;
+  friend std::default_delete<DatabaseActorInfo>;
 
   SafeRefPtr<FullDatabaseMetadata> mMetadata;
   // We don't use LinkedList<CheckedUnsafePtr<Database>> because
