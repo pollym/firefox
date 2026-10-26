@@ -2117,6 +2117,19 @@ class Settings(
                 },
         )
 
+    var openLinksInYoutube by
+        stringPreference(
+            key = appContext.getPreferenceKey(R.string.pref_key_open_links_in_youtube),
+            default = appContext.getString(R.string.pref_key_open_links_in_youtube_never),
+        )
+
+    /** Whether the in-development open links in YouTube app preference is revealed via secret settings. */
+    var openLinksInYoutubeFeatureEnabled by
+        booleanPreference(
+            key = appContext.getPreferenceKey(R.string.pref_key_open_links_in_youtube_feature_enabled),
+            default = false,
+        )
+
     var overrideFxAServer by
         stringPreference(
             appContext.getPreferenceKey(R.string.pref_key_override_fxa_server),

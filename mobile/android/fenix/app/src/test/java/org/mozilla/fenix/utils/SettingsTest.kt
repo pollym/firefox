@@ -28,6 +28,7 @@ import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mozilla.fenix.R
 import org.mozilla.fenix.browser.browsingmode.BrowsingMode
 import org.mozilla.fenix.components.toolbar.ToolbarPosition
 import org.mozilla.fenix.nimbus.AutomotiveSensitiveData
@@ -1609,5 +1610,22 @@ class SettingsTest {
         settings.isMenuCustomizationScreenEnabled = false
 
         assertFalse(settings.isMenuCustomizationScreenEnabled)
+    }
+
+    @Test
+    fun `GIVEN no value has been set WHEN reading openLinksInYoutube THEN it defaults to never`() {
+        assertEquals(
+            testContext.getString(R.string.pref_key_open_links_in_youtube_never),
+            settings.openLinksInYoutube,
+        )
+    }
+
+    @Test
+    fun `GIVEN openLinksInYoutube is written WHEN reading it back THEN the stored value is returned`() {
+        val never = testContext.getString(R.string.pref_key_open_links_in_youtube_never)
+
+        settings.openLinksInYoutube = never
+
+        assertEquals(never, settings.openLinksInYoutube)
     }
 }
