@@ -14,7 +14,6 @@ kind-dependencies:
     - beetmover-android-app
 
 task-defaults:
-    run-on-repo-type: [hg]
     description: Sends Slack message to release testers that Testrail Milestone was created.
     task-context:
         from-parameters:
