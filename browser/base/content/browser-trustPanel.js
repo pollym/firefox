@@ -197,6 +197,8 @@ class TrustPanel {
   #sameSiteNavigation = false;
   /** True while navigating within the same tab, false when changing URLs due to switching tabs. */
   #sameTabNavigation = false;
+  // The tracker count's running tab switch animation, if any.
+  #trackerCountTabSwitchAnimation = null;
 
   /**
    * If the document is using a qualified website authentication certificate
@@ -556,6 +558,8 @@ class TrustPanel {
       return;
     }
 
+    let previousTrackerCountWidth = this.#shownTrackerCountWidth();
+
     // Close the panel if we navigate to a new url.
     if (this.#uri?.spec != uri.spec && this.#popup?.state == "open") {
       this.#closingReason ??= CLOSING_REASONS.NAVIGATED;
@@ -606,6 +610,9 @@ class TrustPanel {
     void this.#checkForBreaches(uri);
 
     this.#updateToolbarTrackerCount();
+    if (!this.#sameTabNavigation) {
+      this.#animateTrackerCountTabSwitch(previousTrackerCountWidth);
+    }
   }
 
   /** Asynchronous check for the current page's breached status, updating the address bar icon if the page was breached */
@@ -902,6 +909,89 @@ class TrustPanel {
     }
     document.l10n.setArgs(iconContainer, { count });
     this.#updateUrlbarIcon();
+  }
+
+  /**
+   * The width the address bar icon was last drawn at, if it showed a tracker
+   * count, without flushing layout.
+   *
+   * @returns {number|null}
+   */
+  #shownTrackerCountWidth() {
+    let icon = document.getElementById("trust-icon-container");
+    if (!icon.matches(".has-blocked-trackers:not(.breached, .insecure)")) {
+      return null;
+    }
+    // The icon is hidden while the address bar is being edited.
+    return window.windowUtils.getBoundsWithoutFlushing(icon).width || null;
+  }
+
+  /**
+   * Animate the address bar icon into the selected tab's tracker count: it
+   * resizes from its width in the previous tab while the new count fades in.
+   * If the selected tab shows no count, the previous tab's pill shrinks down
+   * to the shield and fades out instead. The animations are defined in
+   * identity-block.css.
+   *
+   * @param {number|null} previousWidth
+   *   The icon's width before switching tabs, if it showed a tracker count.
+   */
+  #animateTrackerCountTabSwitch(previousWidth) {
+    let icon = document.getElementById("trust-icon-container");
+    let hasCount = icon.matches(
+      ".has-blocked-trackers:not(.breached, .insecure)"
+    );
+    let shrinksToShield =
+      previousWidth &&
+      !icon.matches(".has-blocked-trackers, .breached, .insecure");
+    if (
+      !(hasCount || shrinksToShield) ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    // An attribute rather than a class, since #updateUrlbarIcon removes
+    // classes it doesn't manage.
+    icon.toggleAttribute("tracker-count-tab-switch", false);
+    // The pill's resize replaces the count's expand, which would otherwise make
+    // the pill measure narrower than it ends up.
+    document
+      .getElementById("trust-icon-tracker-count-shortform-wrapper")
+      .getAnimations()
+      .find(a => a.animationName == "show-shortform-tracker-count")
+      ?.finish();
+    let width = icon.getBoundingClientRect().width;
+    if (!width) {
+      return;
+    }
+    previousWidth ??=
+      document.getElementById("trust-icon").getBoundingClientRect().width +
+      2 * parseFloat(window.getComputedStyle(icon).paddingInlineStart);
+    icon.style.setProperty("--tracker-count-from-width", `${previousWidth}px`);
+    icon.style.setProperty("--tracker-count-to-width", `${width}px`);
+    icon.toggleAttribute("tracker-count-tab-switch", true);
+
+    let animation = icon
+      .getAnimations()
+      .find(a =>
+        [
+          "tracker-count-tab-switch-resize",
+          "tracker-count-tab-switch-shrink",
+        ].includes(a.animationName)
+      );
+    this.#trackerCountTabSwitchAnimation = animation;
+    let cleanUp = () => {
+      if (this.#trackerCountTabSwitchAnimation != animation) {
+        return;
+      }
+      this.#trackerCountTabSwitchAnimation = null;
+      icon.toggleAttribute("tracker-count-tab-switch", false);
+    };
+    if (animation) {
+      animation.finished.then(cleanUp, cleanUp);
+    } else {
+      cleanUp();
+    }
   }
 
   #updateBlockerView() {
