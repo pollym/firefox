@@ -32,6 +32,7 @@
 #include "nsDeviceContext.h"
 #include "nsIScrollbarMediator.h"
 #include "nsLayoutUtils.h"
+#include "nsProgressFrame.h"
 #include "nsRangeFrame.h"
 #include "nsScrollbarFrame.h"
 
@@ -996,18 +997,18 @@ void Theme::PaintProgress(nsIFrame* aFrame, PaintBackendData& aPaintData,
       }
       return progress->Position();
     }();
+    const Side startSide = nsProgressFrame::PhysicalStartSide(
+        !isHorizontal, aFrame->GetWritingMode());
     if (isHorizontal) {
       double clipWidth = rect.width * position;
       clipRect.width = clipWidth;
-      if (IsFrameRTL(aFrame)) {
+      if (startSide == eSideRight) {
         clipRect.x += rect.width - clipWidth;
       }
     } else {
       double clipHeight = rect.height * position;
       clipRect.height = clipHeight;
-      const WritingMode wm = aFrame->GetWritingMode();
-      if (!wm.IsVertical() ||
-          wm.PhysicalSide(LogicalSide::IStart) == eSideBottom) {
+      if (startSide == eSideBottom) {
         clipRect.y += rect.height - clipHeight;
       }
     }
