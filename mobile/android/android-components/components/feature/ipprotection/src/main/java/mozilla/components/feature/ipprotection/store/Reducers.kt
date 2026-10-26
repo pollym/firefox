@@ -6,6 +6,7 @@
 
 package mozilla.components.feature.ipprotection.store
 
+import kotlin.time.Instant
 import mozilla.components.ExperimentalAndroidComponentsApi
 import mozilla.components.concept.engine.ipprotection.ProxyState
 import mozilla.components.concept.engine.ipprotection.ServiceState
@@ -20,6 +21,8 @@ import mozilla.components.feature.ipprotection.store.state.ProxyActivation
 import mozilla.components.feature.ipprotection.store.state.ProxyStatus
 import mozilla.components.feature.ipprotection.store.state.Recommended
 import mozilla.components.feature.ipprotection.store.state.Uninitialized
+import mozilla.components.feature.ipprotection.store.state.UsageQuota
+import mozilla.components.feature.ipprotection.store.state.asDataVolume
 import mozilla.components.feature.ipprotection.store.state.isActivationInFlight
 
 @Suppress("CognitiveComplexMethod", "LongMethod", "ForbiddenSuppress")
@@ -68,11 +71,7 @@ internal fun iPProtectionReducer(
         }
 
         is IPProtectionAction.UsageChanged -> {
-            state.copy(
-                remainingDataBytes = action.remaining,
-                maxDataBytes = action.max,
-                resetDate = action.resetTime,
-            )
+            state.copy(usageQuota = action.toUsageQuota())
         }
 
         is IPProtectionAction.CountryListChanged -> {
@@ -363,9 +362,7 @@ internal fun internalReducer(
 
 private fun IPProtectionState.clearProfileData(action: InternalAction.AccountManagerStateChanged): IPProtectionState {
     return copy(
-        remainingDataBytes = -1L,
-        maxDataBytes = -1L,
-        resetDate = null,
+        usageQuota = null,
         proxyActivation = ProxyActivation.Idle,
         pendingActivationRequest = PendingActivationRequest.Deactivate,
         accountState = accountState.copy(status = action.status),
@@ -471,5 +468,23 @@ private fun ProxyState.asProxyStatus(): ProxyStatus {
         ProxyState.ACTIVE -> Authorized.Active
         ProxyState.PAUSED -> Authorized.DataLimitReached
         ProxyState.ERROR -> Authorized.ConnectionError
+    }
+}
+
+/**
+ * Converts the data usage items in [IPProtectionAction.UsageChanged] to [UsageQuota]. When either [remaining] or [max]
+ * is negative, the quota information is unavailable.
+ */
+private fun IPProtectionAction.UsageChanged.toUsageQuota(): UsageQuota? {
+    val remainingVolume = remaining.takeIf { it >= 0 }?.asDataVolume()
+    val maxVolume = max.takeIf { it > 0 }?.asDataVolume()
+
+    val reset = resetTime?.let(Instant::parseOrNull)
+
+    return when {
+        remainingVolume == null -> null
+        max == 0L -> UsageQuota.Unmetered(reset)
+        maxVolume == null -> null
+        else -> UsageQuota.Metered(resetTime = reset, max = maxVolume, remaining = remainingVolume)
     }
 }

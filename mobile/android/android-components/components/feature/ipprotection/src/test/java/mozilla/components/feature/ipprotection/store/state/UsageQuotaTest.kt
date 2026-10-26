@@ -20,7 +20,7 @@ class UsageQuotaTest {
 
     @Test
     fun `GIVEN a finite metered quota WHEN used is queried THEN used data volume is returned`() {
-        val quota = UsageQuota.Metered(cycleEnd = null, max = DataVolume(10), remaining = DataVolume(4))
+        val quota = UsageQuota.Metered(resetTime = null, max = DataVolume(10), remaining = DataVolume(4))
 
         assertEquals(DataVolume(6), quota.used)
     }

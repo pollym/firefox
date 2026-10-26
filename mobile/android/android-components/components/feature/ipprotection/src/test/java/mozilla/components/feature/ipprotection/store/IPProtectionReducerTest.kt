@@ -6,6 +6,7 @@ package mozilla.components.feature.ipprotection.store
 
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.time.Instant
 import mozilla.components.ExperimentalAndroidComponentsApi
 import mozilla.components.concept.engine.ipprotection.IPProtectionHandler
 import mozilla.components.concept.engine.ipprotection.ProxyState
@@ -15,6 +16,7 @@ import mozilla.components.feature.ipprotection.store.state.AccountState
 import mozilla.components.feature.ipprotection.store.state.AccountStatus
 import mozilla.components.feature.ipprotection.store.state.Authorized
 import mozilla.components.feature.ipprotection.store.state.Country
+import mozilla.components.feature.ipprotection.store.state.DataVolume
 import mozilla.components.feature.ipprotection.store.state.EligibilityStatus
 import mozilla.components.feature.ipprotection.store.state.LocationListUpdateState
 import mozilla.components.feature.ipprotection.store.state.LocationState
@@ -22,6 +24,7 @@ import mozilla.components.feature.ipprotection.store.state.PendingActivationRequ
 import mozilla.components.feature.ipprotection.store.state.ProxyActivation
 import mozilla.components.feature.ipprotection.store.state.Recommended
 import mozilla.components.feature.ipprotection.store.state.Uninitialized
+import mozilla.components.feature.ipprotection.store.state.UsageQuota
 import mozilla.components.feature.ipprotection.store.state.isActivationInFlight
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -43,29 +46,92 @@ class IPProtectionReducerTest {
     }
 
     @Test
-    fun `WHEN UsageChanged is dispatched THEN data fields are updated`() {
-        val remaining = 1000L
-        val max = 5000L
-        val resetTime = "2026-06-01T00:00:00Z"
-        val state = buildIPProtectionState(remaining, max, resetTime)
+    fun `WHEN UsageChanged is dispatched THEN usage quota is metered`() {
+        val usageQuota =
+            UsageQuota.Metered(
+                max = 5000.bytes,
+                remaining = 1000.bytes,
+                resetTime = Instant.parse("2026-06-01T00:00:00Z"),
+            )
+        val state = buildIPProtectionState().copy(usageQuota = usageQuota)
 
-        val updatedRemaining = 999L
-        val updatedMax = 10000L
-        val updatedResetTime = "2026-06-01T00:10:00Z"
+        val updatedQuota =
+            UsageQuota.Metered(
+                max = 10000.bytes,
+                remaining = 999.bytes,
+                resetTime = Instant.parse("2026-06-01T00:10:00Z"),
+            )
         val resultState =
-            iPProtectionReducer(state, IPProtectionAction.UsageChanged(updatedRemaining, updatedMax, updatedResetTime))
+            iPProtectionReducer(
+                state,
+                IPProtectionAction.UsageChanged(999L, 10000L, "2026-06-01T00:10:00Z"),
+            )
 
-        assertEquals(updatedRemaining, resultState.remainingDataBytes)
-        assertEquals(updatedMax, resultState.maxDataBytes)
-        assertEquals(updatedResetTime, resultState.resetDate)
+        assertEquals(updatedQuota, resultState.usageQuota)
+    }
+
+    @Test
+    fun `WHEN UsageChanged has negative remaining bytes THEN usage quota is unavailable`() {
+        val state = buildIPProtectionState()
+        val result = iPProtectionReducer(state, IPProtectionAction.UsageChanged(-1L, 5000L, "2026-06-01T00:00:00Z"))
+        assertNull(result.usageQuota)
+    }
+
+    @Test
+    fun `WHEN UsageChanged has 0 remaining bytes THEN usage quota is metered with remaining volume 0`() {
+        val state = buildIPProtectionState()
+        val result = iPProtectionReducer(state, IPProtectionAction.UsageChanged(0L, 5000L, "2026-06-01T00:00:00Z"))
+        assertEquals(
+            UsageQuota.Metered(
+                resetTime = Instant.parse("2026-06-01T00:00:00Z"),
+                max = 5000.bytes,
+                remaining = DataVolume.Zero,
+            ),
+            result.usageQuota,
+        )
+    }
+
+    @Test
+    fun `WHEN UsageChanged has 0 max bytes THEN usage quota is unmetered`() {
+        val state = buildIPProtectionState()
+        val result = iPProtectionReducer(state, IPProtectionAction.UsageChanged(1000L, 0L, "2026-06-01T00:00:00Z"))
+        assertEquals(
+            UsageQuota.Unmetered(resetTime = Instant.parse("2026-06-01T00:00:00Z")),
+            result.usageQuota,
+        )
+    }
+
+    @Test
+    fun `WHEN UsageChanged has a non-zero max THEN usage quota preserves the max volume`() {
+        val state = buildIPProtectionState()
+        val result = iPProtectionReducer(state, IPProtectionAction.UsageChanged(1000L, 6000L, "2026-06-01T00:00:00Z"))
+        assertEquals(
+            UsageQuota.Metered(
+                resetTime = Instant.parse("2026-06-01T00:00:00Z"),
+                max = 6000.bytes,
+                remaining = 1000.bytes,
+            ),
+            result.usageQuota,
+        )
+    }
+
+    @Test
+    fun `WHEN UsageChanged has negative max bytes THEN usage quota is unavailable`() {
+        val state = buildIPProtectionState()
+        val result = iPProtectionReducer(state, IPProtectionAction.UsageChanged(1000L, -1L, "2026-06-01T00:00:00Z"))
+        assertNull(result.usageQuota)
     }
 
     @Test
     fun `WHEN ServiceStateChanged or ProxyStateChanged is dispatched THEN data fields are unchanged`() {
-        val remaining = 1000L
-        val max = 5000L
-        val resetTime = "2026-06-01T00:00:00Z"
-        val state = buildIPProtectionState(remaining, max, resetTime)
+        val usageQuota =
+            UsageQuota.Metered(
+                max = DataVolume(5000),
+                remaining = DataVolume(1000),
+                resetTime = Instant.parse("2026-06-01T00:00:00Z"),
+            )
+        val state = buildIPProtectionState().copy(usageQuota = usageQuota)
+
         val actions =
             ServiceState.entries.map { IPProtectionAction.ServiceStateChanged(it) } +
                 ProxyState.entries.map { IPProtectionAction.ProxyStateChanged(it) }
@@ -73,9 +139,7 @@ class IPProtectionReducerTest {
         actions.forEach { action ->
             val resultState = iPProtectionReducer(state, action)
 
-            assertEquals(remaining, resultState.remainingDataBytes)
-            assertEquals(max, resultState.maxDataBytes)
-            assertEquals(resetTime, resultState.resetDate)
+            assertEquals(usageQuota, resultState.usageQuota)
         }
     }
 
@@ -94,17 +158,25 @@ class IPProtectionReducerTest {
                 }
 
             val resultState =
-                iPProtectionReducer(buildIPProtectionState(), IPProtectionAction.ProxyStateChanged(proxyState))
+                iPProtectionReducer(
+                    buildIPProtectionState(),
+                    IPProtectionAction.ProxyStateChanged(proxyState),
+                )
 
-            assertEquals("$proxyState should map to $expected", expected, resultState.proxyStatus)
+            assertEquals(
+                "$proxyState should map to $expected",
+                expected,
+                resultState.proxyStatus,
+            )
         }
     }
 
     @Test
     fun `WHEN the proxy reports an error THEN its message becomes the last error AND a later report without an error clears it`() {
+        val state = buildIPProtectionState()
         val errorState =
             iPProtectionReducer(
-                buildIPProtectionState(),
+                state,
                 IPProtectionAction.ProxyStateChanged(ProxyState.ERROR, "boom"),
             )
 
@@ -346,9 +418,12 @@ class IPProtectionReducerTest {
                 )
                 .copy(
                     eligibilityStatus = EligibilityStatus.Eligible,
-                    remainingDataBytes = 1000L,
-                    maxDataBytes = 5000L,
-                    resetDate = "2026-06-01T00:00:00Z",
+                    usageQuota =
+                        UsageQuota.Metered(
+                            remaining = DataVolume(1000),
+                            max = DataVolume(5000),
+                            resetTime = Instant.parseOrNull("2026-06-01T00:00:00Z"),
+                        ),
                     proxyActivation = ProxyActivation.TurningOn,
                     pendingActivationRequest = PendingActivationRequest.Activate(null),
                 )
@@ -361,9 +436,7 @@ class IPProtectionReducerTest {
 
         assertEquals(
             dirtyState.copy(
-                remainingDataBytes = -1L,
-                maxDataBytes = -1L,
-                resetDate = null,
+                usageQuota = null,
                 proxyActivation = ProxyActivation.Idle,
                 pendingActivationRequest = PendingActivationRequest.Deactivate,
                 accountState = AccountState(AccountStatus.NoAccount),
@@ -1062,3 +1135,6 @@ class IPProtectionReducerTest {
         assertEquals(LocationListUpdateState.Updated, resultState.locationState.updateState)
     }
 }
+
+private val Number.bytes: DataVolume
+    get() = DataVolume(this.toLong())

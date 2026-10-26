@@ -34,11 +34,12 @@ import mozilla.components.feature.ipprotection.store.IPProtectionStore
 import mozilla.components.feature.ipprotection.store.state.AccountState
 import mozilla.components.feature.ipprotection.store.state.AccountStatus
 import mozilla.components.feature.ipprotection.store.state.Authorized
-import mozilla.components.feature.ipprotection.store.state.BYTES_PER_GB
+import mozilla.components.feature.ipprotection.store.state.DataVolume
 import mozilla.components.feature.ipprotection.store.state.EligibilityStatus
 import mozilla.components.feature.ipprotection.store.state.IPProtectionState
 import mozilla.components.feature.ipprotection.store.state.ProxyStatus
 import mozilla.components.feature.ipprotection.store.state.Uninitialized
+import mozilla.components.feature.ipprotection.store.state.UsageQuota
 import mozilla.components.support.test.robolectric.testContext
 import mozilla.components.ui.icons.R as iconsR
 import org.junit.Rule
@@ -114,14 +115,18 @@ class VpnMenuItemProviderTest {
                     eligibilityStatus = EligibilityStatus.Eligible,
                     serviceStatus = ServiceState.Ready,
                     proxyStatus = Authorized.DataLimitReached,
-                    maxDataBytes = (5 * BYTES_PER_GB).toLong(),
+                    usageQuota =
+                        UsageQuota.Metered(
+                            max = DataVolume.roundedGigabytes(5),
+                            remaining = DataVolume.Zero,
+                        ),
                 )
             )
         val provider = provider(store)
 
         assertEquals(
             MenuItemSummary(
-                text = Text.Resource(R.string.ip_protection_menu_limit_reached, listOf(5)),
+                text = Text.Resource(R.string.ip_protection_menu_limit_reached, listOf(5L)),
                 state = MenuItemState.WARNING,
             ),
             (provider.itemFlow.value as StandardMenuItem).summary,

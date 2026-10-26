@@ -53,9 +53,6 @@ internal fun buildStore(
 }
 
 internal fun buildIPProtectionState(
-    remainingDataBytes: Long = -1L,
-    maxDataBytes: Long = -1L,
-    resetDate: String? = null,
     accountStatus: AccountStatus = AccountStatus.Authenticated,
     serviceStatus: ServiceState = ServiceState.Uninitialized,
     proxyStatus: ProxyStatus = Uninitialized,
@@ -65,9 +62,6 @@ internal fun buildIPProtectionState(
     proxyActivation: ProxyActivation = ProxyActivation.Idle,
 ): IPProtectionState {
     return IPProtectionState(
-        remainingDataBytes = remainingDataBytes,
-        maxDataBytes = maxDataBytes,
-        resetDate = resetDate,
         accountState = AccountState(accountStatus),
         serviceStatus = serviceStatus,
         proxyStatus = proxyStatus,
