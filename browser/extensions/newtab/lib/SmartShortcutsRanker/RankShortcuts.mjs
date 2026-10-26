@@ -943,7 +943,7 @@ export class RankShortcutsProvider {
     const refrec_scores = ["rece", "freq", "refre", "unid"].some(f =>
       features.includes(f)
     )
-      ? await this.fetchRefreFeatures(withGuid, features)
+      ? await this.fetchRefreFeatures(withGuid)
       : { rece: null, freq: null, refre: null, unid: null };
     const open_scores = features?.includes?.("open")
       ? await getIsOpen(
