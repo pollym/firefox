@@ -1262,6 +1262,27 @@ already_AddRefed<GLContext> GLContextProviderEGL::CreateHeadless(
   return ret.forget();
 }
 
+#ifdef MOZ_WIDGET_ANDROID
+/* static */
+already_AddRefed<GLContext> GLContextProviderEGL::CreateHeadlessNative(
+    const GLContextCreateDesc& desc, nsACString* const out_failureId) {
+  if (desc.flags & CreateContextFlags::FORBID_HARDWARE) {
+    *out_failureId = "FEATURE_FAILURE_NATIVE_EGL_SOFTWARE_UNSUPPORTED"_ns;
+    return nullptr;
+  }
+  const auto lib = GLLibraryEGL::GetNative(out_failureId);
+  if (!lib) {
+    return nullptr;
+  }
+  const auto display = lib->DefaultDisplay(out_failureId);
+  if (!display) {
+    return nullptr;
+  }
+  auto ret = GLContextEGL::CreateWithoutSurface(display, desc, out_failureId);
+  return ret.forget();
+}
+#endif
+
 // Don't want a global context on Android as 1) share groups across 2 threads
 // fail on many Tegra drivers (bug 759225) and 2) some mobile devices have a
 // very strict limit on global number of GL contexts (bug 754257) and 3) each
