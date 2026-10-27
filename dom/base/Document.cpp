@@ -2491,6 +2491,17 @@ void Document::AccumulatePageLoadTelemetry() {
     }
   }
 
+  // connectStart is null when the document reused an existing connection.
+  TimeStamp connectStart;
+  timedChannel->GetConnectStart(&connectStart);
+  if (connectStart) {
+    TimeDuration timeToConnectStart = connectStart - navigationStart;
+    mPageloadEventData.set_timeToConnectStart(
+        timeToConnectStart > zeroDuration
+            ? static_cast<uint32_t>(timeToConnectStart.ToMilliseconds())
+            : 0);
+  }
+
   TimeStamp secureConnectStart;
   TimeStamp connectEnd;
   timedChannel->GetSecureConnectionStart(&secureConnectStart);
