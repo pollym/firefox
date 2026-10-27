@@ -96,13 +96,3 @@ async function test_preference_binding_without_callback() {
 
   await toolbox.destroy();
 }
-
-async function openSettings() {
-  await pushPref("devtools.settings.redesign-enabled", true);
-  const tab = await addTab("about:blank");
-  const toolbox = await openToolboxForTab(tab, "options");
-  const root = toolbox.getCurrentPanel().element;
-  await root.updateComplete;
-
-  return { toolbox, root };
-}

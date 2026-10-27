@@ -4,6 +4,15 @@
 
 /** @import { SettingSection, SettingChangeHandler } from "./types/inventory.d.ts" */
 
+// eslint-disable-next-line no-shadow
+const { require } = ChromeUtils.importESModule(
+  "resource://devtools/shared/loader/Loader.sys.mjs"
+);
+/** @type {typeof import("../framework/devtools.js")} */
+const {
+  gDevTools,
+} = require("resource://devtools/client/framework/devtools.js");
+
 /** @type {ReadonlyArray<SettingSection>} */
 export const inventory = [
   {
@@ -15,54 +24,63 @@ export const inventory = [
         l10nId: "devtools-settings-tool-netmonitor",
         type: "boolean",
         pref: "devtools.netmonitor.enabled",
+        changeAction: "updateToolRegistration",
       },
       {
         id: "settings-tool-styleeditor",
         l10nId: "devtools-settings-tool-styleeditor",
         type: "boolean",
         pref: "devtools.styleeditor.enabled",
+        changeAction: "updateToolRegistration",
       },
       {
         id: "settings-tool-performance",
         l10nId: "devtools-settings-tool-performance",
         type: "boolean",
         pref: "devtools.performance.enabled",
+        changeAction: "updateToolRegistration",
       },
       {
         id: "settings-tool-memory",
         l10nId: "devtools-settings-tool-memory",
         type: "boolean",
         pref: "devtools.memory.enabled",
+        changeAction: "updateToolRegistration",
       },
       {
         id: "settings-tool-storage",
         l10nId: "devtools-settings-tool-storage",
         type: "boolean",
         pref: "devtools.storage.enabled",
+        changeAction: "updateToolRegistration",
       },
       {
         id: "settings-tool-accessibility",
         l10nId: "devtools-settings-tool-accessibility",
         type: "boolean",
         pref: "devtools.accessibility.enabled",
+        changeAction: "updateToolRegistration",
       },
       {
         id: "settings-tool-application",
         l10nId: "devtools-settings-tool-application",
         type: "boolean",
         pref: "devtools.application.enabled",
+        changeAction: "updateToolRegistration",
       },
       {
         id: "settings-tool-dom",
         l10nId: "devtools-settings-tool-dom",
         type: "boolean",
         pref: "devtools.dom.enabled",
+        changeAction: "updateToolRegistration",
       },
       {
         id: "settings-tool-antitracking",
         l10nId: "devtools-settings-tool-antitracking",
         type: "boolean",
         pref: "devtools.anti-tracking.enabled",
+        changeAction: "updateToolRegistration",
       },
     ],
   },
@@ -104,4 +122,23 @@ export const inventory = [
 export const callbacks = {
   updateToolboxButtons: ({ toolbox }) =>
     toolbox.updateToolboxButtonsVisibility(),
+
+  updateToolRegistration: ({ event }) => {
+    const tool = gDevTools
+      .getDefaultTools()
+      .find(
+        definition =>
+          "visibilityswitch" in definition &&
+          definition.visibilityswitch === event.pref
+      );
+    if (!tool) {
+      throw new Error(`No tool uses the ${event.pref} pref.`);
+    }
+    const isEnabled = Services.prefs.getBoolPref(event.pref);
+    gDevTools.emit(
+      isEnabled ? "tool-registered" : "tool-unregistered",
+      tool.id
+    );
+    Glean.devtoolsTool.registered[tool.id].set(isEnabled);
+  },
 };

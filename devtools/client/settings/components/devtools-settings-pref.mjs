@@ -57,7 +57,7 @@ export class DevToolsSettingsPref extends MozLitElement {
     Services.prefs.setBoolPref(this.pref, checkbox.checked);
     if (this.changeAction) {
       this.dispatchEvent(
-        new SettingChangedEvent({ action: this.changeAction })
+        new SettingChangedEvent({ action: this.changeAction, pref: this.pref })
       );
     }
   };

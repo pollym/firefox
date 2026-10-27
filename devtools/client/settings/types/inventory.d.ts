@@ -3,9 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { Toolbox } from "../../framework/toolbox.js";
+import { SettingChangedEvent } from "../events.mjs";
 import { callbacks } from "../inventory.mjs";
 
-export type SettingChangeHandler = (context: { toolbox: Toolbox }) => void;
+export type SettingChangeHandler = (context: {
+  toolbox: Toolbox;
+  event: SettingChangedEvent;
+}) => void;
 
 export interface BaseSetting {
   id: string;

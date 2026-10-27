@@ -42,7 +42,7 @@ export class SettingsPanel {
       // the panel might have been destroyed already
       return;
     }
-    callbacks[event.action]({ toolbox: this.toolbox });
+    callbacks[event.action]({ toolbox: this.toolbox, event });
   };
 
   destroy() {

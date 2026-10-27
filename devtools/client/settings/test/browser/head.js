@@ -8,3 +8,12 @@ Services.scriptloader.loadSubScript(
   "chrome://mochitests/content/browser/devtools/client/shared/test/shared-head.js",
   this
 );
+
+async function openSettings() {
+  await pushPref("devtools.settings.redesign-enabled", true);
+  const tab = await addTab("about:blank");
+  const toolbox = await openToolboxForTab(tab, "options");
+  const root = toolbox.getCurrentPanel().element;
+  await root.updateComplete;
+  return { toolbox, root };
+}
