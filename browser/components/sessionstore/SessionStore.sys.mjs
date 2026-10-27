@@ -666,6 +666,9 @@ class _SessionStore {
   // decides to later open a non-private window as well.
   #deferredInitialState = null;
 
+  // Whether startup_session_outcome has been recorded yet.
+  #sessionOutcomeRecorded = false;
+
   // Keeps track of whether a notification needs to be sent that closed objects have changed.
   #closedObjectsChanged = false;
 
@@ -1026,6 +1029,27 @@ class _SessionStore {
 
     Glean.sessionRestore.startupSessionDecision.record(extra);
     this.#log.debug("Session decision", extra);
+  }
+
+  /**
+   * Report what came of the restore decision reported by
+   * #recordSessionDecision. Only the restore at startup is reported, so the
+   * first call wins. A session held back for a later window gets its outcome
+   * here, not when that window eventually opens.
+   *
+   * @param {string} outcome
+   *        One of "restored", "deferred_to_window", "no_windows" or
+   *        "nothing".
+   */
+  #recordSessionOutcome(outcome) {
+    if (this.#sessionOutcomeRecorded) {
+      return;
+    }
+    this.#sessionOutcomeRecorded = true;
+    Glean.sessionRestore.startupSessionOutcome.record({ outcome });
+    this.#log.debug(
+      `Session outcome: ${outcome}, ${this.#restoreCount} windows`
+    );
   }
 
   /**
@@ -1848,6 +1872,7 @@ class _SessionStore {
           this.#deferredInitialState = lazy.SessionStartup.state;
 
           // Nothing to restore now, notify observers things are complete.
+          this.#recordSessionOutcome("deferred_to_window");
           Services.obs.notifyObservers(null, NOTIFY_WINDOWS_RESTORED);
           Services.obs.notifyObservers(
             null,
@@ -1881,6 +1906,7 @@ class _SessionStore {
         }
       } else {
         // Nothing to restore, notify observers things are complete.
+        this.#recordSessionOutcome("nothing");
         Services.obs.notifyObservers(null, NOTIFY_WINDOWS_RESTORED);
         Services.obs.notifyObservers(
           null,
@@ -6596,6 +6622,7 @@ class _SessionStore {
     );
     // We're done here if there are no windows.
     if (!root.windows || !root.windows.length) {
+      this.#recordSessionOutcome("no_windows");
       this.#sendRestoreCompletedNotifications();
       return;
     }
@@ -8123,6 +8150,7 @@ class _SessionStore {
 
     // This was the last window restored at startup, notify observers.
     if (!this.#browserSetState) {
+      this.#recordSessionOutcome("restored");
       Services.obs.notifyObservers(null, NOTIFY_WINDOWS_RESTORED);
       this.#log.debug(`All ${this.#restoreCount} windows restored`);
       this.#maybeOpenNewTabAfterRestore();
