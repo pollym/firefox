@@ -11,6 +11,8 @@ skip-if = [ "true" ] # Bug 2084381
 
 ["test_deferred_initial_state_window_features_mismatch.py"]
 
+["test_deferred_nothing_to_restore.py"]
+
 ["test_log_files.py"]
 
 ["test_new_tab_on_restore.py"]
