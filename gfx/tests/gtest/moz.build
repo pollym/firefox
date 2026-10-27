@@ -21,6 +21,7 @@ UNIFIED_SOURCES += [
     "TestImageAddressableSize.cpp",
     "TestMatrix.cpp",
     "TestMoz2D.cpp",
+    "TestNVImage.cpp",
     "TestPlanarYCbCrImage.cpp",
     "TestPoint.cpp",
     "TestPolygon.cpp",
