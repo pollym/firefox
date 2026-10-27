@@ -89,6 +89,8 @@ tags = "remote-settings searchmain"
 
 ["test_getSubmission_partnerCode.js"]
 
+["test_hideOneOffButton.js"]
+
 ["test_identifiers.js"]
 
 ["test_ignorelist.js"]
@@ -237,6 +239,8 @@ support-files = [
 ["test_settings_migrate_14.js"]
 
 ["test_settings_migrate_id_format.js"]
+
+["test_settings_migration_hideOneOffs.js"]
 
 ["test_settings_migration_ids.js"]
 support-files = ["settings/v6-ids-upgrade.json"]

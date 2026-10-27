@@ -511,6 +511,15 @@ function promiseSanitizationComplete() {
   return TestUtils.topicObserved("sanitizer-sanitization-complete");
 }
 
+function settingsRedesignHistoryEnabled() {
+  return (
+    Services.prefs.getBoolPref(
+      "browser.settings-redesign.history2.enabled",
+      false
+    ) || Services.prefs.getBoolPref("browser.settings-redesign.enabled", false)
+  );
+}
+
 /**
  * This wraps the dialog and provides some convenience methods for interacting
  * with it.
@@ -667,7 +676,7 @@ ClearHistoryDialogHelper.prototype = {
     // We want to simulate opening the dialog inside preferences for clear history
     // and clear site data
     if (this._mode != "browser") {
-      if (this._mode == "clearOnShutdown") {
+      if (this._mode == "clearOnShutdown" && settingsRedesignHistoryEnabled()) {
         await openPreferencesViaOpenPreferencesAPI("history", {
           leaveOpen: true,
         });
