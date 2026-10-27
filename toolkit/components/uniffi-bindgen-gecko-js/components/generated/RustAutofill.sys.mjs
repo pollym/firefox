@@ -2723,6 +2723,8 @@ export class FfiConverterTypeUpdatableAddressFieldsWithMeta extends FfiConverter
 /**
  * What you pass to create or update a credit-card. The number is given in
  * cleartext; the store encrypts it and derives the last-4 digits itself.
+ * On update, a null `cc_cvv` keeps the stored CVV and an empty one clears
+ * it.
  */
 export class UpdatableCreditCardFields {
     constructor(
