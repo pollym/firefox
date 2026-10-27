@@ -816,57 +816,12 @@ add_task(async function test_copyAllLinksInGroup_singleTab() {
 });
 
 /**
- * Tests that the swatches are positioned within tab-group-properties-and-actions
- * when Nova is disabled.
+ * Tests that the swatches are positioned before the name field.
  */
-add_task(async function test_swatchLayoutDefault() {
-  await SpecialPowers.pushPrefEnv({
-    set: [["browser.nova.enabled", false]],
-  });
-
+add_task(async function test_swatchLayout() {
   let { tabgroupEditor, group } = await createTabGroupAndOpenEditPanel(
     [],
-    "test_swatchLayoutDefault"
-  );
-  let tabgroupPanel = tabgroupEditor.panel;
-  let swatches = tabgroupPanel.querySelector(".tab-group-editor-swatches");
-  let nameContainer = tabgroupPanel.querySelector(".tab-group-editor-name");
-  let propertiesActions = tabgroupPanel.querySelector(
-    "#tab-group-properties-and-actions"
-  );
-
-  Assert.notEqual(
-    swatches.nextElementSibling,
-    nameContainer,
-    "Swatches are not directly above the name field"
-  );
-  Assert.equal(
-    swatches.parentElement,
-    propertiesActions,
-    "Swatches are in the properties-and-actions container"
-  );
-
-  let panelHidden = BrowserTestUtils.waitForPopupEvent(tabgroupPanel, "hidden");
-  tabgroupPanel.hidePopup();
-  await panelHidden;
-
-  await removeTabGroup(group);
-  await SpecialPowers.popPrefEnv();
-});
-
-/**
- * Tests that the swatches are positioned before the name field
- * when Nova is enabled, and that their positions are restored
- * when Nova is disabled.
- */
-add_task(async function test_swatchLayoutNova() {
-  await SpecialPowers.pushPrefEnv({
-    set: [["browser.nova.enabled", true]],
-  });
-
-  let { tabgroupEditor, group } = await createTabGroupAndOpenEditPanel(
-    [],
-    "test_swatchLayoutNova"
+    "test_swatchLayout"
   );
   let tabgroupPanel = tabgroupEditor.panel;
   let swatches = tabgroupPanel.querySelector(".tab-group-editor-swatches");
@@ -878,43 +833,16 @@ add_task(async function test_swatchLayoutNova() {
   Assert.equal(
     swatches.nextElementSibling,
     nameContainer,
-    "Swatches are directly above the name field when Nova is enabled"
+    "Swatches are directly above the name field"
   );
   Assert.notEqual(
     swatches.parentElement,
     propertiesActions,
-    "Swatches are not in the properties-and-actions container when Nova is enabled"
+    "Swatches are not in the properties-and-actions container"
   );
 
   let panelHidden = BrowserTestUtils.waitForPopupEvent(tabgroupPanel, "hidden");
   tabgroupPanel.hidePopup();
   await panelHidden;
-  await SpecialPowers.popPrefEnv();
-
-  // Verify layout is restored when we re-open the panel and disable Nova.
-  await SpecialPowers.pushPrefEnv({
-    set: [["browser.nova.enabled", false]],
-  });
-
-  let panelShown = BrowserTestUtils.waitForPopupEvent(tabgroupPanel, "shown");
-  tabgroupEditor.openEditModal(group);
-  await panelShown;
-
-  Assert.notEqual(
-    swatches.nextElementSibling,
-    nameContainer,
-    "Swatches are not directly above the name field after disabling Nova"
-  );
-  Assert.equal(
-    swatches.parentElement,
-    propertiesActions,
-    "Swatches are back in the properties-and-actions container after disabling Nova"
-  );
-
-  panelHidden = BrowserTestUtils.waitForPopupEvent(tabgroupPanel, "hidden");
-  tabgroupPanel.hidePopup();
-  await panelHidden;
-
   await removeTabGroup(group);
-  await SpecialPowers.popPrefEnv();
 });
