@@ -326,13 +326,23 @@ RefPtr<WebRenderAPI::CreatePromise> WebRenderAPI::Create(
           // wr_window_new puts a message into gfxCriticalNote if it returns
           // false
           MOZ_ASSERT(errorMessage);
+          if (!errorMessage) {
+            return CreatePromise::CreateAndReject("wr_window_new unknown error"_ns , __func__);
+          }
+
           error.AssignASCII(errorMessage);
           wr_api_free_error_msg(errorMessage);
           return CreatePromise::CreateAndReject(error, __func__);
         }
-        MOZ_ASSERT(wrRenderer);
-        MOZ_ASSERT(docHandle);
 
+        MOZ_ASSERT(wrRenderer);
+        if (!wrRenderer) {
+          return CreatePromise::CreateAndReject("wr_window_new without wrRenderer"_ns , __func__);
+        }
+        MOZ_ASSERT(docHandle);
+        if (!wrRenderer) {
+          return CreatePromise::CreateAndReject("wr_window_new without docHandle"_ns , __func__);
+        }
         const WebRenderBackend backend = compositor->BackendType();
         const WebRenderCompositor compositorType = compositor->CompositorType();
         const bool useANGLE = compositor->UseANGLE();
