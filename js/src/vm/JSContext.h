@@ -156,7 +156,7 @@ class MicroTaskQueueElement {
     // A PromiseReactionRecord, run by PromiseReactionJob.
     PromiseReaction = JS::MicroTask::Kind::FirstJSKind,
 
-    // A ThenableJob; the kind selects which resolution routine it runs.
+    // A ThenableJobObject; the kind selects which resolution routine it runs.
     ResolveThenable,
     ResolveBuiltinThenable,
     // Used by JS::SafeResolve: runs PerformPromiseResolution on the job's

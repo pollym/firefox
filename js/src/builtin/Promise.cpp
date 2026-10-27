@@ -722,7 +722,7 @@ static bool AbruptRejectPromise(JSContext* cx, CallArgs& args,
                              capability.reject());
 }
 
-class MicroTaskEntry : public NativeObject {
+class PromiseJobObject : public NativeObject {
  protected:
   enum Slots {
     // Shared slots:
@@ -779,7 +779,7 @@ class MicroTaskEntry : public NativeObject {
  * PromiseReaction Records
  * https://tc39.es/ecma262/#sec-promisereaction-records
  */
-class PromiseReactionRecord : public MicroTaskEntry {
+class PromiseReactionRecord : public PromiseJobObject {
   // If this flag is set, this reaction record is already enqueued to the
   // job queue, and the spec's [[Type]] field is represented by
   // REACTION_FLAG_FULFILLED flag.
@@ -863,13 +863,13 @@ class PromiseReactionRecord : public MicroTaskEntry {
     //   reaction to be created. (These functions act as if they had created a
     //   promise to invoke the appropriate provided reaction function, without
     //   actually allocating a promise for them.)
-    Promise = MicroTaskEntry::Slots::Promise,
+    Promise = PromiseJobObject::Slots::Promise,
 
     // The host defined data for this reaction record. Can be null.
     // See step 5 in https://html.spec.whatwg.org/#hostmakejobcallback
     IncumbentGlobalRepresentative =
-        MicroTaskEntry::Slots::IncumbentGlobalRepresentative,
-    OptionalHostDefinedData = MicroTaskEntry::Slots::OptionalHostDefinedData,
+        PromiseJobObject::Slots::IncumbentGlobalRepresentative,
+    OptionalHostDefinedData = PromiseJobObject::Slots::OptionalHostDefinedData,
 
     // < Invisibly here are the microtask job slots from the parent class
     // MicroTask. >
@@ -878,7 +878,7 @@ class PromiseReactionRecord : public MicroTaskEntry {
     // the reaction job. This may be a CCW. We don't store the global
     // of the realm directly because wrappers to globals can change
     // globals, which breaks code.
-    EnqueueGlobalRepresentative = MicroTaskEntry::Slots::SlotCount,
+    EnqueueGlobalRepresentative = PromiseJobObject::Slots::SlotCount,
 
     // The [[Handler]] field(s) of a PromiseReaction record. We create a
     // single reaction record for fulfillment and rejection, therefore our
@@ -1103,11 +1103,11 @@ const JSClass PromiseReactionRecord::class_ = {
 
 // A Thenable Job is data bound to a specific task type when
 // enqueued in the microtask queue.
-class ThenableJob : public MicroTaskEntry {
+class ThenableJobObject : public PromiseJobObject {
  protected:
   enum Slots {
-    // These slots come directoy after the MicroTaskEntry slots.
-    Thenable = MicroTaskEntry::Slots::SlotCount,
+    // These slots come directoy after the PromiseJobObject slots.
+    Thenable = PromiseJobObject::Slots::SlotCount,
     Then,
     SlotCount
   };
@@ -1127,22 +1127,22 @@ class ThenableJob : public MicroTaskEntry {
 };
 
 template <>
-inline bool JSObject::is<MicroTaskEntry>() const {
-  return is<ThenableJob>() || is<PromiseReactionRecord>();
+inline bool JSObject::is<PromiseJobObject>() const {
+  return is<ThenableJobObject>() || is<PromiseReactionRecord>();
 }
 
-const JSClass ThenableJob::class_ = {
-    "ThenableJob",
-    JSCLASS_HAS_RESERVED_SLOTS(ThenableJob::SlotCount),
+const JSClass ThenableJobObject::class_ = {
+    "ThenableJobObject",
+    JSCLASS_HAS_RESERVED_SLOTS(ThenableJobObject::SlotCount),
 };
 
-// The routine a ThenableJob runs is chosen by the
+// The routine a ThenableJobObject runs is chosen by the
 // js::MicroTaskQueueElement::Kind it is enqueued under, not by anything stored
 // on the job.
-ThenableJob* NewThenableJob(JSContext* cx, HandleObject promise,
-                            HandleValue thenable, HandleObject then,
-                            HandleObject incumbentGlobalRepresentative,
-                            HandleObject optionalHostDefinedData) {
+ThenableJobObject* NewThenableJob(JSContext* cx, HandleObject promise,
+                                  HandleValue thenable, HandleObject then,
+                                  HandleObject incumbentGlobalRepresentative,
+                                  HandleObject optionalHostDefinedData) {
   cx->check(optionalHostDefinedData);
   // MG:XXX: Boy isn't it silly that we have to root here, only to get the
   // allocation site...
@@ -1152,7 +1152,7 @@ ThenableJob* NewThenableJob(JSContext* cx, HandleObject promise,
     return nullptr;
   }
 
-  auto* job = NewBuiltinClassInstance<ThenableJob>(cx);
+  auto* job = NewBuiltinClassInstance<ThenableJobObject>(cx);
   if (!job) {
     return nullptr;
   }
@@ -1646,7 +1646,7 @@ static bool GetFlowIdFromJob(JSObject* job, uint64_t* uid) {
     return false;
   }
 
-  MOZ_ASSERT(unwrapped->is<MicroTaskEntry>(), "Only use on JSMicroTasks");
+  MOZ_ASSERT(unwrapped->is<PromiseJobObject>(), "Only use on JSMicroTasks");
 
   *uid = js::gc::GetUniqueIdInfallible(unwrapped);
   return true;
@@ -2942,7 +2942,7 @@ static bool PromiseResolveBuiltinThenableJob(JSContext* cx,
     return false;
   }
 
-  ThenableJob* thenableJob =
+  ThenableJobObject* thenableJob =
       NewThenableJob(cx, promise, thenable, then,
                      hostDefinedGlobalRepresentative, optionalHostDefinedData);
   if (!thenableJob) {
@@ -2985,7 +2985,7 @@ static bool PromiseResolveBuiltinThenableJob(JSContext* cx,
   }
 
   RootedField<Value, 2> thenableValue(roots, ObjectValue(*thenable));
-  ThenableJob* thenableJob =
+  ThenableJobObject* thenableJob =
       NewThenableJob(cx, promiseToResolve, thenableValue, nullptr,
                      incumbentGlobalRepresentative, optionalHostDefinedData);
   if (!thenableJob) {
@@ -3134,7 +3134,7 @@ static void RequiresDeferredPromiseResolution(HandleValue value, JSContext* cx,
   }
 
   RootedObject promiseObj(cx, promise);
-  ThenableJob* job =
+  ThenableJobObject* job =
       NewThenableJob(cx, promiseObj, resolution, nullptr,
                      incumbentGlobalRepresentative, optionalHostDefinedData);
   if (!job) {
@@ -8508,7 +8508,7 @@ bool JS::JSMicroTaskRef::run(JSContext* cx) && {
       return PromiseReactionJob(cx, task);
 
     case MicroTaskQueueElement::Kind::ResolveThenable: {
-      ThenableJob* job = &unwrappedTask->as<ThenableJob>();
+      ThenableJobObject* job = &unwrappedTask->as<ThenableJobObject>();
       // MG:XXX: Note: Because we don't care about the result of these values
       // after the call, do these really have to be rooted (I don't think so?)
       RootedField<JSObject*, 2> promise(roots, job->promise());
@@ -8519,14 +8519,14 @@ bool JS::JSMicroTaskRef::run(JSContext* cx) && {
     }
 
     case MicroTaskQueueElement::Kind::ResolveBuiltinThenable: {
-      ThenableJob* job = &unwrappedTask->as<ThenableJob>();
+      ThenableJobObject* job = &unwrappedTask->as<ThenableJobObject>();
       RootedField<JSObject*, 2> promise(roots, job->promise());
       RootedField<JSObject*, 5> thenable(roots, &job->thenable().toObject());
       return PromiseResolveBuiltinThenableJob(cx, promise, thenable);
     }
 
     case MicroTaskQueueElement::Kind::DeferredResolve: {
-      ThenableJob* job = &unwrappedTask->as<ThenableJob>();
+      ThenableJobObject* job = &unwrappedTask->as<ThenableJobObject>();
       RootedField<PromiseObject*, 3> promise(
           roots, &job->promise()->as<PromiseObject>());
       RootedField<Value, 4> resolution(roots, job->thenable());
@@ -8550,8 +8550,8 @@ JS_PUBLIC_API bool JS::JSMicroTaskRef::maybeGetAllocationSite(
     return false;
   }
 
-  MOZ_ASSERT(task->is<MicroTaskEntry>());
-  JSObject* maybeWrappedStack = task->as<MicroTaskEntry>().allocationStack();
+  MOZ_ASSERT(task->is<PromiseJobObject>());
+  JSObject* maybeWrappedStack = task->as<PromiseJobObject>().allocationStack();
 
   if (!maybeWrappedStack) {
     out.set(nullptr);
@@ -8578,13 +8578,14 @@ JS_PUBLIC_API bool JS::JSMicroTaskRef::maybeGetHostDefinedData(
     return false;
   }
 
-  MOZ_ASSERT(task->is<MicroTaskEntry>());
+  MOZ_ASSERT(task->is<PromiseJobObject>());
   JSObject* maybeIncumbentGlobalRepresentative =
-      task->as<MicroTaskEntry>()
+      task->as<PromiseJobObject>()
           .getIncumbentGlobalRepresentative()
           .toObjectOrNull();
-  JSObject* maybeOptionalHostDefinedData =
-      task->as<MicroTaskEntry>().getOptionalHostDefinedData().toObjectOrNull();
+  JSObject* maybeOptionalHostDefinedData = task->as<PromiseJobObject>()
+                                               .getOptionalHostDefinedData()
+                                               .toObjectOrNull();
 
   if (!maybeIncumbentGlobalRepresentative) {
     // If we don't have an incumbent global we don't process host defined data.
@@ -8630,7 +8631,7 @@ JS_PUBLIC_API JSObject* JS::JSMicroTaskRef::executionGlobal() && {
     case MicroTaskQueueElement::Kind::DeferredResolve:
       // Thenable jobs are allocated in the right realm+global and so we
       // can just use nonCCWGlobal;
-      MOZ_ASSERT(unwrapped->is<ThenableJob>());
+      MOZ_ASSERT(unwrapped->is<ThenableJobObject>());
       return &unwrapped->nonCCWGlobal();
 
     case MicroTaskQueueElement::Kind::Embedder:
@@ -8646,8 +8647,8 @@ JS_PUBLIC_API JSObject* JS::JSMicroTaskRef::maybeGetPromise() && {
     return nullptr;
   }
 
-  MOZ_ASSERT(unwrapped->is<MicroTaskEntry>());
-  return unwrapped->as<MicroTaskEntry>().promise();
+  MOZ_ASSERT(unwrapped->is<PromiseJobObject>());
+  return unwrapped->as<PromiseJobObject>().promise();
 }
 
 JS_PUBLIC_API bool JS::JSMicroTaskRef::getFlowId(uint64_t* uid) && {
