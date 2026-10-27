@@ -263,6 +263,8 @@ skip-if = [
 
 ["test_anonymousContent_api.html"]
 
+["test_anonymousContent_id_table.html"]
+
 ["test_anonymousContent_append_after_reflow.html"]
 
 ["test_anonymousContent_canvas.html"]
