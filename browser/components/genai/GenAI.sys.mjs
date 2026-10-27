@@ -372,6 +372,53 @@ export const GenAI = {
   },
 
   /**
+   * @param {Window} window browser window of the context menu
+   * @returns {boolean} whether the selection menu was turned off and can be
+   *   turned back on from the context menu
+   */
+  canTurnOnSelectionMenu(window) {
+    return (
+      lazy.highlightToSearchFeatureGate &&
+      !lazy.highlightToSearchEnabled &&
+      !lazy.AIWindow.isAIWindowActive(window)
+    );
+  },
+
+  /**
+   * Turn the selection menu back on and show it over the selection that was
+   * right-clicked. Turning every action off is what turned it off, which isn't
+   * a preference worth restoring, so each action comes back too.
+   *
+   * @param {WindowGlobalParent} windowGlobal frame that was right-clicked
+   * @param {{screenXDevPx: number, screenYDevPx: number}} point where the
+   *   context menu was opened
+   */
+  turnOnSelectionMenu(windowGlobal, point) {
+    Services.prefs.setBoolPref("browser.highlightToSearch.enabled", true);
+    if (
+      !this.canShowAIAction &&
+      !lazy.highlightToSearchSearchEnabled &&
+      !lazy.highlightToSearchCopyEnabled
+    ) {
+      Services.prefs.setBoolPref("browser.ml.chat.shortcuts", true);
+      Services.prefs.setBoolPref(
+        "browser.highlightToSearch.search.enabled",
+        true
+      );
+      Services.prefs.setBoolPref(
+        "browser.highlightToSearch.copy.enabled",
+        true
+      );
+    }
+    Glean.selectionMenu.optionToggled.record({
+      action: "master",
+      enabled: true,
+      source: "context_menu",
+    });
+    windowGlobal.getActor("GenAI").sendAsyncMessage("ShowSelectionMenu", point);
+  },
+
+  /**
    * @returns {bool} can show
    */
   get canShowSelectionMenu() {
@@ -633,11 +680,9 @@ export const GenAI = {
       const copyVisible = this.canShowCopyAction;
       copyActionButton.hidden = !copyVisible;
       moreActionsButton.hidden = !this.canShowMoreActions;
-      moreActionsSeparator.hidden = moreActionsButton.hidden;
-      return {
-        hasActions: aiVisible || !!searchEngine || copyVisible,
-        searchEngine,
-      };
+      const hasActions = aiVisible || !!searchEngine || copyVisible;
+      moreActionsSeparator.hidden = moreActionsButton.hidden || !hasActions;
+      return { hasActions, searchEngine };
     };
 
     panel.resetCopyConfirmation = () => {
@@ -793,6 +838,9 @@ export const GenAI = {
     searchToggle.iconSrc = "chrome://global/skin/icons/search-glass.svg";
     copyToggle.iconSrc = "chrome://global/skin/icons/edit-copy.svg";
 
+    const allOffNotice = document.getElementById("more-actions-all-off-notice");
+    let turnOffWhenClosed = false;
+
     const renderMoreActions = () => {
       // The chatbot row is absent, not unchecked, while the chatbot is blocked.
       aiToggle.hidden = !this.canOfferChatbot;
@@ -807,6 +855,8 @@ export const GenAI = {
       aiToggle.pressed = lazy.chatShortcuts;
       searchToggle.pressed = lazy.highlightToSearchSearchEnabled;
       copyToggle.pressed = lazy.highlightToSearchCopyEnabled;
+      allOffNotice.hidden = true;
+      turnOffWhenClosed = false;
     };
 
     const hasEnabledAction = () =>
@@ -827,19 +877,8 @@ export const GenAI = {
           enabled: toggle.pressed,
           source: "menu",
         });
-        if (!hasEnabledAction()) {
-          Services.prefs.setBoolPref(
-            "browser.highlightToSearch.enabled",
-            false
-          );
-          Glean.selectionMenu.optionToggled.record({
-            action: "master",
-            enabled: false,
-            source: "uncheck_all",
-          });
-          panel.hide();
-          return;
-        }
+        turnOffWhenClosed = !hasEnabledAction();
+        allOffNotice.hidden = !turnOffWhenClosed;
         // Re-render the bar in place rather than waiting for the next
         // selection.
         panel.updateActions(
@@ -870,6 +909,19 @@ export const GenAI = {
       if (event.target == moreActionsPanel) {
         moreActionsButton.setAttribute("type", buttonDefaultState);
         moreActionsButton.ariaExpanded = "false";
+        if (turnOffWhenClosed) {
+          turnOffWhenClosed = false;
+          Services.prefs.setBoolPref(
+            "browser.highlightToSearch.enabled",
+            false
+          );
+          Glean.selectionMenu.optionToggled.record({
+            action: "master",
+            enabled: false,
+            source: "uncheck_all",
+          });
+          panel.hide();
+        }
       }
     });
     moreActionsButton.addEventListener("click", async () => {
