@@ -668,6 +668,7 @@ dependencies {
     testImplementation project(':components:support-test-libstate')
     testImplementation testFixtures(project(':components:support-utils'))
     testImplementation testFixtures(project(':components:feature-tabgroups-storage'))
+    testImplementation testFixtures(project(':components:feature-tabdata-coordinator'))
 
     testImplementation ComponentsDependencies.mozilla_appservices_full_megazord_libsForTests
 

@@ -5,8 +5,6 @@
 package org.mozilla.fenix.tabgroups.strip.redux
 
 import kotlin.test.assertEquals
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -14,6 +12,7 @@ import mozilla.components.feature.tabdata.coordinator.TabDataCoordinator
 import mozilla.components.feature.tabdata.coordinator.data.Tab as CoordinatorTab
 import mozilla.components.feature.tabdata.coordinator.data.TabGroup
 import mozilla.components.feature.tabdata.coordinator.data.TabsSnapshot
+import mozilla.components.feature.tabdata.coordinator.fakes.FakeTabDataCoordinator
 import org.junit.Test
 
 class TabGroupsStripMiddlewareTest {
@@ -105,13 +104,13 @@ class TabGroupsStripMiddlewareTest {
     @Test
     fun `WHEN a later snapshot emits THEN the strip keeps updating`() =
         runTest(testDispatcher) {
-            val tabsSnapshot = MutableStateFlow<TabsSnapshot?>(null)
-            val store = buildStore(coordinator = FakeTabDataCoordinator(tabsSnapshot))
+            val coordinator = FakeTabDataCoordinator()
+            val store = buildStore(coordinator = coordinator)
             testDispatcher.scheduler.advanceUntilIdle()
             assertEquals(expected = TabGroupsStripState.TabGroupStripHidden, actual = store.state)
 
             val tab1 = createTab(id = "1", tabGroupId = "group")
-            tabsSnapshot.value =
+            coordinator.tabsSnapshot.value =
                 TabsSnapshot(
                     selectedTab = tab1,
                     normalTabs = listOf(tab1),
@@ -136,12 +135,10 @@ class TabGroupsStripMiddlewareTest {
             val tab1 = createTab(id = "1", tabGroupId = "group")
             val coordinator =
                 FakeTabDataCoordinator(
-                    MutableStateFlow(
-                        TabsSnapshot(
-                            selectedTab = tab1,
-                            normalTabs = listOf(tab1),
-                            openTabGroups = listOf(createGroup("group", "Group", tabIds = listOf("1"))),
-                        )
+                    TabsSnapshot(
+                        selectedTab = tab1,
+                        normalTabs = listOf(tab1),
+                        openTabGroups = listOf(createGroup("group", "Group", tabIds = listOf("1"))),
                     )
                 )
             val store =
@@ -166,8 +163,7 @@ class TabGroupsStripMiddlewareTest {
             )
         }
 
-    private fun buildStore(snapshot: TabsSnapshot?): TabGroupsStripStore =
-        buildStore(FakeTabDataCoordinator(MutableStateFlow(snapshot)))
+    private fun buildStore(snapshot: TabsSnapshot?): TabGroupsStripStore = buildStore(FakeTabDataCoordinator(snapshot))
 
     private fun buildStore(coordinator: TabDataCoordinator): TabGroupsStripStore =
         TabGroupsStripStore(middleware = listOf(TabGroupsStripMiddleware(coordinator, testScope, testDispatcher)))
@@ -196,8 +192,4 @@ class TabGroupsStripMiddlewareTest {
         id: String,
         isFocused: Boolean = false,
     ) = TabGroupsStripState.Tab(id = id, url = "https://example.com/$id", title = "Tab $id", isFocused = isFocused)
-}
-
-private class FakeTabDataCoordinator(override val tabsSnapshot: StateFlow<TabsSnapshot?>) : TabDataCoordinator {
-    override fun initialize() = Unit
 }

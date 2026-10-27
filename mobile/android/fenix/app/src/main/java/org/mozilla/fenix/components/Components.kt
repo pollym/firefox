@@ -563,7 +563,11 @@ class Components(
 
     val tabDataCoordinator: TabDataCoordinator by lazyMonitored {
         DefaultTabDataCoordinator(
-            tabRepository = DefaultTabRepository(browserStore = core.store),
+            tabRepository =
+                DefaultTabRepository(
+                    browserStore = core.store,
+                    tabsUseCases = useCases.tabsUseCases,
+                ),
             tabGroupRepository = core.tabGroupRepository,
             isInactiveTabsEnabled = settings::inactiveTabsAreEnabled,
             isTabGroupsEnabled = settings::tabGroupsEnabled,
