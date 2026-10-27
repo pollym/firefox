@@ -3501,6 +3501,12 @@ nsChangeHint Element::GetAttributeChangeHint(const nsAtom* aAttribute,
   return nsChangeHint(0);
 }
 
+void Element::DoScheduleForPresAttrEvaluation() {
+  MOZ_ASSERT(IsPendingMappedAttributeEvaluation());
+  MOZ_ASSERT(IsInComposedDoc());
+  OwnerDoc()->ScheduleForPresAttrEvaluation(this);
+}
+
 void Element::SetMappedDeclarationBlock(
     already_AddRefed<StyleLockedDeclarationBlock> aDeclarations) {
   MOZ_ASSERT(IsPendingMappedAttributeEvaluation());
@@ -4170,12 +4176,8 @@ nsresult Element::SetAttrAndNotify(
     MOZ_TRY(SetAndSwapAttr(ni, aParsedValue, &oldValueSet, aIsKnownNew));
   }
 
-  if (IsAttrMapped(aNamespaceID, aName) &&
-      !IsPendingMappedAttributeEvaluation()) {
-    mAttrs.InfallibleMarkAsPendingPresAttributeEvaluation();
-    if (Document* doc = GetComposedDoc()) {
-      doc->ScheduleForPresAttrEvaluation(this);
-    }
+  if (IsAttrMapped(aNamespaceID, aName)) {
+    ScheduleForPresAttrEvaluationIfNeeded();
   }
 
   // If the old value owns its own data, we know it is OK to keep using it.
@@ -4556,12 +4558,8 @@ nsresult Element::UnsetAttr(int32_t aNameSpaceID, nsAtom* aName, bool aNotify) {
     hadDirAuto = HasDirAuto();  // already takes bdi into account
   }
 
-  if (IsAttrMapped(aNameSpaceID, aName) &&
-      !IsPendingMappedAttributeEvaluation()) {
-    mAttrs.InfallibleMarkAsPendingPresAttributeEvaluation();
-    if (Document* doc = GetComposedDoc()) {
-      doc->ScheduleForPresAttrEvaluation(this);
-    }
+  if (IsAttrMapped(aNameSpaceID, aName)) {
+    ScheduleForPresAttrEvaluationIfNeeded();
   }
 
   nsAttrValue oldValue;

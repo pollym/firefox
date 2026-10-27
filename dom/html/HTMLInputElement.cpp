@@ -4936,11 +4936,8 @@ void HTMLInputElement::HandleTypeChange(FormControlType aNewType,
       }
     }
     // We should update our mapped attribute mapping function.
-    if (mAttrs.HasAttrs() && !mAttrs.IsPendingMappedAttributeEvaluation()) {
-      mAttrs.InfallibleMarkAsPendingPresAttributeEvaluation();
-      if (auto* doc = GetComposedDoc()) {
-        doc->ScheduleForPresAttrEvaluation(this);
-      }
+    if (mAttrs.HasAttrs()) {
+      ScheduleForPresAttrEvaluationIfNeeded();
     }
   }
 

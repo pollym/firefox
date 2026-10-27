@@ -472,6 +472,15 @@ class Element : public FragmentOrElement {
     return mAttrs.IsPendingMappedAttributeEvaluation();
   }
 
+  void ScheduleForPresAttrEvaluationIfNeeded() {
+    if (IsPendingMappedAttributeEvaluation() ||
+        !mAttrs.MarkAsPendingPresAttributeEvaluation() || !IsInComposedDoc()) {
+      return;
+    }
+    DoScheduleForPresAttrEvaluation();
+  }
+  void DoScheduleForPresAttrEvaluation();
+
   void SetMappedDeclarationBlock(already_AddRefed<StyleLockedDeclarationBlock>);
 
   /**
