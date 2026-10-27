@@ -11,7 +11,6 @@ import { FormAutofillUtils } from "resource://gre/modules/shared/FormAutofillUti
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
-  CreditCard: "resource://gre/modules/CreditCard.sys.mjs",
   OSKeyStore: "resource://gre/modules/OSKeyStore.sys.mjs",
   formAutofillStorage: "resource://autofill/FormAutofillStorage.sys.mjs",
   ManageAddresses: "chrome://formautofill/content/manageDialog.mjs",
@@ -143,8 +142,8 @@ export class FormAutofillPreferences {
           let l10nId = "payment-moz-box-item";
           if (hasSecurityCode) {
             l10nId = expDate
-              ? "payment-moz-box-item-with-security-code-2"
-              : "payment-moz-box-item-security-code-only-2";
+              ? "payment-moz-box-item-with-security-code"
+              : "payment-moz-box-item-security-code-only";
           }
 
           const config = {
@@ -155,9 +154,6 @@ export class FormAutofillPreferences {
             l10nArgs: {
               cardNumber: record["cc-number"].replace(/^(\*+)(\d+)$/, "$1 $2"),
               expDate,
-              securityCode: hasSecurityCode
-                ? lazy.CreditCard.formatSecurityCodeName(record)
-                : "",
             },
             options: [
               {
