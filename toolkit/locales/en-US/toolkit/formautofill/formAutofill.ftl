@@ -37,9 +37,6 @@ credit-card-doorhanger-credit-cards-sync-checkbox = Sync all saved cards across 
 
 credit-card-save-doorhanger-header = Securely save this card?
 credit-card-save-doorhanger-description = { -brand-short-name } encrypts your card number. Your security code won’t be saved.
-credit-card-save-doorhanger-description-security-code = { -brand-short-name } encrypts your card number and security code, so only you can use them to fill payment forms.
-credit-card-doorhanger-save-security-codes-checkbox =
-    .label = Always save security codes for payment methods.
 
 ## Used on the doorhanger when users submit a new card and security codes can be saved.
 
@@ -85,6 +82,19 @@ credit-card-capture-save-new-button =
 credit-card-capture-update-button =
     .label = Update existing card
     .accessKey = U
+
+## Used on the doorhanger when a saved card is submitted with changed details
+## and security codes can be saved.
+
+credit-card-update-payment-method-doorhanger-header = Update payment method?
+credit-card-capture-save-new-payment-method-button =
+    .label = Save new payment method
+    .accessKey = S
+credit-card-capture-update-payment-method-button =
+    .label = Update
+    .accessKey = U
+
+##
 
 # Label for the button in the dropdown menu used to clear the populated form.
 autofill-clear-form-label = Clear Autofill Form
