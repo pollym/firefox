@@ -40,6 +40,22 @@ function descriptionL10nId(content) {
   return content.firstElementChild.getAttribute("data-l10n-id");
 }
 
+function cardDetailsL10nId(content) {
+  return content.querySelector(".line-two").getAttribute("data-l10n-id");
+}
+
+async function formatLabel(id) {
+  const [msg] = await document.l10n.formatMessages([{ id }]);
+  return msg.attributes.find(attr => attr.name == "label").value;
+}
+
+async function clickToggle(toggle) {
+  const prefChanged = TestUtils.waitForPrefChange(ENABLED_PREF);
+  toggle.click();
+  await prefChanged;
+  await toggle.updateComplete;
+}
+
 add_setup(async function () {
   // The security code is supported only while the Rust store serves.
   await switchCreditCardStore({ rust: true });
@@ -60,8 +76,8 @@ add_task(async function test_save_doorhanger_before_rollout() {
       "The doorhanger says the security code won't be saved"
     );
     ok(
-      !content.querySelector("moz-checkbox"),
-      "The security codes checkbox is not shown"
+      !content.querySelector("moz-checkbox, moz-toggle"),
+      "No security codes control is shown"
     );
     await clickDoorhangerButton(SECONDARY_BUTTON);
   });
@@ -80,21 +96,34 @@ add_task(async function test_save_doorhanger_when_capture_is_off() {
   await withDoorhanger(CC_VALUES, async content => {
     is(
       descriptionL10nId(content),
-      "credit-card-save-doorhanger-description",
-      "The doorhanger says the security code won't be saved"
+      "credit-card-save-payment-method-doorhanger-description",
+      "The description doesn't mention the security code"
     );
 
-    const checkbox = content.querySelector("moz-checkbox");
-    ok(checkbox, "The security codes checkbox is shown");
-    await checkbox.updateComplete;
-    ok(!checkbox.checked, "The security codes checkbox is unchecked");
+    const toggle = content.querySelector("moz-toggle");
+    ok(toggle, "The security codes toggle is shown");
+    await toggle.updateComplete;
+    ok(!toggle.pressed, "The security codes toggle is off");
+    is(
+      toggle.getAttribute("data-l10n-id"),
+      "credit-card-doorhanger-dont-save-security-codes-toggle",
+      "The toggle says security codes aren't saved"
+    );
+    is(
+      cardDetailsL10nId(content),
+      "credit-card-doorhanger-card-details-name-expiration",
+      "The card details leave out the uncaptured security code"
+    );
 
-    const prefChanged = TestUtils.waitForPrefChange(ENABLED_PREF);
-    checkbox.click();
-    await prefChanged;
+    await clickToggle(toggle);
     ok(
       Services.prefs.getBoolPref(ENABLED_PREF),
-      "Checking the checkbox turns saving security codes back on"
+      "Turning the toggle on turns saving security codes back on"
+    );
+    is(
+      toggle.getAttribute("data-l10n-id"),
+      "credit-card-doorhanger-always-save-security-codes-toggle",
+      "The toggle says security codes are saved"
     );
 
     await clickDoorhangerButton(SECONDARY_BUTTON);
@@ -119,8 +148,8 @@ add_task(async function test_save_doorhanger_while_json_store_serves() {
       "The doorhanger says the security code won't be saved"
     );
     ok(
-      !content.querySelector("moz-checkbox"),
-      "The security codes checkbox is not shown"
+      !content.querySelector("moz-checkbox, moz-toggle"),
+      "No security codes control is shown"
     );
     await clickDoorhangerButton(SECONDARY_BUTTON);
   });
@@ -129,7 +158,7 @@ add_task(async function test_save_doorhanger_while_json_store_serves() {
   await switchCreditCardStore({ rust: true });
 });
 
-add_task(async function test_save_doorhanger_checkbox_toggles_pref() {
+add_task(async function test_save_doorhanger_content() {
   await SpecialPowers.pushPrefEnv({
     set: [
       [SUPPORTED_PREF, "on"],
@@ -138,49 +167,141 @@ add_task(async function test_save_doorhanger_checkbox_toggles_pref() {
   });
 
   await withDoorhanger(CC_VALUES, async content => {
+    const notification = getNotification();
+    is(
+      notification.getAttribute("label"),
+      await document.l10n.formatValue(
+        "credit-card-save-payment-method-doorhanger-header"
+      ),
+      "The doorhanger asks to save the payment method"
+    );
     is(
       descriptionL10nId(content),
-      "credit-card-save-doorhanger-description-security-code",
-      "The doorhanger says the security code is saved"
+      "credit-card-save-payment-method-doorhanger-description-security-code",
+      "The description says the security code is saved"
     );
-
-    const checkbox = content.querySelector("moz-checkbox");
-    ok(checkbox, "The security codes checkbox is shown");
-    await checkbox.updateComplete;
-    ok(checkbox.checked, "The security codes checkbox is checked");
     is(
-      checkbox.getAttribute("support-page"),
-      "credit-card-autofill",
-      "The checkbox links to the support page"
+      notification.getAttribute("secondarybuttonlabel"),
+      await formatLabel("credit-card-capture-dismiss-button"),
+      "The secondary button dismisses the doorhanger"
     );
-
-    let prefChanged = TestUtils.waitForPrefChange(ENABLED_PREF);
-    checkbox.click();
-    await prefChanged;
+    is(
+      cardDetailsL10nId(content),
+      "credit-card-doorhanger-card-details-name-expiration-security-code",
+      "The card details note the security code"
+    );
     ok(
-      !Services.prefs.getBoolPref(ENABLED_PREF),
-      "Unchecking the checkbox disables saving security codes"
+      content.querySelector(".payments-doorhanger-options-button"),
+      "The edit button is shown"
     );
 
-    prefChanged = TestUtils.waitForPrefChange(ENABLED_PREF);
-    checkbox.click();
-    await prefChanged;
+    const toggle = content.querySelector("moz-toggle");
+    ok(toggle, "The security codes toggle is shown");
     ok(
-      Services.prefs.getBoolPref(ENABLED_PREF),
-      "Checking the checkbox enables saving security codes"
+      !content.querySelector("moz-checkbox"),
+      "The security codes checkbox is not shown"
     );
-
-    prefChanged = TestUtils.waitForPrefChange(ENABLED_PREF);
-    checkbox.click();
-    await prefChanged;
+    await toggle.updateComplete;
+    ok(toggle.pressed, "The security codes toggle is on");
+    is(
+      toggle.getAttribute("data-l10n-id"),
+      "credit-card-doorhanger-always-save-security-codes-toggle",
+      "The toggle says security codes are saved"
+    );
 
     await clickDoorhangerButton(SECONDARY_BUTTON);
   });
 
-  ok(
-    !Services.prefs.getBoolPref(ENABLED_PREF),
-    "Dismissing the doorhanger keeps the checkbox choice"
-  );
+  await SpecialPowers.popPrefEnv();
+});
+
+add_task(async function test_save_doorhanger_toggle_follows_pref() {
+  await SpecialPowers.pushPrefEnv({
+    set: [
+      [SUPPORTED_PREF, "on"],
+      [ENABLED_PREF, true],
+    ],
+  });
+
+  await withDoorhanger(CC_VALUES, async content => {
+    const toggle = content.querySelector("moz-toggle");
+    await toggle.updateComplete;
+
+    await clickToggle(toggle);
+    ok(
+      !Services.prefs.getBoolPref(ENABLED_PREF),
+      "Turning the toggle off disables saving security codes"
+    );
+    is(
+      toggle.getAttribute("data-l10n-id"),
+      "credit-card-doorhanger-dont-save-security-codes-toggle",
+      "The toggle says security codes aren't saved"
+    );
+    is(
+      descriptionL10nId(content),
+      "credit-card-save-payment-method-doorhanger-description",
+      "The description no longer mentions the security code"
+    );
+    is(
+      cardDetailsL10nId(content),
+      "credit-card-doorhanger-card-details-name-expiration",
+      "The card details no longer note the security code"
+    );
+
+    await clickToggle(toggle);
+    ok(
+      Services.prefs.getBoolPref(ENABLED_PREF),
+      "Turning the toggle on enables saving security codes"
+    );
+    is(
+      toggle.getAttribute("data-l10n-id"),
+      "credit-card-doorhanger-always-save-security-codes-toggle",
+      "The toggle says security codes are saved"
+    );
+    is(
+      descriptionL10nId(content),
+      "credit-card-save-payment-method-doorhanger-description-security-code",
+      "The description mentions the security code again"
+    );
+    is(
+      cardDetailsL10nId(content),
+      "credit-card-doorhanger-card-details-name-expiration-security-code",
+      "The card details note the security code again"
+    );
+
+    await clickDoorhangerButton(SECONDARY_BUTTON);
+  });
+
+  await SpecialPowers.popPrefEnv();
+});
+
+add_task(async function test_save_doorhanger_without_security_code() {
+  await SpecialPowers.pushPrefEnv({
+    set: [
+      [SUPPORTED_PREF, "on"],
+      [ENABLED_PREF, true],
+    ],
+  });
+
+  const valuesWithoutCode = { ...CC_VALUES };
+  delete valuesWithoutCode["#cc-csc"];
+  await withDoorhanger(valuesWithoutCode, async content => {
+    is(
+      descriptionL10nId(content),
+      "credit-card-save-payment-method-doorhanger-description",
+      "The description doesn't mention the missing security code"
+    );
+    is(
+      cardDetailsL10nId(content),
+      "credit-card-doorhanger-card-details-name-expiration",
+      "The card details leave out the missing security code"
+    );
+    ok(
+      content.querySelector("moz-toggle"),
+      "The security codes toggle is still offered"
+    );
+    await clickDoorhangerButton(SECONDARY_BUTTON);
+  });
 
   await SpecialPowers.popPrefEnv();
 });
@@ -223,14 +344,14 @@ add_task(async function test_update_doorhanger_shows_checkbox() {
 });
 
 async function uncheckSecurityCodes(content) {
-  const checkbox = content.querySelector("moz-checkbox");
-  await checkbox.updateComplete;
+  const control = content.querySelector("moz-toggle, moz-checkbox");
+  await control.updateComplete;
   const prefChanged = TestUtils.waitForPrefChange(ENABLED_PREF);
-  checkbox.click();
+  control.click();
   await prefChanged;
 }
 
-add_task(async function test_save_doorhanger_unchecked_drops_security_code() {
+add_task(async function test_save_with_toggle_on_stores_security_code() {
   await SpecialPowers.pushPrefEnv({
     set: [
       [SUPPORTED_PREF, "on"],
@@ -239,7 +360,14 @@ add_task(async function test_save_doorhanger_unchecked_drops_security_code() {
   });
 
   await withDoorhanger(CC_VALUES, async content => {
-    await uncheckSecurityCodes(content);
+    const toggle = content.querySelector("moz-toggle");
+    await toggle.updateComplete;
+    ok(toggle.pressed, "The security codes toggle is on");
+    is(
+      descriptionL10nId(content),
+      "credit-card-save-payment-method-doorhanger-description-security-code",
+      "The description says the security code is saved"
+    );
 
     const onChanged = waitForStorageChangedEvents("add");
     await clickDoorhangerButton(MAIN_BUTTON);
@@ -249,12 +377,101 @@ add_task(async function test_save_doorhanger_unchecked_drops_security_code() {
   const creditCards = await getCreditCards();
   is(creditCards.length, 1, "One credit card is saved");
   is(creditCards[0]["cc-name"], "User 1", "The card is saved");
-  ok(
-    !("cc-csc" in creditCards[0]),
-    "The security code is not saved once the checkbox is unchecked"
+  is(
+    creditCards[0]["cc-csc"],
+    "123",
+    "The security code is saved along with the card"
   );
 
   await removeAllRecords();
+  await SpecialPowers.popPrefEnv();
+});
+
+add_task(async function test_save_with_toggle_off_stores_no_security_code() {
+  await SpecialPowers.pushPrefEnv({
+    set: [
+      [SUPPORTED_PREF, "on"],
+      [ENABLED_PREF, true],
+    ],
+  });
+
+  await withDoorhanger(CC_VALUES, async content => {
+    const toggle = content.querySelector("moz-toggle");
+    await toggle.updateComplete;
+    await clickToggle(toggle);
+    ok(!toggle.pressed, "The security codes toggle is off");
+    is(
+      descriptionL10nId(content),
+      "credit-card-save-payment-method-doorhanger-description",
+      "The description no longer mentions the security code"
+    );
+    is(
+      cardDetailsL10nId(content),
+      "credit-card-doorhanger-card-details-name-expiration",
+      "The card details no longer note the security code"
+    );
+
+    const onChanged = waitForStorageChangedEvents("add");
+    await clickDoorhangerButton(MAIN_BUTTON);
+    await onChanged;
+  });
+
+  ok(
+    !Services.prefs.getBoolPref(ENABLED_PREF),
+    "Saving security codes stays off"
+  );
+
+  // Storage hides security codes from reads while saving them is off, so turn
+  // it back on to check that none was stored.
+  await SpecialPowers.pushPrefEnv({ set: [[ENABLED_PREF, true]] });
+  const creditCards = await getCreditCards();
+  is(creditCards.length, 1, "One credit card is saved");
+  is(creditCards[0]["cc-name"], "User 1", "The card is saved");
+  ok(
+    !creditCards[0]["cc-csc"],
+    "The security code is not saved once the toggle is off"
+  );
+
+  await SpecialPowers.popPrefEnv();
+  await removeAllRecords();
+  await SpecialPowers.popPrefEnv();
+});
+
+add_task(async function test_dismiss_saves_nothing_and_keeps_toggle() {
+  await SpecialPowers.pushPrefEnv({
+    set: [
+      [SUPPORTED_PREF, "on"],
+      [ENABLED_PREF, true],
+    ],
+  });
+
+  await withDoorhanger(CC_VALUES, async content => {
+    const toggle = content.querySelector("moz-toggle");
+    await toggle.updateComplete;
+    await clickToggle(toggle);
+    await clickDoorhangerButton(SECONDARY_BUTTON);
+  });
+
+  ok(
+    !Services.prefs.getBoolPref(ENABLED_PREF),
+    "Dismissing keeps saving security codes turned off"
+  );
+  is((await getCreditCards()).length, 0, "Dismissing saves no card");
+
+  await withDoorhanger(CC_VALUES, async content => {
+    const toggle = content.querySelector("moz-toggle");
+    await toggle.updateComplete;
+    ok(!toggle.pressed, "The toggle starts off, as it was left");
+    await clickToggle(toggle);
+    await clickDoorhangerButton(SECONDARY_BUTTON);
+  });
+
+  ok(
+    Services.prefs.getBoolPref(ENABLED_PREF),
+    "Dismissing keeps saving security codes turned on"
+  );
+  is((await getCreditCards()).length, 0, "Dismissing saves no card");
+
   await SpecialPowers.popPrefEnv();
 });
 

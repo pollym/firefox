@@ -909,6 +909,13 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
     return !!this.newRecord["cc-csc"];
   }
 
+  get savesSecurityCode() {
+    return (
+      this.hasSubmittedSecurityCode &&
+      FormAutofill.isAutofillCreditCardCVVEnabled
+    );
+  }
+
   /**
    * We have not yet sync address and credit card design. After syncing,
    * we should be able to use the same "class"
@@ -958,7 +965,8 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
     const docFragment = this.doc.createDocumentFragment();
 
     const label = this.doc.createXULElement("label");
-    this.doc.l10n.setAttributes(label, this.ui.description.l10nId);
+    label.className = "payments-doorhanger-message";
+    this.updateDescription(label);
     docFragment.appendChild(label);
 
     const descriptionWrapper = this.doc.createXULElement("hbox");
@@ -1002,6 +1010,14 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
     this.content.appendChild(docFragment);
   }
 
+  updateDescription(label) {
+    const { l10nId, securityCodeL10nId } = this.ui.description;
+    this.doc.l10n.setAttributes(
+      label,
+      securityCodeL10nId && this.savesSecurityCode ? securityCodeL10nId : l10nId
+    );
+  }
+
   appendCardDetails(line, name) {
     const parts = [];
     const args = {};
@@ -1018,7 +1034,7 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
       args.year = String(year).slice(-2);
     }
 
-    if (this.hasSubmittedSecurityCode) {
+    if (this.savesSecurityCode) {
       parts.push("security-code");
       args.securityCode = lazy.CreditCard.formatSecurityCodeName(
         this.newRecord
@@ -1026,6 +1042,9 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
     }
 
     if (!parts.length) {
+      line.removeAttribute("data-l10n-id");
+      line.removeAttribute("data-l10n-args");
+      line.textContent = "";
       return;
     }
 
@@ -1055,6 +1074,41 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
       );
     });
     this.content.appendChild(checkbox);
+  }
+
+  appendSecurityCodeToggle() {
+    const toggle = this.doc.createElement("moz-toggle");
+    const updateLabel = () => {
+      this.doc.l10n.setAttributes(
+        toggle,
+        toggle.pressed
+          ? "credit-card-doorhanger-always-save-security-codes-toggle"
+          : "credit-card-doorhanger-dont-save-security-codes-toggle"
+      );
+    };
+    toggle.pressed = Services.prefs.getBoolPref(
+      FormAutofill.ENABLED_AUTOFILL_CREDITCARDS_CVV_PREF
+    );
+    updateLabel();
+    toggle.addEventListener("toggle", () => {
+      Services.prefs.setBoolPref(
+        FormAutofill.ENABLED_AUTOFILL_CREDITCARDS_CVV_PREF,
+        toggle.pressed
+      );
+      updateLabel();
+      this.updateDescription(
+        this.content.querySelector(".payments-doorhanger-message")
+      );
+      this.appendCardDetails(
+        this.content.querySelector(".line-two"),
+        this.newRecord["cc-name"]
+      );
+    });
+    this.content.appendChild(toggle);
+  }
+
+  appendSecurityCodeControl() {
+    this.appendSecurityCodeToggle();
   }
 
   createPrivacyPanelButton() {
@@ -1098,7 +1152,7 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
     // Offered whenever security codes are supported, so a user who turned
     // saving them off can turn it back on from here.
     if (FormAutofill.isAutofillCreditCardCVVSupported) {
-      this.appendSecurityCodeCheckbox();
+      this.appendSecurityCodeControl();
     }
   }
 
@@ -1113,7 +1167,8 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
   }
 
   // The record to be saved by this doorhanger. The security code is left out
-  // when the user unchecks the checkbox, so that an update keeps the stored one.
+  // when the user turns saving security codes off, so that an update keeps the
+  // stored one.
   recordToSave() {
     if (FormAutofill.isAutofillCreditCardCVVEnabled) {
       return this.newRecord;
@@ -1130,6 +1185,10 @@ export class CreditCardUpdateDoorhanger extends CreditCardSaveDoorhanger {
 
   constructor(browser, oldRecord, newRecord, flowId) {
     super(browser, oldRecord, newRecord, flowId);
+  }
+
+  appendSecurityCodeControl() {
+    this.appendSecurityCodeCheckbox();
   }
 }
 
@@ -1464,14 +1523,20 @@ CONTENT = {
       tooltiptext: l10n.formatValueSync("autofill-message-tooltip"),
     },
     header: {
-      l10nId: "credit-card-save-doorhanger-header",
+      get l10nId() {
+        return FormAutofill.isAutofillCreditCardCVVSupported
+          ? "credit-card-save-payment-method-doorhanger-header"
+          : "credit-card-save-doorhanger-header";
+      },
     },
     description: {
       get l10nId() {
-        return FormAutofill.isAutofillCreditCardCVVEnabled
-          ? "credit-card-save-doorhanger-description-security-code"
+        return FormAutofill.isAutofillCreditCardCVVSupported
+          ? "credit-card-save-payment-method-doorhanger-description"
           : "credit-card-save-doorhanger-description";
       },
+      securityCodeL10nId:
+        "credit-card-save-payment-method-doorhanger-description-security-code",
     },
     content: {},
     footer: {
@@ -1481,7 +1546,11 @@ CONTENT = {
       },
       secondaryActions: [
         {
-          l10nId: "credit-card-capture-cancel-button",
+          get l10nId() {
+            return FormAutofill.isAutofillCreditCardCVVSupported
+              ? "credit-card-capture-dismiss-button"
+              : "credit-card-capture-cancel-button";
+          },
           callbackState: "cancel",
         },
         {
