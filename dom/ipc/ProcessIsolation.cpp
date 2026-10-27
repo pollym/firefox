@@ -359,15 +359,13 @@ static IsolationBehavior IsolationBehaviorForURI(nsIURI* aURI, bool aIsSubframe,
     return IsolationBehavior::Parent;
   }
 
-  // There is more handling for extension content processes in the caller, but
-  // they should load in an extension content process unless we're loading a
-  // subframe.
+  // There is more handling for extension content processes in the caller,
+  // which is also where extension subframes that have to be loaded in the same
+  // process as their parent document are handled.
+  //
+  // TODO: aIsSubframe is no longer needed here and should be dropped in a
+  // followup.
   if (scheme == "moz-extension"_ns) {
-    if (aIsSubframe) {
-      // As a temporary measure, extension iframes must be loaded within the
-      // same process as their parent document.
-      return IsolationBehavior::Inherit;
-    }
     return IsolationBehavior::Extension;
   }
 
@@ -740,11 +738,24 @@ Result<NavigationIsolationOptions, nsresult> IsolationOptionsForNavigation(
   if (auto* addonPolicy =
           BasePrincipal::Cast(resultOrPrecursor)->AddonPolicy()) {
     if (aParentWindow) {
-      // As a temporary measure, extension iframes must be loaded within the
-      // same process as their parent document.
-      MOZ_LOG(gProcessIsolationLog, LogLevel::Verbose,
-              ("Loading extension subframe in same process as parent"));
-      behavior = IsolationBehavior::Inherit;
+      // As a temporary measure, extension iframes loaded within web content
+      // must be loaded within the same process as their parent document, such
+      // that content scripts can synchronously access them. The same applies
+      // to file:// process remote types and privilegedmozilla (in particular
+      // for the subset extensions that will be allowed to access FxA web pages)
+      // and when the extension process is completely disabled through prefs.
+      const RemoteType& parentRemoteType = aParentWindow->GetRemoteType();
+      if (!ExtensionPolicyService::GetSingleton().UseRemoteExtensions() ||
+          parentRemoteType.IsWeb() || parentRemoteType.IsFile() ||
+          parentRemoteType.IsPrivilegedMozilla()) {
+        MOZ_LOG(gProcessIsolationLog, LogLevel::Verbose,
+                ("Loading extension subframe in same process as parent"));
+        behavior = IsolationBehavior::Inherit;
+      } else {
+        MOZ_LOG(gProcessIsolationLog, LogLevel::Verbose,
+                ("Loading extension subframe in extension content process"));
+        behavior = IsolationBehavior::Extension;
+      }
     } else {
       MOZ_LOG(
           gProcessIsolationLog, LogLevel::Verbose,
