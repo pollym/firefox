@@ -3618,8 +3618,7 @@ void nsHttpTransaction::SetHttpTrailers(nsCString& aTrailers) {
   LOG(("[\n    %s\n]", aTrailers.get()));
 
   // Introduce a local variable to minimize the critical section.
-  UniquePtr<nsHttpHeaderArray> httpTrailers =
-      std::make_unique<nsHttpHeaderArray>();
+  auto httpTrailers = std::make_unique<nsHttpHeaderArray>();
   {
     MutexAutoLock lock(mLock);
     if (mForTakeResponseTrailers) {

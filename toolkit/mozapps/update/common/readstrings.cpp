@@ -361,7 +361,7 @@ int IniReader::Read() {
     keyListSize += strlen(key.get());
     keyListSize += 1;  // For the terminating null
   }
-  mozilla::UniquePtr<char[]> keyList = std::make_unique<char[]>(keyListSize);
+  auto keyList = std::make_unique<char[]>(keyListSize);
   char* keyListPtr = keyList.get();
   for (const auto& key : mKeys) {
     strcpy(keyListPtr, key.get());
@@ -371,8 +371,7 @@ int IniReader::Read() {
   *keyListPtr = '\0';
 
   // Now make the array for the resulting data to be stored in
-  mozilla::UniquePtr<mozilla::UniquePtr<char[]>[]> results =
-      std::make_unique<mozilla::UniquePtr<char[]>[]>(mKeys.size());
+  auto results = std::make_unique<mozilla::UniquePtr<char[]>[]>(mKeys.size());
 
   // Invoke ReadStrings to read the file and store the data for us
   int statusCode = ReadStrings(mPath.get(), keyList.get(), mKeys.size(),

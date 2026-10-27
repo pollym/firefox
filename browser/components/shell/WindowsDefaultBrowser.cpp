@@ -101,8 +101,7 @@ bool LaunchControlPanelDefaultPrograms() {
   GetAppRegName(appRegName);
   int bufferSize = _scwprintf(paramFormat, appRegName.get());
   ++bufferSize;  // Extra byte for terminating null
-  mozilla::UniquePtr<wchar_t[]> params =
-      std::make_unique<wchar_t[]>(bufferSize);
+  auto params = std::make_unique<wchar_t[]>(bufferSize);
   _snwprintf_s(params.get(), bufferSize, _TRUNCATE, paramFormat,
                appRegName.get());
 

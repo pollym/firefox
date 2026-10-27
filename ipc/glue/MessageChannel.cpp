@@ -2220,8 +2220,8 @@ void MessageChannel::InduceConnectionError() {
 }
 
 void MessageChannel::NotifyImpendingShutdown() {
-  UniquePtr<Message> msg = std::make_unique<Message>(
-      MSG_ROUTING_NONE, IMPENDING_SHUTDOWN_MESSAGE_TYPE);
+  auto msg = std::make_unique<Message>(MSG_ROUTING_NONE,
+                                       IMPENDING_SHUTDOWN_MESSAGE_TYPE);
   MonitorAutoLock lock(*mMonitor);
   if (Connected()) {
     SendMessageToLink(std::move(msg));

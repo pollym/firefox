@@ -164,8 +164,7 @@ void ChannelPosix::Init(Mode mode) {
 }
 
 bool ChannelPosix::EnqueueHelloMessage() {
-  mozilla::UniquePtr<Message> msg =
-      std::make_unique<Message>(MSG_ROUTING_NONE, HELLO_MESSAGE_TYPE);
+  auto msg = std::make_unique<Message>(MSG_ROUTING_NONE, HELLO_MESSAGE_TYPE);
   if (!msg->WriteInt(base::GetCurrentProcId())) {
     CloseLocked();
     return false;

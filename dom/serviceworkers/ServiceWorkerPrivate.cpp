@@ -1109,9 +1109,8 @@ RefPtr<PushHandledPromise> ServiceWorkerPrivate::SendPushEvent(
   }
 
   if (mInfo->State() == ServiceWorkerState::Activating) {
-    UniquePtr<PendingPushEvent> pendingEvent =
-        std::make_unique<PendingPushEvent>(this, std::move(aRegistration),
-                                           std::move(args));
+    auto pendingEvent = std::make_unique<PendingPushEvent>(
+        this, std::move(aRegistration), std::move(args));
     RefPtr<PushHandledPromise> promise = pendingEvent->Promise();
 
     mPendingFunctionalEvents.AppendElement(std::move(pendingEvent));

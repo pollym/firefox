@@ -2515,10 +2515,10 @@ TEST(GeckoProfiler, Markers)
   // Create three strings: two that are the maximum allowed length, and one that
   // is one char longer.
   static const size_t kMax = ProfileBuffer::kMaxFrameKeyLength;
-  UniquePtr<char[]> okstr1 = std::make_unique<char[]>(kMax);
-  UniquePtr<char[]> okstr2 = std::make_unique<char[]>(kMax);
-  UniquePtr<char[]> longstr = std::make_unique<char[]>(kMax + 1);
-  UniquePtr<char[]> longstrCut = std::make_unique<char[]>(kMax + 1);
+  auto okstr1 = std::make_unique<char[]>(kMax);
+  auto okstr2 = std::make_unique<char[]>(kMax);
+  auto longstr = std::make_unique<char[]>(kMax + 1);
+  auto longstrCut = std::make_unique<char[]>(kMax + 1);
   for (size_t i = 0; i < kMax; i++) {
     okstr1[i] = 'a';
     okstr2[i] = 'b';

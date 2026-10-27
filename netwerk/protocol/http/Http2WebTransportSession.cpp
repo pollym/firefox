@@ -67,7 +67,7 @@ void Http2WebTransportSessionImpl::CloseSession(uint32_t aStatus,
   mHandler->SetSentFin();
 
   Capsule capsule = Capsule::CloseWebTransportSession(aStatus, aReason);
-  UniquePtr<CapsuleEncoder> encoder = std::make_unique<CapsuleEncoder>();
+  auto encoder = std::make_unique<CapsuleEncoder>();
   encoder->EncodeCapsule(capsule);
   EnqueueOutCapsule(CapsuleTransmissionPriority::Important, std::move(encoder));
 }
@@ -133,7 +133,7 @@ void Http2WebTransportSessionImpl::SendDatagram(nsTArray<uint8_t>&& aData,
 
   Capsule capsule = Capsule::WebTransportDatagram(std::move(aData));
 
-  UniquePtr<CapsuleEncoder> encoder = std::make_unique<CapsuleEncoder>();
+  auto encoder = std::make_unique<CapsuleEncoder>();
   encoder->EncodeCapsule(capsule);
   EnqueueOutCapsule(CapsuleTransmissionPriority::Normal, std::move(encoder));
 }

@@ -348,8 +348,7 @@ nsresult txStylesheet::addTemplate(txTemplateItem* aTemplate,
       aImportFrame->mMatchableTemplates.get(aTemplate->mMode);
 
   if (!templates) {
-    UniquePtr<nsTArray<MatchableTemplate>> newList =
-        std::make_unique<nsTArray<MatchableTemplate>>();
+    auto newList = std::make_unique<nsTArray<MatchableTemplate>>();
     nsresult rv =
         aImportFrame->mMatchableTemplates.set(aTemplate->mMode, newList.get());
     NS_ENSURE_SUCCESS(rv, rv);

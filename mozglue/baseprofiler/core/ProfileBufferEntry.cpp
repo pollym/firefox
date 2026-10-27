@@ -560,7 +560,7 @@ class EntryGetter {
 BaseProfilerThreadId ProfileBuffer::StreamSamplesToJSON(
     SpliceableJSONWriter& aWriter, BaseProfilerThreadId aThreadId,
     double aSinceTime, UniqueStacks& aUniqueStacks) const {
-  UniquePtr<char[]> dynStrBuf = std::make_unique<char[]>(kMaxFrameKeyLength);
+  auto dynStrBuf = std::make_unique<char[]>(kMaxFrameKeyLength);
 
   return mEntries.Read([&](ProfileChunkedBuffer::Reader* aReader) {
     MOZ_ASSERT(aReader,

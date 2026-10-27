@@ -1256,8 +1256,7 @@ bool SkeletonState::DecodeIndex(ogg_packet* aPacket) {
     return (mActive = false);
   }
 
-  UniquePtr<nsKeyFrameIndex> keyPoints =
-      std::make_unique<nsKeyFrameIndex>(startTime, endTime);
+  auto keyPoints = std::make_unique<nsKeyFrameIndex>(startTime, endTime);
 
   p = aPacket->packet + INDEX_KEYPOINT_OFFSET;
   const unsigned char* limit = aPacket->packet + aPacket->bytes;

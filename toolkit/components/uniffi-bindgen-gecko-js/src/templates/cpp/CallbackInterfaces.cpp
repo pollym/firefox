@@ -186,7 +186,7 @@ extern "C" void {{ meth.fn_name }}(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<{{ meth.async_handler_class_name }}>(
+  auto handler = std::make_unique<{{ meth.async_handler_class_name }}>(
         aUniffiHandle,
         {% for a in arguments -%}
         {{ a.name }},
@@ -266,7 +266,7 @@ extern "C" void {{ meth.fn_name }}(
   {{ meth.out_pointer_ty.type_name }} aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<{{ meth.async_handler_class_name }}>(aUniffiHandle{% for a in arguments %}, {{ a.name }}{%- endfor %});
+  auto handler = std::make_unique<{{ meth.async_handler_class_name }}>(aUniffiHandle{% for a in arguments %}, {{ a.name }}{%- endfor %});
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &{{ cbi.handler_var }});
 }
 

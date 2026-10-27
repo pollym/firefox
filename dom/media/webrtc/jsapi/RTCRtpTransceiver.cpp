@@ -849,10 +849,8 @@ static auto JsepCodecDescToVideoCodecConfig(
     return Nothing();
   }
 
-  UniquePtr<VideoCodecConfigH264> h264Config;
-
   if (aCodec.mName == "H264") {
-    h264Config = std::make_unique<VideoCodecConfigH264>();
+    auto h264Config = std::make_unique<VideoCodecConfigH264>();
     size_t spropSize = sizeof(h264Config->sprop_parameter_sets);
     strncpy(h264Config->sprop_parameter_sets,
             aCodec.mSpropParameterSets.c_str(), spropSize);

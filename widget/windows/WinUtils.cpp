@@ -1870,8 +1870,7 @@ bool WinUtils::GetAppInitDLLs(nsAString& aOutput) {
     return false;
   }
   // Allocate the buffer and query for the actual data
-  mozilla::UniquePtr<wchar_t[]> data =
-      std::make_unique<wchar_t[]>(numBytes / sizeof(wchar_t));
+  auto data = std::make_unique<wchar_t[]>(numBytes / sizeof(wchar_t));
   status = RegQueryValueExW(hkey, kAppInitDLLs, nullptr, nullptr,
                             (LPBYTE)data.get(), &numBytes);
   if (status != ERROR_SUCCESS) {

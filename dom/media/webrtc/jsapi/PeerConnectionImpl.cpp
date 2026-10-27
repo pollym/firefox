@@ -3999,8 +3999,7 @@ RefPtr<dom::RTCStatsReportPromise> PeerConnectionImpl::GetStats(
     return mFinalStatsQuery->Then(
         GetMainThreadSerialEventTarget(), __func__,
         [this, self = RefPtr<PeerConnectionImpl>(this)]() {
-          UniquePtr<dom::RTCStatsReportInternal> finalStats =
-              std::make_unique<dom::RTCStatsReportInternal>();
+          auto finalStats = std::make_unique<dom::RTCStatsReportInternal>();
           // Might not be set if this encountered some error.
           if (mFinalStats) {
             *finalStats = *mFinalStats;

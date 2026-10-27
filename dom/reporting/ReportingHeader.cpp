@@ -385,7 +385,7 @@ ReportingHeader::ParseReportToHeader(nsIHttpChannel* aChannel, nsIURI* aURI,
     return nullptr;
   }
 
-  UniquePtr<Client> client = std::make_unique<Client>();
+  auto client = std::make_unique<Client>();
 
   for (const dom::ReportingItem& item : data.mItems.Value()) {
     nsAutoCString groupName;

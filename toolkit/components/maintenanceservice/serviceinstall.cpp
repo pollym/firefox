@@ -157,8 +157,7 @@ BOOL UpdateServiceDescription(SC_HANDLE serviceHandle) {
 
   int bufferSize = MultiByteToWideChar(
       CP_UTF8, 0, serviceStrings.serviceDescription.get(), -1, nullptr, 0);
-  mozilla::UniquePtr<WCHAR[]> serviceDescription =
-      std::make_unique<WCHAR[]>(bufferSize);
+  auto serviceDescription = std::make_unique<WCHAR[]>(bufferSize);
   if (!MultiByteToWideChar(CP_UTF8, 0, serviceStrings.serviceDescription.get(),
                            -1, serviceDescription.get(), bufferSize)) {
     LOG_WARN(("Could not convert description to wide string format.  (%lu)",

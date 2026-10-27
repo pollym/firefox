@@ -1460,8 +1460,7 @@ RLBoxExpatSandboxPool::CreateSandboxData(uint64_t aSize) {
 
   NS_ENSURE_TRUE(create_ok, nullptr);
 
-  mozilla::UniquePtr<RLBoxExpatSandboxData> sbxData =
-      std::make_unique<RLBoxExpatSandboxData>(aSize);
+  auto sbxData = std::make_unique<RLBoxExpatSandboxData>(aSize);
 
   // Register callbacks common to both system and non-system principals
   sbxData->mHandleXMLDeclaration =

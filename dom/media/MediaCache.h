@@ -6,13 +6,13 @@
 #define MediaCache_h_
 
 #include <limits>
+#include <memory>
 
 #include "DecoderDoctorLogger.h"
 #include "Intervals.h"
 #include "MediaChannelStatistics.h"
 #include "mozilla/Monitor.h"
 #include "mozilla/Result.h"
-#include "mozilla/UniquePtr.h"
 #include "mozilla/dom/MediaDebugInfoBinding.h"
 #include "nsCOMPtr.h"
 #include "nsHashKeys.h"
@@ -545,7 +545,7 @@ class MediaCacheStream : public DecoderDoctorLifeLogger<MediaCacheStream> {
   // Heap allocate this buffer since the exact power-of-2 will cause allocation
   // slop when combined with the rest of the object members.
   // This partial buffer should always be read/write within the cache's monitor.
-  const UniquePtr<uint8_t[]> mPartialBlockBuffer =
+  const std::unique_ptr<uint8_t[]> mPartialBlockBuffer =
       std::make_unique<uint8_t[]>(BLOCK_SIZE);
 
   // True if associated with a private browsing window.

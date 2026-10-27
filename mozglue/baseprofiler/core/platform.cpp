@@ -2336,8 +2336,7 @@ static ProfilingStack* locked_register_thread(PSLockRef aLock,
 
   RefPtr<ThreadInfo> info = new ThreadInfo(aName, profiler_current_thread_id(),
                                            profiler_is_main_thread());
-  UniquePtr<RegisteredThread> registeredThread =
-      std::make_unique<RegisteredThread>(info, aStackTop);
+  auto registeredThread = std::make_unique<RegisteredThread>(info, aStackTop);
 
   TLSRegisteredThread::SetRegisteredThread(aLock, registeredThread.get());
 

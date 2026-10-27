@@ -5006,8 +5006,7 @@ int XREMain::XRE_mainInit(bool* aExitFlag) {
     return 1;
   }
   if (ar == ARG_FOUND) {
-    UniquePtr<DBusService> dbusService =
-        std::make_unique<DBusService>(dbusServiceLauncher);
+    auto dbusService = std::make_unique<DBusService>(dbusServiceLauncher);
     if (dbusService->Init()) {
       dbusService->Run();
     }

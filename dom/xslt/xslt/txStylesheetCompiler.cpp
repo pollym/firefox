@@ -408,8 +408,7 @@ nsresult txStylesheetCompiler::ensureNewElementContext() {
     return NS_OK;
   }
 
-  UniquePtr<txElementContext> context =
-      std::make_unique<txElementContext>(*mElementContext);
+  auto context = std::make_unique<txElementContext>(*mElementContext);
   pushObject(mElementContext.release());
   mElementContext = std::move(context);
 

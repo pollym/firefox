@@ -64,8 +64,7 @@ UniquePtr<RLBoxSandboxDataBase> RLBoxWOFF2SandboxPool::CreateSandboxData(
 #endif
   NS_ENSURE_TRUE(createOK, nullptr);
 
-  UniquePtr<RLBoxWOFF2SandboxData> sbxData =
-      std::make_unique<RLBoxWOFF2SandboxData>(aSize, std::move(sandbox));
+  auto sbxData = std::make_unique<RLBoxWOFF2SandboxData>(aSize, std::move(sandbox));
 
   // Register brotli callback
   sbxData->mDecompressCallback = sbxData->Sandbox()->register_callback(

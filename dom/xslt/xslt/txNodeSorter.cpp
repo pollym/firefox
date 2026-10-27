@@ -96,7 +96,7 @@ nsresult txNodeSorter::addSortElement(Expr* aSelectExpr, Expr* aLangExpr,
       }
     }
 
-    UniquePtr<txResultStringComparator> comparator =
+    auto comparator =
         std::make_unique<txResultStringComparator>(ascending, upperFirst);
     rv = comparator->init(
         lang, aContext->getContextNode().OwnerDoc()->ShouldResistFingerprinting(

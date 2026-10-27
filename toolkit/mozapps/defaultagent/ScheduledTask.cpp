@@ -206,8 +206,7 @@ HRESULT RegisterTask(const wchar_t* uniqueToken,
       return hr;
     }
 
-    mozilla::UniquePtr<wchar_t[]> timeStr =
-        std::make_unique<wchar_t[]>(kTimeStrMaxLen + 1);
+    auto timeStr = std::make_unique<wchar_t[]>(kTimeStrMaxLen + 1);
 
     if (wcsftime(timeStr.get(), kTimeStrMaxLen + 1, kTimeFormat, &now_tm) ==
         0) {

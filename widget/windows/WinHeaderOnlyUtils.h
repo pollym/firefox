@@ -769,8 +769,7 @@ inline UniquePtr<wchar_t[]> GetPackageFamilyName() {
     return nullptr;
   }
 
-  UniquePtr<wchar_t[]> packageIdentity =
-      std::make_unique<wchar_t[]>(packageNameSize);
+  auto packageIdentity = std::make_unique<wchar_t[]>(packageNameSize);
   if (pGetCurrentPackageFamilyName(&packageNameSize, packageIdentity.get()) !=
       ERROR_SUCCESS) {
     return nullptr;

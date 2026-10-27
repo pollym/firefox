@@ -857,8 +857,7 @@ nsresult JsepTrack::Negotiate(const SdpMediaSection& answer,
     return NS_ERROR_FAILURE;
   }
 
-  UniquePtr<JsepTrackNegotiatedDetails> negotiatedDetails =
-      std::make_unique<JsepTrackNegotiatedDetails>();
+  auto negotiatedDetails = std::make_unique<JsepTrackNegotiatedDetails>();
 
   CreateEncodings(remote, negotiatedCodecs, negotiatedDetails.get());
 

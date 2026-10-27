@@ -5622,8 +5622,7 @@ nsresult PreferencesImpl::WritePrefFile(
   AUTO_PROFILER_LABEL("PreferencesImpl::WritePrefFile", OTHER);
 
   if (Preferences::sPreferences->AllowOffMainThreadSave()) {
-    UniquePtr<PrefSaveData> prefs =
-        std::make_unique<PrefSaveData>(SavePrefs(aPrefOverrideMap));
+    auto prefs = std::make_unique<PrefSaveData>(SavePrefs(aPrefOverrideMap));
 
     nsresult rv = NS_OK;
     bool writingToCurrent = false;

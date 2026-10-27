@@ -673,8 +673,7 @@ void PerformanceMainThread::CreateNavigationTimingEntry() {
   nsAutoString name;
   GetURLSpecFromChannel(mChannel, name);
 
-  UniquePtr<PerformanceTimingData> timing =
-      std::make_unique<PerformanceTimingData>(mChannel, nullptr, 0);
+  auto timing = std::make_unique<PerformanceTimingData>(mChannel, nullptr, 0);
 
   nsCOMPtr<nsIHttpChannel> httpChannel = do_QueryInterface(mChannel);
   if (httpChannel) {

@@ -38,7 +38,7 @@ TEST_F(APZCSnappingOnMomentumTesterMock, Snap_On_Momentum) {
     aSm.SetSnapInfo(ScrollSnapInfo(snap));
   });
 
-  UniquePtr<ScopedLayerTreeRegistration> registration =
+  auto registration =
       std::make_unique<ScopedLayerTreeRegistration>(LayersId{0}, mcc);
   UpdateHitTestingTree();
 

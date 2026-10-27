@@ -1577,8 +1577,7 @@ void BrowserChild::FlushAllCoalescedMouseData() {
     if (!data || data->IsEmpty()) {
       continue;
     }
-    UniquePtr<CoalescedMouseData> dispatchData =
-        std::make_unique<CoalescedMouseData>();
+    auto dispatchData = std::make_unique<CoalescedMouseData>();
 
     dispatchData->RetrieveDataFrom(*data);
     mToBeDispatchedMouseData.Push(dispatchData.release());
@@ -1619,8 +1618,7 @@ mozilla::ipc::IPCResult BrowserChild::RecvRealMouseMoveEvent(
     // Can't coalesce current mousemove event. Put the coalesced mousemove data
     // with the same pointer id to mToBeDispatchedMouseData, coalesce the
     // current one, and process all pending data in mToBeDispatchedMouseData.
-    UniquePtr<CoalescedMouseData> dispatchData =
-        std::make_unique<CoalescedMouseData>();
+    auto dispatchData = std::make_unique<CoalescedMouseData>();
 
     dispatchData->RetrieveDataFrom(*data);
     mToBeDispatchedMouseData.Push(dispatchData.release());
@@ -1735,8 +1733,7 @@ mozilla::ipc::IPCResult BrowserChild::RecvRealMouseButtonEvent(
     // events in the end of the nsQueue and dispatch events from the beginning.
     FlushAllCoalescedMouseData();
 
-    UniquePtr<CoalescedMouseData> dispatchData =
-        std::make_unique<CoalescedMouseData>();
+    auto dispatchData = std::make_unique<CoalescedMouseData>();
 
     // We'll dispatch aEvent immediately via
     // ProcessPendingCoalescedMouseDataAndDispatchEvents().

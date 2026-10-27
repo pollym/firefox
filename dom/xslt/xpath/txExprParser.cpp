@@ -537,8 +537,7 @@ nsresult txExprParser::createLocationStep(txExprLexer& lexer,
     }
   }
 
-  UniquePtr<LocationStep> lstep =
-      std::make_unique<LocationStep>(nodeTest.get(), axisIdentifier);
+  auto lstep = std::make_unique<LocationStep>(nodeTest.get(), axisIdentifier);
 
   (void)nodeTest.release();
 

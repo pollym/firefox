@@ -1019,8 +1019,7 @@ NS_IMETHODIMP AsyncTryCopyFaviconsRunnable::Run() {
 
   RefPtr<Database> DB = Database::GetDatabase();
   NS_ENSURE_STATE(DB);
-  UniquePtr<ConnectionAdapter> adapter =
-      std::make_unique<ConnectionAdapter>(DB);
+  auto adapter = std::make_unique<ConnectionAdapter>(DB);
   rv = FetchIconInfo(adapter, mFromPageURI, UINT16_MAX, fromIconData);
   NS_ENSURE_SUCCESS(rv, rv);
   if (fromIconData.payloads.IsEmpty()) {

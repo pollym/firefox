@@ -490,25 +490,25 @@ struct Q {
 static int randomInt() { return 4; }
 
 static bool TestMakeUnique() {
-  UniquePtr<int> a1(std::make_unique<int>());
-  UniquePtr<long> a2(std::make_unique<long>(4));
+  auto a1 = std::make_unique<int>();
+  auto a2 = std::make_unique<long>(4);
 
   // no args, easy
-  UniquePtr<Q> q0(std::make_unique<Q>());
+  auto q0 = std::make_unique<Q>();
 
   // temporary bound to const lval ref
-  UniquePtr<Q> q1(std::make_unique<Q>(Q()));
+  auto q1 = std::make_unique<Q>(Q());
 
   // passing through a non-const lval ref
-  UniquePtr<Q> q2(std::make_unique<Q>(*q1, 'c'));
+  auto q2 = std::make_unique<Q>(*q1, 'c');
 
   // pass by copying, forward a temporary, pass by value
-  UniquePtr<Q> q3(std::make_unique<Q>(Q(), UniquePtr<int>(), randomInt()));
+  auto q3 = std::make_unique<Q>(Q(), UniquePtr<int>(), randomInt());
 
   // various type mismatching to test "fuzzy" forwarding
-  UniquePtr<Q> q4(std::make_unique<Q>('s', 66LL, 3.141592654, &q3));
+  auto q4 = std::make_unique<Q>('s', 66LL, 3.141592654, &q3);
 
-  UniquePtr<char[]> c1(std::make_unique<char[]>(5));
+  auto c1 = std::make_unique<char[]>(5);
 
   return true;
 }

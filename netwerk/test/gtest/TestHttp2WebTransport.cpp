@@ -121,7 +121,7 @@ class MockWebTransportServer : public CapsuleParser::Listener {
 
   void SendWebTransportMaxStreamsCapsule(uint64_t aLimit, bool aBidi) {
     Capsule capsule = Capsule::WebTransportMaxStreams(aLimit, aBidi);
-    UniquePtr<CapsuleEncoder> encoder = std::make_unique<CapsuleEncoder>();
+    auto encoder = std::make_unique<CapsuleEncoder>();
     encoder->EncodeCapsule(capsule);
     mOutCapsules.Push(std::move(encoder));
   }
@@ -130,28 +130,28 @@ class MockWebTransportServer : public CapsuleParser::Listener {
                                          nsTArray<uint8_t>&& aData) {
     Capsule capsule =
         Capsule::WebTransportStreamData(aID, aFin, std::move(aData));
-    UniquePtr<CapsuleEncoder> encoder = std::make_unique<CapsuleEncoder>();
+    auto encoder = std::make_unique<CapsuleEncoder>();
     encoder->EncodeCapsule(capsule);
     mOutCapsules.Push(std::move(encoder));
   }
 
   void SendWebTransportMaxStreamDataCapsule(uint64_t aLimit, uint64_t aID) {
     Capsule capsule = Capsule::WebTransportMaxStreamData(aLimit, aID);
-    UniquePtr<CapsuleEncoder> encoder = std::make_unique<CapsuleEncoder>();
+    auto encoder = std::make_unique<CapsuleEncoder>();
     encoder->EncodeCapsule(capsule);
     mOutCapsules.Push(std::move(encoder));
   }
 
   void SendWebTransportMaxDataCapsule(uint64_t aLimit) {
     Capsule capsule = Capsule::WebTransportMaxData(aLimit);
-    UniquePtr<CapsuleEncoder> encoder = std::make_unique<CapsuleEncoder>();
+    auto encoder = std::make_unique<CapsuleEncoder>();
     encoder->EncodeCapsule(capsule);
     mOutCapsules.Push(std::move(encoder));
   }
 
   void SendWebTransportStopSendingCapsule(uint64_t aError, uint64_t aID) {
     Capsule capsule = Capsule::WebTransportStopSending(aError, aID);
-    UniquePtr<CapsuleEncoder> encoder = std::make_unique<CapsuleEncoder>();
+    auto encoder = std::make_unique<CapsuleEncoder>();
     encoder->EncodeCapsule(capsule);
     mOutCapsules.Push(std::move(encoder));
   }
@@ -159,14 +159,14 @@ class MockWebTransportServer : public CapsuleParser::Listener {
   void SendWebTransportResetStreamCapsule(uint64_t aError, uint64_t aSize,
                                           uint64_t aID) {
     Capsule capsule = Capsule::WebTransportResetStream(aError, aSize, aID);
-    UniquePtr<CapsuleEncoder> encoder = std::make_unique<CapsuleEncoder>();
+    auto encoder = std::make_unique<CapsuleEncoder>();
     encoder->EncodeCapsule(capsule);
     mOutCapsules.Push(std::move(encoder));
   }
 
   void SendDatagramCapsule(nsTArray<uint8_t>&& aPayload) {
     Capsule capsule = Capsule::WebTransportDatagram(std::move(aPayload));
-    UniquePtr<CapsuleEncoder> encoder = std::make_unique<CapsuleEncoder>();
+    auto encoder = std::make_unique<CapsuleEncoder>();
     encoder->EncodeCapsule(capsule);
     mOutCapsules.Push(std::move(encoder));
   }

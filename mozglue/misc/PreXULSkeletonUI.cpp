@@ -297,7 +297,7 @@ static Result<Ok, PreXULSkeletonUIError> GetSkeletonUILock() {
 
   // The number of bytes * 2 characters per byte + 1 for the null terminator
   uint32_t hexHashSize = sizeof(uint32_t) * 2 + 1;
-  UniquePtr<wchar_t[]> installHash = std::make_unique<wchar_t[]>(hexHashSize);
+  auto installHash = std::make_unique<wchar_t[]>(hexHashSize);
   // This isn't perfect - it's a 32-bit hash of the path to our executable. It
   // could reasonably collide, or casing could potentially affect things, but
   // the theory is that that should be uncommon enough and the failure case
@@ -1168,8 +1168,7 @@ DWORD WINAPI AnimateSkeletonUI(void* aUnused) {
   // of the animation provided in the design mockup. We define it in CSS pixels
   // simply because the rest of our UI is based off of CSS scalings.
   int animationWidth = CSSToDevPixels(80, sCSSToDevPixelScaling);
-  UniquePtr<uint32_t[]> animationLookup =
-      std::make_unique<uint32_t[]>(animationWidth);
+  auto animationLookup = std::make_unique<uint32_t[]>(animationWidth);
   uint32_t animationColor = sAnimationColor;
   NormalizedRGB rgbBlend = UintToRGB(animationColor);
 

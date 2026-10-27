@@ -1213,7 +1213,7 @@ void MediaFormatReader::OnDemuxerInitDone(const MediaResult& aResult) {
 
   mDemuxerInitDone = true;
 
-  UniquePtr<MetadataTags> tags(std::make_unique<MetadataTags>());
+  auto tags = std::make_unique<MetadataTags>();
 
   const bool checkSupport = !IsWaitingOnCDMResource();
 

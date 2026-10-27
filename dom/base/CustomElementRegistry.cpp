@@ -147,10 +147,9 @@ UniquePtr<CustomElementCallback> CustomElementCallback::Create(
       if (aDefinition->mCallbacks->mConnectedMoveCallback.WasPassed()) {
         func = aDefinition->mCallbacks->mConnectedMoveCallback.Value();
       } else if (aDefinition->mCallbacks->mDisconnectedCallback.WasPassed()) {
-        UniquePtr<CustomElementCallback> callback =
-            std::make_unique<CustomElementCallback>(
-                aCustomElement, ElementCallbackType::eDisconnected,
-                aDefinition->mCallbacks->mDisconnectedCallback.Value(), aArgs);
+        auto callback = std::make_unique<CustomElementCallback>(
+            aCustomElement, ElementCallbackType::eDisconnected,
+            aDefinition->mCallbacks->mDisconnectedCallback.Value(), aArgs);
         if (aDefinition->mCallbacks->mConnectedCallback.WasPassed()) {
           callback->SetSecondaryCallback(
               ElementCallbackType::eConnected,

@@ -286,7 +286,7 @@ bool PathContainsInvalidLinks(wchar_t* const fullPath) {
         }
       }
 
-      mozilla::UniquePtr<UINT8[]> byteBuffer =
+      auto byteBuffer =
           std::make_unique<UINT8[]>(MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
       ZeroMemory(byteBuffer.get(), MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
       REPARSE_DATA_BUFFER* buffer = (REPARSE_DATA_BUFFER*)byteBuffer.get();
@@ -351,8 +351,7 @@ bool IsProgramFilesPath(NS_tchar* fullPath) {
   if (longInstallPathChars == 0) {
     return false;
   }
-  mozilla::UniquePtr<wchar_t[]> longInstallPath =
-      std::make_unique<wchar_t[]>(longInstallPathChars);
+  auto longInstallPath = std::make_unique<wchar_t[]>(longInstallPathChars);
   if (!GetLongPathNameW(fullPath, longInstallPath.get(),
                         longInstallPathChars)) {
     return false;
@@ -387,7 +386,7 @@ bool IsProgramFilesPath(NS_tchar* fullPath) {
       // Allocate space for a copy of the string along with a terminator and one
       // extra character for the trailing backslash.
       length += 1;
-      mozilla::UniquePtr<wchar_t[]> programFiles32PathWithSlash =
+      auto programFiles32PathWithSlash =
           std::make_unique<wchar_t[]>(length + 1);
 
       NS_tsnprintf(programFiles32PathWithSlash.get(), length + 1, NS_T("%s\\"),
@@ -421,8 +420,7 @@ bool IsProgramFilesPath(NS_tchar* fullPath) {
     if (lengthChars <= 1) {
       return false;
     }
-    mozilla::UniquePtr<wchar_t[]> programFilesNativePath =
-        std::make_unique<wchar_t[]>(lengthChars);
+    auto programFilesNativePath = std::make_unique<wchar_t[]>(lengthChars);
 
     // Now actually read the value.
     if (RegGetValueW(
@@ -447,7 +445,7 @@ bool IsProgramFilesPath(NS_tchar* fullPath) {
       // Allocate space for a copy of the string along with a terminator and one
       // extra character for the trailing backslash.
       nativePathStrLen += 1;
-      mozilla::UniquePtr<wchar_t[]> programFilesNativePathWithSlash =
+      auto programFilesNativePathWithSlash =
           std::make_unique<wchar_t[]>(nativePathStrLen + 1);
 
       NS_tsnprintf(programFilesNativePathWithSlash.get(), nativePathStrLen + 1,

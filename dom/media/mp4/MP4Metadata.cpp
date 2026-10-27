@@ -504,8 +504,7 @@ MP4Metadata::ResultAndIndice MP4Metadata::GetTrackIndice(
     }
   }
 
-  UniquePtr<IndiceWrapper> indice;
-  indice = std::make_unique<IndiceWrapper>(indiceRawData);
+  auto indice = std::make_unique<IndiceWrapper>(indiceRawData);
 
   return {NS_OK, std::move(indice)};
 }

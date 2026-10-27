@@ -838,7 +838,7 @@ nsBinaryInputStream::ReadArrayBuffer(uint64_t aLength,
   }
 
   uint32_t bufSize = std::min<uint64_t>(aLength, 4096);
-  UniquePtr<char[]> buf = std::make_unique<char[]>(bufSize);
+  auto buf = std::make_unique<char[]>(bufSize);
 
   uint64_t pos = 0;
   *aReadLength = 0;

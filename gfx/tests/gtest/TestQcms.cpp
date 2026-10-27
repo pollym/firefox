@@ -170,13 +170,13 @@ static void ClearRgbaBuffer(uint8_t* aBuffer, size_t aPixels) {
 }
 
 static UniquePtr<uint8_t[]> GetRgbOutputBuffer(size_t aPixels) {
-  UniquePtr<uint8_t[]> buffer = std::make_unique<uint8_t[]>(aPixels * 3);
+  auto buffer = std::make_unique<uint8_t[]>(aPixels * 3);
   ClearRgbBuffer(buffer.get(), aPixels);
   return buffer;
 }
 
 static UniquePtr<uint8_t[]> GetRgbaOutputBuffer(size_t aPixels) {
-  UniquePtr<uint8_t[]> buffer = std::make_unique<uint8_t[]>(aPixels * 4);
+  auto buffer = std::make_unique<uint8_t[]>(aPixels * 4);
   ClearRgbaBuffer(buffer.get(), aPixels);
   return buffer;
 }

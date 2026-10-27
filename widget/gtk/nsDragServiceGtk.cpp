@@ -205,8 +205,8 @@ gboolean nsDragSessionGtk::ScheduleMotionEvent(
 
   // Returning TRUE means we'll reply with a status message, unless we first
   // get a leave.
-  UniquePtr<DragTaskGtk> task = std::make_unique<DragTaskGtk>(
-      eDragTaskMotion, aDragContext, aWindow, aWindowPoint, aTime);
+  auto task = std::make_unique<DragTaskGtk>(eDragTaskMotion, aDragContext,
+                                            aWindow, aWindowPoint, aTime);
   return Schedule(std::move(task));
 }
 
@@ -214,8 +214,8 @@ gboolean nsDragSessionGtk::ScheduleDropEvent(nsWindow* aWindow,
                                              GdkDragContext* aDragContext,
                                              LayoutDeviceIntPoint aWindowPoint,
                                              guint aTime) {
-  UniquePtr<DragTaskGtk> task = std::make_unique<DragTaskGtk>(
-      eDragTaskDrop, aDragContext, aWindow, aWindowPoint, aTime);
+  auto task = std::make_unique<DragTaskGtk>(eDragTaskDrop, aDragContext,
+                                            aWindow, aWindowPoint, aTime);
   if (!Schedule(std::move(task))) {
     NS_WARNING("Additional drag drop ignored");
     return FALSE;
@@ -231,7 +231,7 @@ void nsDragSessionGtk::ScheduleLeaveEvent() {
   // We don't know at this stage whether a drop signal will immediately
   // follow.  If the drop signal gets sent it will happen before we return
   // to the main loop and the scheduled leave task will be replaced.
-  UniquePtr<DragTaskGtk> task = std::make_unique<DragTaskGtk>(eDragTaskLeave);
+  auto task = std::make_unique<DragTaskGtk>(eDragTaskLeave);
   if (!Schedule(std::move(task))) {
     NS_WARNING("Drag leave after drop");
   }

@@ -1192,10 +1192,9 @@ nsresult TextServicesDocument::OffsetEntryArray::DidInsertText(
     } else {
       // Insert an inserted text offset entry before the current
       // entry!
-      UniquePtr<OffsetEntry> newInsertedTextEntry =
-          std::make_unique<OffsetEntry>(entry->mTextNode,
-                                        entry->mOffsetInTextInBlock,
-                                        aInsertedString.Length());
+      auto newInsertedTextEntry = std::make_unique<OffsetEntry>(
+          entry->mTextNode, entry->mOffsetInTextInBlock,
+          aInsertedString.Length());
       newInsertedTextEntry->mIsInsertedText = true;
       newInsertedTextEntry->mOffsetInTextNode = entry->mOffsetInTextNode;
       // XXX(Bug 1631371) Check if this should use a fallible operation as it
@@ -1228,9 +1227,8 @@ nsresult TextServicesDocument::OffsetEntryArray::DidInsertText(
     if (!insertedTextEntry) {
       // We didn't find an inserted text offset entry, so
       // create one.
-      UniquePtr<OffsetEntry> newInsertedTextEntry =
-          std::make_unique<OffsetEntry>(
-              entry->mTextNode, mSelection.StartOffsetInTextInBlock(), 0);
+      auto newInsertedTextEntry = std::make_unique<OffsetEntry>(
+          entry->mTextNode, mSelection.StartOffsetInTextInBlock(), 0);
       newInsertedTextEntry->mOffsetInTextNode = entry->EndOffsetInTextNode();
       newInsertedTextEntry->mIsInsertedText = true;
       // XXX(Bug 1631371) Check if this should use a fallible operation as it

@@ -25,8 +25,7 @@ const std::string& RsdparsaSdpParser::ParserName() {
 
 UniquePtr<SdpParser::Results> RsdparsaSdpParser::Parse(
     const std::string& aText) {
-  UniquePtr<SdpParser::InternalResults> results =
-      std::make_unique<SdpParser::InternalResults>(Name());
+  auto results = std::make_unique<SdpParser::InternalResults>(Name());
   const ffi::SdpSession* result = nullptr;
   const ffi::SdpParserError* err = nullptr;
   ffi::StringView sdpTextView{reinterpret_cast<const uint8_t*>(aText.data()),

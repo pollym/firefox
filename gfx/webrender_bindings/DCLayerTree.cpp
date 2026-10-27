@@ -399,7 +399,7 @@ bool DCLayerTree::InitializeVideoOverlaySupport() {
     return true;
   }
 
-  UniquePtr<GpuOverlayInfo> info = std::make_unique<GpuOverlayInfo>();
+  auto info = std::make_unique<GpuOverlayInfo>();
 
   RefPtr<IDXGIDevice> dxgiDevice;
   RefPtr<IDXGIAdapter> adapter;

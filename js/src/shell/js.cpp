@@ -7959,7 +7959,7 @@ static bool WithSourceHook(JSContext* cx, unsigned argc, Value* vp) {
     return false;
   }
 
-  mozilla::UniquePtr<ShellSourceHook> hook = std::make_unique<ShellSourceHook>(
+  auto hook = std::make_unique<ShellSourceHook>(
       cx, args[0].toObject().as<JSFunction>());
   if (!hook) {
     return false;

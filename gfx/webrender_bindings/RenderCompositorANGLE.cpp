@@ -53,7 +53,7 @@ UniquePtr<RenderCompositor> RenderCompositorANGLE::Create(
     return nullptr;
   }
 
-  UniquePtr<RenderCompositorANGLE> compositor =
+  auto compositor =
       std::make_unique<RenderCompositorANGLE>(aWidget, std::move(gl));
   if (!compositor->Initialize(aError)) {
     return nullptr;

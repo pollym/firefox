@@ -132,8 +132,7 @@ class DynamicBlockList final : public DynamicBlockListBase {
       destinationPayloadSize += sizeof(DllBlockInfo) + kTestDllBytes;
     }
 #endif
-    UniquePtr<uint8_t[]> payload =
-        std::make_unique<uint8_t[]>(destinationPayloadSize);
+    auto payload = std::make_unique<uint8_t[]>(destinationPayloadSize);
     ok = ::ReadFile(file.get(), payload.get(), header.mPayloadSize, &bytesRead,
                     nullptr);
     if (!ok || bytesRead != header.mPayloadSize) {

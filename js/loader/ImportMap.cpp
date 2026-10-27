@@ -118,7 +118,7 @@ static UniquePtr<SpecifierMap> SortAndNormalizeSpecifierMap(
     JSContext* aCx, HandleObject aOriginalMap, nsIURI* aBaseURL,
     const ReportWarningHelper& aWarning) {
   // Step 1. Let normalized be an empty ordered map.
-  UniquePtr<SpecifierMap> normalized = std::make_unique<SpecifierMap>();
+  auto normalized = std::make_unique<SpecifierMap>();
 
   Rooted<IdVector> specifierKeys(aCx, IdVector(aCx));
   if (!JS_Enumerate(aCx, aOriginalMap, &specifierKeys)) {
@@ -244,7 +244,7 @@ static UniquePtr<ScopeMap> SortAndNormalizeScopes(
   }
 
   // Step 1. Let normalized be an empty map.
-  UniquePtr<ScopeMap> normalized = std::make_unique<ScopeMap>();
+  auto normalized = std::make_unique<ScopeMap>();
 
   // Step 2. For each scopePrefix → potentialSpecifierMap of originalMap,
   for (size_t i = 0; i < scopeKeys.length(); i++) {
@@ -316,7 +316,7 @@ static UniquePtr<IntegrityMap> NormalizeIntegrity(
     JSContext* aCx, HandleObject aOriginalMap, nsIURI* aBaseURL,
     const ReportWarningHelper& aWarning) {
   // Step 1. Let normalized be an empty ordered map.
-  UniquePtr<IntegrityMap> normalized = std::make_unique<IntegrityMap>();
+  auto normalized = std::make_unique<IntegrityMap>();
 
   Rooted<IdVector> keys(aCx, IdVector(aCx));
   if (!JS_Enumerate(aCx, aOriginalMap, &keys)) {
@@ -589,7 +589,7 @@ static UniquePtr<SpecifierMap> MergeSpecifierMaps(
     SpecifierMap* newMap, SpecifierMap* oldMap,
     const ReportWarningHelper& aWarning) {
   // 1. Let mergedMap be a deep copy of oldMap.
-  UniquePtr<SpecifierMap> mergedMap = std::make_unique<SpecifierMap>();
+  auto mergedMap = std::make_unique<SpecifierMap>();
   for (auto&& [k, v] : *oldMap) {
     mergedMap->emplace(k, v);
   }

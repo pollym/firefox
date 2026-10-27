@@ -61,7 +61,7 @@ nsresult txResultStringComparator::init(const nsACString& aLanguage,
 std::pair<UniquePtr<txObject>, nsresult>
 txResultStringComparator::createSortableValue(Expr* aExpr,
                                               txIEvalContext* aContext) {
-  UniquePtr<nsString> string = std::make_unique<nsString>();
+  auto string = std::make_unique<nsString>();
   nsresult rv = aExpr->evaluateToString(aContext, *string);
   return std::make_pair(std::make_unique<StringValue>(std::move(string)), rv);
 }
