@@ -20,8 +20,8 @@
  */
 
 /**
- * pdfjsVersion = 6.5.334
- * pdfjsBuild = 67667f1e4
+ * pdfjsVersion = 6.5.390
+ * pdfjsBuild = ea6cf5c98
  */
 
 ;// ./src/shared/util.js
@@ -29,6 +29,8 @@ const isNodeJS = false;
 const BBOX_INIT = [Infinity, Infinity, -Infinity, -Infinity];
 const F32_BBOX_INIT = new Float32Array(BBOX_INIT);
 const FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
+const DEFAULT_VERTICAL_ORIGIN_Y = 880;
+const DEFAULT_VERTICAL_ADVANCE = 1000;
 const LINE_FACTOR = 1.35;
 const LINE_DESCENT_FACTOR = 0.35;
 const BASELINE_FACTOR = LINE_DESCENT_FACTOR / LINE_FACTOR;
@@ -6240,19 +6242,12 @@ class RadialAxialShading extends BaseShading {
   }
 }
 function meshUpdateBounds(self) {
-  let minX = self.coords[0][0],
-    minY = self.coords[0][1],
-    maxX = minX,
-    maxY = minY;
-  for (let i = 1, ii = self.coords.length; i < ii; i++) {
-    const x = self.coords[i][0],
-      y = self.coords[i][1];
-    minX = minX > x ? x : minX;
-    minY = minY > y ? y : minY;
-    maxX = maxX < x ? x : maxX;
-    maxY = maxY < y ? y : maxY;
+  const coords = self.coords,
+    bounds = BBOX_INIT.slice();
+  for (let i = 0, ii = coords.length; i < ii; i++) {
+    Util.pointBoundingBox(coords[i][0], coords[i][1], bounds);
   }
-  self.bounds = [minX, minY, maxX, maxY];
+  self.bounds = bounds;
 }
 function meshPackData(self) {
   const coords = self.coords;
@@ -17196,6 +17191,7 @@ const getVerticalPresentationForm = getLookupTableFactory(t => {
   t[0xff5b] = 0xfe37;
   t[0xff5d] = 0xfe38;
 });
+const VERTICAL_ROTATED_CHARS = new Set([0x2010, 0x2015, 0x2016, 0x3018, 0x3019, 0x301c, 0x30a0, 0x30fc, 0xff1d, 0xff5c, 0xff5e, 0xff5f, 0xff60]);
 const MAX_SIZE_TO_COMPILE = 1000;
 function compileType3Glyph({
   data: img,
@@ -17419,15 +17415,29 @@ const MAX_SUBR_NESTING = 10;
 const MAX_CHARSTRING_TOKENS = 64 * 1024 * 1024;
 const MAX_STACK_SIZE = 48;
 const MAX_FD_ARRAY_COUNT = 256;
-function removeCharStringByte(cursor, data, pos) {
+function removeCharStringBytes(cursor, data, start, end) {
   const {
     readStart
   } = cursor;
-  if (pos > readStart) {
-    data.copyWithin(cursor.writePos, readStart, pos);
-    cursor.writePos += pos - readStart;
+  if (start > readStart) {
+    data.copyWithin(cursor.writePos, readStart, start);
+    cursor.writePos += start - readStart;
   }
-  cursor.readStart = pos + 1;
+  cursor.readStart = end;
+}
+function isEmptyCharString(data) {
+  const b0 = data[0];
+  let pos = 0;
+  if (b0 === 28) {
+    pos = 3;
+  } else if (b0 >= 32 && b0 <= 246) {
+    pos = 1;
+  } else if (b0 >= 247 && b0 <= 254) {
+    pos = 2;
+  } else if (b0 === 255) {
+    pos = 5;
+  }
+  return data[pos] === 14;
 }
 function looksLikeUnsigned16BitNegative(coord) {
   return coord > 0x7fff && coord <= 0xffff;
@@ -17648,6 +17658,9 @@ const CharstringValidationData12 = [null, null, null, {
   resetStack: true
 }];
 class CFFParser {
+  #privateDicts = new Map();
+  #privateDataLength = 0;
+  #subrsIndexes = new Map();
   constructor(file, properties, seacAnalysisEnabled) {
     this.bytes = file.getBytes();
     this.properties = properties;
@@ -17905,9 +17918,13 @@ class CFFParser {
   #parseCharString(state, data, localSubrIndex, globalSubrIndex, cursor) {
     const view = new DataView(data.buffer, data.byteOffset, data.bytesLength);
     let stackSize = state.stackSize;
-    const stack = state.stack;
+    const {
+      stack,
+      argStarts
+    } = state;
     const length = data.length;
     for (let j = 0; j < length;) {
+      argStarts[stackSize] = j;
       const value = data[j++];
       if (++state.tokens > MAX_CHARSTRING_TOKENS || stackSize > MAX_STACK_SIZE) {
         warn("Charstring exceeds the execution limits.");
@@ -17950,7 +17967,7 @@ class CFFParser {
       } else if (value === 19 || value === 20) {
         state.hints += stackSize >> 1;
         if (state.hints === 0) {
-          removeCharStringByte(cursor, data, j - 1);
+          removeCharStringBytes(cursor, data, j - 1, j);
           continue;
         }
         j += state.hints + 7 >> 3;
@@ -17983,6 +18000,7 @@ class CFFParser {
         }
         state.callDepth--;
         stackSize = state.stackSize;
+        argStarts[0] = -1;
         continue;
       } else if (value === 11) {
         state.stackSize = stackSize;
@@ -17991,7 +18009,7 @@ class CFFParser {
         data[j - 1] = 14;
         validationCommand = CharstringValidationData[14];
       } else if (value === 9) {
-        removeCharStringByte(cursor, data, j - 1);
+        removeCharStringBytes(cursor, data, j - 1, j);
         continue;
       } else {
         validationCommand = CharstringValidationData[value];
@@ -18014,16 +18032,14 @@ class CFFParser {
           }
           return false;
         }
-        if (state.firstStackClearing && validationCommand.stackClearing) {
-          state.firstStackClearing = false;
-          stackSize -= validationCommand.min;
-          if (stackSize >= 2 && validationCommand.stem) {
-            stackSize %= 2;
-          } else if (stackSize > 1) {
-            warn("Found too many parameters for stack-clearing command");
+        if (validationCommand.stackClearing) {
+          let extraArgs = validationCommand.stem ? stackSize % 2 : stackSize - validationCommand.min;
+          if (state.firstStackClearing && extraArgs > 0) {
+            state.width = stack[--extraArgs];
           }
-          if (stackSize > 0) {
-            state.width = stack[stackSize - 1];
+          state.firstStackClearing = false;
+          if (extraArgs > 0 && state.callDepth === 0 && argStarts[0] >= cursor.readStart) {
+            removeCharStringBytes(cursor, data, argStarts[0], argStarts[extraArgs]);
           }
         }
         if ("stackDelta" in validationCommand) {
@@ -18031,6 +18047,7 @@ class CFFParser {
             validationCommand.stackFn(stack, stackSize);
           }
           stackSize += validationCommand.stackDelta;
+          argStarts[0] = -1;
         } else if (validationCommand.stackClearing || validationCommand.resetStack) {
           stackSize = 0;
         }
@@ -18057,6 +18074,7 @@ class CFFParser {
         tokens: 0,
         stackSize: 0,
         stack: [],
+        argStarts: [],
         hints: 0,
         firstStackClearing: true,
         seac: null,
@@ -18109,6 +18127,12 @@ class CFFParser {
     parentDict.setByKey(18, [0, 0]);
     parentDict.privateDict = privateDict;
   }
+  #addPrivateDataLength(length) {
+    this.#privateDataLength += length;
+    if (this.#privateDataLength > this.bytes.length) {
+      throw new FormatError("CFF Private DICT data exceeds the font length");
+    }
+  }
   parsePrivateDict(parentDict) {
     if (!parentDict.hasName("Private")) {
       this.emptyPrivateDictionary(parentDict);
@@ -18128,11 +18152,19 @@ class CFFParser {
     if (offset + size > this.bytes.length) {
       throw new FormatError("CFF Private DICT extends past end of font");
     }
+    const cacheKey = `${offset}_${size}`;
+    const cachedDict = this.#privateDicts.get(cacheKey);
+    if (cachedDict) {
+      parentDict.privateDict = cachedDict;
+      return;
+    }
     const privateDictEnd = offset + size;
     const dictData = this.bytes.subarray(offset, privateDictEnd);
+    this.#addPrivateDataLength(dictData.length);
     const dict = this.parseDict(dictData);
     const privateDict = this.createDict(CFFPrivateDict, dict, parentDict.strings);
     parentDict.privateDict = privateDict;
+    this.#privateDicts.set(cacheKey, privateDict);
     const blueScale = privateDict.getByName("BlueScale");
     const blueShift = privateDict.getByName("BlueShift");
     const blueFuzz = privateDict.getByName("BlueFuzz");
@@ -18175,10 +18207,17 @@ class CFFParser {
     const relativeOffset = offset + subrsOffset;
     if (subrsOffset === 0 || relativeOffset >= this.bytes.length) {
       this.emptyPrivateDictionary(parentDict);
+      this.#privateDicts.set(cacheKey, parentDict.privateDict);
       return;
     }
-    const subrsIndex = this.parseIndex(relativeOffset);
-    privateDict.subrsIndex = subrsIndex.obj;
+    privateDict.subrsIndex = this.#subrsIndexes.getOrInsertComputed(relativeOffset, () => {
+      const {
+        obj,
+        endPos
+      } = this.parseIndex(relativeOffset);
+      this.#addPrivateDataLength(Math.max(endPos - relativeOffset, obj.count));
+      return obj;
+    });
   }
   parseCharsets(pos, length, strings, cid) {
     if (pos === 0) {
@@ -18339,16 +18378,31 @@ class CFF {
   constructor(rawFileLength = 0) {
     this.rawFileLength = rawFileLength;
   }
-  duplicateFirstGlyph() {
-    if (this.charStrings.count >= 65535) {
-      warn("Not enough space in charstrings to duplicate first glyph.");
-      return;
+  duplicateFirstGlyph(replaceEmptyGlyph = false) {
+    const {
+      charStrings,
+      fdSelect
+    } = this;
+    const glyphZero = charStrings.get(0);
+    let id = charStrings.count;
+    if (id < 65535) {
+      charStrings.add(glyphZero);
+    } else {
+      id = replaceEmptyGlyph ? id - 1 : 0;
+      while (id > 0 && (this.seacs.has(id) || !isEmptyCharString(charStrings.get(id)))) {
+        id--;
+      }
+      if (id === 0) {
+        warn("Not enough space in charstrings to duplicate first glyph.");
+        return 0;
+      }
+      charStrings.set(id, glyphZero);
     }
-    const glyphZero = this.charStrings.get(0);
-    this.charStrings.add(glyphZero);
+    this.widths[id] = this.widths[0];
     if (this.isCIDFont) {
-      this.fdSelect.fdSelect.push(this.fdSelect.fdSelect[0]);
+      fdSelect.fdSelect[id] = fdSelect.fdSelect[0];
     }
+    return id;
   }
   hasGlyphId(id) {
     if (id < 0 || id >= this.charStrings.count) {
@@ -18736,11 +18790,18 @@ class CFFCompiler {
     };
   }
   compilePrivateDicts(dicts, trackers, output) {
+    const locations = new Map();
+    const subrs = new Map();
     for (let i = 0, ii = dicts.length; i < ii; ++i) {
       const fontDict = dicts[i];
       const privateDict = fontDict.privateDict;
       if (!privateDict || !fontDict.hasName("Private")) {
         throw new FormatError("There must be a private dictionary.");
+      }
+      let location = locations.get(privateDict);
+      if (location) {
+        trackers[i].setEntryLocation("Private", location, output);
+        continue;
       }
       const privateDictTracker = new CFFOffsetTracker();
       const privateDictData = this.compileDict(privateDict, privateDictTracker);
@@ -18749,13 +18810,20 @@ class CFFCompiler {
       if (!privateDictData.length) {
         outputLength = 0;
       }
-      trackers[i].setEntryLocation("Private", [privateDictData.length, outputLength], output);
+      location = [privateDictData.length, outputLength];
+      locations.set(privateDict, location);
+      trackers[i].setEntryLocation("Private", location, output);
       output.setArray(privateDictData);
       if (privateDict.subrsIndex && privateDict.hasName("Subrs")) {
-        const subrs = this.compileIndex(privateDict.subrsIndex);
-        privateDictTracker.setEntryLocation("Subrs", [privateDictData.length], output);
-        output.setArray(subrs);
+        subrs.getOrInsertComputed(privateDict.subrsIndex, makeArr).push([privateDictTracker, outputLength]);
       }
+    }
+    for (const [subrsIndex, users] of subrs) {
+      const subrsStart = output.length;
+      for (const [privateDictTracker, privateDictStart] of users) {
+        privateDictTracker.setEntryLocation("Subrs", [subrsStart - privateDictStart], output);
+      }
+      output.setArray(this.compileIndex(subrsIndex));
     }
   }
   compileDict(dict, offsetTracker) {
@@ -20657,11 +20725,18 @@ class IdentityToUnicodeMap {
 
 
 class CFFFont {
+  #replacedGlyphId = -1;
   constructor(file, properties) {
     this.properties = properties;
     const parser = new CFFParser(file, properties, (/* inlined export .SEAC_ANALYSIS_ENABLED */true));
     this.cff = parser.parse();
-    this.cff.duplicateFirstGlyph();
+    const {
+      charStringCount
+    } = this.cff;
+    this.glyphZeroId = this.cff.duplicateFirstGlyph(true);
+    if (this.glyphZeroId > 0 && this.glyphZeroId < charStringCount) {
+      this.#replacedGlyphId = this.glyphZeroId;
+    }
     const compiler = new CFFCompiler(this.cff);
     this.seacs = this.cff.seacs;
     try {
@@ -20721,7 +20796,7 @@ class CFFFont {
     return type1FontGlyphMapping(properties, encoding, charsets);
   }
   hasGlyphId(id) {
-    return this.cff.hasGlyphId(id);
+    return id !== this.#replacedGlyphId && this.cff.hasGlyphId(id);
   }
   _createBuiltInEncoding() {
     const {
@@ -26111,7 +26186,7 @@ function amendFallbackToUnicode(properties) {
   properties.toUnicode.amend(toUnicode);
 }
 class fonts_Glyph {
-  constructor(originalCharCode, fontChar, unicode, accent, width, vmetric, operatorListId, isSpace, isInFont) {
+  constructor(originalCharCode, fontChar, unicode, accent, width, vmetric, operatorListId, isSpace, isInFont, isRotated) {
     this.originalCharCode = originalCharCode;
     this.fontChar = fontChar;
     this.unicode = unicode;
@@ -26121,6 +26196,7 @@ class fonts_Glyph {
     this.operatorListId = operatorListId;
     this.isSpace = isSpace;
     this.isInFont = isInFont;
+    this.isRotated = isRotated;
   }
   get category() {
     return shadow(this, "category", getCharUnicodeCategory(this.unicode), true);
@@ -28326,7 +28402,7 @@ class Font {
     if (properties.builtInEncoding) {
       adjustType1ToUnicode(properties, properties.builtInEncoding);
     }
-    const glyphZeroId = font instanceof CFFFont ? font.numGlyphs - 1 : 1;
+    const glyphZeroId = font instanceof CFFFont ? font.glyphZeroId : 1;
     const mapping = font.getGlyphMapping(properties);
     let newMapping = null;
     let newCharCodeToGlyphId = mapping;
@@ -28563,15 +28639,34 @@ class Font {
         warn(`charToGlyph - invalid fontCharCode: ${fontCharCode}`);
       }
     }
-    if (this.missingFile && this.vertical && fontChar.length === 1) {
-      const vertical = getVerticalPresentationForm()[fontChar.charCodeAt(0)];
+    let isRotated = false;
+    if (this.missingFile && this.vertical && fontChar.length === 1 && this.#hasVerticalVariant(charcode)) {
+      const charCode = fontChar.charCodeAt(0);
+      const vertical = getVerticalPresentationForm()[charCode];
       if (vertical) {
         fontChar = unicode = String.fromCharCode(vertical);
+      } else {
+        isRotated = VERTICAL_ROTATED_CHARS.has(charCode);
       }
     }
-    glyph = new fonts_Glyph(charcode, fontChar, unicode, accent, width, vmetric, operatorListId, isSpace, isInFont);
+    glyph = new fonts_Glyph(charcode, fontChar, unicode, accent, width, vmetric, operatorListId, isSpace, isInFont, isRotated);
     this.#glyphCache.set(charcode, glyph);
     return glyph;
+  }
+  #hasVerticalVariant(charcode) {
+    const {
+      cMap
+    } = this;
+    if (!cMap?.builtInCMap) {
+      return true;
+    }
+    let {
+      useCMap
+    } = cMap;
+    while (useCMap?.vertical) {
+      useCMap = useCMap.useCMap;
+    }
+    return !useCMap || cMap.lookup(charcode) !== useCMap.lookup(charcode);
   }
   charsToGlyphs(chars) {
     let glyphs = this.#charsCache.get(chars);
@@ -36948,7 +37043,7 @@ class PartialEvaluator {
       }
       if (properties.vertical) {
         const dw2 = dict.getArray("DW2");
-        let vmetrics = isNumberArray(dw2, 2) ? dw2 : [880, -1000];
+        let vmetrics = isNumberArray(dw2, 2) ? dw2 : [(/* inlined export .DEFAULT_VERTICAL_ORIGIN_Y */880), -(/* inlined export .DEFAULT_VERTICAL_ADVANCE */1000)];
         defaultVMetrics = [vmetrics[1], defaultWidth * 0.5, vmetrics[0]];
         vmetrics = dict.get("W2");
         if (Array.isArray(vmetrics)) {
@@ -59775,6 +59870,30 @@ class PDFDocument {
       }
     };
   }
+  #createPage(pageIndex, pageDict, ref) {
+    const {
+      catalog,
+      pdfManager,
+      xfaFactory,
+      xref
+    } = this;
+    return new Page({
+      pdfManager,
+      xref,
+      pageIndex,
+      pageDict,
+      ref,
+      globalIdFactory: this._globalIdFactory,
+      fontCache: catalog.fontCache,
+      builtInCMapCache: catalog.builtInCMapCache,
+      standardFontDataCache: catalog.standardFontDataCache,
+      globalColorSpaceCache: catalog.globalColorSpaceCache,
+      globalImageCache: catalog.globalImageCache,
+      systemFontCache: catalog.systemFontCache,
+      nonBlendModesSet: catalog.nonBlendModesSet,
+      xfaFactory
+    });
+  }
   parse(recoveryMode) {
     this.xref.parse(recoveryMode);
     this.catalog = new Catalog(this.pdfManager, this.xref);
@@ -60297,22 +60416,7 @@ class PDFDocument {
     } else {
       promise = catalog.getPageDict(pageIndex);
     }
-    promise = promise.then(([pageDict, ref]) => new Page({
-      pdfManager: this.pdfManager,
-      xref: this.xref,
-      pageIndex,
-      pageDict,
-      ref,
-      globalIdFactory: this._globalIdFactory,
-      fontCache: catalog.fontCache,
-      builtInCMapCache: catalog.builtInCMapCache,
-      standardFontDataCache: catalog.standardFontDataCache,
-      globalColorSpaceCache: catalog.globalColorSpaceCache,
-      globalImageCache: catalog.globalImageCache,
-      systemFontCache: catalog.systemFontCache,
-      nonBlendModesSet: catalog.nonBlendModesSet,
-      xfaFactory
-    }));
+    promise = promise.then(([pageDict, ref]) => this.#createPage(pageIndex, pageDict, ref));
     this.#pagePromises.set(pageIndex, promise);
     return promise;
   }
@@ -60375,22 +60479,7 @@ class PDFDocument {
           promise = Promise.reject(pageDict);
           promise.catch(() => {});
         } else {
-          promise = Promise.resolve(new Page({
-            pdfManager,
-            xref: this.xref,
-            pageIndex,
-            pageDict,
-            ref,
-            globalIdFactory: this._globalIdFactory,
-            fontCache: catalog.fontCache,
-            builtInCMapCache: catalog.builtInCMapCache,
-            standardFontDataCache: catalog.standardFontDataCache,
-            globalColorSpaceCache: this.globalColorSpaceCache,
-            globalImageCache: catalog.globalImageCache,
-            systemFontCache: catalog.systemFontCache,
-            nonBlendModesSet: catalog.nonBlendModesSet,
-            xfaFactory: null
-          }));
+          promise = Promise.resolve(this.#createPage(pageIndex, pageDict, ref));
         }
         this.#pagePromises.set(pageIndex, promise);
       }
@@ -63762,18 +63851,59 @@ class PDFEditor {
       pageDict.set("UserUnit", userUnit);
     }
     pageDict.setIfDict("Resources", await this.#collectDependencies(resources, true, xref));
-    let newAnnots = null;
-    if (annotations) {
-      const newAnnotations = await this.#collectDependencies(annotations, true, xref);
-      this.#fixNamedDestinations(newAnnotations, dedupNamedDestinations);
-      if (Array.isArray(newAnnotations) && newAnnotations.length > 0) {
-        newAnnots = newAnnotations;
-      }
-    }
     const newAnnotations = documentData.document === this.#primaryDocument ? this.#newAnnotationsParams?.newAnnotationsByPage?.get(page.pageIndex)?.filter(({
       copyLevel: level
     }) => (level ?? 0) === copyLevel) : null;
+    const deletedAnnotations = new RefSet();
+    for (const {
+      id,
+      deleted,
+      popup,
+      popupRef
+    } of newAnnotations || []) {
+      if (!Ref.fromString(id)) {
+        continue;
+      }
+      if (deleted) {
+        deletedAnnotations.put(id);
+      }
+      if (popupRef && (deleted || popup?.deleted)) {
+        deletedAnnotations.put(popupRef);
+      }
+    }
+    let newAnnots = null;
+    if (annotations) {
+      const keptAnnotations = await this.#collectDependencies(annotations.filter(annotation => !(annotation instanceof Ref && deletedAnnotations.has(annotation))), true, xref);
+      this.#fixNamedDestinations(keptAnnotations, dedupNamedDestinations);
+      if (Array.isArray(keptAnnotations) && keptAnnotations.length > 0) {
+        newAnnots = keptAnnotations;
+      }
+    }
     if (newAnnotations?.length) {
+      const editedAnnotations = new RefSet();
+      const updateInPlace = (data, id) => {
+        const ref = id && oldRefMapping.get(id);
+        const dict = ref && this.xref[ref.num];
+        if (!(dict instanceof Dict)) {
+          return false;
+        }
+        data.ref = ref;
+        data.oldAnnotation = dict;
+        editedAnnotations.put(ref);
+        return true;
+      };
+      for (const annotation of newAnnotations) {
+        if (annotation.deleted || !updateInPlace(annotation, annotation.id)) {
+          continue;
+        }
+        delete annotation.id;
+        const {
+          popup
+        } = annotation;
+        if (popup && !popup.deleted) {
+          updateInPlace(popup, annotation.popupRef);
+        }
+      }
       const {
         handler,
         task,
@@ -63790,7 +63920,9 @@ class PDFEditor {
       for (const {
         ref
       } of newData.annotations) {
-        newAnnots.push(ref);
+        if (!editedAnnotations.has(ref)) {
+          newAnnots.push(ref);
+        }
       }
     }
     pageDict.setIfArray("Annots", newAnnots);
@@ -64561,7 +64693,7 @@ class WorkerMessageHandler {
       docId,
       apiVersion
     } = docParams;
-    const workerVersion = "6.5.334";
+    const workerVersion = "6.5.390";
     if (apiVersion !== workerVersion) {
       throw new Error(`The API version "${apiVersion}" does not match the Worker version "${workerVersion}".`);
     }

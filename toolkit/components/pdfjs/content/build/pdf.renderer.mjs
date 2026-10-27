@@ -20,8 +20,8 @@
  */
 
 /**
- * pdfjsVersion = 6.5.334
- * pdfjsBuild = 67667f1e4
+ * pdfjsVersion = 6.5.390
+ * pdfjsBuild = ea6cf5c98
  */
 
 ;// ./src/shared/util.js
@@ -29,6 +29,8 @@ const isNodeJS = false;
 const BBOX_INIT = [Infinity, Infinity, -Infinity, -Infinity];
 const F32_BBOX_INIT = new Float32Array(BBOX_INIT);
 const FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
+const DEFAULT_VERTICAL_ORIGIN_Y = 880;
+const DEFAULT_VERTICAL_ADVANCE = 1000;
 const LINE_FACTOR = 1.35;
 const LINE_DESCENT_FACTOR = 0.35;
 const BASELINE_FACTOR = (/* unused pure expression or super */ null && (LINE_DESCENT_FACTOR / LINE_FACTOR));
@@ -876,23 +878,6 @@ class OutputScale {
     return this.sx === this.sy;
   }
   limitCanvas(width, height, maxPixels, maxDim, capAreaFactor = -1) {
-    let maxAreaScale = Infinity,
-      maxWidthScale = Infinity,
-      maxHeightScale = Infinity;
-    maxPixels = OutputScale.capPixels(maxPixels, capAreaFactor);
-    if (maxPixels > 0) {
-      maxAreaScale = Math.sqrt(maxPixels / (width * height));
-    }
-    if (maxDim !== -1) {
-      maxWidthScale = maxDim / width;
-      maxHeightScale = maxDim / height;
-    }
-    const maxScale = Math.min(maxAreaScale, maxWidthScale, maxHeightScale);
-    if (this.sx > maxScale || this.sy > maxScale) {
-      this.sx = maxScale;
-      this.sy = maxScale;
-      return true;
-    }
     return false;
   }
   static get pixelRatio() {
@@ -902,7 +887,6 @@ class OutputScale {
     return maxPixels;
   }
 }
-const SupportedImageMimeTypes = new Set(["image/apng", "image/avif", "image/bmp", "image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/webp", "image/x-icon"]);
 function applyOpacity(color, opacity) {
   opacity = MathClamp(opacity ?? 1, 0, 1);
   const white = 255 * (1 - opacity);
@@ -4450,6 +4434,14 @@ class CanvasGraphics {
     }
     return shadow(this, "isFontSubpixelAAEnabled", enabled);
   }
+  #getTextPattern(color, pathType, opIdx) {
+    const ctx = this.ctx;
+    ctx.save();
+    const pattern = color.getPattern(ctx, this, getCurrentTransformInverse(ctx), pathType, opIdx);
+    const transform = getCurrentTransform(ctx);
+    ctx.restore();
+    return [pattern, transform];
+  }
   showText(opIdx, glyphs) {
     if (this.dependencyTracker) {
       this.dependencyTracker.recordDependencies(opIdx, Dependencies.showText).resetBBox(opIdx);
@@ -4512,18 +4504,10 @@ class CanvasGraphics {
     }
     ctx.lineWidth = lineWidth;
     if (needsFill && current.patternFill) {
-      ctx.save();
-      const pattern = current.fillColor.getPattern(ctx, this, getCurrentTransformInverse(ctx), PathType.FILL, opIdx);
-      patternFillTransform = getCurrentTransform(ctx);
-      ctx.restore();
-      ctx.fillStyle = pattern;
+      [ctx.fillStyle, patternFillTransform] = this.#getTextPattern(current.fillColor, PathType.FILL, opIdx);
     }
     if (needsStroke && current.patternStroke) {
-      ctx.save();
-      const pattern = current.strokeColor.getPattern(ctx, this, getCurrentTransformInverse(ctx), PathType.STROKE, opIdx);
-      patternStrokeTransform = getCurrentTransform(ctx);
-      ctx.restore();
-      ctx.strokeStyle = pattern;
+      [ctx.strokeStyle, patternStrokeTransform] = this.#getTextPattern(current.strokeColor, PathType.STROKE, opIdx);
     }
     if (font.isInvalidPDFjsFont) {
       const chars = [];
@@ -4545,7 +4529,8 @@ class CanvasGraphics {
       return;
     }
     let x = 0,
-      i;
+      i,
+      glyphPatterns = null;
     for (i = 0; i < glyphsLength; ++i) {
       const glyph = glyphs[i];
       if (typeof glyph === "number") {
@@ -4556,7 +4541,7 @@ class CanvasGraphics {
       const spacing = (glyph.isSpace ? wordSpacing : 0) + charSpacing;
       const character = glyph.fontChar;
       const accent = glyph.accent;
-      let scaledX, scaledY;
+      let scaledX, scaledY, measure;
       let width = glyph.width;
       if (vertical) {
         const vmetric = glyph.vmetric;
@@ -4565,22 +4550,39 @@ class CanvasGraphics {
         width = -vmetric[0];
         scaledX = vx / fontSizeScale;
         scaledY = (x + vy) / fontSizeScale;
+        if (glyph.isRotated) {
+          measure = ctx.measureText(character);
+          const glyphScale = widthAdvanceScale / fontSizeScale;
+          const halfWidth = glyph.width / 2 * glyphScale;
+          const centerX = scaledX + halfWidth;
+          scaledX = scaledY - ((/* inlined export .DEFAULT_VERTICAL_ORIGIN_Y */880) - (/* inlined export .DEFAULT_VERTICAL_ADVANCE */1000) / 2) * glyphScale - halfWidth;
+          scaledY = (measure.actualBoundingBoxAscent - measure.actualBoundingBoxDescent) / 2 - centerX;
+          restoreNeeded = true;
+          ctx.save();
+          ctx.rotate(Math.PI / 2);
+        }
       } else {
         scaledX = x / fontSizeScale;
         scaledY = 0;
       }
-      let measure;
-      if (font.remeasure && width > 0) {
-        measure = ctx.measureText(character);
+      const glyphWidth = glyph.isRotated ? glyph.width : width;
+      if ((font.remeasure || glyph.isRotated) && glyphWidth > 0) {
+        measure ??= ctx.measureText(character);
         const measuredWidth = measure.width * 1000 / fontSize * fontSizeScale;
-        if (width < measuredWidth && this.isFontSubpixelAAEnabled) {
-          const characterScaleX = width / measuredWidth;
-          restoreNeeded = true;
-          ctx.save();
+        if (glyphWidth < measuredWidth && this.isFontSubpixelAAEnabled) {
+          const characterScaleX = glyphWidth / measuredWidth;
+          if (!restoreNeeded) {
+            restoreNeeded = true;
+            ctx.save();
+          }
           ctx.scale(characterScaleX, 1);
           scaledX /= characterScaleX;
-        } else if (width !== measuredWidth) {
-          scaledX += (width - measuredWidth) / 2000 * fontSize / fontSizeScale;
+          if (font.missingFile && (patternFillTransform || patternStrokeTransform)) {
+            glyphPatterns ||= new Map();
+            [ctx.fillStyle, ctx.strokeStyle] = glyphPatterns.getOrInsertComputed(glyph.isRotated ? -characterScaleX : characterScaleX, () => [patternFillTransform ? this.#getTextPattern(current.fillColor, PathType.FILL, opIdx)[0] : ctx.fillStyle, patternStrokeTransform ? this.#getTextPattern(current.strokeColor, PathType.STROKE, opIdx)[0] : ctx.strokeStyle]);
+          }
+        } else if (glyphWidth !== measuredWidth) {
+          scaledX += (glyphWidth - measuredWidth) / 2000 * fontSize / fontSizeScale;
         }
       }
       if (this.contentVisible && (glyph.isInFont || font.missingFile)) {
@@ -7549,7 +7551,7 @@ class RendererMessageHandler {
     this.#connection = null;
   }
   static #sendReady(handler) {
-    const workerVersion = "6.5.334";
+    const workerVersion = "6.5.390";
     const testObj = new Uint8Array();
     handler.send("ready", {
       testObj,
