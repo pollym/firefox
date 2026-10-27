@@ -39,7 +39,8 @@ class BlockReflowState {
           mShouldApplyTextBoxTrimStart(false),
           mShouldApplyTextBoxTrimAtBlockEnd(false),
           mShouldApplyTextBoxTrimAtFragmentEnd(false),
-          mIsCurrentLineAdjacentToBStart(false) {}
+          mIsCurrentLineAdjacentToBStart(false),
+          mShouldTrimInheritedBEndMargins(false) {}
 
     // Set in the BlockReflowState constructor when reflowing a "block margin
     // root" frame (i.e. a frame with any of the NS_BLOCK_BFC flag set, for
@@ -102,6 +103,11 @@ class BlockReflowState {
     // Initially true only for the first fragment; cleared when a preceding
     // line is nonempty or has clearance.
     bool mIsCurrentLineAdjacentToBStart : 1;
+
+    // Trim child margins at the block-end edge because they collapse through
+    // this block to an ancestor's trimmed edge. Enabled after a completed
+    // untrimmed reflow confirms that collapse.
+    bool mShouldTrimInheritedBEndMargins : 1;
   };
 
  public:
@@ -131,6 +137,7 @@ class BlockReflowState {
       bool aIsAdjacentToBStart);
 
   bool ShouldTrimChildBStartMargins() const;
+  bool ShouldTrimChildBEndMargins() const;
 
   /**
    * Unshifts coords, restores availableBSize to reality.
