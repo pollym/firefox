@@ -10688,12 +10688,21 @@ void PresShell::DidDoReflow(bool aInterruptible) {
     return;
   }
 
+  if (nsCOMPtr<nsIDocShell> docShell = mPresContext->GetDocShell()) {
+    DOMHighResTimeStamp now = GetPerformanceNowUnclamped();
+    docShell->NotifyReflowObservers(aInterruptible, mLastReflowStart, now);
+  }
+
+  if (mIsDestroying) {
+    return;
+  }
+
   {
     nsAutoScriptBlocker scriptBlocker;
     AutoAssertNoFlush noReentrantFlush(*this);
-    if (nsCOMPtr<nsIDocShell> docShell = mPresContext->GetDocShell()) {
-      DOMHighResTimeStamp now = GetPerformanceNowUnclamped();
-      docShell->NotifyReflowObservers(aInterruptible, mLastReflowStart, now);
+
+    if (RefPtr hub = mAccessibleCaretEventHub) {
+      hub->DidReflow();
     }
 
     SynthesizeMouseMove(false);
