@@ -1466,7 +1466,7 @@ CONTENT = {
           callbackState: "cancel",
         },
         {
-          l10nId: "credit-card-capture-never-save-button",
+          l10nId: "credit-card-capture-never-save-payment-methods-button",
           callbackState: "disable",
         },
       ],

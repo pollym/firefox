@@ -49,8 +49,8 @@ credit-card-capture-save-button =
 credit-card-capture-cancel-button =
     .label = Not now
     .accessKey = W
-credit-card-capture-never-save-button =
-    .label = Never save cards
+credit-card-capture-never-save-payment-methods-button =
+    .label = Never save payment methods
     .accessKey = N
 
 # Used on the doorhanger when an credit card change is detected.
