@@ -1062,20 +1062,6 @@ toolbarbutton[constrain-size="true"][cui-areatype="panel"] > .toolbarbutton-badg
   }
 }
 
-#PanelUI-fxa-menu-secure-sync-subpanel,
-#PanelUI-fxa-device-recent-tabs {
-  height: fit-content;
-  /* FIXME: Why is !important needed here? */
-  min-height: 0 !important;
-}
-
-/* FIXME(bug 2061145): We should track visible panel without using :has() */
-/* stylelint-disable-next-line stylelint-plugin-mozilla/no-has-selector */
-.panel-viewcontainer:has(#PanelUI-fxa-menu-secure-sync-subpanel[visible], #PanelUI-fxa-device-recent-tabs[visible], #PanelUI-profiles[visible]) {
-  /* FIXME: Why is !important needed here? */
-  min-height: 0 !important;
-}
-
 #PanelUI-fxa-cta-menu .fxa-cta-button label {
   margin: 0;
 }
@@ -3015,11 +3001,6 @@ radiogroup:focus-visible > .subviewradio[focused="true"] {
   /* stylelint-disable-next-line stylelint-plugin-mozilla/use-design-tokens */
   max-height: 50dvh;
   overflow: hidden auto;
-}
-
-#PanelUI-profiles {
-  height: fit-content;
-  min-height: 0 !important;
 }
 
 /* ----- Profiles FxA panel ----- */
