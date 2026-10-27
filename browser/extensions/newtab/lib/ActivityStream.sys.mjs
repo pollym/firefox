@@ -210,6 +210,7 @@ export const WEATHER_OPTIN_REGIONS = [
   "DE", // Germany
   "GB", // United Kingdom
   "GR", // Greece
+  "GL", // Greenland
   "HU", // Hungary
   "IS", // Iceland
   "IE", // Ireland
