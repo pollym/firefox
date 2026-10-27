@@ -247,8 +247,9 @@ $side-col-width-px: $col-width-px * 2;
   @include newtab-card-style;
 
   padding: var(--space-medium);
+  border: var(--card-border);
   border-radius: var(--border-radius-large);
-  box-shadow: var(--box-shadow-level-2);
+  box-shadow: var(--card-box-shadow);
   color: var(--text-color);
   display: flex;
   flex-direction: column;
@@ -266,7 +267,7 @@ $side-col-width-px: $col-width-px * 2;
 
   &:hover,
   &:focus-within {
-    outline: 1px solid var(--border-color-deemphasized);
+    border-color: var(--border-color-deemphasized);
     box-shadow: var(--card-box-shadow-hover);
   }
 
