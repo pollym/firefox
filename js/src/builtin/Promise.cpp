@@ -1940,7 +1940,7 @@ static bool CanUseSameRealmEnqueue(JSContext* cx, HandleObject reactionObj,
   }
 
   // HostEnqueuePromiseJob(job.[[Job]], job.[[Realm]]).
-  return EnqueueJob(cx, MicroTaskQueueElement::Kind::PromiseReaction,
+  return EnqueueJob(cx, MicroTaskQueueElement::Kind::PromiseReactionObject,
                     &reactionVal.toObject());
 }
 
@@ -2004,7 +2004,7 @@ static bool CanUseSameRealmEnqueue(JSContext* cx, HandleObject reactionObj,
   reaction->setEnqueueGlobalRepresentative(globalRepresentative);
 
   // HostEnqueuePromiseJob(job.[[Job]], job.[[Realm]]).
-  return EnqueueJob(cx, MicroTaskQueueElement::Kind::PromiseReaction,
+  return EnqueueJob(cx, MicroTaskQueueElement::Kind::PromiseReactionObject,
                     reaction.get());
 }
 
@@ -8501,7 +8501,7 @@ bool JS::JSMicroTaskRef::run(JSContext* cx) && {
   }
 
   switch (MicroTaskQueueElement::Kind(task_.kind())) {
-    case MicroTaskQueueElement::Kind::PromiseReaction:
+    case MicroTaskQueueElement::Kind::PromiseReactionObject:
       MOZ_ASSERT(unwrappedTask->is<PromiseReactionRecord>());
       // Note: We pass the (maybe)wrapped task here since PromiseReactionJob
       // will decide what realm to be in based on the wrapper if it exists.
@@ -8614,7 +8614,7 @@ JS_PUBLIC_API JSObject* JS::JSMicroTaskRef::executionGlobal() && {
   }
 
   switch (MicroTaskQueueElement::Kind(task_.kind())) {
-    case MicroTaskQueueElement::Kind::PromiseReaction: {
+    case MicroTaskQueueElement::Kind::PromiseReactionObject: {
       // Use the stored equeue representative (which may need to be unwrapped)
       JSObject* enqueueGlobalRepresentative =
           unwrapped->as<PromiseReactionRecord>().enqueueGlobalRepresentative();

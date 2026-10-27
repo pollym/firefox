@@ -154,7 +154,7 @@ class MicroTaskQueueElement {
     Embedder = JS::MicroTask::Kind::Embedder,
 
     // A PromiseReactionRecord, run by PromiseReactionJob.
-    PromiseReaction = JS::MicroTask::Kind::FirstJSKind,
+    PromiseReactionObject = JS::MicroTask::Kind::FirstJSKind,
 
     // A ThenableJobObject; the kind selects which resolution routine it runs.
     ResolveThenable,
