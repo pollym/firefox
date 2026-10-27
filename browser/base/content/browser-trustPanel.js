@@ -199,6 +199,13 @@ class TrustPanel {
   #sameTabNavigation = false;
   // The tracker count's running tab switch animation, if any.
   #trackerCountTabSwitchAnimation = null;
+  /**
+   * Content-blocking logs of the pages visited on the current site, per tab.
+   *
+   * @type {WeakMap<MozBrowser, {site: string, logs: Map<number, object>}>}
+   * `logs` maps inner window IDs to their parsed log, in order of first visit.
+   */
+  #siteTrackerLogs = new WeakMap();
 
   /**
    * If the document is using a qualified website authentication certificate
@@ -441,7 +448,9 @@ class TrustPanel {
     const [hasMonitorAccountOrStoredPasswords, blockedTrackersCount] =
       await Promise.all([
         this.#hasMonitorAccountOrStoredPasswords(),
-        this.#computeTrackerCount(),
+        this.#computeTrackerCount(
+          JSON.parse(gBrowser.selectedBrowser.getContentBlockingLog())
+        ),
       ]);
     Glean.trustpanel.opened.record({
       breach_status: getBreachedStatus({
@@ -479,21 +488,29 @@ class TrustPanel {
   /**
    * Whether two URIs are on the same site — i.e. share a base domain (eTLD+1),
    * so subdomains (e.g. www.example.com and example.com) count as the same
-   * site. Guards against URIs with no base domain (IP hosts, about:, etc.).
+   * site.
    *
    * @param {nsIURI} a
    * @param {nsIURI} b
    * @returns {boolean}
    */
   #isSameSite(a, b) {
+    const siteA = this.#siteKey(a);
+    return !!siteA && siteA === this.#siteKey(b);
+  }
+
+  /**
+   * The site a URI belongs to: its base domain (eTLD+1), or its host for IP
+   * addresses and hosts like localhost that have no base domain.
+   *
+   * @param {nsIURI} uri
+   * @returns {string|null} Null for URIs without a host (about:, file:, etc.).
+   */
+  #siteKey(uri) {
     try {
-      return (
-        !!a &&
-        !!b &&
-        Services.eTLD.getBaseDomain(a) === Services.eTLD.getBaseDomain(b)
-      );
+      return uri?.host ? SiteDataManager.getBaseDomainFromHost(uri.host) : null;
     } catch (ex) {
-      return false;
+      return null;
     }
   }
 
@@ -506,15 +523,18 @@ class TrustPanel {
     if (!this.#enabled) {
       return;
     }
-    let sameSite = this.#isSameSite(targetURI, this.#uri);
+    // The page being navigated away from is still current, so store its log
+    // now to include trackers blocked since the last content-blocking event.
+    this.#recordCurrentPageLog(gBrowser.selectedBrowser);
+    const isSameSite = this.#isSameSite(targetURI, this.#uri);
     // Set this early (before the new page's content-blocking events) to avoid a
     // race with updateIdentity. STATE_START can fire without a URI.
     if (targetURI) {
-      this.#sameSiteNavigation = sameSite;
+      this.#sameSiteNavigation = isSameSite;
     }
     // A same-site navigation keeps the resolved icon static; only cross-site
     // resets and scans.
-    if (sameSite) {
+    if (isSameSite) {
       return;
     }
     this.#blockersChecked = false;
@@ -581,6 +601,11 @@ class TrustPanel {
       // that results in two `updateIdentity` calls with the same site, but that should not
       // be considered a same-site navigation:
       this.#sameTabNavigation && this.#isSameSite(uri, this.#uri);
+    if (!this.#sameTabNavigation) {
+      // Store the log of the tab being switched away from, in case it navigates
+      // while in the background.
+      this.#recordCurrentPageLog(this.#lastBrowser);
+    }
     this.#lastBrowser = browser;
 
     this.#state = state;
@@ -672,7 +697,7 @@ class TrustPanel {
       targetClasses.add("entry-page");
     }
     // Added after "entry-page" so the tracker-count pill animation stays in sync.
-    if (this.#trackerCountEnabled && this.#computeTrackerCount() > 0) {
+    if (this.#trackerCountEnabled && this.#getCumulativeTrackerCount() > 0) {
       targetClasses.add("has-blocked-trackers");
     }
 
@@ -868,9 +893,7 @@ class TrustPanel {
     this.#updateBlockerView();
   }
 
-  #computeTrackerCount() {
-    const log = JSON.parse(gBrowser.selectedBrowser.getContentBlockingLog());
-
+  #computeTrackerCount(log) {
     const logEntriesToCount = Object.values(log).filter(
       entry =>
         typeof privacyMetricsStatsCategories[identifyType(entry)] !==
@@ -883,7 +906,7 @@ class TrustPanel {
     if (!this.#trackerCountEnabled) {
       return;
     }
-    let count = this.#computeTrackerCount();
+    let count = this.#getCumulativeTrackerCount();
 
     // A blocked tracker resolves the scanning shield straight into the reveal.
     if (count > 0) {
@@ -1005,7 +1028,7 @@ class TrustPanel {
       }
     }
 
-    const count = this.#computeTrackerCount();
+    const count = this.#getCumulativeTrackerCount();
 
     this.#addButtons("trustpanel-blocked", blocked, true);
     this.#addButtons("trustpanel-detected", detected, false);
@@ -1120,8 +1143,9 @@ class TrustPanel {
     Glean.trustpanel.trackerListOpened.record();
   }
 
-  async #openBlockerDetailsSubview(event, blocker, blocking) {
-    let count = await blocker.getBlockerCount();
+  #openBlockerDetailsSubview(event, blocker, blocking) {
+    const logs = this.#getTrackerLogs();
+    let count = blocker.getBlockerCount(logs);
     let blockingKey = blocking ? "blocking" : "not-blocking";
     // Null for a cookie behavior we don't know a title for. The rest of the
     // subview is still worth showing, so only the title is skipped.
@@ -1156,7 +1180,7 @@ class TrustPanel {
       listHeaderId
     );
 
-    let { items } = await blocker._generateSubViewListItems();
+    let { items } = blocker._generateSubViewListItems(logs);
     document.getElementById("trustpanel-blocker-items").replaceChildren(items);
     document
       .getElementById("trustpanel-popup-multiView")
@@ -1180,7 +1204,7 @@ class TrustPanel {
     Glean.trustpanel.clearCookiesOpened.record();
   }
 
-  async #addButtons(section, blockers, blocking) {
+  #addButtons(section, blockers, blocking) {
     let sectionElement = document.getElementById(section);
 
     if (!blockers.length) {
@@ -1188,7 +1212,8 @@ class TrustPanel {
       return;
     }
 
-    let children = blockers.map(async blocker => {
+    const logs = this.#getTrackerLogs();
+    let children = blockers.map(blocker => {
       let button = document.createElement("moz-button");
       button.classList.add("moz-button-subviewbutton-nav");
       button.setAttribute("iconsrc", blocker.iconSrc);
@@ -1196,7 +1221,7 @@ class TrustPanel {
       document.l10n.setAttributes(
         button,
         `trustpanel-list-label-${blocker.l10nKeys.general}`,
-        { count: await blocker.getBlockerCount() }
+        { count: blocker.getBlockerCount(logs) }
       );
       button.addEventListener("click", event =>
         this.#openBlockerDetailsSubview(event, blocker, blocking)
@@ -1207,7 +1232,7 @@ class TrustPanel {
     sectionElement.hidden = false;
     sectionElement
       .querySelector(".trustpanel-blocker-buttons")
-      .replaceChildren(...(await Promise.all(children)));
+      .replaceChildren(...children);
   }
 
   get #trackingProtectionEnabled() {
@@ -2285,6 +2310,69 @@ class TrustPanel {
     );
 
     return undismissedBreaches;
+  }
+
+  /**
+   * Store the content-blocking log of the document currently loaded in
+   * `browser`. The logs are kept per site: if that document is on a different
+   * website than the stored logs, they are dropped first.
+   *
+   * The site is taken from the document itself rather than from navigation
+   * starts, so loads that never commit (downloads, stopped loads) and
+   * redirects through other sites don't reset the count.
+   *
+   * @param {MozBrowser} browser
+   */
+  #recordCurrentPageLog(browser) {
+    if (!this.#trackerCountEnabled) {
+      return;
+    }
+    const windowGlobal = browser?.browsingContext?.currentWindowGlobal;
+    const log = windowGlobal?.contentBlockingLog;
+    if (!log) {
+      return;
+    }
+    const site = this.#siteKey(windowGlobal.documentURI);
+    // Documents without a site, like the transient about:blank created while
+    // navigating, neither count nor end the current site's visit.
+    if (!site) {
+      return;
+    }
+    let siteLogs = this.#siteTrackerLogs.get(browser);
+    if (siteLogs?.site !== site) {
+      siteLogs = { site, logs: new Map() };
+      this.#siteTrackerLogs.set(browser, siteLogs);
+    }
+    siteLogs.logs.set(windowGlobal.innerWindowId, JSON.parse(log));
+  }
+
+  #getCumulativeTrackerCount() {
+    if (!this.#uriHasHost) {
+      return 0;
+    }
+    return this.#getTrackerLogs().reduce(
+      (total, log) => total + this.#computeTrackerCount(log),
+      0
+    );
+  }
+
+  /**
+   * The content-blocking logs of every page visited on the current site in the
+   * selected tab, in the order they were first visited. A page restored from
+   * the back-forward cache keeps its single entry, so it isn't counted twice.
+   * When the tracker count feature is disabled, only the current page's log is
+   * returned.
+   *
+   * @returns {object[]} Content-blocking logs for visited pages on the current site.
+   */
+  #getTrackerLogs() {
+    const browser = gBrowser.selectedBrowser;
+    if (!this.#trackerCountEnabled) {
+      const log = browser.getContentBlockingLog();
+      return log ? [JSON.parse(log)] : [];
+    }
+    this.#recordCurrentPageLog(browser);
+    return [...(this.#siteTrackerLogs.get(browser)?.logs.values() ?? [])];
   }
 
   async dismissBreachAlert(event) {
