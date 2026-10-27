@@ -117,9 +117,6 @@ class ListenSheetTest {
         composeTestRule
             .onNodeWithTag(ELAPSED_TIME_TEST_TAG_EXPANDED, useUnmergedTree = true)
             .assertTextEquals(formatted(LESS_THAN_ONE_SEC_ELAPSED_TIME_MS))
-        composeTestRule
-            .onNodeWithTag(TOTAL_TIME_TEST_TAG_EXPANDED, useUnmergedTree = true)
-            .assertTextEquals(formatted(TOTAL_DURATION_MS))
     }
 
     @Test
@@ -135,7 +132,6 @@ class ListenSheetTest {
         composeTestRule.onNodeWithTag(AUDIO_PROGRESS_BAR_TEST_TAG_EXPANDED).assertDoesNotExist()
         composeTestRule.onNodeWithTag(AUDIO_PROGRESS_BAR_TEST_TAG_COMPACT).assertExists()
         composeTestRule.onNodeWithTag(ELAPSED_TIME_TEST_TAG_EXPANDED, useUnmergedTree = true).assertDoesNotExist()
-        composeTestRule.onNodeWithTag(TOTAL_TIME_TEST_TAG_EXPANDED, useUnmergedTree = true).assertDoesNotExist()
     }
 
     @Test
@@ -161,16 +157,6 @@ class ListenSheetTest {
         setContent(expanded = false, playbackPhase = PlaybackPhase.Buffering)
 
         composeTestRule.onNodeWithTag(PLAY_PAUSE_BUTTON_TEST_TAG).assert(hasContentDescription(pause))
-    }
-
-    @Test
-    fun `GIVEN a bar catching up with a changed estimate WHEN shown THEN the length is the one the bar is drawn against`() {
-        setContent(
-            expanded = true,
-            articleProgress = ArticleProgress(positionMs = 60_000, durationMs = 600_000, barPosition = 0.2f),
-        )
-
-        composeTestRule.onNodeWithText("05:00", useUnmergedTree = true).assertExists()
     }
 
     @Test
@@ -260,7 +246,6 @@ class ListenSheetTest {
         composeTestRule.onNodeWithTag(PLAY_PAUSE_BUTTON_TEST_TAG).assertIsNotEnabled()
         composeTestRule.onNodeWithTag(AUDIO_PROGRESS_BAR_TEST_TAG_EXPANDED).assertIsNotEnabled()
         composeTestRule.onNodeWithTag(ELAPSED_TIME_TEST_TAG_EXPANDED, useUnmergedTree = true).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(TOTAL_TIME_TEST_TAG_EXPANDED, useUnmergedTree = true).assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription(playbackSpeed).assertIsNotEnabled()
         composeTestRule.onNodeWithContentDescription(voiceOptions).assertIsNotEnabled()
         composeTestRule.onNodeWithContentDescription(rewind).assertIsNotEnabled()
@@ -365,6 +350,22 @@ class ListenSheetTest {
             .onNodeWithTag(ELAPSED_TIME_TEST_TAG_EXPANDED, useUnmergedTree = true)
             .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.HideFromAccessibility))
         assertEquals(listOf(ListenAction.Playback.SeekRequested(0.5f)), actions)
+    }
+
+    @Test
+    fun `GIVEN a bar catching up with a changed estimate WHEN shown THEN the spoken length is the one the bar is drawn against`() {
+        setContent(
+            expanded = true,
+            articleProgress = ArticleProgress(positionMs = 60_000, durationMs = 600_000, barPosition = 0.2f),
+        )
+        val spokenState =
+            testContext.getString(
+                R.string.mozac_feature_listentopage_seek_state,
+                formatSpokenDuration(60, Locale.getDefault()),
+                formatSpokenDuration(300, Locale.getDefault()),
+            )
+
+        composeTestRule.onNodeWithTag(AUDIO_PROGRESS_BAR_TEST_TAG_EXPANDED).assert(hasStateDescription(spokenState))
     }
 
     @Test
