@@ -295,6 +295,21 @@ def _collect(pipe, poll_interval):
 
         last_process_sample = None
 
+        # On Linux, psutil's boot time comes from the btime field of
+        # /proc/stat, which is truncated to whole seconds. This shifts
+        # process creation times earlier by up to one second.
+        create_time_correction = 0
+        if process_sampling_interval is not None and sys.platform.startswith("linux"):
+            create_time_correction = min(
+                max(
+                    time.time()
+                    - time.clock_gettime(time.CLOCK_BOOTTIME)
+                    - psutil.boot_time(),
+                    0,
+                ),
+                1,
+            )
+
         def update_known_processes(force=False):
             nonlocal known_processes, last_process_sample
 
@@ -317,7 +332,7 @@ def _collect(pipe, poll_interval):
                 pid = p.pid
                 try:
                     with p.oneshot():
-                        create_time = p.create_time()
+                        create_time = p.create_time() + create_time_correction
                         # Zombies have exited, they just haven't been waited
                         # for by their parent yet.
                         if p.status() == psutil.STATUS_ZOMBIE:
