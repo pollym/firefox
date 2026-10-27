@@ -14,6 +14,7 @@ transforms:
 
 kind-dependencies:
     - toolchain
+    - build-apk
     - signing-apk
 
 task-defaults:
@@ -323,9 +324,13 @@ tasks:
                 app-name: fenix
         description: Test Fenix
         dependencies:
+            build-apk: build-apk-fenix-nightly-firebase
             signed-apk-debug-apk: signing-apk-fenix-nightly-firebase
             signed-apk-android-test: signing-apk-fenix-android-test-nightly
         fetches:
+            build-apk:
+                - artifact: mapping.txt
+                  extract: false
             signed-apk-debug-apk:
                 - artifact: target.arm64-v8a.apk
                   extract: false
@@ -336,6 +341,7 @@ tasks:
             skip-unless-backstop: null
         run-on-projects: [mozilla-central-only]
         flank-config: fenix/arm-nightly-full.yml
+        mapping: true
         treeherder:
             symbol: fenix-nightly(ui-test-arm-nightly)
 
