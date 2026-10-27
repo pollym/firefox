@@ -295,15 +295,6 @@ static bool GetBuildConfiguration(JSContext* cx, unsigned argc, Value* vp) {
     return false;
   }
 
-#ifdef EARLY_BETA_OR_EARLIER
-  value = BooleanValue(true);
-#else
-  value = BooleanValue(false);
-#endif
-  if (!JS_SetProperty(cx, info, "early_beta_or_earlier", value)) {
-    return false;
-  }
-
 #ifdef MOZ_CODE_COVERAGE
   value = BooleanValue(true);
 #else
