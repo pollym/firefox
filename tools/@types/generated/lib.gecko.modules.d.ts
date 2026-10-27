@@ -493,6 +493,7 @@ export interface Modules {
   "moz-src:///browser/components/tabbrowser/NewTabPagePreloading.sys.mjs": typeof import("moz-src:///browser/components/tabbrowser/NewTabPagePreloading.sys.mjs"),
   "moz-src:///browser/components/tabbrowser/OpenInTabsUtils.sys.mjs": typeof import("moz-src:///browser/components/tabbrowser/OpenInTabsUtils.sys.mjs"),
   "moz-src:///browser/components/tabbrowser/SmartTabGrouping.sys.mjs": typeof import("moz-src:///browser/components/tabbrowser/SmartTabGrouping.sys.mjs"),
+  "moz-src:///browser/components/tabbrowser/TabGroupsToolbarButton.sys.mjs": typeof import("moz-src:///browser/components/tabbrowser/TabGroupsToolbarButton.sys.mjs"),
   "moz-src:///browser/components/tabbrowser/TabMetrics.sys.mjs": typeof import("moz-src:///browser/components/tabbrowser/TabMetrics.sys.mjs"),
   "moz-src:///browser/components/tabbrowser/TabUnloader.sys.mjs": typeof import("moz-src:///browser/components/tabbrowser/TabUnloader.sys.mjs"),
   "moz-src:///browser/components/tabbrowser/Tabbrowser.sys.mjs": typeof import("moz-src:///browser/components/tabbrowser/Tabbrowser.sys.mjs"),

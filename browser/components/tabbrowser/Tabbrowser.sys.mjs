@@ -63,6 +63,8 @@ const lazy = XPCOMUtils.declareLazy({
   SponsorProtection:
     "moz-src:///browser/components/newtab/SponsorProtection.sys.mjs",
   TabCrashHandler: "resource:///modules/ContentCrashHandlers.sys.mjs",
+  TabGroupsToolbarButton:
+    "moz-src:///browser/components/tabbrowser/TabGroupsToolbarButton.sys.mjs",
   tabLocalization: () =>
     new Localization(
       [
@@ -261,6 +263,7 @@ export class Tabbrowser {
     this.documentGlobal.addEventListener("deactivate", this);
     this.documentGlobal.addEventListener("TabGroupCollapse", this);
     this.documentGlobal.addEventListener("TabGroupCreateByUser", this);
+    this.documentGlobal.addEventListener("TabGroupCreateDone", this);
     this.documentGlobal.addEventListener("TabGrouped", this);
     this.documentGlobal.addEventListener("TabUngrouped", this);
     this.documentGlobal.addEventListener("TabSplitViewActivate", this);
@@ -9505,6 +9508,10 @@ export class Tabbrowser {
 
   on_TabGroupCreateByUser(aEvent) {
     this.tabGroupMenu.openCreateModal(aEvent.target);
+  }
+
+  on_TabGroupCreateDone() {
+    lazy.TabGroupsToolbarButton.maybeAddTabGroupsButton();
   }
 
   on_TabGrouped(aEvent) {
