@@ -329,21 +329,39 @@ class PdfToolsIntegrationTest {
     }
 
     @Test
-    fun `WHEN the feature is started THEN the overlays are traversed between the address bar and the page`() {
+    fun `GIVEN the address bar is at the top WHEN the feature is started THEN the overlays are traversed between the address bar and the page`() {
         // Test for Bug 2066197
         val addressBar = View(activity).apply { id = R.id.composable_toolbar }
         val content = View(activity).apply { id = R.id.engineView }
         container.addView(addressBar)
         container.addView(content)
 
-        integration().start()
+        integration(isAddressBarAtBottom = false).start()
+        shadowOf(Looper.getMainLooper()).idle()
+
+        val tools = container.children.elementAt(2)
+        val dialog = (container.children.elementAt(3) as ViewGroup).getChildAt(0)
+        assertEquals(addressBar.id, tools.accessibilityTraversalAfter)
+        assertEquals(tools.id, dialog.accessibilityTraversalAfter)
+        assertEquals(dialog.id, content.accessibilityTraversalAfter)
+    }
+
+    @Test
+    fun `GIVEN the address bar is at the bottom WHEN the feature is started THEN the overlays are traversed between the page and the address bar`() {
+        // Test for Bug 2085012
+        val addressBar = View(activity).apply { id = R.id.composable_toolbar }
+        val content = View(activity).apply { id = R.id.engineView }
+        container.addView(addressBar)
+        container.addView(content)
+
+        integration(isAddressBarAtBottom = true).start()
         shadowOf(Looper.getMainLooper()).idle()
 
         val tools = container.children.elementAt(2)
         val dialog = container.children.elementAt(3)
-        assertEquals(addressBar.id, tools.accessibilityTraversalAfter)
+        assertEquals(content.id, tools.accessibilityTraversalAfter)
         assertEquals(tools.id, dialog.accessibilityTraversalAfter)
-        assertEquals(dialog.id, content.accessibilityTraversalAfter)
+        assertEquals(dialog.id, addressBar.accessibilityTraversalAfter)
     }
 
     /** Stands in for the browser toolbar, which removes the navigation bar as its composition is created. */

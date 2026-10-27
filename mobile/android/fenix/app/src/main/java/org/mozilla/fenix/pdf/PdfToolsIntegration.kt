@@ -142,6 +142,7 @@ class PdfToolsIntegration(
         scope = null
 
         container.pageContent?.accessibilityTraversalAfter = View.NO_ID
+        container.addressBar?.accessibilityTraversalAfter = View.NO_ID
         overlays.forEach(container::removeView)
         overlays = emptyList()
     }
@@ -198,7 +199,7 @@ class PdfToolsIntegration(
     }
 
     /**
-     * Ensures the screenreader focus order shows the PDF tools before the content.
+     * Ensures the screenreader focus order shows the PDF tools between the address bar and the content.
      *
      * @param tools The PDF tools overlay.
      * @param dialog The signature dialog overlay.
@@ -207,9 +208,15 @@ class PdfToolsIntegration(
         val addressBar = container.addressBar ?: return
         val pageContent = container.pageContent ?: return
 
-        tools.accessibilityTraversalAfter = addressBar.id
-        dialog.accessibilityTraversalAfter = tools.id
-        pageContent.accessibilityTraversalAfter = dialog.id
+        if (isAddressBarAtBottom) {
+            tools.accessibilityTraversalAfter = pageContent.id
+            dialog.accessibilityTraversalAfter = tools.id
+            addressBar.accessibilityTraversalAfter = dialog.id
+        } else {
+            tools.accessibilityTraversalAfter = addressBar.id
+            dialog.accessibilityTraversalAfter = tools.id
+            pageContent.accessibilityTraversalAfter = dialog.id
+        }
     }
 
     /** Opens the dialog for adding a signature to the PDF. */
