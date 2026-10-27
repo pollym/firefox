@@ -37,7 +37,6 @@ import org.mozilla.fenix.helpers.MatcherHelper.assertUIObjectExists
 import org.mozilla.fenix.helpers.MatcherHelper.itemContainingText
 import org.mozilla.fenix.helpers.MatcherHelper.itemWithDescription
 import org.mozilla.fenix.helpers.MatcherHelper.itemWithResId
-import org.mozilla.fenix.helpers.MatcherHelper.itemWithResIdAndText
 import org.mozilla.fenix.helpers.TestAssetHelper
 import org.mozilla.fenix.helpers.TestAssetHelper.waitingTime
 import org.mozilla.fenix.helpers.TestHelper.appName
@@ -177,8 +176,6 @@ class CustomTabRobot(private val composeTestRule: ComposeTestRule) {
         composeTestRule.onNodeWithContentDescription(customTabActionButtonDescription).assertIsDisplayed()
         Log.i(TAG, "verifyCustomTabActionButton: Verified that the custom tab action button is displayed")
     }
-
-    fun verifyPDFReaderToolbarItems() = assertUIObjectExists(itemWithResIdAndText("download", "Download"))
 
     fun verifyCustomTabsMainMenuItems(
         customMenuItem: String,

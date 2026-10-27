@@ -12,6 +12,7 @@ import org.mozilla.fenix.compose.snackbar.SNACKBAR_BUTTON_TEST_TAG
 import org.mozilla.fenix.compose.snackbar.SNACKBAR_TEST_TAG
 import org.mozilla.fenix.helpers.DataGenerationHelper.getStringResource
 import org.mozilla.fenix.helpers.TestHelper.shortAppName
+import org.mozilla.fenix.pdf.PdfToolsTestTag
 import org.mozilla.fenix.ui.efficiency.helpers.PageReadinessProfiles
 import org.mozilla.fenix.ui.efficiency.helpers.Selector
 import org.mozilla.fenix.ui.efficiency.helpers.SelectorContainer
@@ -592,6 +593,13 @@ object BrowserPageSelectors : SelectorContainer {
             value = "download",
             secondaryValue = "Download",
             description = "PDF viewer download button",
+        )
+
+    val PDF_TOOLS_DOWNLOAD_BUTTON =
+        Selector(
+            strategy = SelectorStrategy.COMPOSE_BY_TAG,
+            value = PdfToolsTestTag.DOWNLOAD_BUTTON,
+            description = "PDF tools download button",
         )
 
     val SHAKE_TO_SUMMARIZE_CFR_DISMISS_BUTTON =

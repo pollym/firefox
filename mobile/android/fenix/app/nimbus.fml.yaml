@@ -19,8 +19,13 @@ import:
       pdfjs:
         - channel: developer
           value: {
-          download-button: true,
-          open-in-app-button: true
+          download-button: false,
+          open-in-app-button: false
+        }
+        - channel: nightly
+          value: {
+          download-button: false,
+          open-in-app-button: false
         }
   - path: ../../android-components/components/feature/fxsuggest/fxsuggest.fml.yaml
     channel: release
@@ -1341,6 +1346,13 @@ features:
         description: If true, the Android PDF UI tools are shown.
         type: Boolean
         default: false
+    defaults:
+      - channel: developer
+        value:
+          android-ui-tools: true
+      - channel: nightly
+        value:
+          android-ui-tools: true
 
   tab-reload-cover:
     description: >

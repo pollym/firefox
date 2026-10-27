@@ -25,6 +25,7 @@ import mozilla.components.concept.engine.mediasession.MediaSession
 import mozilla.components.feature.contextmenu.R as contextMenuR
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
+import org.mozilla.fenix.Config
 import org.mozilla.fenix.ext.components
 import org.mozilla.fenix.helpers.DataGenerationHelper.getStringResource
 import org.mozilla.fenix.helpers.HomeActivityIntentTestRule
@@ -35,6 +36,7 @@ import org.mozilla.fenix.helpers.TestHelper.appContext
 import org.mozilla.fenix.helpers.TestHelper.mDevice
 import org.mozilla.fenix.helpers.TestHelper.packageName
 import org.mozilla.fenix.helpers.ext.waitNotNull
+import org.mozilla.fenix.ui.efficiency.core.WaitPolicy
 import org.mozilla.fenix.ui.efficiency.core.driveUntil
 import org.mozilla.fenix.ui.efficiency.helpers.BasePage
 import org.mozilla.fenix.ui.efficiency.helpers.Selector
@@ -324,6 +326,18 @@ class BrowserPage(composeRule: AndroidComposeTestRule<HomeActivityIntentTestRule
     /** Confirm the download prompt, starting the download. */
     fun clickDownloadPromptConfirmButton(): BrowserPage {
         mozClick(DownloadsSelectors.DOWNLOAD_DIALOG_CONFIRM_BUTTON)
+        return this
+    }
+
+    fun clickDownloadPDFButton(): BrowserPage {
+        // Bug 2081247 to switch to new toolbar for testing
+        if (Config.channel.isNightlyOrDebug) {
+            mozClick(BrowserPageSelectors.PDF_TOOLS_DOWNLOAD_BUTTON, WaitPolicy.Poll(waitingTime))
+            verifyDownloadPrompt()
+            clickDownloadPromptConfirmButton()
+        } else {
+            mozClick(BrowserPageSelectors.PDF_DOWNLOAD_BUTTON)
+        }
         return this
     }
 
