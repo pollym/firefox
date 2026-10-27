@@ -11687,35 +11687,45 @@ static bool StartSerializingShadowDOM(
     aBuilder.Append(u" shadowrootslotassignment=\"manual\"");
   }
 
-  // 7. If shadow's slot assignment is "manual", then append "
-  // shadowrootslotassignment="manual"".
+  // 7. If shadow's clonable is set, then append " shadowrootclonable=""".
   if (shadow->Clonable()) {
     aBuilder.Append(u" shadowrootclonable=\"\"");
+  }
+
+  // 8. If shadow's reference target is non-null:
+  // 8.1. Append " shadowrootreferencetarget="".
+  // 8.2. Append shadow's reference target.
+  // 8.3. Append """.
+  if (StaticPrefs::dom_shadowdom_referenceTarget_enabled() &&
+      shadow->HasReferenceTarget()) {
+    aBuilder.Append(u" shadowrootreferencetarget=\"");
+    aBuilder.Append(shadow->ReferenceTarget());
+    aBuilder.Append(u"\"");
   }
 
   auto isGlobalCustomElementRegistry = [](CustomElementRegistry* registry) {
     return registry && !registry->IsScoped();
   };
 
-  // 8. Let shouldAppendRegistryAttribute be the result of running these steps:
+  // 9. Let shouldAppendRegistryAttribute be the result of running these steps:
   const bool shouldAppendRegistryAttribute = [&]() {
     if (!StaticPrefs::dom_scoped_custom_element_registries_enabled()) {
       return false;
     }
 
-    // 8.1. Let documentRegistry be shadow's node document's custom element
+    // 9.1. Let documentRegistry be shadow's node document's custom element
     //    registry.
     CustomElementRegistry* documentRegistry =
         shadow->OwnerDoc()->GetCustomElementRegistry();
-    // 8.2. Let shadowRegistry be shadow's custom element registry.
+    // 9.2. Let shadowRegistry be shadow's custom element registry.
     CustomElementRegistry* shadowRegistry = shadow->GetCustomElementRegistry();
 
-    // 8.3. If documentRegistry is null and shadowRegistry is null, then return
+    // 9.3. If documentRegistry is null and shadowRegistry is null, then return
     //    false.
     if (!documentRegistry && !shadowRegistry) {
       return false;
     }
-    // 8.4. If documentRegistry is a global custom element registry and
+    // 9.4. If documentRegistry is a global custom element registry and
     //    shadowRegistry is a global custom element registry, then return
     //    false.
     else if (isGlobalCustomElementRegistry(documentRegistry) &&
@@ -11723,25 +11733,25 @@ static bool StartSerializingShadowDOM(
       return false;
     }
 
-    // 8.5. Return true.
+    // 9.5. Return true.
     return true;
   }();
 
-  // 9. If shouldAppendRegistryAttribute is true, then append "
+  // 10. If shouldAppendRegistryAttribute is true, then append "
   //    shadowrootcustomelementregistry=""".
   if (shouldAppendRegistryAttribute) {
     aBuilder.Append(u" shadowrootcustomelementregistry=\"\"");
   }
 
-  // 10. Append U+003E (>).
+  // 11. Append U+003E (>).
   aBuilder.Append(u">");
 
-  // 11. Append the value of running the HTML fragment serialization algorithm
+  // 12. Append the value of running the HTML fragment serialization algorithm
   //     with shadow, serializableShadowRoots, and shadowRoots (thus recursing
   //     into this algorithm for that element).
   // (Returning `true` tells the caller to continue).
   if (!shadow->HasChildren()) {
-    // 12. Append "</template>".
+    // 13. Append "</template>".
     aBuilder.Append(u"</template>");
     return false;
   }
