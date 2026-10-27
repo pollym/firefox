@@ -26,6 +26,7 @@ window.MozXULElement?.insertFTLIfNeeded("toolkit/global/mozPromo.ftl");
  * @property {string} imageWidth - How big the image is sized. Can be "default", "small" or "large".
  * @property {string} imageDisplay - Whether the image touches the edge of the promo or has a little bit of padding around it. Can be "cover" or "padded".
  * @property {boolean} dismissable - Whether the promo can be dismissed.
+ * @slot image - Content rendered in place of the image when imageSrc is not set.
  * @fires promo:user-dismissed
  *  Custom event indicating that the promo was dismissed by the user.
  */
@@ -33,6 +34,7 @@ export class MozPromo extends MozLitElement {
   static queries = {
     actionsSlot: "slot[name=actions]",
     supportLinkSlot: "slot[name=support-link]",
+    imageSlot: "slot[name=image]",
     actionsSupportWrapper: ".actions-and-support-link-wrapper",
     closeButton: "moz-button.close",
   };
@@ -78,7 +80,7 @@ export class MozPromo extends MozLitElement {
         <div class="image-container"><img src=${this.imageSrc} alt="" /></div>
       `;
     }
-    return "";
+    return html`<slot name="image"></slot>`;
   }
 
   closeButtonTemplate() {
