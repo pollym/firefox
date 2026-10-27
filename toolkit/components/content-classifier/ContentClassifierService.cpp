@@ -1452,6 +1452,8 @@ void ContentClassifierService::ProcessListChanges(
   nsTHashSet<nsCString> activeNames = ActiveFeatureNames(snapshot);
 
   nsTArray<const ContentClassifierFeature*> toUpdate;
+  nsTArray<uint64_t> featureVersions;
+  uint64_t generation;
   {
     MutexAutoLock lock(mLock);
     for (const auto& feature : GetFeatures()) {
@@ -1471,27 +1473,44 @@ void ContentClassifierService::ProcessListChanges(
         toUpdate.AppendElement(&feature);
       }
     }
+
+    // Bump the global generation and (where applicable) per-feature
+    // versions under the lock. The build closure compares each captured
+    // version against the current one before installing, so a later
+    // ProcessListChanges call for the same feature can't be overwritten by
+    // an earlier in-flight rebuild. The global generation gates
+    // Populate / Prune / Notify so an older closure's stale snapshot
+    // can't clobber the active-engine lists set up by a newer call.
+    generation = ++mUpdateGeneration;
+    featureVersions.SetCapacity(toUpdate.Length());
+    for (const auto* feature : toUpdate) {
+      uint64_t& v = mFeatureVersions.LookupOrInsert(feature->mName);
+      featureVersions.AppendElement(++v);
+    }
   }
 
-  UpdateFeatures(toUpdate, std::move(snapshot));
+  UpdateFeatures(std::move(toUpdate), std::move(featureVersions), generation,
+                 std::move(snapshot));
 }
 
 void ContentClassifierService::UpdateFeatures(
-    const nsTArray<const ContentClassifierFeature*>& aFeatures,
+    nsTArray<const ContentClassifierFeature*> aFeatures,
+    nsTArray<uint64_t> aFeatureVersions, uint64_t aGeneration,
     EnginesPrefsSnapshot aPreferenceSnapshot) {
   MOZ_ASSERT(NS_IsMainThread());
+  MOZ_ASSERT(aFeatures.Length() == aFeatureVersions.Length());
 
-  // Drop inactive features before issuing fetches: their engines will be
-  // removed by PruneInactiveEngines below, so fetching list bytes just to
-  // throw the engine away would be wasted work.
+#ifdef DEBUG
+  // Ensure the features to update are all active in the snapshot.
   nsTHashSet<nsCString> activeNames = ActiveFeatureNames(aPreferenceSnapshot);
-  nsTArray<const ContentClassifierFeature*> features;
+  for (const auto* feature : aFeatures) {
+    MOZ_ASSERT(activeNames.Contains(nsCString(feature->mName)),
+               "UpdateFeatures expects only features active in the snapshot");
+  }
+#endif
+
   nsTArray<RefPtr<EngineRulesPromise>> fetches;
   for (const auto* feature : aFeatures) {
-    if (!activeNames.Contains(nsCString(feature->mName))) {
-      continue;
-    }
-    features.AppendElement(feature);
     fetches.AppendElement(FetchEngineDataForFeature(*feature));
   }
 
@@ -1504,28 +1523,9 @@ void ContentClassifierService::UpdateFeatures(
     return;
   }
 
-  // Bump the global generation and (where applicable) per-feature
-  // versions under the lock. The build closure compares each captured
-  // version against the current one before installing, so a later
-  // UpdateFeatures call for the same feature can't be overwritten by
-  // an earlier in-flight rebuild. The global generation gates
-  // Populate / Prune / Notify so an older closure's stale snapshot
-  // can't clobber the active-engine lists set up by a newer call.
-  nsTArray<uint64_t> featureVersions;
-  featureVersions.SetCapacity(features.Length());
-  uint64_t generation;
-  {
-    MutexAutoLock lock(mLock);
-    generation = ++mUpdateGeneration;
-    for (const auto* feature : features) {
-      uint64_t& v = mFeatureVersions.LookupOrInsert(feature->mName);
-      featureVersions.AppendElement(++v);
-    }
-  }
-
   RefPtr<ContentClassifierService> self = this;
 
-  if (features.IsEmpty()) {
+  if (aFeatures.IsEmpty()) {
     // No fetches needed; still refresh the active lists and prune in
     // case the snapshot changed. Run the lock-holding work on the
     // build thread so it never blocks the main thread. The Notify is
@@ -1533,7 +1533,8 @@ void ContentClassifierService::UpdateFeatures(
     // call — otherwise a newer call's closure will fire it.
     buildThread->Dispatch(NS_NewRunnableFunction(
         "ContentClassifierService::UpdateFeaturesNoFetch",
-        [self, snapshot = std::move(aPreferenceSnapshot), generation]() {
+        [self, snapshot = std::move(aPreferenceSnapshot),
+         generation = aGeneration]() {
           {
             MutexAutoLock lock(self->mLock);
             if (self->mInitPhase != InitPhase::InitSucceeded) {
@@ -1555,10 +1556,10 @@ void ContentClassifierService::UpdateFeatures(
   EngineRulesPromise::AllSettled(GetMainThreadSerialEventTarget(), fetches)
       ->Then(
           GetMainThreadSerialEventTarget(), __func__,
-          [self, features = std::move(features),
-           featureVersions = std::move(featureVersions),
+          [self, features = std::move(aFeatures),
+           featureVersions = std::move(aFeatureVersions),
            snapshot = std::move(aPreferenceSnapshot),
-           buildThread = std::move(buildThread), generation](
+           buildThread = std::move(buildThread), generation = aGeneration](
               EngineRulesPromise::AllSettledPromiseType::ResolveOrRejectValue&&
                   aValue) mutable {
             MOZ_ASSERT(NS_IsMainThread());
