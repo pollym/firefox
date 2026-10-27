@@ -1432,18 +1432,10 @@ export class BaseContent extends React.PureComponent {
                 widgetsEnabled={widgetsEnabled}
                 dispatch={this.props.dispatch}
               />
-              {(shouldShowOMCHighlight(
+              {shouldShowOMCHighlight(
                 this.props.Messages,
                 "CustomWallpaperHighlight"
-              ) ||
-                shouldShowOMCHighlight(
-                  this.props.Messages,
-                  "WorldCupWallpaperHighlight"
-                ) ||
-                shouldShowOMCHighlight(
-                  this.props.Messages,
-                  "WorldCupSemiFinalWallpaperHighlight"
-                )) && (
+              ) && (
                 <MessageWrapper dispatch={this.props.dispatch}>
                   <WallpaperFeatureHighlight
                     position="inset-block-start inset-inline-start"

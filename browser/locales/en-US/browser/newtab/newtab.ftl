@@ -961,15 +961,6 @@ newtab-crossword-widget-open-menu-button =
 # crossword. “Particle” is a brand name and should not be translated.
 newtab-crossword-menu-powered-by-particle = Powered by Particle
 
-## World Cup wallpaper OMC messages
-## Shown as on-screen messages promoting the World Cup wallpapers.
-
-newtab-sports-widget-message-wallpapers-title = Kick off the World Cup with new wallpapers
-newtab-sports-widget-message-wallpapers-body = Bring some match-day energy to your browser for the tournament.
-newtab-sports-widget-message-wallpapers-cta = Choose wallpaper
-newtab-sports-widget-message-wallpapers-semifinals-title = Get a new wallpaper for the semi-finals
-newtab-sports-widget-message-wallpapers-semifinals-body = Set the stage for the World Cup’s biggest matches.
-
 ## Strings introduced by the Nova redesign of the Timer widget
 
 # Variables:
