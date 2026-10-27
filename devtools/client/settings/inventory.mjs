@@ -224,12 +224,14 @@ export const inventory = [
         l10nId: "devtools-settings-inspector-user-agent-shadow-dom",
         type: "boolean",
         pref: "devtools.inspector.showAllAnonymousContent",
+        changeAction: "reloadPage",
       },
       {
         id: "settings-inspector-show-comments",
         l10nId: "devtools-settings-inspector-show-comments",
         type: "boolean",
         pref: "devtools.markup.showComments",
+        changeAction: "reloadPage",
       },
       {
         id: "settings-inspector-collapse-attributes",
@@ -327,6 +329,8 @@ export const callbacks = {
     toolbox.updateToolboxButtonsVisibility(),
 
   updateSplitConsole: ({ toolbox }) => toolbox.updateIsSplitConsoleEnabled(),
+
+  reloadPage: ({ toolbox }) => toolbox.reload(false),
 
   updateToolRegistration: ({ event }) => {
     const tool = getToolForPref(event.pref);

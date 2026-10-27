@@ -111,10 +111,12 @@ devtools-settings-inspector-user-agent-styles =
 devtools-settings-inspector-user-agent-shadow-dom =
     .label = Show Browser Shadow DOM
     .title = Turning this on will show Shadow DOM elements handled by the browser.
+    .description = Reloads the page
 
 devtools-settings-inspector-show-comments =
     .label = Show comments
     .title = Display comment nodes in the inspector
+    .description = Reloads the page
 
 devtools-settings-inspector-collapse-attributes =
     .label = Truncate DOM attributes
