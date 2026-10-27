@@ -60,6 +60,7 @@ class JumpListBuilder : public nsIJumpListBuilder, public nsIObserver {
   NS_DECL_NSIOBSERVER
 
   explicit JumpListBuilder(const nsAString& aAppUserModelId,
+                           bool aPrivateBrowsing = false,
                            RefPtr<JumpListBackend> aTestingBackend = nullptr);
 
  private:
