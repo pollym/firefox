@@ -212,7 +212,7 @@ who = "Mark Hammond <mhammond@skippinet.com.au>"
 criteria = "safe-to-deploy"
 user-id = 43489 # JR Conlin (jrconlin)
 start = "2019-05-01"
-end = "2026-08-06"
+end = "2027-10-27"
 notes = "Crate lives under github.com/mozilla, is maintained by Mozilla and has the same review and publishing guidelines as mozilla-central."
 
 [[wildcard-audits.encoding_rs]]
@@ -445,7 +445,7 @@ who = "Alex Franchuk <afranchuk@mozilla.com>"
 criteria = "safe-to-deploy"
 user-id = 106639 # Alex Franchuk (afranchuk)
 start = "2023-07-25"
-end = "2026-11-13"
+end = "2027-10-27"
 notes = "This crate is written and solely maintained by a mozilla employee."
 
 [[wildcard-audits.qcms]]
@@ -8697,6 +8697,13 @@ who = "Lee Salzman <lsalzman@mozilla.com>"
 criteria = "safe-to-deploy"
 version = "0.1.0"
 notes = "Written and maintained by Gfx team at Mozilla."
+
+[[audits.wpf-gpu-raster]]
+who = "Alex Franchuk <afranchuk@mozilla.com>"
+criteria = "safe-to-deploy"
+delta = "0.1.0 -> 0.1.0@git:99979da091fd58fba8477e7fcdf5ec0727102916"
+importable = false
+notes = "All code written by Mozilla employees."
 
 [[audits.write16]]
 who = "Henri Sivonen <hsivonen@hsivonen.fi>"
