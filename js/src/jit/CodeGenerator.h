@@ -141,11 +141,6 @@ class CodeGenerator final : public CodeGeneratorSpecific {
                              Register allocSite, Register output,
                              const wasm::TrapSiteDesc& trapSiteDesc);
 
-  void setCompilationTime(mozilla::TimeDuration duration) {
-    compileTime_ = duration;
-  }
-  mozilla::TimeDuration getCompilationTime() const { return compileTime_; }
-
  private:
   void emitPostWriteBarrier(const LAllocation* obj);
   void emitPostWriteBarrier(Register objreg);
@@ -425,9 +420,6 @@ class CodeGenerator final : public CodeGeneratorSpecific {
 
   // Script counts created during code generation.
   IonScriptCounts* scriptCounts_;
-
-  // Total Ion compilation time.
-  mozilla::TimeDuration compileTime_;
 
 #ifdef FUZZING_JS_FUZZILLI
   void emitFuzzilliHashObject(LInstruction* lir, Register obj, Register output);

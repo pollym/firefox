@@ -2654,10 +2654,6 @@ static void AccumulateTelemetryCallback(JSMetric id,
       glean::javascript_gc::slice_time.ProcessGet().AccumulateRawDuration(
           sample.as<TimeDuration>());
       break;
-    case JSMetric::ION_COMPILE_TIME:
-      glean::javascript_ion::compile_time.AccumulateRawDuration(
-          sample.as<TimeDuration>());
-      break;
     case JSMetric::GC_BUDGET_MS_2:
       glean::javascript_gc::budget.ProcessGet().AccumulateRawDuration(
           sample.as<TimeDuration>());
