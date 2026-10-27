@@ -11,6 +11,7 @@
 #include "nsThreadUtils.h"
 #include "nsIFile.h"
 #include "nsIFileURL.h"
+#include "nsIThreadShutdown.h"
 #include "nsIXPConnect.h"
 #include "mozilla/AppShutdown.h"
 #include "mozilla/CheckedInt.h"
@@ -1692,8 +1693,25 @@ void Connection::shutdownAsyncThread() {
   }
 #endif
 
-  MOZ_ALWAYS_SUCCEEDS(mAsyncExecutionThread->Shutdown());
-  mAsyncExecutionThread = nullptr;
+  // Join the thread asynchronously: a blocking join would spin this thread's
+  // event loop, and connections are often closed while the browser is busy
+  // shutting down. nsThreadManager will reap any outstanding join at
+  // XPCOMShutdownThreads anyway.
+  nsCOMPtr<nsIThreadShutdown> shutdown;
+  if (NS_SUCCEEDED(
+          mAsyncExecutionThread->BeginShutdown(getter_AddRefs(shutdown)))) {
+    // We keep a strong reference to the connection, it keeps it alive until the
+    // thread is reaped, so mAsyncExecutionThread is cleared before
+    // ~Connection asserts on it and before the failsafe close in Release().
+    RefPtr event = NS_NewRunnableFunction(
+        "storage::Connection::asyncThreadShutdownComplete",
+        [self = RefPtr{this}] { self->mAsyncExecutionThread = nullptr; });
+    shutdown->OnCompletion(event);
+  } else {
+    // This ran late in XPCOM shutdown, after nsThreadManager already started
+    // shutting down and joining all the threads, including this one.
+    mAsyncExecutionThread = nullptr;
+  }
 }
 
 nsresult Connection::internalClose(sqlite3* aNativeConnection) {
