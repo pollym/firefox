@@ -25,6 +25,7 @@ export class SettingsPanel {
 
   /** @returns {this} */
   open() {
+    this.element?.setToolbox(this.toolbox);
     this.element?.addEventListener(
       SettingChangedEvent.eventName,
       this.#onSettingChanged,
@@ -47,6 +48,7 @@ export class SettingsPanel {
 
   destroy() {
     this.#abortController.abort();
+    this.element?.setToolbox(null);
     this.element = null;
     this.toolbox = null;
   }

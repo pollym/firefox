@@ -24,6 +24,8 @@ export const inventory = [
         l10nId: "devtools-settings-tool-netmonitor",
         type: "boolean",
         pref: "devtools.netmonitor.enabled",
+        disabled: "unsupportedTool",
+        disabledL10nId: "devtools-settings-tool-not-supported",
         changeAction: "updateToolRegistration",
       },
       {
@@ -31,6 +33,8 @@ export const inventory = [
         l10nId: "devtools-settings-tool-styleeditor",
         type: "boolean",
         pref: "devtools.styleeditor.enabled",
+        disabled: "unsupportedTool",
+        disabledL10nId: "devtools-settings-tool-not-supported",
         changeAction: "updateToolRegistration",
       },
       {
@@ -38,6 +42,8 @@ export const inventory = [
         l10nId: "devtools-settings-tool-performance",
         type: "boolean",
         pref: "devtools.performance.enabled",
+        disabled: "unsupportedTool",
+        disabledL10nId: "devtools-settings-tool-not-supported",
         changeAction: "updateToolRegistration",
       },
       {
@@ -45,6 +51,8 @@ export const inventory = [
         l10nId: "devtools-settings-tool-memory",
         type: "boolean",
         pref: "devtools.memory.enabled",
+        disabled: "unsupportedTool",
+        disabledL10nId: "devtools-settings-tool-not-supported",
         changeAction: "updateToolRegistration",
       },
       {
@@ -52,6 +60,8 @@ export const inventory = [
         l10nId: "devtools-settings-tool-storage",
         type: "boolean",
         pref: "devtools.storage.enabled",
+        disabled: "unsupportedTool",
+        disabledL10nId: "devtools-settings-tool-not-supported",
         changeAction: "updateToolRegistration",
       },
       {
@@ -59,6 +69,8 @@ export const inventory = [
         l10nId: "devtools-settings-tool-accessibility",
         type: "boolean",
         pref: "devtools.accessibility.enabled",
+        disabled: "unsupportedTool",
+        disabledL10nId: "devtools-settings-tool-not-supported",
         changeAction: "updateToolRegistration",
       },
       {
@@ -66,6 +78,8 @@ export const inventory = [
         l10nId: "devtools-settings-tool-application",
         type: "boolean",
         pref: "devtools.application.enabled",
+        disabled: "unsupportedTool",
+        disabledL10nId: "devtools-settings-tool-not-supported",
         changeAction: "updateToolRegistration",
       },
       {
@@ -73,6 +87,8 @@ export const inventory = [
         l10nId: "devtools-settings-tool-dom",
         type: "boolean",
         pref: "devtools.dom.enabled",
+        disabled: "unsupportedTool",
+        disabledL10nId: "devtools-settings-tool-not-supported",
         changeAction: "updateToolRegistration",
       },
       {
@@ -83,6 +99,8 @@ export const inventory = [
         // TODO: Move Anti Tracking to an experimental tools section.
         // https://bugzilla.mozilla.org/show_bug.cgi?id=2084099
         hidden: "antiTrackingUnavailable",
+        disabled: "unsupportedTool",
+        disabledL10nId: "devtools-settings-tool-not-supported",
         changeAction: "updateToolRegistration",
       },
     ],
@@ -127,16 +145,7 @@ export const callbacks = {
     toolbox.updateToolboxButtonsVisibility(),
 
   updateToolRegistration: ({ event }) => {
-    const tool = gDevTools
-      .getDefaultTools()
-      .find(
-        definition =>
-          "visibilityswitch" in definition &&
-          definition.visibilityswitch === event.pref
-      );
-    if (!tool) {
-      throw new Error(`No tool uses the ${event.pref} pref.`);
-    }
+    const tool = getToolForPref(event.pref);
     const isEnabled = Services.prefs.getBoolPref(event.pref);
     gDevTools.emit(
       isEnabled ? "tool-registered" : "tool-unregistered",
@@ -153,4 +162,23 @@ export const conditions = {
   // https://bugzilla.mozilla.org/show_bug.cgi?id=2084099
   antiTrackingUnavailable: () =>
     !gDevTools.getDefaultTools().some(tool => tool.id === "antitracking"),
+
+  unsupportedTool: ({ toolbox, setting }) => {
+    const tool = getToolForPref(setting.pref);
+    return !tool.isToolSupported(toolbox);
+  },
 };
+
+/** @param {string} pref */
+function getToolForPref(pref) {
+  const tool = gDevTools
+    .getDefaultTools()
+    .find(
+      definition =>
+        "visibilityswitch" in definition && definition.visibilityswitch === pref
+    );
+  if (!tool) {
+    throw new Error(`No tool uses the ${pref} pref.`);
+  }
+  return tool;
+}

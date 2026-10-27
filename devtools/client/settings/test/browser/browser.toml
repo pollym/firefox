@@ -8,6 +8,8 @@ support-files = [
 
 ["browser_settings_anti_tracking_hidden.js"]
 
+["browser_settings_default_tools_support.js"]
+
 ["browser_settings_default_tools_toggle.js"]
 
 ["browser_settings_preference_bindings.js"]

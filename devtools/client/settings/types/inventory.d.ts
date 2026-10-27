@@ -11,13 +11,18 @@ export type SettingChangeHandler = (context: {
   event: SettingChangedEvent;
 }) => void;
 
-export type SettingCondition = () => boolean;
+export type SettingCondition = (context: {
+  toolbox: Toolbox;
+  setting: Setting;
+}) => boolean;
 
 export interface BaseSetting {
   id: string;
   pref: string;
   l10nId: string;
   hidden?: keyof typeof conditions;
+  disabled?: keyof typeof conditions;
+  disabledL10nId?: string;
   changeAction?: keyof typeof callbacks;
 }
 

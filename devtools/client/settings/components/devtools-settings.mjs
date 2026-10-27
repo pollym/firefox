@@ -11,12 +11,29 @@ import { conditions, inventory } from "../inventory.mjs";
 
 /**
  * @import { Setting, SettingSection } from "../types/inventory.d.ts"
+ * @import { Toolbox } from "../../framework/toolbox.js"
  */
 
 /** Renders the settings inventory as nested binding elements and controls. */
 export class DevToolsSettings extends MozLitElement {
+  /** @type {Toolbox | null} */
+  #toolbox = null;
+
+  /** @param {Toolbox | null} toolbox */
+  setToolbox(toolbox) {
+    this.#toolbox = toolbox;
+    this.requestUpdate();
+  }
+
   /** @param {Setting} setting */
   #renderSetting(setting) {
+    const toolbox = this.#toolbox;
+    if (!toolbox) {
+      return nothing;
+    }
+    const disabled = setting.disabled
+      ? conditions[setting.disabled]({ toolbox, setting })
+      : false;
     switch (setting.type) {
       case "boolean":
         return html`
@@ -27,7 +44,15 @@ export class DevToolsSettings extends MozLitElement {
             <moz-checkbox
               id=${setting.id}
               data-l10n-id=${setting.l10nId}
-            ></moz-checkbox>
+              .disabled=${disabled}
+            >
+              ${disabled && setting.disabledL10nId
+                ? html`<span
+                    slot="description"
+                    data-l10n-id=${setting.disabledL10nId}
+                  ></span>`
+                : nothing}
+            </moz-checkbox>
           </devtools-settings-pref>
         `;
       default:
@@ -37,9 +62,13 @@ export class DevToolsSettings extends MozLitElement {
 
   /** @param {SettingSection} section */
   #renderSection(section) {
+    const toolbox = this.#toolbox;
+    if (!toolbox) {
+      return nothing;
+    }
     const settings = [];
     for (const setting of section.settings) {
-      if (setting.hidden && conditions[setting.hidden]()) {
+      if (setting.hidden && conditions[setting.hidden]({ toolbox, setting })) {
         continue;
       }
       settings.push(this.#renderSetting(setting));
@@ -52,6 +81,9 @@ export class DevToolsSettings extends MozLitElement {
   }
 
   render() {
+    if (!this.#toolbox) {
+      return nothing;
+    }
     return html`
       <link
         rel="stylesheet"
