@@ -46,12 +46,38 @@ devtools-settings-tool-not-supported = Not supported for current toolbox target
 devtools-settings-toolbox-buttons =
     .label = Available Toolbox Buttons
 
+# The button shows the number of errors on the page.
+devtools-settings-toolbox-errorcount =
+    .label = Show error count button
+
+devtools-settings-toolbox-pick =
+    .label = Show element picker button
+
+# The button selects an iframe as the currently targeted document.
+devtools-settings-toolbox-frames =
+    .label = Show iframe selector button
+
+# The button opens a list of experimental DevTools preferences. It's only
+# available in unofficial builds.
+devtools-settings-toolbox-experimental-prefs =
+    .label = Show experimental preferences button
+
+devtools-settings-toolbox-responsive =
+    .label = Show Responsive Design Mode button
+
+devtools-settings-toolbox-screenshot =
+    .label = Show screenshot button
+
 # The button toggles rulers along the edges of the page.
 devtools-settings-toolbox-rulers =
     .label = Show rulers button
 
-devtools-settings-toolbox-screenshot =
-    .label = Show screenshot button
+# The button toggles a tool for measuring a portion of the page.
+devtools-settings-toolbox-measure =
+    .label = Show measuring tool button
+
+devtools-settings-toolbox-jstracer =
+    .label = Show JavaScript Tracer button
 
 ## Style Editor section, configuring the CSS Style Editor.
 
