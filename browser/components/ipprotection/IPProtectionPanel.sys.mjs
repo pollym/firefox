@@ -458,7 +458,6 @@ export class IPProtectionPanel {
 
         if (this.active && aLocationURI) {
           this.#updateSiteData();
-          this.#updateProxyError();
         }
       },
     };
@@ -637,7 +636,6 @@ export class IPProtectionPanel {
     }
 
     this.#updateSiteData();
-    this.#updateProxyError();
     lazy.IPProtectionServerlist.maybeFetchList();
 
     if (this.state.paused) {
@@ -1227,38 +1225,6 @@ export class IPProtectionPanel {
     this.setState({ siteData });
   }
 
-  /**
-   * The error to show for the proxy state. A failed connection that only
-   * carries included sites is not shown on a tab it does not carry.
-   *
-   * @returns {string}
-   */
-  #getProxyErrorType() {
-    if (lazy.IPPProxyManager.state !== lazy.IPPProxyStates.ERROR) {
-      return "";
-    }
-    if (
-      lazy.IPPProxyManager.mode === lazy.IPPMode.MODE_INCLUSION &&
-      lazy.IPPSiteRuleManager.getRule(
-        getSitePrincipal(this.gBrowser),
-        this.gBrowser?.selectedBrowser.browserId
-      ) !== lazy.IPPPrincipalRules.INCLUDED
-    ) {
-      return "";
-    }
-    return lazy.ERRORS.GENERIC;
-  }
-
-  /**
-   * Re-evaluates a proxy state error for the selected tab. Errors from a
-   * failed start in this panel are left alone.
-   */
-  #updateProxyError() {
-    if (lazy.IPPProxyManager.state === lazy.IPPProxyStates.ERROR) {
-      this.setState({ error: this.#getProxyErrorType() });
-    }
-  }
-
   #handleEvent(event) {
     if (event.type == "IPProtection:Init") {
       this.updateComponentState(event.target);
@@ -1299,7 +1265,10 @@ export class IPProtectionPanel {
       event.type == "IPProtectionService:StateChanged" ||
       event.type === "IPPAuthProvider:StateChanged"
     ) {
-      const errorType = this.#getProxyErrorType();
+      let errorType = "";
+      if (lazy.IPPProxyManager.state === lazy.IPPProxyStates.ERROR) {
+        errorType = lazy.ERRORS.GENERIC;
+      }
       const paused = lazy.IPPProxyManager.state === lazy.IPPProxyStates.PAUSED;
 
       this.setState({
@@ -1324,7 +1293,6 @@ export class IPProtectionPanel {
       });
     } else if (event.type == "SiteRuleManager:RuleChanged") {
       this.#updateSiteData();
-      this.#updateProxyError();
     } else if (event.type == "IPProtectionServerlist:ListChanged") {
       this.setState({
         locationsList: lazy.IPProtectionServerlist.countries,
