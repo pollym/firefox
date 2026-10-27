@@ -144,14 +144,14 @@ class EditorLineBreakBase {
     MOZ_RELEASE_ASSERT(aText);
     MOZ_RELEASE_ASSERT(aText->TextDataLength());
     const uint32_t lastCharIndex = aText->TextDataLength() - 1u;
-    return SelfType(std::forward<RefPtr<Text>>(aText), lastCharIndex);
+    return SelfType(std::move(aText), lastCharIndex);
   }
   [[nodiscard]] static SelfType AtLastChar(nsCOMPtr<nsIContent>&& aText) {
     MOZ_RELEASE_ASSERT(aText);
     MOZ_RELEASE_ASSERT(aText->IsText());
     MOZ_RELEASE_ASSERT(aText->AsText()->TextDataLength());
     const uint32_t lastCharIndex = aText->AsText()->TextDataLength() - 1u;
-    return SelfType(std::forward<nsCOMPtr<nsIContent>>(aText), lastCharIndex);
+    return SelfType(std::move(aText), lastCharIndex);
   }
 
   [[nodiscard]] bool IsInComposedDoc() const {
@@ -429,7 +429,7 @@ class CreateLineBreakResult final : public CaretPoint {
         mLineBreak(Some(aCreateElementResult.UnwrapNewNode())) {}
   explicit CreateLineBreakResult(CreateElementResult&& aCreateElementResult,
                                  EditorDOMPoint&& aCaretPoint)
-      : CaretPoint(std::forward<EditorDOMPoint>(aCaretPoint)),
+      : CaretPoint(std::move(aCaretPoint)),
         mLineBreak(Some(aCreateElementResult.UnwrapNewNode())) {
     aCreateElementResult.IgnoreCaretPointSuggestion();
   }
