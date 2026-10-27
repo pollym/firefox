@@ -1686,8 +1686,8 @@ autofill-payment-methods-manage-payments-button =
     .label = Manage payment methods
     .accesskey = m
 # This operation requires the user to authenticate with the operating system (device sign-in)
-autofill-reauth-payment-methods-checkbox-2 =
-    .label = Require device sign in to autofill and manage payment methods
+autofill-payment-methods-require-device-sign-in-checkbox =
+    .label = Require device sign-in to autofill
     .accesskey = o
 # Security codes are the CVV/CVC card codes
 autofill-payment-methods-save-security-codes-checkbox =

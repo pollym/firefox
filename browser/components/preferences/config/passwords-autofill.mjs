@@ -202,7 +202,7 @@ const FORM_AUTOFILL_CONFIG = {
         items: [
           {
             id: "requireOSAuthForPayments",
-            l10nId: "autofill-reauth-payment-methods-checkbox-2",
+            l10nId: "autofill-payment-methods-require-device-sign-in-checkbox",
             supportPage:
               "credit-card-autofill#w_require-authentication-for-autofill",
           },
