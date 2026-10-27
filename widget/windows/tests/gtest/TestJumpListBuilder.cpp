@@ -421,12 +421,17 @@ TEST(JumpListBuilder, CheckForRemovals)
 
         collection->AddObject(link);
 
-        // Let's re-use the same IShellLink, but change the URL to add our
-        // second entry. The values of the IShellLink are ultimately copied
-        // over to the items being added to the collection.
+        // AddObject stores the interface pointer rather than copying the
+        // link's values, so the second entry needs its own IShellLink.
+        RefPtr<IShellLinkW> secondLink;
+        hr = CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER,
+                              IID_IShellLinkW, getter_AddRefs(secondLink));
+        MOZ_RELEASE_ASSERT(SUCCEEDED(hr));
+
         nsAutoString secondLinkHref(u"https://mozilla.org"_ns);
-        link->SetArguments(secondLinkHref.get());
-        collection->AddObject(link);
+        secondLink->SetArguments(secondLinkHref.get());
+        secondLink->SetIconLocation(appPath.get(), 0);
+        collection->AddObject(secondLink);
 
         RefPtr<IObjectArray> pArray;
         hr = collection->QueryInterface(IID_IObjectArray,
