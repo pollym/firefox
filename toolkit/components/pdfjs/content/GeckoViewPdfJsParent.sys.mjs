@@ -250,6 +250,10 @@ class SignatureHandler {
   onEvent(aEvent, aData, aCallback) {
     debug`onEvent: name=${aEvent}, data=${aData}`;
 
+    if (!this.#actor.manager?.isCurrentGlobal) {
+      return;
+    }
+
     if (
       this.#actor.browser.contentPrincipal.spec !==
       "resource://pdf.js/web/viewer.html"

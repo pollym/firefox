@@ -57,4 +57,19 @@ class PdfSignatureTest : BaseSessionTest() {
             )
         }
     }
+
+    // Bug 2079932
+    @Test
+    fun addSignatureAfterCrossSiteNavigation() {
+        mainSession.loadTestPath(TRACEMONKEY_PDF_PATH)
+        mainSession.waitForPageStop()
+
+        mainSession.loadUri("https://example.org/tests/junit/hello.html")
+        mainSession.waitForPageStop()
+
+        mainSession.loadTestPath(TRACEMONKEY_PDF_PATH)
+        mainSession.waitForPageStop()
+
+        sessionRule.waitForResult(mainSession.pdfViewerEditor.addSignature("Test"))
+    }
 }
