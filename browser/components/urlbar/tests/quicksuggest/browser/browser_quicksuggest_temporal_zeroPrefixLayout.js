@@ -154,17 +154,21 @@ add_task(async function noRecentSearches() {
 });
 
 // The default zero prefix layout and `maxRichResults` are used when the user
-// turns off temporal suggestions.
+// turns off temporal suggestions or every temporal type.
 add_task(async function suggestTemporalDisabled() {
   await addRecentSearches(NUM_RECENT_SEARCHES);
-  await SpecialPowers.pushPrefEnv({
-    set: [["browser.urlbar.suggest.temporal", false]],
-  });
-  Assert.deepEqual(await getZeroPrefixLayout(), [
-    ["top_site", 7],
-    ["recent_search", 3],
-  ]);
-  await SpecialPowers.popPrefEnv();
+  for (let pref of [
+    "browser.urlbar.suggest.temporal",
+    "browser.urlbar.suggest.temporal.seasonal",
+  ]) {
+    info(`Turning off ${pref}`);
+    await SpecialPowers.pushPrefEnv({ set: [[pref, false]] });
+    Assert.deepEqual(await getZeroPrefixLayout(), [
+      ["top_site", 7],
+      ["recent_search", 3],
+    ]);
+    await SpecialPowers.popPrefEnv();
+  }
 });
 
 // Recent searches take the space temporal suggestions don't use.

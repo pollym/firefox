@@ -546,6 +546,7 @@ export interface Modules {
   "moz-src:///browser/components/urlbar/private/GeolocationUtils.sys.mjs": typeof import("moz-src:///browser/components/urlbar/private/GeolocationUtils.sys.mjs"),
   "moz-src:///browser/components/urlbar/private/MLSuggest.sys.mjs": typeof import("moz-src:///browser/components/urlbar/private/MLSuggest.sys.mjs"),
   "moz-src:///browser/components/urlbar/private/SuggestBackendRust.sys.mjs": typeof import("moz-src:///browser/components/urlbar/private/SuggestBackendRust.sys.mjs"),
+  "moz-src:///browser/components/urlbar/private/TemporalSuggestions.sys.mjs": typeof import("moz-src:///browser/components/urlbar/private/TemporalSuggestions.sys.mjs"),
   "moz-src:///browser/modules/ASWebAuthSessionService.sys.mjs": typeof import("moz-src:///browser/modules/ASWebAuthSessionService.sys.mjs"),
   "moz-src:///browser/modules/CanvasPermissionPromptHelper.sys.mjs": typeof import("moz-src:///browser/modules/CanvasPermissionPromptHelper.sys.mjs"),
   "moz-src:///browser/modules/ContextId.sys.mjs": typeof import("moz-src:///browser/modules/ContextId.sys.mjs"),

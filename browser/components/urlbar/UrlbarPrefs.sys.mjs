@@ -660,7 +660,7 @@ const PREF_URLBAR_DEFAULTS = /** @type {PreferenceDefinition[]} */ ([
   ["temporal.rowCount", 5],
 
   // The maximum number of results in the zero prefix view when temporal search
-  // suggestions are enabled and `suggest.temporal` is true. A user-set
+  // suggestions are enabled (see `TemporalSuggestions.isEnabled`). A user-set
   // `maxRichResults` takes precedence.
   ["temporal.zeroPrefixMaxRichResults", 13],
 

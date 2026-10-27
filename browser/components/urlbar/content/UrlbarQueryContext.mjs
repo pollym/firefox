@@ -12,6 +12,16 @@ import UrlbarPrefs from "chrome://browser/content/urlbar/UrlbarContentPrefs.mjs"
 import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
 import { UrlbarResult } from "chrome://browser/content/urlbar/UrlbarResult.mjs";
 
+const { XPCOMUtils } =
+  typeof ChromeUtils == "undefined"
+    ? { XPCOMUtils: null }
+    : ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
+
+const lazy = XPCOMUtils?.declareLazy({
+  TemporalSuggestions:
+    "moz-src:///browser/components/urlbar/private/TemporalSuggestions.sys.mjs",
+});
+
 /**
  * @import {UrlbarSearchStringTokenData} from "moz-src:///browser/components/urlbar/UrlbarTokenizer.sys.mjs"
  * @import {SearchMode} from "moz-src:///browser/components/urlbar/content/UrlbarInputBase.mjs"
@@ -222,15 +232,14 @@ export class UrlbarQueryContext {
   /**
    * Whether the zero prefix layout and result count for temporal search
    * suggestions apply to this query. They only apply to the urlbar SAP, and
-   * not when the user has turned off temporal suggestions.
+   * only when `TemporalSuggestions.isEnabled` is true.
    *
    * @type {boolean}
    */
   get isTemporalZeroPrefix() {
     return (
       this.sapName == "urlbar" &&
-      UrlbarPrefs.get("temporal.featureGate") &&
-      UrlbarPrefs.get("suggest.temporal") &&
+      !!lazy?.TemporalSuggestions.isEnabled &&
       !this.searchString &&
       !this.searchMode
     );
