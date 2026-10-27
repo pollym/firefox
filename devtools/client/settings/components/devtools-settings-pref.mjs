@@ -40,7 +40,11 @@ export class DevToolsSettingsPref extends MozLitElement {
       if (control instanceof MozCheckbox) {
         control.checked = Services.prefs.getBoolPref(this.pref);
       } else if (control instanceof MozSelect) {
-        control.value = Services.prefs.getStringPref(this.pref);
+        if (this.#isIntPref()) {
+          control.value = String(Services.prefs.getIntPref(this.pref));
+        } else {
+          control.value = Services.prefs.getStringPref(this.pref);
+        }
       } else {
         return;
       }
@@ -57,7 +61,11 @@ export class DevToolsSettingsPref extends MozLitElement {
     if (control instanceof MozCheckbox) {
       Services.prefs.setBoolPref(this.pref, control.checked);
     } else if (control instanceof MozSelect) {
-      Services.prefs.setStringPref(this.pref, control.value);
+      if (this.#isIntPref()) {
+        Services.prefs.setIntPref(this.pref, Number(control.value));
+      } else {
+        Services.prefs.setStringPref(this.pref, control.value);
+      }
     } else {
       return;
     }
@@ -67,6 +75,10 @@ export class DevToolsSettingsPref extends MozLitElement {
       );
     }
   };
+
+  #isIntPref() {
+    return Services.prefs.getPrefType(this.pref) === Services.prefs.PREF_INT;
+  }
 
   render() {
     if (this._errorMessage) {

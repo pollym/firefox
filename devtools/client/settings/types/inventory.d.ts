@@ -32,7 +32,7 @@ export interface BooleanSetting extends BaseSetting {
 
 export interface SettingOption {
   value: string;
-  l10nId: string;
+  l10nId?: string;
 }
 
 export interface SelectSetting extends BaseSetting {

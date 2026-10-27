@@ -344,6 +344,13 @@ export const inventory = [
         pref: "devtools.editor.expandtab",
       },
       {
+        id: "settings-editor-tab-size",
+        l10nId: "devtools-settings-editor-tab-size",
+        type: "select",
+        pref: "devtools.editor.tabsize",
+        options: [{ value: "2" }, { value: "4" }, { value: "8" }],
+      },
+      {
         id: "settings-editor-keymap",
         l10nId: "devtools-settings-editor-keymap",
         type: "select",

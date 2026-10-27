@@ -77,7 +77,8 @@ export class DevToolsSettings extends MozLitElement {
               option => html`
                 <moz-option
                   value=${option.value}
-                  data-l10n-id=${option.l10nId}
+                  data-l10n-id=${option.l10nId ?? nothing}
+                  label=${option.l10nId ? nothing : option.value}
                 ></moz-option>
               `
             )}

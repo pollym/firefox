@@ -201,6 +201,10 @@ devtools-settings-editor-expand-tab =
     .label = Indent using spaces
     .title = Use spaces instead of the tab character
 
+# The number of spaces used to display a tab character in the source editor.
+devtools-settings-editor-tab-size =
+    .label = Tab size
+
 # Selects which configuration of keyboard shortcuts to use in the source editor.
 devtools-settings-editor-keymap =
     .label = Keybindings
