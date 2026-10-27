@@ -6,6 +6,7 @@
 #define toolkit_crashreporter_breakpad_client_linux_crash_generation
 
 #include "third_party/lss/linux_syscall_support.h"
+#include <cstdint>
 
 namespace CrashReporter {
 
@@ -50,6 +51,10 @@ class UniqueFd {
 
  private:
   int mFd = -1;
+};
+
+enum class GenerationClientAction: uint8_t {
+    ForkAndLaunchExecutor = 1,
 };
 
 } // namespace CrashReporter

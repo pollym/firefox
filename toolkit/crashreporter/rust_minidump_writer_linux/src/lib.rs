@@ -10,12 +10,16 @@ use {
     libc::{pid_t, SI_TKILL, SI_USER},
     minidump_writer::{
         minidump_writer::{DirectAuxvDumpInfo as InternalDumpInfo, MinidumpWriterConfig},
+        remote_process_inspection::{
+            executor, io::UnixStream, transport, ExecutorResources, ARGS_BUFFER_LEN,
+            OUTPUT_BUFFER_LEN,
+        },
         CrashContextExt,
     },
     mozannotation_server::{AnnotationData, CAnnotation},
     std::{
         convert::TryInto,
-        ffi::{c_char, CStr, CString},
+        ffi::{c_char, c_int, CStr, CString},
         fs::File,
     },
 };
@@ -217,6 +221,16 @@ pub extern "C" fn minidump_writer_set_direct_auxv_dump_info(
         });
 }
 
+#[no_mangle]
+pub extern "C" fn minidump_writer_set_remote_unix_stream(
+    context: &mut MinidumpWriterContext,
+    unix_stream_socket_fd: c_int,
+) {
+    let io = unsafe { UnixStream::from_raw_fd(unix_stream_socket_fd) };
+    let transport = transport::postcard::Backend::new(io, [0u8; OUTPUT_BUFFER_LEN]);
+    context.writer_config.set_remote_transport(transport);
+}
+
 /// Write the minidump to the file
 ///
 /// Generates the minidump and writes it out to the file specified when the object was created.
@@ -270,6 +284,46 @@ pub unsafe extern "C" fn free_minidump_extra_data(extra_data: *mut ExtraCrashDat
         // SAFETY: The pointer must have been created by `minidump_writer_dump` and not yet freed.
         let _extra_data = Box::from_raw(extra_data);
     }
+}
+
+/// Set the remote executor up and running, exits when it is done.
+///
+/// # Safety
+///
+/// `unix_stream_socket_fd` must be a valid file descriptor for a Unix socket.
+#[no_mangle]
+pub unsafe extern "C" fn minidump_writer_run_remote_executor(
+    target_pid: pid_t,
+    unix_stream_socket_fd: c_int,
+    error_msg: Option<&mut *mut c_char>,
+) -> bool {
+    // SAFETY: per the function's safety invariant, unix_stream_socket_fd is assumed valid.
+    let io = unsafe { UnixStream::from_raw_fd(unix_stream_socket_fd) };
+    let transport = transport::postcard::Executor::new(io, [0u8; ARGS_BUFFER_LEN]);
+
+    let mut resources = ExecutorResources::const_new();
+
+    match executor::run(target_pid, transport, resources.as_mut()) {
+        Ok(()) => true,
+        Err(e) => {
+            if let Some(error_msg_ptr) = error_msg {
+                *error_msg_ptr = CString::new(format!("{e:#?}")).unwrap().into_raw();
+            }
+            false
+        }
+    }
+}
+
+/// Free any error message created by [`minidump_writer_run_remote_executor`].
+///
+/// # Safety
+///
+/// `error_msg` must be a valid pointer created by a call to [`minidump_writer_run_remote_executor`].
+/// After calling this function, the caller must not use the pointer again.
+#[no_mangle]
+pub unsafe extern "C" fn minidump_writer_free_error_msg(error_msg: *mut c_char) {
+    // SAFETY: per the function safety invariant, this matches its creation.
+    let _error_msg = unsafe { CString::from_raw(error_msg) };
 }
 
 /// Runs a closure and converts any error into a C string stored in the data payload.

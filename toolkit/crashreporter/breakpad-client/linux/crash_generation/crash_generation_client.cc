@@ -30,9 +30,14 @@
 #include "linux/crash_generation/crash_generation_client.h"
 #include "linux/crash_generation/crash_generation.h"
 
+#include <errno.h>
 #include <stdio.h>
+#include <linux/prctl.h>
+#include <sys/prctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+
 
 #include <algorithm>
 
@@ -40,15 +45,90 @@
 #include "common/linux/ignore_ret.h"
 #include "third_party/lss/linux_syscall_support.h"
 
+#if defined(MOZ_OXIDIZED_BREAKPAD)
+#  include "mozilla/toolkit/crashreporter/rust_minidump_writer_linux_ffi_generated.h"
+#endif
+
 namespace google_breakpad {
 
 namespace {
 
 using CrashReporter::UniqueFd;
+using CrashReporter::GenerationClientAction;
 
 static bool CreateStreamSocketPair(UniqueFd (&pair)[2]);
 static bool TakeOrCreateStreamSocketPair(UniqueFd (&pre_pair)[2],
                                          UniqueFd (&pair)[2]);
+
+#if defined(MOZ_OXIDIZED_BREAKPAD)
+constexpr uint8_t POST_FORK_SYNC_BYTE = 0xaa; // arbitrary value
+
+static bool ForkAndLaunchExecutor(UniqueFd executor_endpoint) {
+  pid_t crashed_pid = sys_getpid();
+
+  // Need child to wait after fork until we enable it to ptrace us
+  UniqueFd post_fork_sync[2];
+  if (!CreateStreamSocketPair(post_fork_sync)) {
+    return false;
+  }
+  UniqueFd& post_fork_sync_read = post_fork_sync[0];
+  UniqueFd& post_fork_sync_write = post_fork_sync[1];
+
+  pid_t child_pid = sys_fork();
+  if (child_pid == -1) {
+    return false;
+  } else if (child_pid == 0) {
+    // We're the child
+    post_fork_sync_write.reset();
+
+    uint8_t byte = 0;
+    if (HANDLE_EINTR(sys_read(post_fork_sync_read.get(), &byte, sizeof(byte))) != sizeof(byte)) {
+      sys_exit_group(1);
+    }
+
+    if (byte != POST_FORK_SYNC_BYTE) {
+      sys_exit_group(1);
+    }
+
+    post_fork_sync_read.reset();
+
+    if (!minidump_writer_run_remote_executor(
+        crashed_pid,
+        executor_endpoint.release(),
+        // We're not going to bother with the error message because... What can we really do about it?
+        nullptr))
+    {
+      sys_exit_group(1);
+    }
+
+    sys_exit_group(0);
+  }
+
+  // We're the crashed process
+  post_fork_sync_read.reset();
+  executor_endpoint.reset();
+
+  // Give the child permission to ptrace us
+  // Fails with EINVAL on kernels without Yama, where it isn't needed anyway
+  if (prctl(PR_SET_PTRACER, child_pid) == -1 && errno != EINVAL) {
+    return false;
+  }
+
+  uint8_t byte = POST_FORK_SYNC_BYTE;
+  if (HANDLE_EINTR(sys_write(post_fork_sync_write.get(), &byte, sizeof(byte))) != sizeof(byte)) {
+    return false;
+  }
+
+  post_fork_sync_write.reset();
+
+  int status = 0;
+  if (HANDLE_EINTR(sys_waitpid(child_pid, &status, 0)) == -1) {
+    return false;
+  }
+
+  return WIFEXITED(status) && WEXITSTATUS(status) == 0;
+}
+#endif  // defined(MOZ_OXIDIZED_BREAKPAD)
 
 class CrashGenerationClientImpl : public CrashGenerationClient {
  public:
@@ -93,14 +173,24 @@ class CrashGenerationClientImpl : public CrashGenerationClient {
 
     server_endpoint.reset();
 
-    // Wait for server to indicate that it's done by hanging up on us
-    uint8_t dummy;
-    ssize_t rv = HANDLE_EINTR(sys_read(client_endpoint.get(), &dummy, sizeof(dummy)));
+    // Wait for server to indicate that it's done (by hanging up on us), or that
+    // there is some work to be performed (via a `GenerationClientAction` value)
+    uint8_t action_byte;
+    ssize_t rv = HANDLE_EINTR(sys_read(client_endpoint.get(), &action_byte, sizeof(action_byte)));
     if (rv == -1) {
       return false;
+    } else if (rv == 0) {
+      return true;
     }
 
-    return rv == 0;
+#if defined(MOZ_OXIDIZED_BREAKPAD)
+    switch(static_cast<GenerationClientAction>(action_byte)) {
+      case GenerationClientAction::ForkAndLaunchExecutor:
+        return ForkAndLaunchExecutor(std::move(client_endpoint));
+    }
+#endif
+
+    return false;
   }
 
  private:
