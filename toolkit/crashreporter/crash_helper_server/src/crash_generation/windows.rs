@@ -32,7 +32,7 @@ use windows_sys::Win32::{
             VER_MINORVERSION, VER_SERVICEPACKMAJOR, VER_SERVICEPACKMINOR,
         },
         SystemServices::VER_GREATER_EQUAL,
-        Threading::{OpenProcess, PROCESS_ALL_ACCESS},
+        Threading::{GetProcessId, GetThreadId},
     },
 };
 
@@ -48,19 +48,18 @@ impl CrashGenerator {
         let mut exception_records = message.exception_records;
         let exception_records_ptr = link_exception_records(&mut exception_records);
 
-        let pid = message.process;
+        let handle = message.process.as_raw_handle() as HANDLE;
+        let pid = get_process_id(message.process.as_handle())?;
         let mut exception_pointers = EXCEPTION_POINTERS {
             ExceptionRecord: exception_records_ptr,
             ContextRecord: &mut context as *mut _,
         };
 
         let exception = MINIDUMP_EXCEPTION_INFORMATION {
-            ThreadId: message.thread,
+            ThreadId: get_thread_id(message.thread.as_handle())?,
             ExceptionPointers: &mut exception_pointers,
             ClientPointers: FALSE,
         };
-
-        let handle = get_process_handle(pid)?;
 
         // SAFETY: `handle` is guaranteed to be a valid handle and so is
         // `minidump_file`. The remaining pointers going into this function are
@@ -87,13 +86,12 @@ impl CrashGenerator {
                 }],
             };
 
-            let error = self.finalize_crash_report(
-                handle,
+            self.finalize_crash_report(
+                process_id.get_native(),
                 Some(&extra_data),
                 &path,
                 super::ProcessType::Child,
             );
-            self.insert_crash_report(&process_id, &path, error);
         }
 
         Ok(())
@@ -172,16 +170,19 @@ fn is_windows8_or_later() -> bool {
     }
 }
 
-fn get_process_handle(pid: u32) -> Result<HANDLE, ()> {
+fn get_process_id(handle: BorrowedHandle) -> Result<u32, ()> {
     // SAFETY: No pointers involved, worst case we get an error
-    let handle = unsafe {
-        OpenProcess(PROCESS_ALL_ACCESS, /* bInheritHandle */ FALSE, pid)
-    };
+    match unsafe { GetProcessId(handle.as_raw_handle() as HANDLE) } {
+        0 => Err(()),
+        pid => Ok(pid),
+    }
+}
 
-    if handle.is_null() {
-        Err(())
-    } else {
-        Ok(handle)
+fn get_thread_id(handle: BorrowedHandle) -> Result<u32, ()> {
+    // SAFETY: No pointers involved, worst case we get an error
+    match unsafe { GetThreadId(handle.as_raw_handle() as HANDLE) } {
+        0 => Err(()),
+        tid => Ok(tid),
     }
 }
 
