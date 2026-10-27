@@ -505,6 +505,11 @@ export class PanelList extends HTMLElement {
 
     switch (e.type) {
       case "resize":
+        // Resize events of in-process subframes bubble up to chrome windows.
+        if (e.target == window) {
+          this.hide();
+        }
+        break;
       case "scroll":
         if (!inPanelList) {
           this.hide();
