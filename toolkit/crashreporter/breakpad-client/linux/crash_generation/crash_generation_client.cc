@@ -28,6 +28,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "linux/crash_generation/crash_generation_client.h"
+#include "linux/crash_generation/crash_generation.h"
 
 #include <stdio.h>
 #include <sys/socket.h>
@@ -43,15 +44,28 @@ namespace google_breakpad {
 
 namespace {
 
+using CrashReporter::UniqueFd;
+
+static bool CreateStreamSocketPair(UniqueFd (&pair)[2]);
+static bool TakeOrCreateStreamSocketPair(UniqueFd (&pre_pair)[2],
+                                         UniqueFd (&pair)[2]);
+
 class CrashGenerationClientImpl : public CrashGenerationClient {
  public:
-  explicit CrashGenerationClientImpl(int server_fd) : server_fd_(server_fd) {}
+  explicit CrashGenerationClientImpl(int server_fd) : server_fd_(server_fd) {
+    // Create a first socket pair ahead of time to avoid the GMP sandbox.
+    CreateStreamSocketPair(pre_endpoints_);
+  }
   virtual ~CrashGenerationClientImpl() {}
 
   virtual bool RequestDump(const void* blob, size_t blob_size) {
-    int fds[2];
-    if (sys_pipe(fds) < 0)
+    UniqueFd endpoints[2];
+    if (!TakeOrCreateStreamSocketPair(pre_endpoints_, endpoints)) {
       return false;
+    }
+    UniqueFd& server_endpoint = endpoints[0];
+    UniqueFd& client_endpoint = endpoints[1];
+
     static const unsigned kControlMsgSize = CMSG_SPACE(sizeof(int));
 
     struct kernel_iovec iov;
@@ -70,28 +84,53 @@ class CrashGenerationClientImpl : public CrashGenerationClient {
     hdr->cmsg_type = SCM_RIGHTS;
     hdr->cmsg_len = CMSG_LEN(sizeof(int));
     int* p = reinterpret_cast<int*>(CMSG_DATA(hdr));
-    *p = fds[1];
+    *p = server_endpoint.get();
 
     ssize_t ret = HANDLE_EINTR(sys_sendmsg(server_fd_, &msg, 0));
-    sys_close(fds[1]);
     if (ret < 0) {
-      sys_close(fds[0]);
       return false;
     }
 
-    // Wait for an ACK from the server.
-    char b;
-    IGNORE_RET(HANDLE_EINTR(sys_read(fds[0], &b, 1)));
-    sys_close(fds[0]);
+    server_endpoint.reset();
 
-    return true;
+    // Wait for server to indicate that it's done by hanging up on us
+    uint8_t dummy;
+    ssize_t rv = HANDLE_EINTR(sys_read(client_endpoint.get(), &dummy, sizeof(dummy)));
+    if (rv == -1) {
+      return false;
+    }
+
+    return rv == 0;
   }
 
  private:
   int server_fd_;
+  // Server and client endpoints, in that order
+  UniqueFd pre_endpoints_[2];
 
   DISALLOW_COPY_AND_ASSIGN(CrashGenerationClientImpl);
 };
+
+static bool CreateStreamSocketPair(UniqueFd (&pair)[2]) {
+  int fds[2];
+  if (sys_socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, fds) == -1) {
+    return false;
+  }
+  pair[0] = UniqueFd(fds[0]);
+  pair[1] = UniqueFd(fds[1]);
+  return true;
+}
+
+// Takes the pre-created pair if still available, otherwise creates a new one.
+static bool TakeOrCreateStreamSocketPair(UniqueFd (&pre_pair)[2],
+                                         UniqueFd (&pair)[2]) {
+  if (pre_pair[0] && pre_pair[1]) {
+    pair[0] = std::move(pre_pair[0]);
+    pair[1] = std::move(pre_pair[1]);
+    return true;
+  }
+  return CreateStreamSocketPair(pair);
+}
 
 }  // namespace
 
