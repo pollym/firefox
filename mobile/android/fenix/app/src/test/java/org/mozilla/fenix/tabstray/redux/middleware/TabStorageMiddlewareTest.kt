@@ -30,8 +30,6 @@ import mozilla.components.feature.tabgroups.storage.data.TabGroupData
 import mozilla.components.feature.tabgroups.storage.fakes.FakeTabGroupRepository
 import mozilla.components.feature.tabgroups.storage.repository.TabGroupRepository
 import mozilla.components.feature.tabs.TabsUseCases
-import mozilla.components.feature.tabs.TabsUseCases.MoveTabsUseCase
-import mozilla.components.feature.tabs.TabsUseCases.RemoveTabsUseCase
 import mozilla.components.support.utils.DateTimeProvider
 import mozilla.components.support.utils.FakeDateTimeProvider
 import org.junit.Assert.assertTrue
@@ -39,6 +37,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mozilla.fenix.components.tabs.DefaultTabRepository
 import org.mozilla.fenix.components.usecases.FenixBrowserUseCases
+import org.mozilla.fenix.ext.maxActiveTime
 import org.mozilla.fenix.tabstray.data.TabGroupTheme
 import org.mozilla.fenix.tabstray.data.TabsTrayItem
 import org.mozilla.fenix.tabstray.data.createTabGroup
@@ -395,9 +394,17 @@ class TabStorageMiddlewareTest {
                 tabIds = emptyList(),
             )
 
-        val repository = FakeTabGroupRepository(initialTabGroupData = TabGroupData(tabGroups = listOf(storedGroup)))
+        val repository =
+            FakeTabGroupRepository(
+                initialTabGroupData =
+                    TabGroupData(
+                        tabGroups = listOf(storedGroup),
+                        tabGroupAssignments = mapOf(firstTab.id to storedGroup.id, secondTab.id to storedGroup.id),
+                    )
+            )
         val store =
             createStore(
+                tabGroupsEnabled = true,
                 browserStore = browserStore,
                 tabGroupRepository = repository,
             )
@@ -417,6 +424,7 @@ class TabStorageMiddlewareTest {
         assertEquals(listOf(storedGroup), repository.tabGroupDataFlow.first().tabGroups)
         assertEquals(2, browserStore.state.tabs.size)
 
+        runCurrent()
         store.dispatch(TabGroupAction.DeleteConfirmed(group))
 
         runCurrent()
@@ -550,7 +558,10 @@ class TabStorageMiddlewareTest {
             TabsTrayState(
                 selectedPage = Page.NormalTabs,
                 normalTabsState = TabsTrayState.NormalTabsState(),
-                tabGroupState = TabsTrayState.TabGroupState(groups = listOf(displayGroup)),
+                tabGroupState =
+                    TabsTrayState.TabGroupState(
+                        groups = listOf(displayGroup.copy(lastModified = fakeDateTimeProvider.currentTimeMillis()))
+                    ),
                 backStack = TabsTrayState().backStack + ExpandedTabGroup(group = displayGroup),
                 hasTabDataLoaded = true,
             )
@@ -1607,7 +1618,16 @@ class TabStorageMiddlewareTest {
         val expectedState =
             TabsTrayState(
                 normalTabsState = TabsTrayState.NormalTabsState(tabCount = 0),
-                tabGroupState = TabsTrayState.TabGroupState(groups = listOf(displayGroup.copy(closed = true))),
+                tabGroupState =
+                    TabsTrayState.TabGroupState(
+                        groups =
+                            listOf(
+                                displayGroup.copy(
+                                    closed = true,
+                                    lastModified = fakeDateTimeProvider.currentTimeMillis(),
+                                )
+                            )
+                    ),
                 hasTabDataLoaded = true,
             )
 
@@ -1627,8 +1647,14 @@ class TabStorageMiddlewareTest {
             val activeGroupedTab = createTab("https://mozilla.org")
             browserStore.dispatch(TabListAction.AddTabAction(activeGroupedTab))
 
-            val inactiveTabId = "inactive_99"
-            val inactiveTab = TabsTrayItem.Tab(createTab(id = inactiveTabId, url = "https://example.com"))
+            val inactiveTab =
+                createTab(
+                    id = "inactive_99",
+                    url = "https://example.com",
+                    createdAt = expiredTime(),
+                    lastAccess = expiredTime(),
+                )
+            browserStore.dispatch(TabListAction.AddTabAction(inactiveTab))
 
             val title = "Group 1"
             val theme = TabGroupTheme.Red
@@ -1640,13 +1666,19 @@ class TabStorageMiddlewareTest {
                     tabIds = emptyList(),
                 )
 
-            val repository = FakeTabGroupRepository(initialTabGroupData = TabGroupData(tabGroups = listOf(storedGroup)))
+            val repository =
+                FakeTabGroupRepository(
+                    initialTabGroupData =
+                        TabGroupData(
+                            tabGroups = listOf(storedGroup),
+                            tabGroupAssignments = mapOf(activeGroupedTab.id to storedGroup.id),
+                        )
+                )
 
             val store =
                 createStore(
-                    initialState =
-                        TabsTrayState(inactiveTabs = TabsTrayState.InactiveTabsState(tabs = listOf(inactiveTab))),
                     inactiveTabsEnabled = true,
+                    tabGroupsEnabled = true,
                     browserStore = browserStore,
                     tabGroupRepository = repository,
                 )
@@ -1659,6 +1691,7 @@ class TabStorageMiddlewareTest {
                     tabs = mutableListOf(TabsTrayItem.Tab(activeGroupedTab)),
                 )
 
+            runCurrent()
             store.dispatch(TabGroupAction.DeleteConfirmed(group))
 
             runCurrent()
@@ -1666,7 +1699,8 @@ class TabStorageMiddlewareTest {
 
             assertTrue(repository.tabGroupDataFlow.first().tabGroups.isEmpty())
 
-            assertTrue(browserStore.state.tabs.isEmpty())
+            assertEquals(listOf(inactiveTab.id), browserStore.state.tabs.map { it.id })
+            assertNull(browserStore.state.selectedTabId)
         }
 
     @Test
@@ -1687,9 +1721,17 @@ class TabStorageMiddlewareTest {
                     tabIds = emptyList(),
                 )
 
-            val repository = FakeTabGroupRepository(initialTabGroupData = TabGroupData(tabGroups = listOf(storedGroup)))
+            val repository =
+                FakeTabGroupRepository(
+                    initialTabGroupData =
+                        TabGroupData(
+                            tabGroups = listOf(storedGroup),
+                            tabGroupAssignments = mapOf(firstTab.id to storedGroup.id),
+                        )
+                )
             val store =
                 createStore(
+                    tabGroupsEnabled = true,
                     browserStore = browserStore,
                     tabGroupRepository = repository,
                 )
@@ -1705,6 +1747,7 @@ class TabStorageMiddlewareTest {
             assertEquals(listOf(storedGroup), repository.tabGroupDataFlow.first().tabGroups)
             assertEquals(1, browserStore.state.tabs.size)
 
+            runCurrent()
             store.dispatch(TabGroupAction.CloseTabAndDeleteGroupConfirmed(group))
 
             runCurrent()
@@ -2164,16 +2207,32 @@ class TabStorageMiddlewareTest {
         browserStore.dispatch(TabListAction.AddTabAction(firstTab))
         browserStore.dispatch(TabListAction.AddTabAction(secondTab))
 
-        val repository = FakeTabGroupRepository()
+        val storedGroup =
+            TabGroup(
+                id = "group-1",
+                title = "Group",
+                theme = TabGroupTheme.Red.name,
+                lastModified = 0L,
+                tabIds = listOf(firstTab.id, secondTab.id),
+            )
+        val repository =
+            FakeTabGroupRepository(
+                initialTabGroupData =
+                    TabGroupData(
+                        tabGroups = listOf(storedGroup),
+                        tabGroupAssignments = mapOf(firstTab.id to storedGroup.id, secondTab.id to storedGroup.id),
+                    )
+            )
         val store =
             createStore(
+                tabGroupsEnabled = true,
                 browserStore = browserStore,
                 tabGroupRepository = repository,
             )
 
         val group =
             TabsTrayItem.TabGroup(
-                id = "group-1",
+                id = storedGroup.id,
                 title = "Group",
                 theme = TabGroupTheme.Red,
                 tabs =
@@ -2185,6 +2244,7 @@ class TabStorageMiddlewareTest {
 
         assertEquals(2, browserStore.state.tabs.size)
 
+        runCurrent()
         store.dispatch(TabGroupAction.TabClosed(tab = TabsTrayItem.Tab(firstTab), group = group))
 
         runCurrent()
@@ -2201,16 +2261,32 @@ class TabStorageMiddlewareTest {
         val firstTab = createTab("https://mozilla.org")
         browserStore.dispatch(TabListAction.AddTabAction(firstTab))
 
-        val repository = FakeTabGroupRepository()
+        val storedGroup =
+            TabGroup(
+                id = "group1",
+                title = "Group",
+                theme = TabGroupTheme.Red.name,
+                lastModified = 0L,
+                tabIds = listOf(firstTab.id),
+            )
+        val repository =
+            FakeTabGroupRepository(
+                initialTabGroupData =
+                    TabGroupData(
+                        tabGroups = listOf(storedGroup),
+                        tabGroupAssignments = mapOf(firstTab.id to storedGroup.id),
+                    )
+            )
         val store =
             createStore(
+                tabGroupsEnabled = true,
                 browserStore = browserStore,
                 tabGroupRepository = repository,
             )
 
         val group =
             TabsTrayItem.TabGroup(
-                id = "group1",
+                id = storedGroup.id,
                 title = "Group",
                 theme = TabGroupTheme.Red,
                 tabs = mutableListOf(TabsTrayItem.Tab(firstTab)),
@@ -2218,6 +2294,7 @@ class TabStorageMiddlewareTest {
 
         assertEquals(1, browserStore.state.tabs.size)
 
+        runCurrent()
         store.dispatch(TabGroupAction.TabClosed(tab = TabsTrayItem.Tab(firstTab), group = group))
 
         runCurrent()
@@ -2610,15 +2687,16 @@ class TabStorageMiddlewareTest {
         tabGroupsEnabled: Boolean = false,
         browserStore: BrowserStore = BrowserStore(),
         tabGroupRepository: TabGroupRepository = createRepository(),
-        tabsUseCases: TabsUseCases = TabsUseCases(store = browserStore),
-        removeTabsUseCase: RemoveTabsUseCase = tabsUseCases.removeTabs,
-        moveTabsUseCase: MoveTabsUseCase = tabsUseCases.moveTabs,
         fenixBrowserUseCases: FenixBrowserUseCases = mockk(relaxed = true),
         dateTimeProvider: DateTimeProvider = fakeDateTimeProvider,
     ): TabsTrayStore {
         val tabDataCoordinator =
             DefaultTabDataCoordinator(
-                tabRepository = DefaultTabRepository(browserStore = browserStore, tabsUseCases = tabsUseCases),
+                tabRepository =
+                    DefaultTabRepository(
+                        browserStore = browserStore,
+                        tabsUseCases = TabsUseCases(store = browserStore),
+                    ),
                 tabGroupRepository = tabGroupRepository,
                 isInactiveTabsEnabled = { inactiveTabsEnabled },
                 isTabGroupsEnabled = { tabGroupsEnabled },
@@ -2634,17 +2712,15 @@ class TabStorageMiddlewareTest {
                 listOf(
                     TabStorageMiddleware(
                         tabDataCoordinator = tabDataCoordinator,
-                        tabGroupRepository = tabGroupRepository,
-                        removeTabsUseCase = removeTabsUseCase,
-                        moveTabsUseCase = moveTabsUseCase,
                         fenixBrowserUseCases = fenixBrowserUseCases,
-                        dateTimeProvider = dateTimeProvider,
                         scope = backgroundScope,
                         mainScope = backgroundScope,
                     )
                 ),
         )
     }
+
+    private fun expiredTime(): Long = System.currentTimeMillis() - maxActiveTime - 1
 
     private fun createRepository(
         initialTabGroups: List<TabGroup> = emptyList(),
@@ -2655,7 +2731,8 @@ class TabStorageMiddlewareTest {
                 TabGroupData(
                     tabGroups = initialTabGroups,
                     tabGroupAssignments = initialTabGroupAssignments.associate { it.first to it.second },
-                )
+                ),
+            dateTimeProvider = fakeDateTimeProvider,
         )
 
     private fun fakeTabList(): List<TabSessionState> {

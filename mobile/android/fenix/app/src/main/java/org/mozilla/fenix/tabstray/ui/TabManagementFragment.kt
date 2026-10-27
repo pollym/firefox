@@ -734,9 +734,6 @@ class TabManagementFragment : Fragment() {
                         TabSearchNavigationMiddleware(onSearchResultClicked = ::performTabClick),
                         TabStorageMiddleware(
                             tabDataCoordinator = requireComponents.tabDataCoordinator,
-                            tabGroupRepository = requireComponents.core.tabGroupRepository,
-                            removeTabsUseCase = requireComponents.useCases.tabsUseCases.removeTabs,
-                            moveTabsUseCase = requireComponents.useCases.tabsUseCases.moveTabs,
                             fenixBrowserUseCases = requireComponents.useCases.fenixBrowserUseCases,
                             mainScope = lifecycleScope,
                         ),
