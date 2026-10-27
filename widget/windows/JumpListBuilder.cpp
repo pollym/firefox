@@ -20,8 +20,10 @@
 #include "mozilla/dom/WindowsJumpListShortcutDescriptionBinding.h"
 #include "mozilla/glean/WidgetWindowsMetrics.h"
 #include "mozilla/mscom/Utils.h"
+#include "nsExceptionHandler.h"
 #include "nsIFile.h"
 #include "nsIObserverService.h"
+#include "nsPrintfCString.h"
 #include "nsServiceManagerUtils.h"
 #include "nsThreadUtils.h"
 
@@ -41,11 +43,26 @@ const char kPrefTaskbarEnabled[] = "browser.taskbar.lists.enabled";
 
 using ShellCallOp = glean::widget::JumpListShellCallLabel;
 
-// Times a single call into the Windows Shell.
+// Bounds a single call into the Windows Shell: times it, and notes in the
+// crash report that it is in flight.
+//
+// jump_list_shell_call only gets a sample once a call returns, so a call that
+// never returns is invisible to it. In that case, a crash report will still
+// carry this annotation, and CrashTime minus the recorded value is
+// how long the call had been blocked. Both exist in the crash ping.
 class MOZ_RAII AutoShellCall {
  public:
   explicit AutoShellCall(ShellCallOp aOp)
-      : mTimer(glean::widget::jump_list_shell_call.EnumGet(aOp).Measure()) {}
+      : mTimer(glean::widget::jump_list_shell_call.EnumGet(aOp).Measure()) {
+    // Use `time` to get time, mirroring the crash reporter.
+    CrashReporter::RecordAnnotationNSCString(
+        CrashReporter::Annotation::JumpListShellCallStart,
+        nsPrintfCString("%lld", static_cast<long long>(time(nullptr))));
+  }
+  ~AutoShellCall() {
+    CrashReporter::UnrecordAnnotation(
+        CrashReporter::Annotation::JumpListShellCallStart);
+  }
 
  private:
   glean::impl::TimingDistributionMetric::AutoTimer mTimer;
