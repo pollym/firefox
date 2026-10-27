@@ -1282,10 +1282,10 @@ class MOZ_STACK_CLASS GeneralParser : public PerHandlerParser<ParseHandler> {
     size_t privateAccessors = 0;
 
     // Checks if every instance field is 0.
-    bool hasOnlyInlinableZeroFields = true;
-    Vector<InlinedZeroField, MemberInitializers::MaxInlinedZeroFields,
+    bool hasOnlyInlinableFields = true;
+    Vector<InlinedField, MemberInitializers::MaxInlinedFields,
            SystemAllocPolicy>
-        inlinableZeroFields;
+        inlinableFields;
 
     bool hasPrivateBrand() const {
       return privateMethods > 0 || privateAccessors > 0;

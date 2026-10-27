@@ -8033,15 +8033,15 @@ bool GeneralParser<ParseHandler, Unit>::finishClassConstructor(
 #endif
     // The names are only valid in this compilation: skip constructors that may
     // be compiled later.
-    mozilla::Span<const InlinedZeroField> inlinedFields;
+    mozilla::Span<const InlinedField> inlinedFields;
     if (!hasPrivateBrand && !hasInstanceDecorators &&
         hasHeritage == HasHeritage::No && ctorbox->emitBytecode &&
-        classInitializedMembers.hasOnlyInlinableZeroFields &&
-        !classInitializedMembers.inlinableZeroFields.empty()) {
-      const auto& fields = classInitializedMembers.inlinableZeroFields;
+        classInitializedMembers.hasOnlyInlinableFields &&
+        !classInitializedMembers.inlinableFields.empty()) {
+      const auto& fields = classInitializedMembers.inlinableFields;
       MOZ_ASSERT(fields.length() == classInitializedMembers.instanceFields);
-      InlinedZeroField* copy =
-          this->alloc_.template newArrayUninitialized<InlinedZeroField>(
+      InlinedField* copy =
+          this->alloc_.template newArrayUninitialized<InlinedField>(
               fields.length());
       if (!copy) {
         js::ReportOutOfMemory(fc_);
@@ -8056,7 +8056,7 @@ bool GeneralParser<ParseHandler, Unit>::finishClassConstructor(
         classInitializedMembers.hasInstanceDecorators,
 #endif
         numMemberInitializers, !inlinedFields.IsEmpty());
-    ctorbox->setInlinedZeroFields(inlinedFields);
+    ctorbox->setInlinedFields(inlinedFields);
     ctorbox->setMemberInitializers(initializers);
 
     // Field initialization need access to `this`.
@@ -8762,7 +8762,7 @@ GeneralParser<ParseHandler, Unit>::fieldInitializerOpt(
   }
 
   if constexpr (!std::is_same_v<ParseHandler, SyntaxParseHandler>) {
-    if (!isStatic && classInitializedMembers.hasOnlyInlinableZeroFields &&
+    if (!isStatic && classInitializedMembers.hasOnlyInlinableFields &&
         JS::Prefs::experimental_inline_simple_field_initializers()) {
       // Computed names (`[expr] = 0;`) leave propAtom null. Index-like names
       // need different bytecode than a plain InitProp.
@@ -8773,18 +8773,18 @@ GeneralParser<ParseHandler, Unit>::fieldInitializerOpt(
       bool isZeroLiteral =
           initializerExpr->isKind(ParseNodeKind::NumberExpr) &&
           initializerExpr->template as<NumericLiteral>().value() == 0;
-      bool hasMaxInlinedZeroFields =
-          classInitializedMembers.inlinableZeroFields.length() >=
-          MemberInitializers::MaxInlinedZeroFields;
-      if (isPlainName && isZeroLiteral && !hasMaxInlinedZeroFields) {
-        if (!classInitializedMembers.inlinableZeroFields.append(
-                InlinedZeroField{propAtom, isPrivate})) {
+      bool hasMaxInlinedFields =
+          classInitializedMembers.inlinableFields.length() >=
+          MemberInitializers::MaxInlinedFields;
+      if (isPlainName && isZeroLiteral && !hasMaxInlinedFields) {
+        if (!classInitializedMembers.inlinableFields.append(
+                InlinedField{propAtom, isPrivate})) {
           js::ReportOutOfMemory(fc_);
           return errorResult();
         }
       } else {
-        classInitializedMembers.hasOnlyInlinableZeroFields = false;
-        classInitializedMembers.inlinableZeroFields.clearAndFree();
+        classInitializedMembers.hasOnlyInlinableFields = false;
+        classInitializedMembers.inlinableFields.clearAndFree();
       }
     }
   }

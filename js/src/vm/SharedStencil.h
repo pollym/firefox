@@ -796,7 +796,7 @@ struct MemberInitializers {
 
   // Classes with more all-zero fields than this fall back to the
   // `.initializers` array.
-  static constexpr size_t MaxInlinedZeroFields = 8;
+  static constexpr size_t MaxInlinedFields = 8;
 
 #ifdef DEBUG
   bool valid = false;
@@ -808,7 +808,7 @@ struct MemberInitializers {
   bool hasDecorators : 1;
 #endif
 
-  bool hasInlinedZeroFields : 1;
+  bool hasInlinedFields : 1;
 
   // This struct will eventually have a vector of constant values for optimizing
   // field initializers.
@@ -819,7 +819,7 @@ struct MemberInitializers {
                      bool hasDecorators,
 #endif
                      uint32_t numMemberInitializers,
-                     bool hasInlinedZeroFields = false)
+                     bool hasInlinedFields = false)
       :
 #ifdef DEBUG
         valid(true),
@@ -828,7 +828,7 @@ struct MemberInitializers {
 #ifdef ENABLE_DECORATORS
         hasDecorators(hasDecorators),
 #endif
-        hasInlinedZeroFields(hasInlinedZeroFields),
+        hasInlinedFields(hasInlinedFields),
         numMemberInitializers(numMemberInitializers) {
 #ifdef ENABLE_DECORATORS
     MOZ_ASSERT(
@@ -859,11 +859,11 @@ struct MemberInitializers {
 #ifdef ENABLE_DECORATORS
     auto serialised = (hasPrivateBrand << (NumBits + 2)) |
                       (hasDecorators << (NumBits + 1)) |
-                      (hasInlinedZeroFields << NumBits) | numMemberInitializers;
+                      (hasInlinedFields << NumBits) | numMemberInitializers;
     return serialised;
 #else
-    return (hasPrivateBrand << (NumBits + 1)) |
-           (hasInlinedZeroFields << NumBits) | numMemberInitializers;
+    return (hasPrivateBrand << (NumBits + 1)) | (hasInlinedFields << NumBits) |
+           numMemberInitializers;
 #endif
   }
 
@@ -889,7 +889,7 @@ struct MemberInitializers {
 #ifdef ENABLE_DECORATORS
         hasDecorators(false),
 #endif
-        hasInlinedZeroFields(false),
+        hasInlinedFields(false),
         numMemberInitializers(0) {
   }
 };
