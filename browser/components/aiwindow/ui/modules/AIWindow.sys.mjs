@@ -79,6 +79,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
     "moz-src:///browser/components/sessionstore/SessionStartup.sys.mjs",
   MemoriesSchedulers:
     "moz-src:///browser/components/aiwindow/models/memories/MemoriesSchedulers.sys.mjs",
+  MonitorAgent:
+    "moz-src:///browser/components/aiwindow/models/agents/MonitorAgent.sys.mjs",
   MONITOR_CONDITION_MET_TOPIC:
     "moz-src:///browser/components/aiwindow/models/agents/Monitor.sys.mjs",
   MONITOR_RUN_FAILED_TOPIC:
@@ -408,6 +410,7 @@ export const AIWindow = {
     if (!this.isAvailable) {
       this._onAccountLogout();
     }
+    lazy.MonitorAgent.onBlockedStateChanged().catch(console.error);
   },
 
   _updateButtonVisibility(node) {
