@@ -6687,6 +6687,22 @@ static bool PromiseThenNewPromiseCapability(
     JSContext* cx, Handle<PromiseObject*> promise,
     Handle<PromiseReactionRecord*> reaction);
 
+template <typename ExtraStep>
+[[nodiscard]] static bool PerformPromiseThenWithNewReaction(
+    JSContext* cx, Handle<PromiseObject*> promise,
+    Handle<PromiseCapability> resultCapability, HandleValue onFulfilled,
+    HandleValue onRejected, ExtraStep extraStep) {
+  // Steps 7-8. Create the combined fulfill and reject reaction record.
+  Rooted<PromiseReactionRecord*> reaction(
+      cx, NewReactionRecord(cx, resultCapability, onFulfilled, onRejected));
+  if (!reaction) {
+    return false;
+  }
+
+  extraStep(reaction);
+  return PerformPromiseThenWithReaction(cx, promise, reaction);
+}
+
 [[nodiscard]] bool js::ReactToUnwrappedPromise(
     JSContext* cx, Handle<PromiseObject*> unwrappedPromise,
     HandleObject onFulfilled_, HandleObject onRejected_,
@@ -6696,8 +6712,7 @@ static bool PromiseThenNewPromiseCapability(
   MOZ_ASSERT_IF(onFulfilled_, IsCallable(onFulfilled_));
   MOZ_ASSERT_IF(onRejected_, IsCallable(onRejected_));
 
-  RootedTuple<Value, Value, PromiseCapability, PromiseReactionRecord*> roots(
-      cx);
+  RootedTuple<Value, Value, PromiseCapability> roots(cx);
   RootedField<Value, 0> onFulfilled(
       roots, onFulfilled_ ? ObjectValue(*onFulfilled_)
                           : Int32Value(int32_t(PromiseHandler::Identity)));
@@ -6707,17 +6722,14 @@ static bool PromiseThenNewPromiseCapability(
   RootedField<PromiseCapability, 2> resultCapability(roots);
   MOZ_ASSERT(!resultCapability.promise());
 
-  RootedField<PromiseReactionRecord*, 3> reaction(
-      roots, NewReactionRecord(cx, resultCapability, onFulfilled, onRejected));
-  if (!reaction) {
-    return false;
-  }
-
-  if (behavior == UnhandledRejectionBehavior::Ignore) {
-    reaction->setShouldIgnoreUnhandledRejection();
-  }
-
-  return PerformPromiseThenWithReaction(cx, unwrappedPromise, reaction);
+  auto extraStep = [behavior](const auto& reaction) {
+    if (behavior == UnhandledRejectionBehavior::Ignore) {
+      reaction->setShouldIgnoreUnhandledRejection();
+    }
+  };
+  return PerformPromiseThenWithNewReaction(cx, unwrappedPromise,
+                                           resultCapability, onFulfilled,
+                                           onRejected, extraStep);
 }
 
 static bool CanCallOriginalPromiseThenBuiltin(JSContext* cx,
@@ -6947,9 +6959,8 @@ template <typename T>
                                         PromiseHandler onFulfilled,
                                         PromiseHandler onRejected,
                                         T extraStep) {
-  RootedTuple<JSObject*, PromiseObject*, Value, Value, PromiseCapability,
-              PromiseReactionRecord*>
-      roots(cx);
+  RootedTuple<JSObject*, PromiseObject*, Value, Value, PromiseCapability> roots(
+      cx);
 
   // Step 2. Let promise be ? PromiseResolve(%Promise%, value).
   RootedField<JSObject*, 0> promise(
@@ -6976,14 +6987,9 @@ template <typename T>
   RootedField<PromiseCapability, 4> resultCapability(roots);
   resultCapability.promise().set(resultPromise);
 
-  RootedField<PromiseReactionRecord*, 5> reaction(
-      roots, NewReactionRecord(cx, resultCapability, onFulfilledValue,
-                               onRejectedValue));
-  if (!reaction) {
-    return false;
-  }
-  extraStep(reaction);
-  return PerformPromiseThenWithReaction(cx, unwrappedPromise, reaction);
+  return PerformPromiseThenWithNewReaction(cx, unwrappedPromise,
+                                           resultCapability, onFulfilledValue,
+                                           onRejectedValue, extraStep);
 }
 
 // Explicit Resource Management Proposal
@@ -6997,7 +7003,7 @@ template <typename T>
 [[nodiscard]] bool js::InternalAsyncIteratorDisposeAwait(
     JSContext* cx, JS::Handle<JS::Value> value,
     JS::Handle<JSObject*> resultPromise) {
-  auto extra = [](JS::Handle<PromiseReactionRecord*> reaction) {};
+  auto extra = [](const auto&) {};
   return InternalAwait(cx, value, resultPromise,
                        PromiseHandler::AsyncIteratorDisposeAwaitFulfilled,
                        PromiseHandler::Thrower, extra);
@@ -7007,7 +7013,7 @@ template <typename T>
     JSContext* cx, JS::Handle<AsyncGeneratorObject*> generator,
     JS::Handle<JS::Value> value, PromiseHandler onFulfilled,
     PromiseHandler onRejected) {
-  auto extra = [&](Handle<PromiseReactionRecord*> reaction) {
+  auto extra = [&](const auto& reaction) {
     reaction->setIsAsyncGenerator(generator);
   };
   return InternalAwait(cx, value, nullptr, onFulfilled, onRejected, extra);
@@ -7022,7 +7028,7 @@ template <typename T>
 [[nodiscard]] JSObject* js::AsyncFunctionAwait(
     JSContext* cx, Handle<AsyncFunctionGeneratorObject*> genObj,
     HandleValue value) {
-  auto extra = [&](Handle<PromiseReactionRecord*> reaction) {
+  auto extra = [&](const auto& reaction) {
     MOZ_ASSERT(genObj->realm() == reaction->realm());
     MOZ_ASSERT(genObj->realm() == cx->realm());
     reaction->setIsAsyncFunction(genObj);
@@ -7314,7 +7320,7 @@ bool js::AsyncFromSyncIteratorMethod(JSContext* cx, CallArgs& args,
   // Step 8. IfAbruptRejectPromise(valueWrapper, promiseCapability).
   // Step 14. Perform PerformPromiseThen(valueWrapper, onFulfilled,
   //                                     onRejected, promiseCapability).
-  auto extra = [&](Handle<PromiseReactionRecord*> reaction) {
+  auto extra = [&](const auto& reaction) {
     if (onRejected == PromiseHandler::AsyncFromSyncIteratorClose) {
       reaction->setIsAsyncFromSyncIterator(asyncIter);
     }
@@ -7542,22 +7548,10 @@ bool js::Promise_then(JSContext* cx, unsigned argc, Value* vp) {
     onRejected = Int32Value(int32_t(PromiseHandler::Thrower));
   }
 
-  // Step 7. Let fulfillReaction be the PromiseReaction
-  //         { [[Capability]]: resultCapability, [[Type]]: Fulfill,
-  //           [[Handler]]: onFulfilledJobCallback }.
-  // Step 8. Let rejectReaction be the PromiseReaction
-  //         { [[Capability]]: resultCapability, [[Type]]: Reject,
-  //           [[Handler]]: onRejectedJobCallback }.
-  //
-  // NOTE: We use single object for both reactions.
-  Rooted<PromiseReactionRecord*> reaction(
-      cx, NewReactionRecord(cx, resultCapability, onFulfilled, onRejected));
-  if (!reaction) {
-    return false;
-  }
-
   // Steps 9-14.
-  return PerformPromiseThenWithReaction(cx, promise, reaction);
+  return PerformPromiseThenWithNewReaction(cx, promise, resultCapability,
+                                           onFulfilled, onRejected,
+                                           [](const auto&) {});
 }
 
 /**
@@ -7583,22 +7577,13 @@ bool js::Promise_then(JSContext* cx, unsigned argc, Value* vp) {
   // Step 5.a. Let onRejectedJobCallback be empty.
   HandleValue onRejected = NullHandleValue;
 
-  // Step 7. Let fulfillReaction be the PromiseReaction
-  //         { [[Capability]]: resultCapability, [[Type]]: Fulfill,
-  //           [[Handler]]: onFulfilledJobCallback }.
-  // Step 8. Let rejectReaction be the PromiseReaction
-  //         { [[Capability]]: resultCapability, [[Type]]: Reject,
-  //           [[Handler]]: onRejectedJobCallback }.
-  Rooted<PromiseReactionRecord*> reaction(
-      cx, NewReactionRecord(cx, resultCapability, onFulfilled, onRejected));
-  if (!reaction) {
-    return false;
-  }
-
-  reaction->setIsDefaultResolvingHandler(promiseToResolve);
+  auto extraStep = [promiseToResolve](const auto& reaction) {
+    reaction->setIsDefaultResolvingHandler(promiseToResolve);
+  };
 
   // Steps 9-12.
-  return PerformPromiseThenWithReaction(cx, promise, reaction);
+  return PerformPromiseThenWithNewReaction(cx, promise, resultCapability,
+                                           onFulfilled, onRejected, extraStep);
 }
 
 /**
