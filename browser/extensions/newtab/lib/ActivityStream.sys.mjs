@@ -217,6 +217,7 @@ export const WEATHER_OPTIN_REGIONS = [
   "LV", // Latvia
   "LI", // Liechtenstein
   "LT", // Lithuania
+  "LU", // Luxembourg
   "MT", // Malta
   "NL", // Netherlands
   "NO", // Norway
