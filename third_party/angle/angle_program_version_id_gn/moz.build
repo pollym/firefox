@@ -38,7 +38,7 @@ if CONFIG["OS_TARGET"] == "Android":
     GeneratedFile(
         "/third_party/angle/gen/ANGLEShaderProgramVersion.h.rsp",
         entry_point="write_paths",
-        inputs=['ANGLEShaderProgramVersion.h-3904e8acaa504646.rsp.in'],
+        inputs=['ANGLEShaderProgramVersion.h-224ff58d943d0ea4.rsp.in'],
         script="/python/mozbuild/mozbuild/action/write_path_list.py",
     )
 
