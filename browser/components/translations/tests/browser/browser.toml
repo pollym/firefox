@@ -10,8 +10,6 @@ prefs = [
   "extensions.getAddons.langpacks.url=https://mochi.test:8000/langpacks",
 ]
 
-["browser_translations_about_preferences_manage_downloaded_languages.js"]
-
 ["browser_translations_about_settings_main_page_offer_checkbox.js"]
 
 ["browser_translations_about_settings_subpage_always_translate_langs_a11y.js"]
