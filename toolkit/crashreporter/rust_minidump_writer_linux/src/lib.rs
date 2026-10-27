@@ -46,6 +46,7 @@ pub struct MinidumpWriterContext {
     blamed_thread: pid_t,
     // Also not available in `MinidumpWriterConfig`, but needed to compute extra annotations
     siginfo: Option<libc::signalfd_siginfo>,
+    remote: bool,
 }
 
 /// Gather any extra crash data that the minidump writer doesn't support natively.
@@ -150,6 +151,7 @@ pub unsafe extern "C" fn minidump_writer_create(
             process_id: child,
             blamed_thread: child_blamed_thread,
             siginfo: None,
+            remote: false,
         }))
     });
     if !extra_data.is_null() {
@@ -229,6 +231,7 @@ pub extern "C" fn minidump_writer_set_remote_unix_stream(
     let io = unsafe { UnixStream::from_raw_fd(unix_stream_socket_fd) };
     let transport = transport::postcard::Backend::new(io, [0u8; OUTPUT_BUFFER_LEN]);
     context.writer_config.set_remote_transport(transport);
+    context.remote = true;
 }
 
 /// Write the minidump to the file
@@ -258,6 +261,12 @@ pub unsafe extern "C" fn minidump_writer_dump(
             &mut extra_data.annotations,
         ) {
             extra_data.error = Some(CString::new(format!("{e:#?}")).unwrap());
+        }
+        if context.remote {
+            extra_data.annotations.push(CAnnotation {
+                id: CrashAnnotation::MinidumpRemoteExecutorForTesting as u32,
+                data: AnnotationData::ByteBuffer(vec![1]),
+            });
         }
     }
     err_to_error_msg(extra_data, || {

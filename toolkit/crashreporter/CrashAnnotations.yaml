@@ -1046,6 +1046,14 @@ MainThreadRunnableName:
   type: string
   scope: ping
 
+MinidumpRemoteExecutorForTesting:
+  description: >
+    Set to 1 when the minidump was written using the remote executor. Only for
+    testing purposes.
+  type: boolean
+  bugs:
+    - 2071467
+
 MinidumpSha256Hash:
   description: >
     The sha256 hash of the minidump file, if available.
