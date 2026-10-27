@@ -16,6 +16,7 @@
 #include "gfxContext.h"
 #include "gfxDrawable.h"
 #include "mozilla/ISVGDisplayableFrame.h"
+#include "mozilla/SVGImageContext.h"
 #include "mozilla/SVGIntegrationUtils.h"
 #include "mozilla/SVGObserverUtils.h"
 #include "mozilla/SVGPaintServerFrame.h"

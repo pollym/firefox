@@ -16,7 +16,6 @@
 #include "mozilla/Maybe.h"
 #include "mozilla/MemoryReporting.h"
 #include "mozilla/RelativeTo.h"
-#include "mozilla/SVGImageContext.h"
 #include "mozilla/Span.h"
 #include "mozilla/StaticPrefs_nglayout.h"
 #include "mozilla/SurfaceFromElementResult.h"
@@ -67,6 +66,7 @@ class nsDisplayList;
 class nsDisplayListBuilder;
 enum class nsDisplayListBuilderMode : uint8_t;
 class RetainedDisplayListBuilder;
+class SVGImageContext;
 struct AspectRatio;
 class ComputedStyle;
 class DisplayPortUtils;
