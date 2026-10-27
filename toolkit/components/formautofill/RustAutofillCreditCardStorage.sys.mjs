@@ -207,7 +207,9 @@ function jsRecordToUpdatableCreditCardFields(record) {
     fields[rustKey] = Number(record[jsKey]) || 0;
   }
   fields.ccNumber = record["cc-number"] ?? "";
-  fields.ccCvv = record["cc-csc"] ? String(record["cc-csc"]) : null;
+  // The store keeps its CVV on null and clears it on "". update() has already
+  // merged in a stored cc-csc the caller omitted, so none here means no CVV.
+  fields.ccCvv = record["cc-csc"] ? String(record["cc-csc"]) : "";
   return new lazy.UpdatableCreditCardFields(fields);
 }
 
