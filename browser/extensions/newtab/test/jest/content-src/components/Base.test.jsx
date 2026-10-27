@@ -2206,7 +2206,10 @@ describe("<BaseContent> wallpaper transitions (Bug 2057217)", () => {
     document.body.style.removeProperty("--newtab-wallpaper");
     document.body.style.removeProperty("--newtab-wallpaper-color");
     document.body.style.removeProperty("--newtab-wallpaper-backgroundPosition");
-    document.body.classList.remove("lightWallpaper", "darkWallpaper");
+    document.documentElement.classList.remove(
+      "lightWallpaper",
+      "darkWallpaper"
+    );
     jest.restoreAllMocks();
   });
 
@@ -2593,7 +2596,10 @@ describe("<Base> wallpaper attribution", () => {
     document.body.style.removeProperty("--newtab-wallpaper");
     document.body.style.removeProperty("--newtab-wallpaper-color");
     document.body.style.removeProperty("--newtab-wallpaper-backgroundPosition");
-    document.body.classList.remove("lightWallpaper", "darkWallpaper");
+    document.documentElement.classList.remove(
+      "lightWallpaper",
+      "darkWallpaper"
+    );
   });
 
   function renderWithWallpaper({ prefs = {}, wallpapers = {} } = {}) {
