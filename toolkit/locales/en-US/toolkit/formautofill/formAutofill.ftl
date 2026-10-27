@@ -94,6 +94,13 @@ credit-card-capture-update-payment-method-button =
     .label = Update
     .accessKey = U
 
+## Used on the doorhanger when a saved card is submitted with a new or changed
+## security code.
+
+credit-card-save-security-code-doorhanger-header = Save security code?
+# “Checkout” refers to the payment stage on websites.
+credit-card-save-security-code-doorhanger-description = { -brand-short-name } will encrypt and save your security code for this card so checkout is faster.
+
 ##
 
 # Label for the button in the dropdown menu used to clear the populated form.
