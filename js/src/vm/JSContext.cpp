@@ -12,6 +12,7 @@
 #include "mozilla/Sprintf.h"
 #include "mozilla/Utf8.h"  // mozilla::ConvertUtf16ToUtf8
 
+#include <iterator>
 #include <string.h>
 
 #include "vm/JSContext-inl.h"
@@ -968,6 +969,7 @@ js::UniquePtr<JS::JobQueue::SavedJobQueue> InternalJobQueue::saveJobQueue(
 // embedder enqueued (typically a Private value) which the GC cannot follow, so
 // it is handed to the JobQueue hook instead.
 void JS::MicroTask::trace(JSTracer* trc, const char* name) {
+  TraceRootRange(trc, std::size(extra_), extra_, name);
   if (value_.isGCThing()) {
     TraceRoot(trc, &value_, name);
     return;
@@ -979,6 +981,10 @@ void JS::MicroTask::trace(JSTracer* trc, const char* name) {
     queue->traceNonGCThingMicroTask(trc, &value_);
   }
 }
+
+static_assert(sizeof(JS::MicroTask) == 7 * sizeof(JS::Value),
+              "MicroTasks are held by value in several queues; keep them "
+              "compact");
 
 void js::MicroTaskQueueElement::trace(JSTracer* trc) {
   microTask_.trace(trc, "microtask-queue-entry");
