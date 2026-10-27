@@ -18,6 +18,7 @@
 #include "mozilla/Preferences.h"
 #include "mozilla/dom/Promise.h"
 #include "mozilla/dom/WindowsJumpListShortcutDescriptionBinding.h"
+#include "mozilla/glean/WidgetWindowsMetrics.h"
 #include "mozilla/mscom/Utils.h"
 #include "nsIFile.h"
 #include "nsIObserverService.h"
@@ -38,6 +39,18 @@ NS_IMPL_ISUPPORTS(JumpListBuilder, nsIJumpListBuilder, nsIObserver)
 
 const char kPrefTaskbarEnabled[] = "browser.taskbar.lists.enabled";
 
+using ShellCallOp = glean::widget::JumpListShellCallLabel;
+
+// Times a single call into the Windows Shell.
+class MOZ_RAII AutoShellCall {
+ public:
+  explicit AutoShellCall(ShellCallOp aOp)
+      : mTimer(glean::widget::jump_list_shell_call.EnumGet(aOp).Measure()) {}
+
+ private:
+  glean::impl::TimingDistributionMetric::AutoTimer mTimer;
+};
+
 /**
  * A wrapper around a ICustomDestinationList that implements the JumpListBackend
  * interface. This is an implementation of JumpListBackend that actually causes
@@ -54,6 +67,8 @@ class NativeJumpListBackend : public JumpListBackend {
     // Must run on the owning JumpListBuilder's STA thread.
     MOZ_ASSERT(!NS_IsMainThread());
     MOZ_ASSERT(!mscom::IsCurrentThreadMTA());
+
+    AutoShellCall shellCall(ShellCallOp::eSetup);
 
     RefPtr<ICustomDestinationList> destList;
     HRESULT hr = ::CoCreateInstance(
@@ -75,6 +90,7 @@ class NativeJumpListBackend : public JumpListBackend {
     NS_ASSERT_OWNINGTHREAD(NativeJumpListBackend);
     MOZ_ASSERT(mWindowsDestList);
 
+    AutoShellCall shellCall(ShellCallOp::eSetAppId);
     return mWindowsDestList->SetAppID(pszAppID);
   }
 
@@ -83,6 +99,7 @@ class NativeJumpListBackend : public JumpListBackend {
     NS_ASSERT_OWNINGTHREAD(NativeJumpListBackend);
     MOZ_ASSERT(mWindowsDestList);
 
+    AutoShellCall shellCall(ShellCallOp::eBeginList);
     return mWindowsDestList->BeginList(pcMinSlots, riid, ppv);
   }
 
@@ -90,6 +107,7 @@ class NativeJumpListBackend : public JumpListBackend {
     NS_ASSERT_OWNINGTHREAD(NativeJumpListBackend);
     MOZ_ASSERT(mWindowsDestList);
 
+    AutoShellCall shellCall(ShellCallOp::eAddUserTasks);
     return mWindowsDestList->AddUserTasks(poa);
   }
 
@@ -98,6 +116,7 @@ class NativeJumpListBackend : public JumpListBackend {
     NS_ASSERT_OWNINGTHREAD(NativeJumpListBackend);
     MOZ_ASSERT(mWindowsDestList);
 
+    AutoShellCall shellCall(ShellCallOp::eAppendCategory);
     return mWindowsDestList->AppendCategory(pszCategory, poa);
   }
 
@@ -105,6 +124,7 @@ class NativeJumpListBackend : public JumpListBackend {
     NS_ASSERT_OWNINGTHREAD(NativeJumpListBackend);
     MOZ_ASSERT(mWindowsDestList);
 
+    AutoShellCall shellCall(ShellCallOp::eCommitList);
     return mWindowsDestList->CommitList();
   }
 
@@ -112,6 +132,7 @@ class NativeJumpListBackend : public JumpListBackend {
     NS_ASSERT_OWNINGTHREAD(NativeJumpListBackend);
     MOZ_ASSERT(mWindowsDestList);
 
+    AutoShellCall shellCall(ShellCallOp::eAbortList);
     return mWindowsDestList->AbortList();
   }
 
@@ -119,6 +140,7 @@ class NativeJumpListBackend : public JumpListBackend {
     NS_ASSERT_OWNINGTHREAD(NativeJumpListBackend);
     MOZ_ASSERT(mWindowsDestList);
 
+    AutoShellCall shellCall(ShellCallOp::eDeleteList);
     return mWindowsDestList->DeleteList(pszAppID);
   }
 
@@ -126,6 +148,7 @@ class NativeJumpListBackend : public JumpListBackend {
     NS_ASSERT_OWNINGTHREAD(NativeJumpListBackend);
     MOZ_ASSERT(mWindowsDestList);
 
+    AutoShellCall shellCall(ShellCallOp::eAppendKnownCategory);
     return mWindowsDestList->AppendKnownCategory(category);
   }
 
@@ -135,6 +158,7 @@ class NativeJumpListBackend : public JumpListBackend {
       return;
     }
 
+    AutoShellCall shellCall(ShellCallOp::eTeardown);
     mWindowsDestList = nullptr;
   }
 
@@ -505,6 +529,8 @@ JumpListBuilder::ClearRecentsList() {
       NS_NewRunnableFunction(
           "ClearRecentsList",
           [appUserModelId = mAppUserModelId]() {
+            AutoShellCall shellCall(ShellCallOp::eClearRecents);
+
             RefPtr<IApplicationDestinations> destinations;
             if (SUCCEEDED(CoCreateInstance(CLSID_ApplicationDestinations,
                                            nullptr, CLSCTX_INPROC_SERVER,
