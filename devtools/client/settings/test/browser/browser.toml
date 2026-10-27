@@ -18,4 +18,6 @@ support-files = [
 
 ["browser_settings_rulers.js"]
 
+["browser_settings_split_console.js"]
+
 ["browser_settings_toolbox_buttons_support.js"]

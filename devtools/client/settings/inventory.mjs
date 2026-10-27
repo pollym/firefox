@@ -205,6 +205,7 @@ export const inventory = [
         l10nId: "devtools-settings-webconsole-split-console",
         type: "boolean",
         pref: "devtools.toolbox.splitconsole.enabled",
+        changeAction: "updateSplitConsole",
       },
     ],
   },
@@ -244,6 +245,8 @@ export const inventory = [
 export const callbacks = {
   updateToolboxButtons: ({ toolbox }) =>
     toolbox.updateToolboxButtonsVisibility(),
+
+  updateSplitConsole: ({ toolbox }) => toolbox.updateIsSplitConsoleEnabled(),
 
   updateToolRegistration: ({ event }) => {
     const tool = getToolForPref(event.pref);
