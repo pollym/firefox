@@ -24,6 +24,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
@@ -32,7 +33,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.offset
 import java.util.Locale
+import kotlin.math.roundToLong
 import kotlin.time.Duration.Companion.seconds
 import mozilla.components.compose.base.button.IconButton
 import mozilla.components.compose.base.theme.AcornTheme
@@ -128,8 +129,12 @@ private fun AudioProgress(
 ) {
     // Reading articleProgressState here instead of inside the lambda would defeat the point of hoisting it as a State.
     val progress = { articleProgressState.value.fraction }
+    // Where the user is dragging the thumb to. The thumb and the elapsed time follow it until the seek is asked for.
+    var scrubFraction by remember { mutableStateOf<Float?>(null) }
     val elapsedTime by remember {
-        derivedStateOf { DateUtils.formatElapsedTime(articleProgressState.value.positionMs / MS_PER_SECOND) }
+        derivedStateOf {
+            DateUtils.formatElapsedTime(articleProgressState.value.positionMsAt(scrubFraction) / MS_PER_SECOND)
+        }
     }
     // Seeking needs a length to seek in, which the article only has once its opening has been made.
     val isSeekable by remember { derivedStateOf { articleProgressState.value.durationMs > 0 } }
@@ -162,6 +167,7 @@ private fun AudioProgress(
                 progress = progress,
                 type = AudioProgressBarType.Full,
                 onSeek = {
+                    scrubFraction = null
                     onAction(ListenAction.Playback.SeekRequested(it))
                 },
                 modifier =
@@ -170,6 +176,8 @@ private fun AudioProgress(
                     },
                 isSeekable = isSeekable,
                 isEnabled = isEnabled,
+                scrubFraction = { scrubFraction },
+                onSliderDrag = { scrubFraction = it },
             )
             val textColor =
                 if (isEnabled) {
@@ -186,6 +194,10 @@ private fun AudioProgress(
         }
     }
 }
+
+/** Where in the article [scrubFraction] of it is, or the playback position when the user is not scrubbing. */
+private fun ArticleProgress.positionMsAt(scrubFraction: Float?): Long =
+    scrubFraction?.let { (durationMs * it).roundToLong() } ?: positionMs
 
 /**
  * Extends the component's width by the Thumb's width, and then places it in the center. This allows the track to run up

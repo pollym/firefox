@@ -32,6 +32,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.util.Locale
@@ -72,6 +73,17 @@ class ListenSheetTest {
     // The player formats times with DateUtils, whose exact output is platform dependent (Robolectric
     // zero-pads the minutes where a device does not), so the expected value comes from the same call.
     private fun formatted(seconds: Long) = DateUtils.formatElapsedTime(seconds / 1000)
+
+    // The track hangs off the left of the window, so the drag starts inside the bar. It ends past the bar so that the
+    // thumb lands on the end. The first move only takes the finger past the touch slop.
+    private fun dragThumbPastEnd(release: Boolean) {
+        composeTestRule.onNodeWithTag(AUDIO_PROGRESS_BAR_TEST_TAG_EXPANDED).performTouchInput {
+            down(center)
+            moveTo(percentOffset(0.75f, 0.5f))
+            moveTo(percentOffset(1.2f, 0.5f))
+            if (release) up()
+        }
+    }
 
     private fun setContent(
         expanded: Boolean,
@@ -295,6 +307,34 @@ class ListenSheetTest {
         setContent(expanded = false, availableWidth = NARROW_WINDOW_WIDTH)
 
         composeTestRule.onNodeWithTag(LISTEN_SHEET_PLAYER_CARD_TEST_TAG).assertWidthIsEqualTo(NARROW_WINDOW_WIDTH)
+    }
+
+    @Test
+    fun `WHEN the thumb is dragged THEN the elapsed time follows it before a seek is asked for`() {
+        val actions = mutableListOf<ListenAction>()
+        setContent(expanded = true, onAction = { actions.add(it) })
+
+        dragThumbPastEnd(release = false)
+
+        composeTestRule
+            .onNodeWithTag(ELAPSED_TIME_TEST_TAG_EXPANDED, useUnmergedTree = true)
+            .assertTextEquals(formatted(TOTAL_DURATION_MS))
+        assertTrue("a seek was asked for before the thumb was let go", actions.isEmpty())
+    }
+
+    @Test
+    fun `WHEN the thumb is let go THEN a seek is asked for and the elapsed time stops following the thumb`() {
+        val actions = mutableListOf<ListenAction>()
+        setContent(expanded = true, onAction = { actions.add(it) })
+
+        dragThumbPastEnd(release = true)
+
+        val seek = actions.single() as ListenAction.Playback.SeekRequested
+        assertEquals(1f, seek.fraction, 0.01f)
+        // The store moves the elapsed time once it takes the seek in, and this test has no store.
+        composeTestRule
+            .onNodeWithTag(ELAPSED_TIME_TEST_TAG_EXPANDED, useUnmergedTree = true)
+            .assertTextEquals(formatted(LESS_THAN_ONE_SEC_ELAPSED_TIME_MS))
     }
 
     @Test
