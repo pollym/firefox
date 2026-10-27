@@ -56,7 +56,6 @@ vendoring:
     - 01_report_mismatched_tag.patch
     - 02_dont_generate_salt.patch
     - 03_always_set_eventptrs.patch
-    - 04_getcurrentbyteindex.patch
     - 05_always_store_rawnames.patch
     - 06_dont_ignore_undeclared_entity.patch
     - 07_include_xmlns.patch

@@ -2860,13 +2860,7 @@ XML_GetCurrentByteIndex(XML_Parser parser) {
     return (XML_Index)(parser->m_parseEndByteIndex
                        - (parser->m_parseEndPtr - parser->m_eventPtr));
   }
-/* BEGIN MOZILLA CHANGE (fix XML_GetCurrentByteIndex) */
-#if 0
   return -1;
-#else
-  return (XML_Index)parser->m_parseEndByteIndex;
-#endif
-/* END MOZILLA CHANGE */
 }
 
 /* BEGIN MOZILLA CHANGE (unused API) */

@@ -191,8 +191,8 @@ diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
  
  void XMLCALL
  XML_SetXmlDeclHandler(XML_Parser parser, XML_XmlDeclHandler handler) {
-@@ -2829,6 +2869,8 @@ XML_GetCurrentByteIndex(XML_Parser parser) {
- /* END MOZILLA CHANGE */
+@@ -2823,6 +2863,8 @@ XML_GetCurrentByteIndex(XML_Parser parser) {
+   return -1;
  }
  
 +/* BEGIN MOZILLA CHANGE (unused API) */
@@ -200,7 +200,7 @@ diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
  int XMLCALL
  XML_GetCurrentByteCount(XML_Parser parser) {
    if (parser == NULL)
-@@ -2857,6 +2899,8 @@ XML_GetInputContext(XML_Parser parser, int *offset, int *size) {
+@@ -2851,6 +2893,8 @@ XML_GetInputContext(XML_Parser parser, int *offset, int *size) {
  #endif /* XML_CONTEXT_BYTES > 0 */
    return NULL;
  }
@@ -209,7 +209,7 @@ diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
  
  XML_Size XMLCALL
  XML_GetCurrentLineNumber(XML_Parser parser) {
-@@ -2892,6 +2936,8 @@ XML_GetCurrentColumnNumber(XML_Parser parser) {
+@@ -2886,6 +2930,8 @@ XML_GetCurrentColumnNumber(XML_Parser parser) {
    return (XML_Size)parser->m_position.columnNumber;
  }
  
@@ -218,7 +218,7 @@ diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
  void XMLCALL
  XML_FreeContentModel(XML_Parser parser, XML_Content *model) {
    if (parser == NULL)
-@@ -3142,6 +3188,8 @@ XML_GetFeatureList(void) {
+@@ -3136,6 +3182,8 @@ XML_GetFeatureList(void) {
  
    return features;
  }
@@ -227,7 +227,7 @@ diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
  
  #if XML_GE == 1
  XML_Bool XMLCALL
-@@ -7893,6 +7941,8 @@ dtdCreate(XML_Parser parser) {
+@@ -7881,6 +7929,8 @@ dtdCreate(XML_Parser parser) {
    return p;
  }
  
@@ -236,7 +236,7 @@ diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
  static void
  dtdReset(DTD *p, XML_Parser parser) {
    HASH_TABLE_ITER iter;
-@@ -7934,6 +7984,8 @@ dtdReset(DTD *p, XML_Parser parser) {
+@@ -7922,6 +7972,8 @@ dtdReset(DTD *p, XML_Parser parser) {
    p->hasParamEntityRefs = XML_FALSE;
    p->standalone = XML_FALSE;
  }
@@ -245,7 +245,7 @@ diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
  
  static void
  dtdDestroy(DTD *p, XML_Bool isDocEntity, XML_Parser parser) {
-@@ -8357,6 +8409,8 @@ lookup(XML_Parser parser, HASH_TABLE *table, KEY name, size_t createSize) {
+@@ -8345,6 +8397,8 @@ lookup(XML_Parser parser, HASH_TABLE *table, KEY name, size_t createSize) {
    return lookupWithLength(parser, table, name, keylen(name), createSize);
  }
  
@@ -254,7 +254,7 @@ diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
  XML_NONTESTING_STATIC void
  hashTableClear(HASH_TABLE *table) {
    size_t i;
-@@ -8366,6 +8420,8 @@ hashTableClear(HASH_TABLE *table) {
+@@ -8354,6 +8408,8 @@ hashTableClear(HASH_TABLE *table) {
    }
    table->used = 0;
  }
@@ -263,7 +263,7 @@ diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
  
  XML_NONTESTING_STATIC void
  hashTableDestroy(HASH_TABLE *table) {
-@@ -9079,6 +9135,8 @@ accountingDiffTolerated(XML_Parser originParser, int tok, const char *before,
+@@ -9067,6 +9123,8 @@ accountingDiffTolerated(XML_Parser originParser, int tok, const char *before,
    return tolerated;
  }
  
@@ -272,7 +272,7 @@ diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
  unsigned long long
  testingAccountingGetCountBytesDirect(XML_Parser parser) {
    if (! parser)
-@@ -9092,6 +9150,8 @@ testingAccountingGetCountBytesIndirect(XML_Parser parser) {
+@@ -9080,6 +9138,8 @@ testingAccountingGetCountBytesIndirect(XML_Parser parser) {
      return 0;
    return parser->m_accounting.countBytesIndirect;
  }
