@@ -1331,7 +1331,7 @@ class ThreadActor extends Actor {
         this._clearSteppingHooks();
       }
 
-      this.doResume({ resumeLimit });
+      this.doResume();
       return {};
     } catch (error) {
       return error instanceof Error
