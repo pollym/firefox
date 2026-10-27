@@ -1719,8 +1719,7 @@ void WebrtcVideoConduit::OnRtcpReceived(webrtc::CopyOnWriteBuffer&& aPacket) {
   MOZ_ASSERT(mCallThread->IsOnCurrentThread());
 
   if (mCall->Call()) {
-    mCall->Call()->Receiver()->DeliverRtcpPacket(
-        std::forward<webrtc::CopyOnWriteBuffer>(aPacket));
+    mCall->Call()->Receiver()->DeliverRtcpPacket(std::move(aPacket));
   }
 }
 

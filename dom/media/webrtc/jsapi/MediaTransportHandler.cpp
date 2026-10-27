@@ -1340,12 +1340,10 @@ void MediaTransportEvents::OnPacketReceived(std::string&& aTransportId,
       break;
     case MediaPacket::RTP:
     case MediaPacket::RTCP:
-      mRtpPacketReceived.Notify(std::forward<std::string>(aTransportId),
-                                std::forward<MediaPacket>(aPacket));
+      mRtpPacketReceived.Notify(std::move(aTransportId), std::move(aPacket));
       break;
     case MediaPacket::SCTP:
-      mSctpPacketReceived.Notify(std::forward<std::string>(aTransportId),
-                                 std::forward<MediaPacket>(aPacket));
+      mSctpPacketReceived.Notify(std::move(aTransportId), std::move(aPacket));
       break;
   }
 }

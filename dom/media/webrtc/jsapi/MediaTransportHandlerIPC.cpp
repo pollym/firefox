@@ -431,8 +431,7 @@ mozilla::ipc::IPCResult MediaTransportChild::RecvOnPacketReceived(
     string&& transportId, MediaPacket&& packet) {
   MutexAutoLock lock(mMutex);
   if (mUser) {
-    mUser->OnPacketReceived(std::forward<string>(transportId),
-                            std::forward<MediaPacket>(packet));
+    mUser->OnPacketReceived(std::move(transportId), std::move(packet));
   }
   return ipc::IPCResult::Ok();
 }

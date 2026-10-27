@@ -74,8 +74,8 @@ const UniquePtr<PointerInfo>& PointerEventHandler::InsertOrUpdateActivePointer(
   }();
 
   const UniquePtr<PointerInfo>& pointerInfo =
-      sActivePointersIds->InsertOrUpdate(
-          aPointerId, std::forward<UniquePtr<PointerInfo>>(aNewPointerInfo));
+      sActivePointersIds->InsertOrUpdate(aPointerId,
+                                         std::move(aNewPointerInfo));
   if (MOZ_UNLIKELY(logIt)) {
     MOZ_LOG(
         gLogActivePointers, LogLevel::Info,
