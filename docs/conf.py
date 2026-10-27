@@ -253,6 +253,10 @@ def reattach_nested_rst_nodes(app, doctree):
 
 
 def setup(app):
+    # sphinx-js does not declare it, but it only reads the jsdoc analysis that
+    # runs once before the sources are read.
+    app.extensions["sphinx_js"].parallel_read_safe = True
+    app.extensions["sphinx_js"].parallel_write_safe = True
     app.add_css_file("custom_theme.css")
     app.add_js_file("scrollable_regions.js")
     app.connect("html-page-context", install_sphinx_design)
