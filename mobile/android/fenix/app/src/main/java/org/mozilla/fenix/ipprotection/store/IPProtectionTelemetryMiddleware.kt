@@ -52,12 +52,14 @@ internal class IPProtectionTelemetryMiddleware(
         // is nothing stopping them accessing the feature very quickly through the menu or settings, and running into
         // the said problem.
         when (action) {
-            is IPProtectionAction.ToggleFailed -> handleToggleFailedAction(store.state, action.error, action.operation)
-            is IPProtectionAction.LocationSwitchFailed -> handleLocationSwitchFailed(store.state, action.error)
-            is IPProtectionAction.LocationUpdateFailed -> handleLocationUpdateFailed(action.error)
-            is IPProtectionAction.LocationChanged -> handleLocationChanged(store.state, action)
-            is IPProtectionAction.LocationReset -> handleLocationReset(store.state, action)
-            is IPProtectionAction.PersistedLocationUnavailable ->
+            is IPProtectionAction.ActivationAction.ToggleFailed ->
+                handleToggleFailedAction(store.state, action.error, action.operation)
+            is IPProtectionAction.LocationAction.LocationSwitchFailed ->
+                handleLocationSwitchFailed(store.state, action.error)
+            is IPProtectionAction.LocationAction.LocationUpdateFailed -> handleLocationUpdateFailed(action.error)
+            is IPProtectionAction.LocationAction.LocationChanged -> handleLocationChanged(store.state, action)
+            is IPProtectionAction.LocationAction.LocationReset -> handleLocationReset(store.state, action)
+            is IPProtectionAction.LocationAction.PersistedLocationUnavailable ->
                 handlePersistedLocationUnavailable(store.state, action)
             else -> {
                 // no-op
@@ -155,7 +157,10 @@ internal class IPProtectionTelemetryMiddleware(
         )
     }
 
-    private fun handleLocationChanged(state: IPProtectionState, action: IPProtectionAction.LocationChanged) {
+    private fun handleLocationChanged(
+        state: IPProtectionState,
+        action: IPProtectionAction.LocationAction.LocationChanged,
+    ) {
         val operation = if (action.userAction) LocationChangeOperation.UserAction else LocationChangeOperation.Restore
         Vpn.locationChanged.record(
             Vpn.LocationChangedExtra(
@@ -166,14 +171,14 @@ internal class IPProtectionTelemetryMiddleware(
         )
     }
 
-    private fun handleLocationReset(state: IPProtectionState, action: IPProtectionAction.LocationReset) {
+    private fun handleLocationReset(state: IPProtectionState, action: IPProtectionAction.LocationAction.LocationReset) {
         val countryCode = action.countryCode ?: return
         recordLocationReset(state, countryCode, action.status, LocationResetOperation.Refresh)
     }
 
     private fun handlePersistedLocationUnavailable(
         state: IPProtectionState,
-        action: IPProtectionAction.PersistedLocationUnavailable,
+        action: IPProtectionAction.LocationAction.PersistedLocationUnavailable,
     ) {
         recordLocationReset(state, action.countryCode, action.status, LocationResetOperation.Restore)
     }

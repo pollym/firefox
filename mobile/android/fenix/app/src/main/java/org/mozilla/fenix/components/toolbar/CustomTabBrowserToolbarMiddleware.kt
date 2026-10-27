@@ -177,7 +177,7 @@ class CustomTabBrowserToolbarMiddleware(
             }
 
             is StartPageActions.ProxyActivationAnimationFinished -> {
-                ipProtectionStore.dispatch(IPProtectionAction.ProxyActivationShown)
+                ipProtectionStore.dispatch(IPProtectionAction.ActivationAction.ProxyActivationShown)
                 next(action)
             }
 

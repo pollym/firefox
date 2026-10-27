@@ -463,7 +463,8 @@ class TrustPanelFragment : BottomSheetDialogFragment() {
             IPProtectionStatus.Activating,
             IPProtectionStatus.Enabled,
             IPProtectionStatus.DataLimitReached,
-            IPProtectionStatus.ConnectionError -> components.ipProtection.store.dispatch(IPProtectionAction.Toggle)
+            IPProtectionStatus.ConnectionError ->
+                components.ipProtection.store.dispatch(IPProtectionAction.ActivationAction.Toggle)
 
             IPProtectionStatus.Unavailable,
             IPProtectionStatus.Uninitialized -> Unit

@@ -148,7 +148,7 @@ class VpnMenuItemProviderTest {
 
         assertEquals(expectedItem(), provider.itemFlow.value)
 
-        store.dispatch(IPProtectionAction.EligibilityChanged(EligibilityStatus.Ineligible))
+        store.dispatch(IPProtectionAction.EligibilityAction.EligibilityChanged(EligibilityStatus.Ineligible))
         runCurrent()
 
         assertNull(provider.itemFlow.value)
@@ -160,7 +160,7 @@ class VpnMenuItemProviderTest {
 
         provider(store).onEvent(MenuAction.IPProtectionToggle, menu)
 
-        verify { store.dispatch(IPProtectionAction.Toggle) }
+        verify { store.dispatch(IPProtectionAction.ActivationAction.Toggle) }
         assertFalse(menu.isUsed)
         assertNotNull(Vpn.menuTurnedOn.testGetValue())
     }
@@ -171,7 +171,7 @@ class VpnMenuItemProviderTest {
 
         provider(store).onEvent(MenuAction.IPProtectionToggle, menu)
 
-        verify { store.dispatch(IPProtectionAction.Toggle) }
+        verify { store.dispatch(IPProtectionAction.ActivationAction.Toggle) }
         assertFalse(menu.isUsed)
         assertNotNull(Vpn.menuTurnedOff.testGetValue())
     }
@@ -217,7 +217,7 @@ class VpnMenuItemProviderTest {
 
         provider(store).onEvent(MenuAction.IPProtectionToggle, menu)
 
-        verify(exactly = 0) { store.dispatch(IPProtectionAction.Toggle) }
+        verify(exactly = 0) { store.dispatch(IPProtectionAction.ActivationAction.Toggle) }
         assertFalse(menu.isUsed)
         assertNull(Vpn.menuTurnedOn.testGetValue())
     }

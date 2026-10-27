@@ -82,12 +82,12 @@ class VpnMenuItemProvider(
         when (ipProtectionStore.state.ipProtectionStatus) {
             IPProtectionStatus.Disabled -> {
                 Vpn.menuTurnedOn.record()
-                ipProtectionStore.dispatch(IPProtectionAction.Toggle)
+                ipProtectionStore.dispatch(IPProtectionAction.ActivationAction.Toggle)
             }
 
             IPProtectionStatus.Enabled -> {
                 Vpn.menuTurnedOff.record()
-                ipProtectionStore.dispatch(IPProtectionAction.Toggle)
+                ipProtectionStore.dispatch(IPProtectionAction.ActivationAction.Toggle)
             }
 
             IPProtectionStatus.AuthRequired -> {
@@ -99,7 +99,7 @@ class VpnMenuItemProvider(
 
             IPProtectionStatus.Activating,
             IPProtectionStatus.DataLimitReached,
-            IPProtectionStatus.ConnectionError -> ipProtectionStore.dispatch(IPProtectionAction.Toggle)
+            IPProtectionStatus.ConnectionError -> ipProtectionStore.dispatch(IPProtectionAction.ActivationAction.Toggle)
 
             IPProtectionStatus.Unavailable,
             IPProtectionStatus.Uninitialized -> Unit

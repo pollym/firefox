@@ -107,8 +107,10 @@ class IPProtectionTelemetryMiddlewareTest {
 
         val store = createStore(initialStatus = AccountStatus.EnrolledAndEntitled)
 
-        store.dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate))
-        store.dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate, RuntimeException("boom")))
+        store.dispatch(IPProtectionAction.ActivationAction.ToggleFailed(ActivationOperation.Activate))
+        store.dispatch(
+            IPProtectionAction.ActivationAction.ToggleFailed(ActivationOperation.Activate, RuntimeException("boom"))
+        )
 
         val events = Vpn.errorEncountered.testGetValue()
         assertNotNull(events)
@@ -122,8 +124,8 @@ class IPProtectionTelemetryMiddlewareTest {
 
         val store = createStore(initialStatus = AccountStatus.EnrolledAndEntitled)
 
-        store.dispatch(IPProtectionAction.LocationSwitchFailed())
-        store.dispatch(IPProtectionAction.LocationSwitchFailed(RuntimeException("It's a null-pointer!")))
+        store.dispatch(IPProtectionAction.LocationAction.LocationSwitchFailed())
+        store.dispatch(IPProtectionAction.LocationAction.LocationSwitchFailed(RuntimeException("It's a null-pointer!")))
 
         val events = Vpn.locationSwitchError.testGetValue()
         assertNotNull(events)
@@ -137,7 +139,7 @@ class IPProtectionTelemetryMiddlewareTest {
 
         val store = createStore(initialStatus = AccountStatus.EnrolledAndEntitled)
 
-        store.dispatch(IPProtectionAction.LocationUpdateFailed(RuntimeException("generic-error")))
+        store.dispatch(IPProtectionAction.LocationAction.LocationUpdateFailed(RuntimeException("generic-error")))
 
         val events = Vpn.locationUpdateError.testGetValue()
         assertNotNull(events)
@@ -155,7 +157,7 @@ class IPProtectionTelemetryMiddlewareTest {
                 serviceStatus = ServiceState.Unauthenticated,
             )
 
-        store.dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate))
+        store.dispatch(IPProtectionAction.ActivationAction.ToggleFailed(ActivationOperation.Activate))
 
         val events = Vpn.entitledAccountUnauthenticated.testGetValue()
         assertNotNull(events)
@@ -166,7 +168,7 @@ class IPProtectionTelemetryMiddlewareTest {
     fun `GIVEN a failed activate THEN the operation is recorded as activate`() {
         val store = createStore(initialStatus = AccountStatus.EnrolledAndEntitled)
 
-        store.dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate))
+        store.dispatch(IPProtectionAction.ActivationAction.ToggleFailed(ActivationOperation.Activate))
 
         val events = Vpn.errorEncountered.testGetValue()
         assertNotNull(events)
@@ -177,7 +179,7 @@ class IPProtectionTelemetryMiddlewareTest {
     fun `GIVEN a failed deactivate THEN the operation is recorded as deactivate`() {
         val store = createStore(initialStatus = AccountStatus.EnrolledAndEntitled)
 
-        store.dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Deactivate))
+        store.dispatch(IPProtectionAction.ActivationAction.ToggleFailed(ActivationOperation.Deactivate))
 
         val events = Vpn.errorEncountered.testGetValue()
         assertNotNull(events)
@@ -188,8 +190,8 @@ class IPProtectionTelemetryMiddlewareTest {
     fun `GIVEN activate and deactivate both fail THEN each event keeps its own operation`() {
         val store = createStore(initialStatus = AccountStatus.EnrolledAndEntitled)
 
-        store.dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate))
-        store.dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Deactivate))
+        store.dispatch(IPProtectionAction.ActivationAction.ToggleFailed(ActivationOperation.Activate))
+        store.dispatch(IPProtectionAction.ActivationAction.ToggleFailed(ActivationOperation.Deactivate))
 
         val events = Vpn.errorEncountered.testGetValue()
         assertNotNull(events)
@@ -218,7 +220,7 @@ class IPProtectionTelemetryMiddlewareTest {
 
         expected.keys.forEach { serviceStatus ->
             createStore(serviceStatus = serviceStatus)
-                .dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate))
+                .dispatch(IPProtectionAction.ActivationAction.ToggleFailed(ActivationOperation.Activate))
         }
 
         val events = Vpn.errorEncountered.testGetValue()
@@ -246,7 +248,7 @@ class IPProtectionTelemetryMiddlewareTest {
 
         expected.keys.forEach { proxyStatus ->
             createStore(proxyStatus = proxyStatus)
-                .dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate))
+                .dispatch(IPProtectionAction.ActivationAction.ToggleFailed(ActivationOperation.Activate))
         }
 
         val events = Vpn.errorEncountered.testGetValue()
@@ -282,7 +284,7 @@ class IPProtectionTelemetryMiddlewareTest {
 
         expected.keys.forEach { accountStatus ->
             createStore(initialStatus = accountStatus)
-                .dispatch(IPProtectionAction.ToggleFailed(ActivationOperation.Activate))
+                .dispatch(IPProtectionAction.ActivationAction.ToggleFailed(ActivationOperation.Activate))
         }
 
         val events = Vpn.errorEncountered.testGetValue()
@@ -295,9 +297,12 @@ class IPProtectionTelemetryMiddlewareTest {
         val store = createStore(selectedLocation = Recommended)
 
         store.dispatch(
-            IPProtectionAction.LocationChanged(Country(countryCode = "JP", available = true), userAction = true)
+            IPProtectionAction.LocationAction.LocationChanged(
+                Country(countryCode = "JP", available = true),
+                userAction = true,
+            )
         )
-        store.dispatch(IPProtectionAction.LocationChanged(Recommended, userAction = true))
+        store.dispatch(IPProtectionAction.LocationAction.LocationChanged(Recommended, userAction = true))
 
         val events = Vpn.locationChanged.testGetValue()
         assertNotNull(events)
@@ -310,7 +315,10 @@ class IPProtectionTelemetryMiddlewareTest {
         val store = createStore(proxyStatus = Authorized.Active)
 
         store.dispatch(
-            IPProtectionAction.LocationChanged(Country(countryCode = "JP", available = true), userAction = true)
+            IPProtectionAction.LocationAction.LocationChanged(
+                Country(countryCode = "JP", available = true),
+                userAction = true,
+            )
         )
 
         val extra = Vpn.locationChanged.testGetValue()?.single()?.extra
@@ -323,7 +331,7 @@ class IPProtectionTelemetryMiddlewareTest {
         val store = createStore(selectedLocation = Recommended)
 
         store.dispatch(
-            IPProtectionAction.LocationChanged(
+            IPProtectionAction.LocationAction.LocationChanged(
                 location = Country(countryCode = "JP", available = true),
                 userAction = false,
             )
@@ -344,9 +352,12 @@ class IPProtectionTelemetryMiddlewareTest {
             )
 
         store.dispatch(
-            IPProtectionAction.LocationChanged(Country(countryCode = "FR", available = true), userAction = true)
+            IPProtectionAction.LocationAction.LocationChanged(
+                Country(countryCode = "FR", available = true),
+                userAction = true,
+            )
         )
-        store.dispatch(IPProtectionAction.LocationSwitchFailed())
+        store.dispatch(IPProtectionAction.LocationAction.LocationSwitchFailed())
 
         val events = Vpn.locationChanged.testGetValue()
         assertNotNull(events)
@@ -357,7 +368,7 @@ class IPProtectionTelemetryMiddlewareTest {
 
     @Test
     fun `GIVEN a location is reset THEN the reset reason is recorded as missing`() {
-        createStore().dispatch(IPProtectionAction.LocationReset("JP", CachedLocationStatus.Missing))
+        createStore().dispatch(IPProtectionAction.LocationAction.LocationReset("JP", CachedLocationStatus.Missing))
 
         val events = Vpn.locationReset.testGetValue()
         assertNotNull(events)
@@ -377,7 +388,7 @@ class IPProtectionTelemetryMiddlewareTest {
                     ),
             )
 
-        store.dispatch(IPProtectionAction.LocationReset("JP", CachedLocationStatus.Missing))
+        store.dispatch(IPProtectionAction.LocationAction.LocationReset("JP", CachedLocationStatus.Missing))
 
         val extra = Vpn.locationReset.testGetValue()?.single()?.extra
         assertNotNull(extra)
@@ -391,7 +402,9 @@ class IPProtectionTelemetryMiddlewareTest {
     fun `GIVEN a persisted location is unavailable at startup THEN operation is recorded as restore`() {
         val store = createStore(locations = listOf(Recommended, Country(countryCode = "CA", available = true)))
 
-        store.dispatch(IPProtectionAction.PersistedLocationUnavailable("JP", CachedLocationStatus.Missing))
+        store.dispatch(
+            IPProtectionAction.LocationAction.PersistedLocationUnavailable("JP", CachedLocationStatus.Missing)
+        )
 
         val extra = Vpn.locationReset.testGetValue()?.single()?.extra
         assertNotNull(extra)
@@ -410,7 +423,7 @@ class IPProtectionTelemetryMiddlewareTest {
                 initialStatus = AccountStatus.EnrolledAndEntitled,
             )
 
-        store.dispatch(IPProtectionAction.LocationReset("JP", CachedLocationStatus.Missing))
+        store.dispatch(IPProtectionAction.LocationAction.LocationReset("JP", CachedLocationStatus.Missing))
 
         val extra = Vpn.locationReset.testGetValue()?.single()?.extra
         assertNotNull(extra)
@@ -438,7 +451,7 @@ class IPProtectionTelemetryMiddlewareTest {
         )
 
     private fun IPProtectionStore.transitionTo(status: AccountStatus) {
-        dispatch(IPProtectionAction.AccountStateChanged(status))
+        dispatch(IPProtectionAction.AccountAction.AccountStateChanged(status))
     }
 
     private fun KClass<out ProxyStatus>.objectInstances(): Set<ProxyStatus> =

@@ -48,7 +48,7 @@ class IPProtectionMenuBindingTest {
 
         assertEquals(IPProtectionStatus.Disabled, result?.status)
 
-        ipProtectionStore.dispatch(IPProtectionAction.ProxyStateChanged(ProxyState.ACTIVE))
+        ipProtectionStore.dispatch(IPProtectionAction.ProxyAction.ProxyStateChanged(ProxyState.ACTIVE))
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(IPProtectionStatus.Enabled, result?.status)

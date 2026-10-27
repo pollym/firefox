@@ -1043,12 +1043,12 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
         when (ipProtectionMenuState.status) {
             IPProtectionStatus.Disabled -> {
                 Vpn.menuTurnedOn.record()
-                components.ipProtection.store.dispatch(IPProtectionAction.Toggle)
+                components.ipProtection.store.dispatch(IPProtectionAction.ActivationAction.Toggle)
             }
 
             IPProtectionStatus.Enabled -> {
                 Vpn.menuTurnedOff.record()
-                components.ipProtection.store.dispatch(IPProtectionAction.Toggle)
+                components.ipProtection.store.dispatch(IPProtectionAction.ActivationAction.Toggle)
             }
 
             IPProtectionStatus.AuthRequired -> {
@@ -1062,7 +1062,7 @@ class MenuDialogFragment : BottomSheetDialogFragment() {
             IPProtectionStatus.Activating,
             IPProtectionStatus.DataLimitReached,
             IPProtectionStatus.ConnectionError -> {
-                components.ipProtection.store.dispatch(IPProtectionAction.Toggle)
+                components.ipProtection.store.dispatch(IPProtectionAction.ActivationAction.Toggle)
             }
 
             IPProtectionStatus.Unavailable,
