@@ -1359,6 +1359,7 @@ void CompositorBridgeParent::InitializeStatics() {
       &UpdateWebRenderParameters);
   gfxVars::SetWebRenderBatchedUploadThresholdListener(
       &UpdateWebRenderParameters);
+  gfxVars::SetWebRenderPathAaSamplesListener(&UpdateWebRenderParameters);
 
   gfxVars::SetWebRenderProfilerUIListener(&UpdateWebRenderProfilerUI);
 }
