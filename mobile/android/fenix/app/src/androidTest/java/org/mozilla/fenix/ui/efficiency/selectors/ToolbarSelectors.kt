@@ -26,6 +26,7 @@ object ToolbarSelectors : SelectorContainer {
         HOME_SCREEN_TOOLBAR,
         BROWSER_VIEW_TOOLBAR_ITEMS,
         TAB_COUNTER_SHORTCUT_MENU,
+        SIMPLE_TOOLBAR_NONE_SHORTCUT_ITEMS,
     }
 
     val TOOLBAR =
@@ -42,6 +43,15 @@ object ToolbarSelectors : SelectorContainer {
             value = TABS_COUNTER,
             description = "Tab counter button",
             readiness = PageReadinessProfiles.READY_CONTENT,
+            groups = setOf(Group.SIMPLE_TOOLBAR_NONE_SHORTCUT_ITEMS),
+        )
+
+    val MAIN_MENU_BUTTON =
+        Selector(
+            strategy = SelectorStrategy.UIAUTOMATOR_WITH_DESCRIPTION_CONTAINS,
+            value = getStringResource(R.string.content_description_menu),
+            description = "Three dot menu button",
+            groups = setOf(Group.SIMPLE_TOOLBAR_NONE_SHORTCUT_ITEMS),
         )
 
     val TOOLBAR_URL_BOX =
@@ -127,6 +137,13 @@ object ToolbarSelectors : SelectorContainer {
             groups = setOf(Group.TAB_COUNTER_SHORTCUT_MENU),
         )
 
+    val EXPANDED_TOOLBAR_HOMEPAGE_BUTTON =
+        Selector(
+            strategy = SelectorStrategy.COMPOSE_BY_CONTENT_DESCRIPTION,
+            value = "Homepage",
+            description = "Simple toolbar homepage button",
+        )
+
     val EXPANDED_TOOLBAR_ADD_BOOKMARK_BUTTON =
         Selector(
             strategy = SelectorStrategy.UIAUTOMATOR_WITH_DESCRIPTION_CONTAINS,
@@ -173,6 +190,27 @@ object ToolbarSelectors : SelectorContainer {
             value = getStringResource(R.string.browser_menu_refresh),
             description = "Expanded toolbar refresh button",
             groups = setOf(Group.EXPANDED_TOOLBAR_IN_LANDSCAPE_ITEM),
+        )
+
+    val SIMPLE_TOOLBAR_SHARE_BUTTON =
+        Selector(
+            strategy = SelectorStrategy.COMPOSE_BY_CONTENT_DESCRIPTION,
+            value = "Share",
+            description = "Simple toolbar share button",
+        )
+
+    val SIMPLE_TOOLBAR_HOMEPAGE_BUTTON =
+        Selector(
+            strategy = SelectorStrategy.COMPOSE_BY_CONTENT_DESCRIPTION,
+            value = "Homepage",
+            description = "Simple toolbar homepage button",
+        )
+
+    val SIMPLE_TOOLBAR_BACK_BUTTON =
+        Selector(
+            strategy = SelectorStrategy.COMPOSE_BY_CONTENT_DESCRIPTION,
+            value = "Back",
+            description = "Simple toolbar back button",
         )
 
     val SITE_INFO_BUTTON =
