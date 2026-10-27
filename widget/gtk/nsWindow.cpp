@@ -1832,19 +1832,20 @@ void nsWindow::SetCursor(const Cursor& aCursor) {
   if (mCustomCursorAllowed) {
     imageCursor = GetCursorForImage(aCursor, GdkCeiledScaleFactor());
   }
-
-  // When using a custom cursor, clear the cursor first using eCursor_none, in
-  // order to work around https://gitlab.gnome.org/GNOME/gtk/-/issues/6242
-  GdkCursor* nonImageCursor =
-      get_gtk_cursor(imageCursor ? eCursor_none : aCursor.mDefaultCursor);
   auto CleanupCursor = mozilla::MakeScopeExit([&]() {
     // get_gtk_cursor returns a weak reference, which we shouldn't unref.
     if (imageCursor) {
       g_object_unref(imageCursor);
     }
   });
-
-  gdk_window_set_cursor(mGdkWindow, nonImageCursor);
+  // When using a custom cursor, clear the cursor first using eCursor_none if we
+  // are using gtk<3.24.39, to work around:
+  // https://gitlab.gnome.org/GNOME/gtk/-/issues/6242
+  if (!imageCursor || gtk_check_version(3, 24, 39)) {
+    GdkCursor* nonImageCursor =
+        get_gtk_cursor(imageCursor ? eCursor_none : aCursor.mDefaultCursor);
+    gdk_window_set_cursor(mGdkWindow, nonImageCursor);
+  }
   if (imageCursor) {
     gdk_window_set_cursor(mGdkWindow, imageCursor);
   }
