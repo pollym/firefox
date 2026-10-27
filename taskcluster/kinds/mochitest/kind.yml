@@ -1051,9 +1051,14 @@ tasks:
             - wmf-media-engine
             - msix
             - geckoview-isolated-process
+            - geckoview-java-media
         run-on-projects:
             by-variant:
                 geckoview-isolated-process:
+                    by-test-platform:
+                        android-em.*/debug: built-projects
+                        default: []
+                geckoview-java-media:
                     by-test-platform:
                         android-em.*/debug: built-projects
                         default: []
