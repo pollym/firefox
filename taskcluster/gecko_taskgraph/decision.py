@@ -2,6 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import gc
 import logging
 import os
 import shutil
@@ -272,7 +273,12 @@ def taskgraph_decision(options, parameters):
         )
 
         # write out the full graph for reference
-        full_task_json = tgg.full_task_graph.to_json()
+        full_task_graph = tgg.full_task_graph
+        # The generated graph is long-lived and taskgraph collects no garbage
+        # while generating it, so a collection triggered while serializing it
+        # would walk the whole heap for little gain.
+        gc.freeze()
+        full_task_json = full_task_graph.to_json()
         write_artifact("full-task-graph.json", full_task_json)
 
         # write out kind graph
