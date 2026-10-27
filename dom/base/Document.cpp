@@ -99,6 +99,7 @@
 #include "mozilla/PresShellInlines.h"
 #include "mozilla/ProfilerMarkers.h"
 #include "mozilla/PseudoStyleType.h"
+#include "mozilla/RandomNum.h"
 #include "mozilla/RelativeTo.h"
 #include "mozilla/RestyleManager.h"
 #include "mozilla/ReverseIterator.h"
@@ -1607,6 +1608,7 @@ Document::Document(const char* aContentType,
       mDefaultElementType(0),
       mAllowXULXBL(eTriUnset),
       mSkipDTDSecurityChecks(false),
+      mRandomHasherKey{RandomUint64OrDie(), RandomUint64OrDie()},
       mBidiOptions(IBMBIDI_DEFAULT_BIDI_OPTIONS),
       mSandboxFlags(0),
       mPartID(0),
@@ -14857,13 +14859,13 @@ void Document::UnlinkOriginalDocumentIfStatic() {
   MOZ_ASSERT(!mOriginalDocument);
 }
 
-uintptr_t Document::GetRandomSeed() const {
-  // If the document is a static clone, uses the original document's address.
-  // Otherwise, uses this document's address as its random seed.
+const Array<uint64_t, 2>& Document::GetRandomHasherKey() const {
+  // If the document is a static clone, uses the original document's key.
+  // Otherwise, uses this document's key.
   if (const Document* original = GetOriginalDocument()) {
-    return reinterpret_cast<uintptr_t>(original);
+    return original->mRandomHasherKey;
   }
-  return reinterpret_cast<uintptr_t>(this);
+  return mRandomHasherKey;
 }
 
 nsresult Document::ScheduleFrameRequestCallback(FrameRequestCallback& aCallback,

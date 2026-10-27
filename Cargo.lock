@@ -7948,6 +7948,7 @@ dependencies = [
  "selectors",
  "serde",
  "servo_arc",
+ "siphasher",
  "smallbitvec",
  "smallvec",
  "static_assertions",

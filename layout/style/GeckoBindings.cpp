@@ -1756,8 +1756,11 @@ uint64_t Gecko_Element_GetRandomSeed(const Element* aElement) {
   return aElement->GetRandomSeed();
 }
 
-uint64_t Gecko_Document_GetRandomSeed(const Document* aDocument) {
-  return aDocument->GetRandomSeed();
+void Gecko_Document_GetRandomHasherKey(const Document* aDocument, uint64_t* aK0,
+                                       uint64_t* aK1) {
+  const Array<uint64_t, 2>& key = aDocument->GetRandomHasherKey();
+  *aK0 = key[0];
+  *aK1 = key[1];
 }
 
 bool StyleSingleFontFamily::IsNamedFamily(const nsAString& aFamilyName) const {

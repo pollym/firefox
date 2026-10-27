@@ -17,6 +17,7 @@
 #include "js/RootingAPI.h"
 #include "js/friend/DOMProxy.h"
 #include "mozilla/AlreadyAddRefed.h"
+#include "mozilla/Array.h"
 #include "mozilla/Assertions.h"
 #include "mozilla/Attributes.h"
 #include "mozilla/BasicEvents.h"
@@ -3258,11 +3259,11 @@ class Document : public nsINode,
   void UnlinkOriginalDocumentIfStatic();
 
   /**
-   * Returns a value that identifies this document, used to vary the random
+   * Returns the hash key specific to this document, used to vary the random
    * base values of CSS `random()` functions between document instances.
    * https://drafts.csswg.org/css-values-5/#random-caching
    */
-  uintptr_t GetRandomSeed() const;
+  const Array<uint64_t, 2>& GetRandomHasherKey() const;
 
   /**
    * These are called by the parser as it encounters <picture> tags, the end of
@@ -5606,6 +5607,11 @@ class Document : public nsINode,
   // If mIsStaticDocument is true, mOriginalDocument points to the original
   // document.
   RefPtr<Document> mOriginalDocument;
+
+  // Document-scoped key for hashing the inputs of CSS `random()` functions.
+  // This random value is 128 bits, as required for the key of the SipHash-1-3
+  // keyed hash function (see `Device::document_random_hasher()`).
+  Array<uint64_t, 2> mRandomHasherKey;
 
   // The bidi options for this document.  What this bitfield means is
   // defined in nsBidiUtils.h
