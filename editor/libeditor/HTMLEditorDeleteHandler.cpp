@@ -203,8 +203,9 @@ HTMLEditor::AutoDeleteRangesHandler::FallbackToDeleteRangesWithTransaction(
       }
     }
   }
-  aRangesToDelete.RemoveCollapsedRanges();
-  if (MOZ_UNLIKELY(aRangesToDelete.IsCollapsed())) {
+  aRangesToDelete.RemoveCollapsedRanges(
+      AutoClonedRangeArray::PreservePrimaryRangeIfAllRangesCollapsed::Yes);
+  if (aRangesToDelete.IsCollapsed()) [[unlikely]] {
     return CaretPoint(
         EditorDOMPoint(aRangesToDelete.FirstRangeRef()->StartRef()));
   }
@@ -3414,8 +3415,9 @@ HTMLEditor::AutoDeleteRangesHandler::HandleDeleteNonCollapsedRanges(
         }
       }
     }
-    aRangesToDelete.RemoveCollapsedRanges();
-    if (MOZ_UNLIKELY(aRangesToDelete.IsCollapsed())) {
+    aRangesToDelete.RemoveCollapsedRanges(
+        AutoClonedRangeArray::PreservePrimaryRangeIfAllRangesCollapsed::No);
+    if (aRangesToDelete.IsCollapsed()) [[unlikely]] {
       return EditActionResult::HandledResult();
     }
     if (NS_WARN_IF(!aRangesToDelete.FirstRangeRef()->IsPositioned()) ||
