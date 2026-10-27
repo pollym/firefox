@@ -25,6 +25,13 @@ let ignoreList = [
     errorMessage: /Unknown property.*-moz-/i,
     isFromDevTools: false,
   },
+  // color: -moz-inherit-from-body is UA-only.
+  {
+    sourceName: /\b(quirk)\.css$/i,
+    errorMessage:
+      /Error in parsing value for ‘color: -moz-inherit-from-body;’./i,
+    isFromDevTools: false,
+  },
   // content: -moz-alt-content is UA-only.
   {
     sourceName: /\b(html)\.css$/i,

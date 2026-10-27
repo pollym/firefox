@@ -2372,8 +2372,7 @@ void gfxFcPlatformFontList::GetFontList(nsAtom* aLangGroup,
     sansSerif = true;
   } else if (aGenericFamily.LowerCaseEqualsLiteral("monospace")) {
     monospace = true;
-  } else if (StaticPrefs::mathml_font_family_math_enabled() &&
-             aGenericFamily.LowerCaseEqualsLiteral("math")) {
+  } else if (aGenericFamily.LowerCaseEqualsLiteral("math")) {
     math = true;
   } else if (aGenericFamily.LowerCaseEqualsLiteral("cursive") ||
              aGenericFamily.LowerCaseEqualsLiteral("fantasy")) {
@@ -2705,8 +2704,7 @@ void gfxFcPlatformFontList::AddGenericFonts(
     nsTArray<FamilyAndGeneric>& aFamilyList) {
   // TODO(eri): For now the math generic language uses the legacy
   // "serif.x-math". See `gfxPlatformFontList::AddGenericFonts`.
-  if (StaticPrefs::mathml_font_family_math_enabled() &&
-      aGenericType == StyleGenericFontFamily::Math) {
+  if (aGenericType == StyleGenericFontFamily::Math) {
     aGenericType = StyleGenericFontFamily::Serif;
     aLanguage = nsGkAtoms::x_math;
   }
@@ -2741,8 +2739,7 @@ void gfxFcPlatformFontList::AddGenericFonts(
       if (!fontlistValue.EqualsLiteral("serif") &&
           !fontlistValue.EqualsLiteral("sans-serif") &&
           !fontlistValue.EqualsLiteral("monospace") &&
-          !(StaticPrefs::mathml_font_family_math_enabled() &&
-            fontlistValue.EqualsLiteral("math"))) {
+          !fontlistValue.EqualsLiteral("math")) {
         usePrefFontList = true;
       } else {
         // serif, sans-serif, monospace or math was specified
@@ -2954,7 +2951,7 @@ struct MozLangGroupData {
   const char* defaultLang;
 };
 
-const MozLangGroupData MozLangGroups[] = {
+constexpr MozLangGroupData kMozLangGroups[] = {
     // clang-format off
   {nsGkAtoms::x_western, "en"},
   {nsGkAtoms::x_cyrillic, "ru"},
@@ -3026,14 +3023,11 @@ void gfxFcPlatformFontList::GetSampleLangForGroup(nsAtom* aLanguage,
   // set up lang string
   const MozLangGroupData* mozLangGroup = nullptr;
 
-  if (aLanguage != nsGkAtoms::x_math ||
-      StaticPrefs::mathml_font_family_math_enabled()) {
-    // -- look it up in the list of moz lang groups
-    for (const auto& MozLangGroup : MozLangGroups) {
-      if (aLanguage == MozLangGroup.mozLangGroup) {
-        mozLangGroup = &MozLangGroup;
-        break;
-      }
+  // -- look it up in the list of moz lang groups
+  for (const auto& group : kMozLangGroups) {
+    if (aLanguage == group.mozLangGroup) {
+      mozLangGroup = &group;
+      break;
     }
   }
 
