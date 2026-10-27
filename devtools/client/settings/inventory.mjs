@@ -192,6 +192,7 @@ export const inventory = [
         l10nId: "devtools-settings-debugger-stylesheets",
         type: "boolean",
         pref: "devtools.debugger.features.stylesheets-in-debugger",
+        changeAction: "recordDebuggerStylesheets",
       },
     ],
   },
@@ -222,6 +223,14 @@ export const callbacks = {
       tool.id
     );
     Glean.devtoolsTool.registered[tool.id].set(isEnabled);
+  },
+
+  recordDebuggerStylesheets: ({ event }) => {
+    if (Services.prefs.getBoolPref(event.pref)) {
+      Glean.devtoolsDebuggerStylesheets.stylesheetPrefEnabledCount.add(1);
+    } else {
+      Glean.devtoolsDebuggerStylesheets.stylesheetPrefDisabledCount.add(1);
+    }
   },
 };
 
