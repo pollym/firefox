@@ -3301,14 +3301,10 @@ MediaResult FFmpegVideoDecoder<LIBAV_VER>::CreateImageMediaCodec(
         return false;
       }
 
-      if (mDecoder->ReleaseFrameMediaCodec(this, aRender)) {
-        mDecoder->QueueResumeDrain();
-        // Ensure we don't release the same frame multiple times
-        mDecoder = nullptr;
-        return true;
-      }
+      const bool success = mDecoder->ReleaseFrameMediaCodec(this, aRender);
+      // Ensure we don't release the same frame multiple times.
       mDecoder = nullptr;
-      return false;
+      return success;
     }
 
     RefPtr<FFmpegVideoDecoder<LIBAV_VER>> mDecoder;
@@ -3352,17 +3348,31 @@ bool FFmpegVideoDecoder<LIBAV_VER>::ReleaseFrameMediaCodec(void* aKey,
   // ensure that the underlying AMediaCodec decoder is not flushed or stopped on
   // the task queue while we are in the middle of releasing on the
   // MediaSupervisor thread.
-  return mFrameMap.Take(aKey, [&](AVFrame* aFrame) {
+  bool success = true;
+  bool hasCodecBuffer = false;
+  const bool released = mFrameMap.Take(aKey, [&](AVFrame* aFrame) {
     FFMPEG_LOG("Release MediaCodec frame {}, render={}", fmt::ptr(aFrame),
                aRender);
     for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i) {
       if (aFrame->data[i]) {
-        mLib->av_mediacodec_release_buffer((AVMediaCodecBuffer*)aFrame->data[i],
-                                           aRender ? 1 : 0);
+        hasCodecBuffer = true;
+        const int rv = mLib->av_mediacodec_release_buffer(
+            (AVMediaCodecBuffer*)aFrame->data[i], aRender ? 1 : 0);
+        if (rv < 0) {
+          FFMPEG_LOG("Failed to release MediaCodec frame {}, render={}, rv={}",
+                     fmt::ptr(aFrame), aRender, rv);
+          success = false;
+        }
       }
     }
     mLib->av_frame_free(&aFrame);
   });
+  if (released) {
+    // A frame was removed even if rendering failed. Resume draining after
+    // dropping the map lock, without reporting a successful image submission.
+    QueueResumeDrain();
+  }
+  return released && hasCodecBuffer && success;
 }
 
 void FFmpegVideoDecoder<LIBAV_VER>::ReleaseSurfaceMediaCodec() {
