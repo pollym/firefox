@@ -13,9 +13,6 @@ RUN mkdir /build
 # %include python/mozbuild/mozbuild/action/tooltool.py
 ADD topsrcdir/python/mozbuild/mozbuild/action/tooltool.py /build/tooltool.py
 
-# %include taskcluster/docker/recipes/install-node.sh
-ADD topsrcdir/taskcluster/docker/recipes/install-node.sh /build/install-node.sh
-
 ADD system-setup.sh /tmp/system-setup.sh
 RUN bash /tmp/system-setup.sh
 
