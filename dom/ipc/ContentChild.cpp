@@ -4705,6 +4705,7 @@ mozilla::ipc::IPCResult ContentChild::RecvDeactivateDocuments(
   }
   BrowsingContext* browsingContext = aContext.get();
   MOZ_DIAGNOSTIC_ASSERT(browsingContext->IsTopContent());
+  MOZ_DIAGNOSTIC_ASSERT(browsingContext->IsInProcess() || !aPageSwapTargetInfo);
 
   browsingContext->DeactivateDocuments(aPageSwapTargetInfo.ptrOr(nullptr),
                                        aNavigationType, aForUnload);

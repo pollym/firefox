@@ -3145,7 +3145,8 @@ void CanonicalBrowsingContext::DeactivateDocuments(
     Group()->EachParent([this, &targetInfo, aNavigationType,
                          aForUnload](ContentParent* aContentParent) {
       (void)aContentParent->SendDeactivateDocuments(
-          this, targetInfo, aNavigationType, aForUnload);
+          this, GetContentParent() == aContentParent ? targetInfo : Nothing(),
+          aNavigationType, aForUnload);
     });
 
     // When the old document unloads (aForUnload) it is destroyed rather than
