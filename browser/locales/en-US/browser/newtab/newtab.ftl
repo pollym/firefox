@@ -957,6 +957,10 @@ newtab-crossword-widget-open-menu-button =
     .title = Open crossword menu
     .aria-label = Open crossword menu
 
+# Context menu item linking to the Particle website, the provider of the
+# crossword. “Particle” is a brand name and should not be translated.
+newtab-crossword-menu-powered-by-particle = Powered by Particle
+
 ## World Cup wallpaper OMC messages
 ## Shown as on-screen messages promoting the World Cup wallpapers.
 
