@@ -21,8 +21,7 @@ void ProcInfoChild::Create(ipc::Endpoint<PProcInfoChild>&& aEndpoint) {
   }
 
   taskQueue->Dispatch(NS_NewRunnableFunction(
-      "ProcInfoChild::Bind",
-      [endpoint = std::move(aEndpoint)]() mutable {
+      "ProcInfoChild::Bind", [endpoint = std::move(aEndpoint)]() mutable {
         RefPtr<ProcInfoChild> actor = new ProcInfoChild();
         if (!endpoint.Bind(actor)) {
           NS_WARNING("Failed to bind ProcInfoChild");
