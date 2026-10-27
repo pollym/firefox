@@ -1122,9 +1122,9 @@ void gfxFontconfigFontEntry::InitSkrifaFontFace() {
   }
 
   const int index = GetPatternIndex(mFontPattern);
-  const uint8_t* data = static_cast<const uint8_t*>(file.Data());
-  const size_t size = file.Size();
-  if (SkrifaFontRef* font = skrifa_font_new_from_index(data, size, index)) {
+  const Span<const uint8_t> span = file.AsSpan();
+  if (SkrifaFontRef* font =
+          skrifa_font_new_from_index(span.data(), span.size(), index)) {
     SetSkrifaFont(font, std::move(file));
   }
 }

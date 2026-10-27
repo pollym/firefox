@@ -705,9 +705,9 @@ void gfxDWriteFontEntry::InitSkrifaFontFace() {
     if (!mappedFile.IsValid()) {
       break;
     }
-    const uint8_t* const data = static_cast<const uint8_t*>(mappedFile.Data());
-    const size_t size = mappedFile.Size();
-    if (auto* skf = skrifa_font_new_from_index(data, size, face->GetIndex())) {
+    const Span<const uint8_t> span = mappedFile.AsSpan();
+    if (auto* skf = skrifa_font_new_from_index(span.data(), span.size(),
+                                               face->GetIndex())) {
       SetSkrifaFont(skf, std::move(mappedFile));
     }
     return;
