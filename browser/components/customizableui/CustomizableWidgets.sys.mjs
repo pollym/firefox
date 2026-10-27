@@ -795,7 +795,7 @@ const kFireButtonFlowDirect = "direct";
 if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
   CustomizableWidgets.push({
     id: "fire-button",
-    l10nId: "fire-button-toolbar-button",
+    l10nId: "fire-button-toolbar-button2",
     type: "view",
     viewId: "fire-button-panel",
     defaultArea: "nav-bar",
