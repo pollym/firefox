@@ -139,6 +139,7 @@ class NativeJumpListBackend : public JumpListBackend {
 };
 
 JumpListBuilder::JumpListBuilder(const nsAString& aAppUserModelId,
+                                 bool aPrivateBrowsing,
                                  RefPtr<JumpListBackend> aTestingBackend) {
   MOZ_ASSERT(NS_IsMainThread());
 

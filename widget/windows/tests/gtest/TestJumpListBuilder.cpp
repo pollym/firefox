@@ -361,7 +361,7 @@ TEST(JumpListBuilder, Construction)
   });
 
   nsCOMPtr<nsIJumpListBuilder> builder =
-      new JumpListBuilder(aumid, testBackend);
+      new JumpListBuilder(aumid, /* aPrivateBrowsing */ false, testBackend);
   ASSERT_TRUE(builder);
 
   // This is the amount of time that we will wait for the background thread to
@@ -392,7 +392,7 @@ TEST(JumpListBuilder, CheckForRemovals)
   EXPECT_CALL(*testBackend, SetAppID(_)).Times(1);
 
   nsCOMPtr<nsIJumpListBuilder> builder =
-      new JumpListBuilder(aumid, testBackend);
+      new JumpListBuilder(aumid, /* aPrivateBrowsing */ false, testBackend);
   ASSERT_TRUE(builder);
 
   EXPECT_CALL(*testBackend, AbortList()).Times(2);
@@ -507,7 +507,7 @@ TEST(JumpListBuilder, CheckForRemovalsLongURL)
   EXPECT_CALL(*testBackend, SetAppID(_)).Times(1);
 
   nsCOMPtr<nsIJumpListBuilder> builder =
-      new JumpListBuilder(aumid, testBackend);
+      new JumpListBuilder(aumid, /* aPrivateBrowsing */ false, testBackend);
   ASSERT_TRUE(builder);
 
   EXPECT_CALL(*testBackend, AbortList()).Times(2);
@@ -617,7 +617,7 @@ TEST(JumpListBuilder, PopulateJumpListEmpty)
   EXPECT_CALL(*testBackend, SetAppID(_)).Times(1);
 
   nsCOMPtr<nsIJumpListBuilder> builder =
-      new JumpListBuilder(aumid, testBackend);
+      new JumpListBuilder(aumid, /* aPrivateBrowsing */ false, testBackend);
   ASSERT_TRUE(builder);
 
   AutoJSAPI jsapi;
@@ -673,7 +673,7 @@ TEST(JumpListBuilder, PopulateJumpListOnlyTasks)
   EXPECT_CALL(*testBackend, SetAppID(_)).Times(1);
 
   nsCOMPtr<nsIJumpListBuilder> builder =
-      new JumpListBuilder(aumid, testBackend);
+      new JumpListBuilder(aumid, /* aPrivateBrowsing */ false, testBackend);
   ASSERT_TRUE(builder);
 
   AutoJSAPI jsapi;
@@ -734,7 +734,7 @@ TEST(JumpListBuilder, PopulateJumpListOnlyCustomItems)
   EXPECT_CALL(*testBackend, SetAppID(_)).Times(1);
 
   nsCOMPtr<nsIJumpListBuilder> builder =
-      new JumpListBuilder(aumid, testBackend);
+      new JumpListBuilder(aumid, /* aPrivateBrowsing */ false, testBackend);
   ASSERT_TRUE(builder);
 
   AutoJSAPI jsapi;
@@ -800,7 +800,7 @@ TEST(JumpListBuilder, PopulateJumpList)
   EXPECT_CALL(*testBackend, SetAppID(_)).Times(1);
 
   nsCOMPtr<nsIJumpListBuilder> builder =
-      new JumpListBuilder(aumid, testBackend);
+      new JumpListBuilder(aumid, /* aPrivateBrowsing */ false, testBackend);
   ASSERT_TRUE(builder);
 
   AutoJSAPI jsapi;
@@ -869,7 +869,7 @@ TEST(JumpListBuilder, PopulateJumpListNoOpenedItems)
   EXPECT_CALL(*testBackend, SetAppID(_)).Times(1);
 
   nsCOMPtr<nsIJumpListBuilder> builder =
-      new JumpListBuilder(aumid, testBackend);
+      new JumpListBuilder(aumid, /* aPrivateBrowsing */ false, testBackend);
   ASSERT_TRUE(builder);
 
   AutoJSAPI jsapi;
@@ -932,7 +932,7 @@ TEST(JumpListBuilder, ClearJumpList)
   EXPECT_CALL(*testBackend, SetAppID(_)).Times(1);
 
   nsCOMPtr<nsIJumpListBuilder> builder =
-      new JumpListBuilder(aumid, testBackend);
+      new JumpListBuilder(aumid, /* aPrivateBrowsing */ false, testBackend);
   ASSERT_TRUE(builder);
 
   AutoJSAPI jsapi;
@@ -973,7 +973,7 @@ TEST(JumpListBuilder, TruncateDescription)
   EXPECT_CALL(*testBackend, SetAppID(_)).Times(1);
 
   nsCOMPtr<nsIJumpListBuilder> builder =
-      new JumpListBuilder(aumid, testBackend);
+      new JumpListBuilder(aumid, /* aPrivateBrowsing */ false, testBackend);
   ASSERT_TRUE(builder);
 
   AutoJSAPI jsapi;
