@@ -166,11 +166,17 @@ struct SizeComputationInput {
                       LayoutFrameType aFrameType);
 
  protected:
+  /**
+   * @param aTrimmedMarginSides The sides, in aCBWM, whose margin is truncated
+   *        to zero because of `margin-trim` on an ancestor. Only block-axis
+   *        sides are supported.
+   */
   void InitOffsets(WritingMode aCBWM, nscoord aPercentBasis,
                    LayoutFrameType aFrameType, ComputeSizeFlags aFlags,
                    const Maybe<LogicalMargin>& aBorder,
                    const Maybe<LogicalMargin>& aPadding,
-                   const nsStyleDisplay* aDisplay = nullptr);
+                   const nsStyleDisplay* aDisplay = nullptr,
+                   EnumSet<LogicalSide> aTrimmedMarginSides = {});
 
   /**
    * Convert StyleSize or StyleMaxSize to nscoord when percentages depend on the
@@ -571,6 +577,15 @@ struct ReflowInput : public SizeComputationInput {
 
     // True if the block is a line-clamp container or a descendant thereof
     bool mIsInLineClampContainer : 1;
+
+    // Whether this frame's block-start or block-end margin is trimmed in its
+    // cb's writing mode. They are set explicitly for each ReflowInput and not
+    // inherited, because trimming reaches a descendant's margin only when that
+    // margin adjoins the trimmed edge through a collapsed margin. Border,
+    // padding or margin root can stop the propagation.
+    // https://drafts.csswg.org/css-box-4/#margin-trim
+    bool mTrimBStartMargin : 1;
+    bool mTrimBEndMargin : 1;
   };
   Flags mFlags;
 
@@ -619,6 +634,12 @@ struct ReflowInput : public SizeComputationInput {
     // @note In a Grid container's masonry axis we'll always use
     // the placeholder's position in that axis regardless of this flag.
     StaticPosIsCBOrigin,
+
+    // The frame's block-start / block-end margin (in its containing block's
+    // writing mode) is trimmed to zero because of `margin-trim` on a block
+    // container ancestor. See Flags::mTrimBStartMargin.
+    TrimBStartMargin,
+    TrimBEndMargin,
   };
   using InitFlags = EnumSet<InitFlag>;
 
