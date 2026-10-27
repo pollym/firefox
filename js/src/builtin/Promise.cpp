@@ -6547,8 +6547,9 @@ static PromiseReactionRecord* NewReactionRecord(
   // Handlers must either both be present or both be absent.
   MOZ_ASSERT(onFulfilled.isNull() == onRejected.isNull());
 
-  RootedObject incumbentGlobalRepresentative(cx, nullptr);
-  RootedObject optionalHostDefinedData(cx);
+  RootedTuple<JSObject*, JSObject*> roots(cx);
+  RootedField<JSObject*, 0> incumbentGlobalRepresentative(roots);
+  RootedField<JSObject*, 1> optionalHostDefinedData(roots);
 
   if (!GetObjectFromHostDefinedData(cx, &incumbentGlobalRepresentative,
                                     &optionalHostDefinedData)) {
