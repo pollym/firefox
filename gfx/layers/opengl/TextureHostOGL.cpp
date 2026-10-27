@@ -549,6 +549,15 @@ bool SurfaceTextureHost::SupportsExternalCompositing(
   return aBackend == WebRenderBackend::SOFTWARE;
 }
 
+SurfaceDescriptor SurfaceTextureHost::GetSurfaceDescriptor() {
+  if (!mSurfTex) {
+    return SurfaceDescriptor();
+  }
+  return SurfaceTextureDescriptor(mSurfTex->GetHandle(), mSize, mFormat,
+                                  mContinuousUpdate, mForceBT709ColorSpace,
+                                  mTransformOverride);
+}
+
 ////////////////////////////////////////////////////////////////////////
 // AndroidHardwareBufferTextureSource
 
