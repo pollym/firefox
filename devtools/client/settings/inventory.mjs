@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-/** @import { SettingSection, SettingChangeHandler } from "./types/inventory.d.ts" */
+/** @import { SettingSection, SettingChangeHandler, SettingCondition } from "./types/inventory.d.ts" */
 
 // eslint-disable-next-line no-shadow
 const { require } = ChromeUtils.importESModule(
@@ -80,6 +80,9 @@ export const inventory = [
         l10nId: "devtools-settings-tool-antitracking",
         type: "boolean",
         pref: "devtools.anti-tracking.enabled",
+        // TODO: Move Anti Tracking to an experimental tools section.
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=2084099
+        hidden: "antiTrackingUnavailable",
         changeAction: "updateToolRegistration",
       },
     ],
@@ -141,4 +144,13 @@ export const callbacks = {
     );
     Glean.devtoolsTool.registered[tool.id].set(isEnabled);
   },
+};
+
+/** @satisfies {Record<string, SettingCondition>} */
+export const conditions = {
+  // Match the old settings panel, which lists Anti Tracking only when it was
+  // enabled at startup and keeps it listed after it's unticked.
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=2084099
+  antiTrackingUnavailable: () =>
+    !gDevTools.getDefaultTools().some(tool => tool.id === "antitracking"),
 };

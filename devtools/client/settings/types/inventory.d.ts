@@ -4,17 +4,20 @@
 
 import { Toolbox } from "../../framework/toolbox.js";
 import { SettingChangedEvent } from "../events.mjs";
-import { callbacks } from "../inventory.mjs";
+import { callbacks, conditions } from "../inventory.mjs";
 
 export type SettingChangeHandler = (context: {
   toolbox: Toolbox;
   event: SettingChangedEvent;
 }) => void;
 
+export type SettingCondition = () => boolean;
+
 export interface BaseSetting {
   id: string;
   pref: string;
   l10nId: string;
+  hidden?: keyof typeof conditions;
   changeAction?: keyof typeof callbacks;
 }
 

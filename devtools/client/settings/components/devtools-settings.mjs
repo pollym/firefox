@@ -7,7 +7,7 @@
 import { html, nothing } from "chrome://global/content/vendor/lit.all.mjs";
 import { MozLitElement } from "chrome://global/content/lit-utils.mjs";
 
-import { inventory } from "../inventory.mjs";
+import { conditions, inventory } from "../inventory.mjs";
 
 /**
  * @import { Setting, SettingSection } from "../types/inventory.d.ts"
@@ -37,9 +37,16 @@ export class DevToolsSettings extends MozLitElement {
 
   /** @param {SettingSection} section */
   #renderSection(section) {
+    const settings = [];
+    for (const setting of section.settings) {
+      if (setting.hidden && conditions[setting.hidden]()) {
+        continue;
+      }
+      settings.push(this.#renderSetting(setting));
+    }
     return html`
       <moz-fieldset id=${section.id} data-l10n-id=${section.l10nId}>
-        ${section.settings.map(setting => this.#renderSetting(setting))}
+        ${settings}
       </moz-fieldset>
     `;
   }
