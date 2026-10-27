@@ -295,7 +295,7 @@ def _collect(pipe, poll_interval):
 
         last_process_sample = None
 
-        def update_known_processes():
+        def update_known_processes(force=False):
             nonlocal known_processes, last_process_sample
 
             if process_sampling_interval is None:
@@ -304,7 +304,8 @@ def _collect(pipe, poll_interval):
             # Polls are not evenly spaced, so allow for half a poll of slack
             # to not skip polls when the interval is a multiple of it.
             if (
-                last_process_sample is not None
+                not force
+                and last_process_sample is not None
                 and now - last_process_sample + poll_interval / 2
                 < process_sampling_interval
             ):
@@ -408,6 +409,10 @@ def _collect(pipe, poll_interval):
             collection_overhead = time.monotonic() - last_time - sleep_interval
             last_time = measured_end_time
             sleep_interval = max(poll_interval / 2, poll_interval - collection_overhead)
+
+        # Take a last sample so that processes started since the previous one
+        # are recorded as still running.
+        update_known_processes(force=True)
 
     except Exception as e:
         warnings.warn(f"_collect failed: {e}")
@@ -858,7 +863,18 @@ class SystemResourceMonitor:
 
     def _drain_pipe_locked(self, until_done):
         poll_interval = 0.1 if until_done else 0
-        while _poll(self._pipe, poll_interval=poll_interval):
+        deadline = time.monotonic() + 10
+        while True:
+            # The collector may take a while to send the remaining data, e.g.
+            # when it receives the termination request while enumerating
+            # processes, so keep waiting for it as long as it's alive.
+            alive = (
+                until_done and self._process.is_alive() and time.monotonic() < deadline
+            )
+            if not _poll(self._pipe, poll_interval=poll_interval):
+                if alive:
+                    continue
+                break
             try:
                 (
                     start_time,
