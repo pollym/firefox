@@ -181,6 +181,45 @@ class PdfToolsIntegrationTest {
     }
 
     @Test
+    fun `WHEN add is activated again before or after the engine responds THEN the signature is handed over once`() {
+        val engineSession = mockk<EngineSession>()
+        val onResult = slot<() -> Unit>()
+        every { engineSession.addSignatureToPdf(any(), capture(onResult), any()) } returns Unit
+        val integration = integration(store = storeOf(pdfTabWith(engineSession)))
+        integration.handleSignClick()
+        integration.signatureState.signature.setTextAndPlaceCursorAtEnd("Test User")
+
+        integration.handleSignAddClick()
+        integration.handleSignAddClick()
+        onResult.captured()
+        integration.handleSignAddClick()
+
+        verify(exactly = 1) { engineSession.addSignatureToPdf(any(), any(), any()) }
+    }
+
+    @Test
+    fun `GIVEN a signature is being added WHEN the dialog is closed and reopened THEN the signature is kept until the engine responds`() {
+        val engineSession = mockk<EngineSession>()
+        val onResult = slot<() -> Unit>()
+        every { engineSession.addSignatureToPdf(any(), capture(onResult), any()) } returns Unit
+        val integration = integration(store = storeOf(pdfTabWith(engineSession)))
+        integration.handleSignClick()
+        integration.signatureState.signature.setTextAndPlaceCursorAtEnd("Test User")
+        integration.handleSignAddClick()
+
+        integration.handleSignCloseClick()
+        integration.handleSignClick()
+
+        assertTrue(integration.signatureState.isAddingSignature)
+        assertEquals("Test User", integration.signatureState.signature.text.toString())
+
+        onResult.captured()
+
+        assertFalse(integration.signatureState.isSigning)
+        assertEquals("", integration.signatureState.signature.text.toString())
+    }
+
+    @Test
     fun `WHEN download is activated THEN the selected tab is saved as a PDF`() {
         integration().handleDownloadClick()
 
