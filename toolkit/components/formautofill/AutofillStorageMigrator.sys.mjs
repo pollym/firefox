@@ -39,12 +39,13 @@ const GUID_LIKE = /\b(?=[A-Za-z0-9+/]*[0-9])[A-Za-z0-9+/]{12,}\b/g;
 
 // A failure is reported as a code to group on and a message to read. The
 // message is free text -- a store's own error can name the record it was
-// writing -- so blank the guids out of it and cap it.
+// writing -- so blank the guids out of it and cap it. An XPCOM exception can
+// carry an empty message, and then its result name is what says why.
 const errorCodeOf = e =>
   e instanceof lazy.AutofillApiError ? e.constructor.name : "Unknown";
 
 const errorTextOf = e =>
-  String(e?.message ?? e)
+  String(e?.message || e?.name || e)
     .replace(GUID_LIKE, "<id>")
     .slice(0, 200);
 

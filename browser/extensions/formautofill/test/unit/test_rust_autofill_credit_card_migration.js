@@ -302,10 +302,9 @@ add_task(async function test_unreadable_numbers_fail_the_attempt() {
   // reported, counted against the retry budget, and the profile left on JSON.
   // A key store that is merely locked defers instead, without spending one.
   const realDecrypt = OSKeyStore.decrypt;
+  // Shaped like the native key store's rejection, which has no message.
   OSKeyStore.decrypt = async function () {
-    const e = new Error("keystore unavailable");
-    e.result = Cr.NS_ERROR_FAILURE;
-    throw e;
+    throw Components.Exception("", Cr.NS_ERROR_FAILURE);
   };
   try {
     s = await enableRust(s);
@@ -317,6 +316,11 @@ add_task(async function test_unreadable_numbers_fail_the_attempt() {
   const [event] = migrationEvents();
   Assert.equal(event?.extra.result, "error", "and was reported as a failure");
   Assert.equal(event.extra.failed, "1", "with the unreadable card failed");
+  Assert.equal(
+    event.extra.error_message,
+    "NS_ERROR_FAILURE",
+    "named by its result, for want of a message"
+  );
   Assert.equal(
     Services.prefs.getIntPref(ATTEMPTS_PREF, 0),
     1,
