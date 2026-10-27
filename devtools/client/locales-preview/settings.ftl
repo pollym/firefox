@@ -106,6 +106,7 @@ devtools-settings-styleeditor =
 
 devtools-settings-styleeditor-autocompletion =
     .label = Autocomplete CSS
+    .title = Autocomplete CSS properties, values and selectors in Style Editor as you type
 
 ## Screenshot Behavior section, configuring the screenshot button and command.
 
