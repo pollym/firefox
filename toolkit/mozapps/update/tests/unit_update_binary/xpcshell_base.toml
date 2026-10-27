@@ -129,6 +129,8 @@ run-if = [
 ]
 reason = "Unix only test"
 
+["marFailureCompleteStaleBackup.js"]
+
 ["marFailurePartial.js"]
 
 ["marFailurePartialStaleBackup.js"]

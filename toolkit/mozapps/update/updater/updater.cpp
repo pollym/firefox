@@ -1252,6 +1252,28 @@ static int backup_discard(const NS_tchar* path, const NS_tchar* relPath) {
   return NS_tvsnprintf(draft, MAXPATHLEN, NS_T("%s") DRAFT_EXT, path);
 }
 
+#ifdef TEST_UPDATER
+// Returns true if a test asks for writing the draft of the specified file to
+// fail. Matching is on the leaf name only, and exact.
+static bool test_draft_write_fails(const NS_tchar* path) {
+#  ifdef XP_WIN
+  const wchar_t* failName = _wgetenv(L"MOZ_TEST_DRAFT_WRITE_FAIL");
+#  else
+  const char* failName = getenv("MOZ_TEST_DRAFT_WRITE_FAIL");
+#  endif
+  if (!failName || !*failName) {
+    return false;
+  }
+  const NS_tchar* leaf = path;
+  for (const NS_tchar* c = path; *c; ++c) {
+    if (*c == NS_T('\\') || *c == NS_T('/')) {
+      leaf = c + 1;
+    }
+  }
+  return !NS_tstrcmp(leaf, failName);
+}
+#endif
+
 // Discard the file that holds the draft contents of the specified file. This is
 // also used to get rid of files that a previous updater instance left behind
 // when it crashed, so it only ever discards drafts for paths that the update
@@ -1681,6 +1703,16 @@ int AddFile::Draft() {
   if (rv) {
     return rv;
   }
+
+#ifdef TEST_UPDATER
+  if (test_draft_write_fails(mFile.get())) {
+    LOG(
+        ("AddFile::Draft: TEST fault injection, pretending the draft write "
+         "failed: " LOG_S,
+         mRelPath.get()));
+    return WRITE_ERROR;
+  }
+#endif
 
   return extract_file(mRelPath.get(), draft);
 }
