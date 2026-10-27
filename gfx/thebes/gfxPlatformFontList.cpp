@@ -2372,9 +2372,10 @@ void gfxPlatformFontList::AddGenericFonts(
   AutoLock lock(mLock);
 
   // TODO(eri): For now the math generic language uses the legacy
-  // "serif.x-math" configuration font list to avoid excessive
+  // "serif.x-math" configuration font list to avoid excesive
   // repetition until a better font preference system can be found.
-  if (aGenericType == StyleGenericFontFamily::Math) {
+  if (StaticPrefs::mathml_font_family_math_enabled() &&
+      aGenericType == StyleGenericFontFamily::Math) {
     aGenericType = StyleGenericFontFamily::Serif;
     aLanguage = nsGkAtoms::x_math;
   }
