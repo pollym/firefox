@@ -225,6 +225,11 @@ https_first_disabled = true
 
 ["browser_mobile_root_on_bookmark_menus.js"]
 
+["browser_native_menu_query_limit.js"]
+run-if = [
+  "os == 'mac'",
+]
+
 ["browser_panelview_bookmarks_delete.js"]
 
 ["browser_paste_bookmarks.js"]

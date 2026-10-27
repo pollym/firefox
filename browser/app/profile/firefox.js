@@ -1652,6 +1652,12 @@ pref("places.frecency.origins.alternative.featureGate", false);
 // Whether to warm up network connections for places: menus and places: toolbar.
 pref("browser.places.speculativeConnect.enabled", true);
 
+#ifdef XP_MACOSX
+// Limit query results in the native macOS menu. Set to 0 to disable the limit.
+// Restart for changes to fully apply to cached queries.
+pref("browser.places.nativeMenu.maxResults", 100);
+#endif
+
 // if true, use full page zoom instead of text zoom
 pref("browser.zoom.full", true);
 
