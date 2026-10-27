@@ -984,6 +984,7 @@ private fun TabSessionState?.describeArticle(): ArticleDisplayData =
     ArticleDisplayData(
         title = this?.content?.title?.takeIf { it.isNotBlank() },
         site = this?.pageUrl?.toUri()?.host?.takeIf { it.isNotBlank() }?.stripCommonSubdomains(),
+        isPrivate = this?.content?.private == true,
     )
 
 /**

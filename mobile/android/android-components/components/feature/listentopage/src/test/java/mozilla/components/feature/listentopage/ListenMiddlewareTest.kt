@@ -450,6 +450,28 @@ class ListenMiddlewareTest {
         assertNull(playback.displayDataList.first().site)
     }
 
+    @Test
+    fun `test that an article from a private tab is described as private`() = runTest {
+        val playback = FakePlaybackController()
+        val privateTab = createTab(url = URL, id = TAB_ID, title = "An article", private = true)
+        val store =
+            storeWith(
+                playbackController = playback,
+                browserStore = BrowserStore(BrowserState(tabs = listOf(privateTab), selectedTabId = TAB_ID)),
+            ) {
+                Result.success(Content(text = "Article text.", languageTag = "en-US"))
+            }
+        store.listenAndPlay(TAB_ID, URL)
+        advanceUntilIdle()
+
+        assertEquals(
+            ArticleDisplayData(title = "An article", site = "example.org", isPrivate = true),
+            playback.displayDataList.first(),
+        )
+        assertEquals("An article", store.state.title)
+        assertEquals("example.org", store.state.site)
+    }
+
     // Reported as having no title rather than given one, so that whatever reads this knows the page itself was
     // untitled. The notification shows the app's name in that case, and puts it on in ListenPlaybackController.
     @Test
