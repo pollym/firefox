@@ -111,11 +111,17 @@ add_task(async function testLocalMode() {
       "text/html",
       "the html file is served with the right mime type"
     );
-    const linkToHtmlFile = content.document.querySelector("a");
+    const [linkWithHtmlString, linkToHtmlFile] =
+      content.document.querySelectorAll("a");
     is(
       linkToHtmlFile.textContent,
       "test.html",
       "The link is for the folder unique file"
+    );
+    is(
+      linkWithHtmlString.textContent,
+      "<img>",
+      "The link is for the file whose name includes html entity"
     );
     info("Navigate via a <a> link");
     linkToHtmlFile.click();
