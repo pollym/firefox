@@ -1405,8 +1405,8 @@ tab-group > tab-split-view-wrapper {
 
       .tab-group-line {
         inset-inline-start: calc(var(--tab-margin-inline-inner) * -1) !important;
-        inset-block-start: calc(var(--space-xsmall) * -2);
-        inset-block-end: calc(var(--space-xsmall) * -1);
+        inset-block-start: calc(var(--split-view-wrapper-padding) * -2);
+        inset-block-end: calc(var(--split-view-wrapper-padding) * -1);
       }
 
       :root:not([sidebar-expand-on-hover]) &:last-child {
