@@ -1,26 +1,25 @@
-From aa77838ad96ae0e8e9edac5c4ba007d7a4fca889 Mon Sep 17 00:00:00 2001
-From: Nicolas Guichard <nicolas.guichard@kdab.com>
-Date: Wed, 7 Oct 2026 09:33:10 +0200
-Subject: [PATCH] [gcov] Add support for -fprofile-abs-path
+From 88de0d5aed552bffe56a9eedde21894e349abd00 Mon Sep 17 00:00:00 2001
+From: Nicolas Qiu Guichard <nicolas@guichard.eu>
+Date: Fri, 23 Oct 2026 17:11:04 +0200
+Subject: [PATCH] [gcov] Add support for -fprofile-abs-path (#230077)
 
 GCC has a -fprofile-abs-path option to use absolute paths to source
 files in GCNO files. Citing GCC's documentation:
 > Automatically convert relative source file names to absolute path
-> names in the .gcno files. This allows gcov to find the correct
-> sources in projects where compilations occur with different working
-> directories.
+names in the .gcno files. This allows gcov to find the correct sources
+in projects where compilations occur with different working directories.
 
 This is particularly useful when doing unity builds where a generated
-source file includes many original source files, as otherwise the
-GCNO refers to the original source files by relative paths.
+source file includes many original source files, as otherwise the GCNO
+refers to the original source files by relative paths.
 
 When the -fprofile-abs-path flag is passed to clang/clang++, the new
 -coverage-notes-abs-paths flag is passed to cc1, which calls
 vfs::FileSystem::makeAbsolute to get the absolute path.
 
-getFilename is moved to a member function in GCOVProfiler so that it
-can access the GCOVOptions. This also removes the need for its VFS
-argument and the getVirtualFileSystem member function.
+getFilename is moved to a member function in GCOVProfiler so that it can
+access the GCOVOptions. This also removes the need for its VFS argument
+and the getVirtualFileSystem member function.
 ---
  clang/include/clang/Basic/CodeGenOptions.h    |  3 ++
  clang/include/clang/Options/Options.td        |  6 ++++
@@ -34,10 +33,10 @@ argument and the getVirtualFileSystem member function.
  create mode 100644 clang/test/CodeGen/code-coverage-absolute-paths.c
 
 diff --git a/clang/include/clang/Basic/CodeGenOptions.h b/clang/include/clang/Basic/CodeGenOptions.h
-index c3a23415c922..99a76b4edbf0 100644
+index c12434135a19..72d173b1a698 100644
 --- a/clang/include/clang/Basic/CodeGenOptions.h
 +++ b/clang/include/clang/Basic/CodeGenOptions.h
-@@ -292,6 +292,9 @@ public:
+@@ -255,6 +255,9 @@ public:
    /// The filename with path we use for coverage notes files.
    std::string CoverageNotesFile;
  
@@ -48,10 +47,10 @@ index c3a23415c922..99a76b4edbf0 100644
    std::string ProfileFilterFiles;
  
 diff --git a/clang/include/clang/Options/Options.td b/clang/include/clang/Options/Options.td
-index 88fbd72f4eae..82aba4d4da4f 100644
+index f893d858d526..606c2cc6020a 100644
 --- a/clang/include/clang/Options/Options.td
 +++ b/clang/include/clang/Options/Options.td
-@@ -2020,6 +2020,10 @@ def fno_profile_use : Flag<["-"], "fno-profile-use">,
+@@ -1927,6 +1927,10 @@ def fno_profile_use : Flag<["-"], "fno-profile-use">,
  def ftest_coverage : Flag<["-"], "ftest-coverage">, Group<f_Group>,
      HelpText<"Produce gcov notes files (*.gcno)">;
  def fno_test_coverage : Flag<["-"], "fno-test-coverage">, Group<f_Group>;
@@ -62,7 +61,7 @@ index 88fbd72f4eae..82aba4d4da4f 100644
  def fprofile_arcs : Flag<["-"], "fprofile-arcs">, Group<f_Group>,
      HelpText<"Instrument code to produce gcov data files (*.gcda)">;
  def fno_profile_arcs : Flag<["-"], "fno-profile-arcs">, Group<f_Group>;
-@@ -8246,6 +8250,8 @@ def : Joined<["-"], "coverage-data-file=">,
+@@ -8028,6 +8032,8 @@ def : Joined<["-"], "coverage-data-file=">,
    MarshallingInfoString<CodeGenOpts<"CoverageDataFile">>;
  def : Joined<["-"], "coverage-notes-file=">,
    MarshallingInfoString<CodeGenOpts<"CoverageNotesFile">>;
@@ -72,10 +71,10 @@ index 88fbd72f4eae..82aba4d4da4f 100644
    HelpText<"Four-byte version string for gcov files.">;
  def dump_coverage_mapping : Flag<["-"], "dump-coverage-mapping">,
 diff --git a/clang/lib/CodeGen/BackendUtil.cpp b/clang/lib/CodeGen/BackendUtil.cpp
-index c754c75aa59d..6ba8ebd2bc4d 100644
+index e3ae446fbe81..5e5f6b099b14 100644
 --- a/clang/lib/CodeGen/BackendUtil.cpp
 +++ b/clang/lib/CodeGen/BackendUtil.cpp
-@@ -527,6 +527,7 @@ getGCOVOptions(const CodeGenOptions &CodeGenOpts, const LangOptions &LangOpts) {
+@@ -565,6 +565,7 @@ getGCOVOptions(const CodeGenOptions &CodeGenOpts, const LangOptions &LangOpts) {
    // LLVM's -default-gcov-version flag is set to something invalid.
    GCOVOptions Options;
    Options.EmitNotes = !CodeGenOpts.CoverageNotesFile.empty();
@@ -84,10 +83,10 @@ index c754c75aa59d..6ba8ebd2bc4d 100644
    llvm::copy(CodeGenOpts.CoverageVersion, std::begin(Options.Version));
    Options.NoRedZone = CodeGenOpts.DisableRedZone;
 diff --git a/clang/lib/Driver/ToolChains/Clang.cpp b/clang/lib/Driver/ToolChains/Clang.cpp
-index 63e7c42549d3..df29f8d9c98f 100644
+index db7893c547ee..5ba61b6adf3b 100644
 --- a/clang/lib/Driver/ToolChains/Clang.cpp
 +++ b/clang/lib/Driver/ToolChains/Clang.cpp
-@@ -688,6 +688,12 @@ static void addPGOAndCoverageFlags(const ToolChain &TC, Compilation &C,
+@@ -689,6 +689,12 @@ static void addPGOAndCoverageFlags(const ToolChain &TC, Compilation &C,
      if (EmitCovNotes) {
        CmdArgs.push_back(
            Args.MakeArgString("-coverage-notes-file=" + CoverageFilename));
@@ -139,7 +138,7 @@ index ab791ada2d35..4aee8720470d 100644
  /// -fprofile-arcs is passed.
  // RUN: %clang -### -c %s 2>&1 | FileCheck --check-prefix=NO-COV %s
 diff --git a/llvm/include/llvm/Transforms/Utils/Instrumentation.h b/llvm/include/llvm/Transforms/Utils/Instrumentation.h
-index 8405245b2bc0..e8279ae58e2c 100644
+index 95a985ba3f0c..8921304ba677 100644
 --- a/llvm/include/llvm/Transforms/Utils/Instrumentation.h
 +++ b/llvm/include/llvm/Transforms/Utils/Instrumentation.h
 @@ -67,6 +67,9 @@ struct GCOVOptions {
@@ -153,7 +152,7 @@ index 8405245b2bc0..e8279ae58e2c 100644
    bool EmitData;
  
 diff --git a/llvm/lib/Transforms/Instrumentation/GCOVProfiling.cpp b/llvm/lib/Transforms/Instrumentation/GCOVProfiling.cpp
-index 78b5dcf21cd0..0c96adddc72c 100644
+index 9f47c43bb9a0..8970b5f25814 100644
 --- a/llvm/lib/Transforms/Instrumentation/GCOVProfiling.cpp
 +++ b/llvm/lib/Transforms/Instrumentation/GCOVProfiling.cpp
 @@ -76,6 +76,7 @@ static unsigned wordsOfString(StringRef s) {
@@ -239,5 +238,5 @@ index 78b5dcf21cd0..0c96adddc72c 100644
          }
          Line = 0;
 -- 
-2.55.0
+2.56.0
 

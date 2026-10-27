@@ -3157,10 +3157,10 @@ def coverage_cflags(target, c_compiler, build_env, moz_automation):
         ]
 
     # In automation we have patch adding -fprofile-abs-path starting with Clang 22
-    if (
-        c_compiler.type in ("clang", "clang-cl")
-        and c_compiler.version >= "22.0.0"
-        and moz_automation
+    # This patch was accepted upstream in Clang 24
+    if c_compiler.type in ("clang", "clang-cl") and (
+        c_compiler.version >= "24.0.0"
+        or (c_compiler.version >= "22.0.0" and moz_automation)
     ):
         cflags += ["-fprofile-abs-path"]
 
