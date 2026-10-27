@@ -169,7 +169,12 @@ add_task(async function test_BHRObserver() {
     equal(typeof module[1], "string");
   });
 
-  telSvc.payload.hangs.forEach(hang => {
+  // Other monitored threads (e.g. Compositor, Render) can also report hangs
+  // when the machine is under load.
+  let geckoHangs = telSvc.payload.hangs.filter(hang =>
+    hang.thread.startsWith("Gecko")
+  );
+  geckoHangs.forEach(hang => {
     Assert.greater(hang.duration, 0);
     ok(hang.thread == "Gecko" || hang.thread == "Gecko_Child");
     equal(typeof hang.runnableName, "string");
