@@ -79,6 +79,16 @@ devtools-settings-toolbox-measure =
 devtools-settings-toolbox-jstracer =
     .label = Show JavaScript Tracer button
 
+## Experimental Features section.
+
+devtools-settings-experimental =
+    .label = Experimental Features
+
+devtools-settings-debugger-stylesheets =
+    .label = Show stylesheets in the debugger
+    .title = List and view stylesheets in the debugger
+    .description = Requires reopening the toolbox
+
 ## Style Editor section, configuring the CSS Style Editor.
 
 devtools-settings-styleeditor =

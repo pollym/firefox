@@ -184,6 +184,18 @@ export const inventory = [
     ],
   },
   {
+    id: "settings-experimental",
+    l10nId: "devtools-settings-experimental",
+    settings: [
+      {
+        id: "settings-debugger-stylesheets",
+        l10nId: "devtools-settings-debugger-stylesheets",
+        type: "boolean",
+        pref: "devtools.debugger.features.stylesheets-in-debugger",
+      },
+    ],
+  },
+  {
     id: "settings-styleeditor",
     l10nId: "devtools-settings-styleeditor",
     settings: [
