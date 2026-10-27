@@ -1314,7 +1314,11 @@ class BrowserToolbarMiddleware(
                         if (browserScreenStore.state.readerModeStatus.isActive) {
                             R.string.browser_menu_read_close
                         } else {
-                            R.string.browser_menu_read
+                            if (settings.listenToPageFeatureFlagEnabled) {
+                                R.string.browser_menu_read_or_listen
+                            } else {
+                                R.string.browser_menu_read
+                            }
                         },
                     state =
                         if (browserScreenStore.state.readerModeStatus.isActive) {

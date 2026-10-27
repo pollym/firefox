@@ -3073,7 +3073,7 @@ class BrowserToolbarMiddlewareTest {
     }
 
     @Test
-    fun `GIVEN listen to page enabled WHEN building inactive ReaderMode action THEN uses the audio icon`() {
+    fun `GIVEN listen to page enabled WHEN building inactive ReaderMode action THEN uses the audio icon and description`() {
         val readerModeStatus: ReaderModeStatus =
             mockk(relaxed = true) {
                 every { isAvailable } returns true
@@ -3087,7 +3087,7 @@ class BrowserToolbarMiddlewareTest {
         val result = middleware.buildAction(toolbarAction = ToolbarAction.ReaderMode) as ActionButtonRes
 
         assertEquals(iconsR.drawable.mozac_ic_reader_view_headphones_24, result.drawableResId)
-        assertEquals(R.string.browser_menu_read, result.contentDescription)
+        assertEquals(R.string.browser_menu_read_or_listen, result.contentDescription)
         assertEquals(ActionButton.State.DEFAULT, result.state)
         assertEquals(ReaderModeClicked(false), result.onClick)
     }
