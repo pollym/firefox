@@ -1130,20 +1130,26 @@ class JsepVideoCodecDescription final : public JsepCodecDescription {
         }
         // The negotiated level implies a macroblocks-per-frame/-second cap
         // (Annex A Table A-1) even when the remote didn't explicitly signal
-        // max-fs/max-mbps (the common case). Combine with any explicit
-        // signal by taking the tighter of the two, so we never ask the
-        // encoder for more than the level permits.
+        // max-fs/max-mbps (the common case). Per RFC 6184 section 8.1, an
+        // explicit max-fs/max-mbps replaces the level's value, in either
+        // direction, so the level only fills in what wasn't signaled. Explicit
+        // values are bounded by the highest level we can represent, so a
+        // hostile or bogus value can't overflow later size calculations.
         if (Maybe<H264MacroblockLimits> levelLimits =
                 H264MacroblockLimitsForLevel(SaneH264LevelToH264Level(
                     GetSaneH264Level(mProfileLevelId)))) {
-          if (!mConstraints.maxFs ||
-              mConstraints.maxFs > levelLimits->mMaxMacroblocksPerFrame) {
-            mConstraints.maxFs = levelLimits->mMaxMacroblocksPerFrame;
-          }
-          if (!mConstraints.maxMbps ||
-              mConstraints.maxMbps > levelLimits->mMaxMacroblocksPerSecond) {
-            mConstraints.maxMbps = levelLimits->mMaxMacroblocksPerSecond;
-          }
+          Maybe<H264MacroblockLimits> hardLimits =
+              H264MacroblockLimitsForLevel(H264_LEVEL::H264_LEVEL_5_2);
+          MOZ_ASSERT(hardLimits);
+          mConstraints.maxFs =
+              mConstraints.maxFs ? std::min(mConstraints.maxFs,
+                                            hardLimits->mMaxMacroblocksPerFrame)
+                                 : levelLimits->mMaxMacroblocksPerFrame;
+          mConstraints.maxMbps =
+              mConstraints.maxMbps
+                  ? std::min(mConstraints.maxMbps,
+                             hardLimits->mMaxMacroblocksPerSecond)
+                  : levelLimits->mMaxMacroblocksPerSecond;
         }
       } else {
         // TODO(bug 1143709): max-recv-level support
