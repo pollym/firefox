@@ -448,9 +448,9 @@ abstract class BaseBrowserFragment :
                     fragmentManager = parentFragmentManager,
                     sessionId = customTabSessionId,
                     dialog = appLinksPromptDialog(),
-                    launchInApp = { requireComponents.settings.shouldOpenLinksInApp(customTabSessionId != null) },
+                    launchInApp = { _ -> requireComponents.settings.shouldOpenLinksInApp(customTabSessionId != null) },
                     loadUrlUseCase = requireComponents.useCases.sessionUseCases.loadUrl,
-                    shouldPrompt = { requireComponents.settings.shouldPromptOpenLinksInApp() },
+                    shouldPrompt = { _ -> requireComponents.settings.shouldPromptOpenLinksInApp() },
                     alwaysOpenCheckboxAction = {
                         requireComponents.settings.openLinksInExternalApp =
                             requireContext().getString(R.string.pref_key_open_links_in_apps_always)

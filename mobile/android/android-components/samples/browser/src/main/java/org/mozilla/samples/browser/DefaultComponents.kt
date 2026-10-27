@@ -266,7 +266,7 @@ open class DefaultComponents(private val applicationContext: Context) {
     val appLinksInterceptor by lazy {
         AppLinksInterceptor(
             context = applicationContext,
-            launchInApp = {
+            launchInApp = { _ ->
                 applicationContext.components.preferences.getBoolean(PREF_LAUNCH_EXTERNAL_APP, false)
             },
             launchFromInterceptor = true,

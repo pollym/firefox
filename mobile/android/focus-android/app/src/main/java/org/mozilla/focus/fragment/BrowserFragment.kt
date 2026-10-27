@@ -424,7 +424,7 @@ class BrowserFragment : BaseFragment(), UserInteractionHandler, AccessibilityMan
                     store = components.store,
                     sessionId = tabId,
                     fragmentManager = parentFragmentManager,
-                    launchInApp = { requireContext().settings.openLinksInExternalApp },
+                    launchInApp = { _ -> requireContext().settings.openLinksInExternalApp },
                     loadUrlUseCase = requireContext().components.sessionUseCases.loadUrl,
                     failedToLaunchAction = { fallbackUrl ->
                         fallbackUrl?.let {
