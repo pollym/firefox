@@ -78,7 +78,7 @@ constexpr ContentClassifierFeature kFeatures[] = {
      nsIWebProgressListener::STATE_ALLOWED_TRACKING_CONTENT,
      NS_ERROR_TRACKING_URI, false, true,
      Some(nsIScopedPrefs::PRIVACY_TRACKINGPROTECTION_CONTENT_ENABLED),
-     &ContentClassifierFeatureUtils::IsThirdPartyUnlessAnnotating, nullptr},
+     &ContentClassifierFeatureUtils::ShouldClassifyForETP, nullptr},
     // The annotation variant adds content-track-digest256, which mirrors
     // url-classifier's promotion to STATE_LOADED_LEVEL_2_TRACKING_CONTENT
     // when a content-track-* table matches.
@@ -89,7 +89,7 @@ constexpr ContentClassifierFeature kFeatures[] = {
      nsIWebProgressListener::STATE_REPLACED_TRACKING_CONTENT,
      nsIWebProgressListener::STATE_ALLOWED_TRACKING_CONTENT,
      NS_ERROR_TRACKING_URI, false, true, Nothing(),
-     &ContentClassifierFeatureUtils::IsThirdPartyUnlessAnnotating, nullptr},
+     &ContentClassifierFeatureUtils::ShouldClassifyForETP, nullptr},
     {"social-trackers"_ns, Span<const nsLiteralCString>(kSocialTrackersListIds),
      nsIClassifiedChannel::ClassificationFlags::CLASSIFIED_SOCIALTRACKING,
      nsIWebProgressListener::STATE_LOADED_SOCIALTRACKING_CONTENT,
@@ -98,7 +98,7 @@ constexpr ContentClassifierFeature kFeatures[] = {
      NS_ERROR_SOCIALTRACKING_URI, false, true,
      Some(nsIScopedPrefs::
               PRIVACY_TRACKINGPROTECTION_CONTENT_SOCIALTRACKING_ENABLED),
-     &ContentClassifierFeatureUtils::IsThirdPartyUnlessAnnotating, nullptr},
+     &ContentClassifierFeatureUtils::ShouldClassifyForETP, nullptr},
     {"fingerprinters"_ns, Span<const nsLiteralCString>(kFingerprintersListIds),
      nsIClassifiedChannel::ClassificationFlags::CLASSIFIED_FINGERPRINTING,
      nsIWebProgressListener::STATE_LOADED_FINGERPRINTING_CONTENT,
@@ -107,8 +107,7 @@ constexpr ContentClassifierFeature kFeatures[] = {
      NS_ERROR_FINGERPRINTING_URI, false, true,
      Some(nsIScopedPrefs::
               PRIVACY_TRACKINGPROTECTION_CONTENT_FINGERPRINTING_ENABLED),
-     &ContentClassifierFeatureUtils::IsNonPassiveThirdPartyUnlessAnnotating,
-     nullptr},
+     &ContentClassifierFeatureUtils::ShouldClassifyNonPassiveForETP, nullptr},
     {"email-trackers"_ns, Span<const nsLiteralCString>(kEmailTrackersListIds),
      nsIClassifiedChannel::ClassificationFlags::CLASSIFIED_EMAILTRACKING,
      nsIWebProgressListener::STATE_LOADED_EMAILTRACKING_LEVEL_1_CONTENT,
@@ -117,7 +116,7 @@ constexpr ContentClassifierFeature kFeatures[] = {
      NS_ERROR_EMAILTRACKING_URI, false, true,
      Some(nsIScopedPrefs::
               PRIVACY_TRACKINGPROTECTION_CONTENT_EMAILTRACKING_ENABLED),
-     &ContentClassifierFeatureUtils::IsThirdPartyUnlessAnnotating, nullptr},
+     &ContentClassifierFeatureUtils::ShouldClassifyForETP, nullptr},
     {"cryptominers"_ns, Span<const nsLiteralCString>(kCryptominersListIds),
      nsIClassifiedChannel::ClassificationFlags::CLASSIFIED_CRYPTOMINING,
      nsIWebProgressListener::STATE_LOADED_CRYPTOMINING_CONTENT,
@@ -126,7 +125,7 @@ constexpr ContentClassifierFeature kFeatures[] = {
      NS_ERROR_CRYPTOMINING_URI, false, true,
      Some(nsIScopedPrefs::
               PRIVACY_TRACKINGPROTECTION_CONTENT_CRYPTOMINING_ENABLED),
-     &ContentClassifierFeatureUtils::IsThirdPartyUnlessAnnotating, nullptr},
+     &ContentClassifierFeatureUtils::ShouldClassifyForETP, nullptr},
     {"harmful-addon"_ns, Span<const nsLiteralCString>(kHarmfulAddonListIds),
      nsIClassifiedChannel::ClassificationFlags::CLASSIFIED_TRACKING,
      0,  // mLoadedState: blocking-only feature, not annotated
@@ -139,12 +138,12 @@ constexpr ContentClassifierFeature kFeatures[] = {
      Span<const nsLiteralCString>(kMinorExceptionListIds),
      nsIClassifiedChannel::ClassificationFlags::CLASSIFIED_TRACKING, 0, 0, 0,
      NS_OK, true, true, Nothing(),
-     &ContentClassifierFeatureUtils::IsThirdPartyUnlessAnnotating, nullptr},
+     &ContentClassifierFeatureUtils::ShouldClassifyForETP, nullptr},
     {"major-exceptions"_ns,
      Span<const nsLiteralCString>(kMajorExceptionListIds),
      nsIClassifiedChannel::ClassificationFlags::CLASSIFIED_TRACKING, 0, 0, 0,
      NS_OK, true, true, Nothing(),
-     &ContentClassifierFeatureUtils::IsThirdPartyUnlessAnnotating, nullptr},
+     &ContentClassifierFeatureUtils::ShouldClassifyForETP, nullptr},
     // Test-only features. Their engines are built directly by the HTTP
     // test loader (driven by the *.test_list_urls prefs) and installed
     // into mEngines under these names. They behave like any other
@@ -156,14 +155,14 @@ constexpr ContentClassifierFeature kFeatures[] = {
      nsIWebProgressListener::STATE_ALLOWED_TRACKING_CONTENT,
      NS_ERROR_TRACKING_URI, false, false,
      Some(nsIScopedPrefs::PRIVACY_TRACKINGPROTECTION_CONTENT_TEST_ENABLED),
-     &ContentClassifierFeatureUtils::IsThirdPartyUnlessAnnotating, nullptr},
+     &ContentClassifierFeatureUtils::ShouldClassifyForETP, nullptr},
     {"test_annotate"_ns, Span<const nsLiteralCString>(kTestAnnotateListIds),
      nsIClassifiedChannel::ClassificationFlags::CLASSIFIED_TRACKING,
      nsIWebProgressListener::STATE_LOADED_LEVEL_1_TRACKING_CONTENT,
      nsIWebProgressListener::STATE_REPLACED_TRACKING_CONTENT,
      nsIWebProgressListener::STATE_ALLOWED_TRACKING_CONTENT, NS_OK, false,
-     false, Nothing(),
-     &ContentClassifierFeatureUtils::IsThirdPartyUnlessAnnotating, nullptr},
+     false, Nothing(), &ContentClassifierFeatureUtils::ShouldClassifyForETP,
+     nullptr},
 };
 
 // Prefs that name feature engines built into mEngines.
