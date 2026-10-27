@@ -89,6 +89,16 @@ devtools-settings-debugger-stylesheets =
     .title = List and view stylesheets in the debugger
     .description = Requires reopening the toolbox
 
+## Web Console section, configuring the Web Console.
+
+devtools-settings-webconsole =
+    .label = Web Console
+
+# Enables the split console, which displays the Web Console below other tools.
+devtools-settings-webconsole-split-console =
+    .label = Enable Split Console
+    .title = Open Split Console with the Escape Key
+
 ## Style Editor section, configuring the CSS Style Editor.
 
 devtools-settings-styleeditor =

@@ -197,6 +197,18 @@ export const inventory = [
     ],
   },
   {
+    id: "settings-webconsole",
+    l10nId: "devtools-settings-webconsole",
+    settings: [
+      {
+        id: "settings-webconsole-split-console",
+        l10nId: "devtools-settings-webconsole-split-console",
+        type: "boolean",
+        pref: "devtools.toolbox.splitconsole.enabled",
+      },
+    ],
+  },
+  {
     id: "settings-styleeditor",
     l10nId: "devtools-settings-styleeditor",
     settings: [
