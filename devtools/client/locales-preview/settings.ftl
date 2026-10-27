@@ -132,6 +132,33 @@ devtools-settings-inspector-focus-next-on-enter =
     .label = Focus next input on Enter
     .title = When enabled, hitting the Enter key when editing a selector, a property name or value will move the focus to the next input.
 
+# Selects the format the inspector uses to display colors.
+devtools-settings-inspector-color-unit =
+    .label = Default color unit
+
+## Options for the default color unit select. HSL(A), RGB(A) and HWB are CSS
+## color functions.
+
+# Keeps colors in the format they were written in.
+devtools-settings-inspector-color-unit-authored =
+    .label = As Authored
+
+devtools-settings-inspector-color-unit-hex =
+    .label = Hex
+
+devtools-settings-inspector-color-unit-hsl =
+    .label = HSL(A)
+
+devtools-settings-inspector-color-unit-rgb =
+    .label = RGB(A)
+
+devtools-settings-inspector-color-unit-hwb =
+    .label = HWB
+
+# Uses CSS named colors, like "red", where one matches the color.
+devtools-settings-inspector-color-unit-name =
+    .label = Color Names
+
 ## Style Editor section, configuring the CSS Style Editor.
 
 devtools-settings-styleeditor =

@@ -30,7 +30,17 @@ export interface BooleanSetting extends BaseSetting {
   type: "boolean";
 }
 
-export type Setting = BooleanSetting;
+export interface SettingOption {
+  value: string;
+  l10nId: string;
+}
+
+export interface SelectSetting extends BaseSetting {
+  type: "select";
+  options: ReadonlyArray<SettingOption>;
+}
+
+export type Setting = BooleanSetting | SelectSetting;
 
 export interface SettingSection {
   id: string;

@@ -34,29 +34,57 @@ export class DevToolsSettings extends MozLitElement {
     const disabled = setting.disabled
       ? conditions[setting.disabled]({ toolbox, setting })
       : false;
-    switch (setting.type) {
+    return html`
+      <devtools-settings-pref
+        pref=${setting.pref}
+        change-action=${setting.changeAction ?? nothing}
+      >
+        ${this.#renderControl(setting, disabled)}
+      </devtools-settings-pref>
+    `;
+  }
+
+  /**
+   * @param {Setting} setting
+   * @param {boolean} disabled
+   */
+  #renderControl(setting, disabled) {
+    const { type } = setting;
+    switch (type) {
       case "boolean":
         return html`
-          <devtools-settings-pref
-            pref=${setting.pref}
-            change-action=${setting.changeAction ?? nothing}
+          <moz-checkbox
+            id=${setting.id}
+            data-l10n-id=${setting.l10nId}
+            .disabled=${disabled}
           >
-            <moz-checkbox
-              id=${setting.id}
-              data-l10n-id=${setting.l10nId}
-              .disabled=${disabled}
-            >
-              ${disabled && setting.disabledL10nId
-                ? html`<span
-                    slot="description"
-                    data-l10n-id=${setting.disabledL10nId}
-                  ></span>`
-                : nothing}
-            </moz-checkbox>
-          </devtools-settings-pref>
+            ${disabled && setting.disabledL10nId
+              ? html`<span
+                  slot="description"
+                  data-l10n-id=${setting.disabledL10nId}
+                ></span>`
+              : nothing}
+          </moz-checkbox>
+        `;
+      case "select":
+        return html`
+          <moz-select
+            id=${setting.id}
+            data-l10n-id=${setting.l10nId}
+            .disabled=${disabled}
+          >
+            ${setting.options.map(
+              option => html`
+                <moz-option
+                  value=${option.value}
+                  data-l10n-id=${option.l10nId}
+                ></moz-option>
+              `
+            )}
+          </moz-select>
         `;
       default:
-        throw new Error(`Unsupported setting type "${setting.type}".`);
+        throw new Error(`Unsupported setting type "${type}".`);
     }
   }
 

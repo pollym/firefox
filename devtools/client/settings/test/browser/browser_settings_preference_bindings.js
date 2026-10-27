@@ -5,9 +5,12 @@
 
 const RULERS_PREF = "devtools.command-button-rulers.enabled";
 const SCREENSHOT_PREF = "devtools.command-button-screenshot.enabled";
+const COLOR_UNIT_PREF = "devtools.defaultColorUnit";
 
 add_task(test_independent_preference_bindings);
 add_task(test_preference_binding_without_callback);
+add_task(test_select_preference_binding);
+add_task(test_select_unknown_value);
 
 async function test_independent_preference_bindings() {
   await pushPref(RULERS_PREF, true);
@@ -93,6 +96,35 @@ async function test_preference_binding_without_callback() {
     "A binding without a callback still writes its pref"
   );
   is(changes, 0, "A binding without a callback emits no event");
+
+  await toolbox.destroy();
+}
+
+async function test_select_preference_binding() {
+  await pushPref(COLOR_UNIT_PREF, "hex");
+  const { toolbox, root } = await openSettings();
+  const select = await getSelect(root, "#settings-inspector-color-unit");
+  is(select.value, "hex", "The select reads its pref");
+
+  await chooseOption(select, "rgb");
+  is(
+    Services.prefs.getStringPref(COLOR_UNIT_PREF),
+    "rgb",
+    "Changing the select writes its pref"
+  );
+
+  await toolbox.destroy();
+}
+
+async function test_select_unknown_value() {
+  await pushPref(COLOR_UNIT_PREF, "unknown");
+  const { toolbox, root } = await openSettings();
+  await getSelect(root, "#settings-inspector-color-unit");
+  is(
+    Services.prefs.getStringPref(COLOR_UNIT_PREF),
+    "unknown",
+    "Rendering an unknown value leaves the pref unchanged"
+  );
 
   await toolbox.destroy();
 }
