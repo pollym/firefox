@@ -1666,8 +1666,8 @@ const SAVE_PROMPT_CONFIG = {
     ftls: ["toolkit/formautofill/formAutofill.ftl"],
     requiresAuth: true,
     confirmationHint: {
-      created: "confirmation-hint-credit-card-created",
-      updated: "confirmation-hint-credit-card-updated",
+      created: "confirmation-hint-payment-method-saved",
+      updated: "confirmation-hint-payment-method-updated",
     },
   },
   [AutofillDataTypes.PASSPORT]: {

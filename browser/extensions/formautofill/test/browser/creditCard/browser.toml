@@ -36,6 +36,8 @@ skip-if = [
 
 ["browser_creditCard_doorhanger_action.js"]
 
+["browser_creditCard_doorhanger_confirmation_popup.js"]
+
 ["browser_creditCard_doorhanger_cvv.js"]
 
 ["browser_creditCard_doorhanger_display.js"]

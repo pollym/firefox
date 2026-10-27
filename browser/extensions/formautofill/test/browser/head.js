@@ -1181,10 +1181,17 @@ function normalizeAddressFields(record) {
   return normalized;
 }
 
+/**
+ * @param {object} browser
+ * @param {boolean} forceClose Close the hint instead of waiting for it to hide
+ * @param {string} [anchorID] Id of the element the hint is anchored to
+ * @param {string} [expectedL10nId] If set, the l10n id of the hint message
+ */
 async function verifyConfirmationHint(
   browser,
   forceClose,
-  anchorID = "identity-icon-box"
+  anchorID = "identity-icon-box",
+  expectedL10nId = null
 ) {
   let hintElem = browser.documentGlobal.ConfirmationHint._panel;
   let popupshown = BrowserTestUtils.waitForPopupEvent(hintElem, "shown");
@@ -1206,6 +1213,16 @@ async function verifyConfirmationHint(
       anchorID,
       "Hint should be anchored on the expected notification icon"
     );
+    if (expectedL10nId) {
+      const { ConfirmationHint } = browser.documentGlobal;
+      Assert.equal(
+        ConfirmationHint._message.ownerDocument.l10n.getAttributes(
+          ConfirmationHint._message
+        ).id,
+        expectedL10nId,
+        "Hint shows the expected message"
+      );
+    }
     info("verifyConfirmationHint, hint is shown and has its anchorNode");
     if (forceClose) {
       await closePopup(hintElem);
