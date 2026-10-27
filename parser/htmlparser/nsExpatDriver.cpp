@@ -783,12 +783,6 @@ int nsExpatDriver::HandleExternalEntityRef(const char16_t* openEntityNames,
                                            const char16_t* base,
                                            const char16_t* systemId,
                                            const char16_t* publicId) {
-  if (mInInternalSubset && !mInExternalDTD && openEntityNames) {
-    mInternalSubset.Append(char16_t('%'));
-    mInternalSubset.Append(nsDependentString(openEntityNames));
-    mInternalSubset.Append(char16_t(';'));
-  }
-
   nsCOMPtr<nsIURI> baseURI = GetBaseURI(base);
   NS_ENSURE_TRUE(baseURI, 1);
 
