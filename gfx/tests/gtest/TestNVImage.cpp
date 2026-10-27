@@ -4,10 +4,9 @@
 
 #include <cstring>  // memcpy / memcmp
 
-#include "gtest/gtest.h"
-
 #include "ImageContainer.h"
 #include "gfxPlatform.h"
+#include "gtest/gtest.h"
 #include "mozilla/RefPtr.h"
 #include "mozilla/UniquePtr.h"
 #include "mozilla/gfx/2D.h"
