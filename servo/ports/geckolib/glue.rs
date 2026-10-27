@@ -4481,6 +4481,7 @@ pub extern "C" fn Servo_PositionTryRule_SetStyle(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn Servo_ComputedValues_GetForPageContent(
     raw_data: &PerDocumentStyleData,
+    parent_style: Option<&ComputedValues>,
     page_name: *const nsAtom,
     pseudos: PagePseudoClassFlags,
 ) -> Strong<ComputedValues> {
@@ -4518,7 +4519,7 @@ pub unsafe extern "C" fn Servo_ComputedValues_GetForPageContent(
         .precomputed_values_for_pseudo_with_rule_node::<GeckoElement>(
             &guards,
             &PseudoElement::MozPageContent,
-            None,
+            parent_style,
             rule_node,
         )
         .into()

@@ -726,6 +726,9 @@ class ServoStyleSet {
                   size_t(NonInheritingAnonBox::_Count)>
       mNonInheritingComputedStyles;
 
+  // The default cache for @page.
+  RefPtr<ComputedStyle> mDefaultPageStyleCache;
+
  public:
   void PutCachedAnonymousContentStyles(
       AnonymousContentKey aKey, nsTArray<RefPtr<ComputedStyle>>&& aStyles) {
