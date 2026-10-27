@@ -2861,6 +2861,7 @@ dependencies = [
  "env_logger",
  "lazy_static",
  "log",
+ "tracing",
 ]
 
 [[package]]
@@ -2868,6 +2869,10 @@ name = "gecko_tracing"
 version = "0.1.0"
 dependencies = [
  "error-support",
+ "gecko-profiler",
+ "gecko_logger",
+ "log",
+ "serde",
  "tracing",
  "tracing-subscriber",
  "tracing-support",
