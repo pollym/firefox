@@ -959,7 +959,7 @@ falling back to not using job objects for managing child processes""",
         # processed.
         elif not self._ignore_children and self.reader.is_alive():
             return None
-        elif hasattr(self, "returncode"):
+        elif getattr(self, "returncode", None) is not None:
             return self.returncode
         else:
             return self.proc.poll()
