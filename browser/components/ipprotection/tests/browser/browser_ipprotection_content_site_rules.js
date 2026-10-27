@@ -123,6 +123,24 @@ async function checkSiteRuleStatus(content, descriptionL10nId, iconSrc) {
     () => headingEl.textContent.trim() && descriptionEl.textContent.trim(),
     "Waiting for the site rule status card to be localized"
   );
+
+  let manageButtonEl = content.siteRulesEl.buttonEl;
+  await TestUtils.waitForCondition(
+    () => manageButtonEl.ariaDescribedByElements?.length,
+    "Waiting for the site rules link to be described by the status card"
+  );
+  let [describedByHeadingEl, describedByDescriptionEl] =
+    manageButtonEl.ariaDescribedByElements;
+  Assert.equal(
+    describedByHeadingEl,
+    headingEl,
+    "Site rules link should be described by the status heading"
+  );
+  Assert.equal(
+    describedByDescriptionEl,
+    descriptionEl,
+    "Site rules link should be described by the status description"
+  );
 }
 
 /**
@@ -816,6 +834,10 @@ add_task(async function test_site_rule_status_follows_protection_state() {
   Assert.ok(
     !getSiteRuleStatus(content),
     "Site rule status card should be removed once the rule no longer changes anything"
+  );
+  await TestUtils.waitForCondition(
+    () => !content.siteRulesEl.buttonEl.ariaDescribedByElements,
+    "Site rules link should no longer be described once the status card is removed"
   );
 
   await closePanel();

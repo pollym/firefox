@@ -45,6 +45,8 @@ export default class IPProtectionContentElement extends MozLitElement {
     siteExclusionToggleEl: "#site-exclusion-toggle",
     siteExclusionDescriptionEl: '#site-exclusion-toggle > [slot="description"]',
     siteRulesEl: "#site-rules-control",
+    siteRuleHeadingEl: "#site-rule-heading",
+    siteRuleDescriptionEl: "#site-rule-description",
     siteInclusionPromptEl: "#site-inclusion-prompt",
     settingsButtonEl: "#vpn-settings-button",
   };
@@ -251,6 +253,20 @@ export default class IPProtectionContentElement extends MozLitElement {
       this._messageDismissed = false;
     }
     this.#prevBandwidthWarning = !!this.state.bandwidthWarning;
+
+    this.#updateSiteRulesDescription();
+  }
+
+  async #updateSiteRulesDescription() {
+    let siteRulesEl = this.siteRulesEl;
+    if (!siteRulesEl) {
+      return;
+    }
+    await siteRulesEl.updateComplete;
+    let headingEl = this.siteRuleHeadingEl;
+    let descriptionEl = this.siteRuleDescriptionEl;
+    siteRulesEl.buttonEl.ariaDescribedByElements =
+      headingEl && descriptionEl ? [headingEl, descriptionEl] : null;
   }
 
   messageBarTemplate() {
