@@ -657,12 +657,7 @@ support-files = ["file_selection_change_null_presshell.html"]
 ["test_setInterval_from_start.html"]
 
 ["test_setInterval_uncatchable_exception.html"]
-skip-if = [
-  "asan",
-  "ccov",
-  "opt",
-  "tsan",
-]
+run-if = ["debug"]
 
 ["test_setTimeoutWith0.html"]
 
