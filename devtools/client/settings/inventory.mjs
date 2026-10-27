@@ -208,6 +208,24 @@ export const inventory = [
       },
     ],
   },
+  {
+    id: "settings-screenshot",
+    l10nId: "devtools-settings-screenshot",
+    settings: [
+      {
+        id: "settings-screenshot-clipboard",
+        l10nId: "devtools-settings-screenshot-clipboard",
+        type: "boolean",
+        pref: "devtools.screenshot.clipboard.enabled",
+      },
+      {
+        id: "settings-screenshot-audio",
+        l10nId: "devtools-settings-screenshot-audio",
+        type: "boolean",
+        pref: "devtools.screenshot.audio.enabled",
+      },
+    ],
+  },
 ];
 
 /** @satisfies {Record<string, SettingChangeHandler>} */
