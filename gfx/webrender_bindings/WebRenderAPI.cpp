@@ -327,7 +327,8 @@ RefPtr<WebRenderAPI::CreatePromise> WebRenderAPI::Create(
           // false
           MOZ_ASSERT(errorMessage);
           if (!errorMessage) {
-            return CreatePromise::CreateAndReject("wr_window_new unknown error"_ns , __func__);
+            return CreatePromise::CreateAndReject(
+                "wr_window_new unknown error"_ns, __func__);
           }
 
           error.AssignASCII(errorMessage);
@@ -337,11 +338,13 @@ RefPtr<WebRenderAPI::CreatePromise> WebRenderAPI::Create(
 
         MOZ_ASSERT(wrRenderer);
         if (!wrRenderer) {
-          return CreatePromise::CreateAndReject("wr_window_new without wrRenderer"_ns , __func__);
+          return CreatePromise::CreateAndReject(
+              "wr_window_new without wrRenderer"_ns, __func__);
         }
         MOZ_ASSERT(docHandle);
         if (!wrRenderer) {
-          return CreatePromise::CreateAndReject("wr_window_new without docHandle"_ns , __func__);
+          return CreatePromise::CreateAndReject(
+              "wr_window_new without docHandle"_ns, __func__);
         }
         const WebRenderBackend backend = compositor->BackendType();
         const WebRenderCompositor compositorType = compositor->CompositorType();
