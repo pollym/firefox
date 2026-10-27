@@ -9,6 +9,8 @@ permalink: /changelog/
     * Added `String.toSnakeCase`, which returns a camelCase or PascalCase string in snake_case. [Bug 2084683](https://bugzilla.mozilla.org/show_bug.cgi?id=2084683)
 * **feature-app-links**
     * ⚠️ **Breaking change**: `launchInApp` on `AppLinksInterceptor`, `AppLinksUseCases` and `AppLinksFeature`, and `shouldPrompt` on `AppLinksFeature` now receive the url being opened so the decision can vary by host. [Bug 2083207](https://bugzilla.mozilla.org/show_bug.cgi?id=2083207)
+* **feature-session**
+    * `SwipeRefreshFeature` now disables pull-to-refresh while the observed tab is in fullscreen or showing a PDF. [Bug 2054920](https://bugzilla.mozilla.org/show_bug.cgi?id=2054920)
 
 # 160.0
 * **concept-engine**

@@ -1444,7 +1444,7 @@ abstract class BaseBrowserFragment :
                 .collect { tab -> pipModeChanged(tab) }
         }
 
-        binding.swipeRefresh.isEnabled = shouldPullToRefreshBeEnabled(false)
+        binding.swipeRefresh.isEnabled = shouldPullToRefreshBeEnabled()
 
         if (binding.swipeRefresh.isEnabled) {
             val primaryTextColor = ThemeManager.resolveAttribute(materialR.attr.colorOnSurface, context)
@@ -1814,10 +1814,8 @@ abstract class BaseBrowserFragment :
     }
 
     @VisibleForTesting
-    internal fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean): Boolean {
-        return FeatureFlags.PULL_TO_REFRESH_ENABLED &&
-            requireComponents.settings.isPullToRefreshEnabledInBrowser &&
-            !inFullScreen
+    internal fun shouldPullToRefreshBeEnabled(): Boolean {
+        return FeatureFlags.PULL_TO_REFRESH_ENABLED && requireComponents.settings.isPullToRefreshEnabledInBrowser
     }
 
     /**
@@ -2359,8 +2357,6 @@ abstract class BaseBrowserFragment :
             }
             collapseBrowserView()
         }
-
-        binding.swipeRefresh.isEnabled = shouldPullToRefreshBeEnabled(inFullScreen)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
