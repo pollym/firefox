@@ -1497,6 +1497,7 @@ def test_process_sampling_with_interval():
     with mock.patch.dict(os.environ, {"MOZ_PROCESS_SAMPLING": "0.5"}):
         monitor = SystemResourceMonitor(poll_interval=0.1)
         monitor.start()
+        _wait_for_measurement(monitor)
         subprocess.run([sys.executable, "-c", "import time; time.sleep(2)"], check=True)
         time.sleep(0.6)
         monitor.stop()
