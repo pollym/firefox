@@ -37,6 +37,20 @@ const l10n = new Localization(
 
 let CONTENT = {};
 
+// The card details message for each combination of the details a card has.
+const CARD_DETAILS_L10N_IDS = {
+  name: "credit-card-doorhanger-card-details-name",
+  expiration: "credit-card-doorhanger-card-details-expiration",
+  "security-code": "credit-card-doorhanger-card-details-security-code",
+  "name-expiration": "credit-card-doorhanger-card-details-name-expiration",
+  "name-security-code":
+    "credit-card-doorhanger-card-details-name-security-code",
+  "expiration-security-code":
+    "credit-card-doorhanger-card-details-expiration-security-code",
+  "name-expiration-security-code":
+    "credit-card-doorhanger-card-details-name-expiration-security-code",
+};
+
 /**
  * `AutofillDoorhanger` provides a base for both address capture and credit card
  * capture doorhanger notifications. It handles the UI generation and logic
@@ -1005,18 +1019,23 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
     }
 
     if (this.hasSubmittedSecurityCode) {
-      parts.push("cvv");
+      parts.push("security-code");
+      args.securityCode = lazy.CreditCard.formatSecurityCodeName(
+        this.newRecord
+      );
     }
 
     if (!parts.length) {
       return;
     }
 
-    this.doc.l10n.setAttributes(
-      line,
-      `credit-card-doorhanger-details-${parts.join("-")}`,
-      args
-    );
+    const key = parts.join("-");
+    const l10nId = CARD_DETAILS_L10N_IDS[key];
+    if (!l10nId) {
+      lazy.log.error(`No card details message for "${key}"`);
+      return;
+    }
+    this.doc.l10n.setAttributes(line, l10nId, args);
   }
 
   appendSecurityCodeCheckbox() {
