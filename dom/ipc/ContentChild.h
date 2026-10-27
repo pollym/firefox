@@ -181,6 +181,11 @@ class ContentChild final : public PContentChild,
   mozilla::ipc::IPCResult RecvInitProfiler(
       Endpoint<PProfilerChild>&& aEndpoint);
 
+#ifdef MOZ_WIDGET_ANDROID
+  mozilla::ipc::IPCResult RecvInitProcInfo(
+      Endpoint<PProcInfoChild>&& aEndpoint);
+#endif
+
   mozilla::ipc::IPCResult RecvGMPsChanged(
       nsTArray<GMPCapabilityData>&& capabilities);
 

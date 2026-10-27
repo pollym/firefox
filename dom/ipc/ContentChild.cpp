@@ -32,6 +32,9 @@
 #include "mozilla/NullPrincipal.h"
 #include "mozilla/PerfStats.h"
 #include "mozilla/Preferences.h"
+#ifdef MOZ_WIDGET_ANDROID
+#  include "mozilla/ProcInfoChild.h"
+#endif
 #include "mozilla/ProcessHangMonitorIPC.h"
 #include "mozilla/RemoteLazyInputStreamChild.h"
 #include "mozilla/RemoteMediaManagerChild.h"
@@ -1559,6 +1562,14 @@ mozilla::ipc::IPCResult ContentChild::RecvInitProfiler(
   mProfilerController = ChildProfilerController::Create(std::move(aEndpoint));
   return IPC_OK();
 }
+
+#ifdef MOZ_WIDGET_ANDROID
+mozilla::ipc::IPCResult ContentChild::RecvInitProcInfo(
+    Endpoint<PProcInfoChild>&& aEndpoint) {
+  ProcInfoChild::Create(std::move(aEndpoint));
+  return IPC_OK();
+}
+#endif
 
 mozilla::ipc::IPCResult ContentChild::RecvGMPsChanged(
     nsTArray<GMPCapabilityData>&& capabilities) {
