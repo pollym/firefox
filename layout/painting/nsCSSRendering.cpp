@@ -3063,7 +3063,11 @@ nsBackgroundLayerState nsCSSRendering::PrepareImageLayer(
   }
 
   nsBackgroundLayerState state(aForFrame, &aLayer.mImage, irFlags);
-  if (!state.mImageRenderer.PrepareImage()) {
+  if (!state.mImageRenderer.PrepareImage(Some(nsImageRenderer::PositionParams{
+          aLayer,
+          aBorderArea,
+          aBGClipRect,
+      }))) {
     // There's no image or it's not ready to be painted.
     if (aOutIsTransformedFixed &&
         StyleImageLayerAttachment::Fixed == aLayer.mAttachment) {
