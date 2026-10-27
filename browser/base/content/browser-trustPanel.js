@@ -22,6 +22,8 @@ ChromeUtils.defineESModuleGetters(this, {
     "moz-src:///browser/components/protections/PrivacyMetricsService.sys.mjs",
   QWACs: "resource://gre/modules/psm/QWACs.sys.mjs",
   SiteDataManager: "resource:///modules/SiteDataManager.sys.mjs",
+  TrustPanelTrackerLogs:
+    "moz-src:///browser/components/controlcenter/TrustPanelTrackerLogs.sys.mjs",
   UIState: "resource://services-sync/UIState.sys.mjs",
   UrlbarPrefs: "moz-src:///browser/components/urlbar/UrlbarPrefs.sys.mjs",
 });
@@ -199,13 +201,6 @@ class TrustPanel {
   #sameTabNavigation = false;
   // The tracker count's running tab switch animation, if any.
   #trackerCountTabSwitchAnimation = null;
-  /**
-   * Content-blocking logs of the pages visited on the current site, per tab.
-   *
-   * @type {WeakMap<MozBrowser, {site: string, logs: Map<number, object>}>}
-   * `logs` maps inner window IDs to their parsed log, in order of first visit.
-   */
-  #siteTrackerLogs = new WeakMap();
 
   /**
    * If the document is using a qualified website authentication certificate
@@ -2338,12 +2333,12 @@ class TrustPanel {
     if (!site) {
       return;
     }
-    let siteLogs = this.#siteTrackerLogs.get(browser);
-    if (siteLogs?.site !== site) {
-      siteLogs = { site, logs: new Map() };
-      this.#siteTrackerLogs.set(browser, siteLogs);
-    }
-    siteLogs.logs.set(windowGlobal.innerWindowId, JSON.parse(log));
+    TrustPanelTrackerLogs.record(
+      browser,
+      site,
+      windowGlobal.innerWindowId,
+      log
+    );
   }
 
   #getCumulativeTrackerCount() {
@@ -2372,7 +2367,7 @@ class TrustPanel {
       return log ? [JSON.parse(log)] : [];
     }
     this.#recordCurrentPageLog(browser);
-    return [...(this.#siteTrackerLogs.get(browser)?.logs.values() ?? [])];
+    return TrustPanelTrackerLogs.getLogs(browser);
   }
 
   async dismissBreachAlert(event) {
