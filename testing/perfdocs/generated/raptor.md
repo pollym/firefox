@@ -31296,7 +31296,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -31394,9 +31394,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-amazon**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-amazon**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-amazon**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-amazon**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-amazon**
@@ -31613,9 +31628,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-amazon**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-amazon**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-amazon**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-amazon**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-amazon**
@@ -31680,7 +31710,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -31767,9 +31797,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-bing-search**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-bing-search**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-bing-search**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-bing-search**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-bing-search**
@@ -31946,9 +31991,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-bing-search**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-bing-search**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-bing-search**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-bing-search**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-bing-search**
@@ -32003,7 +32063,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -32066,6 +32126,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-buzzfeed**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-buzzfeed**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-buzzfeed**
   - ✅
   - ✅
@@ -32168,6 +32238,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-buzzfeed**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-buzzfeed**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-buzzfeed**
   - ✅
   - ✅
@@ -32210,7 +32290,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -32298,6 +32378,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-cnn**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-cnn**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-cnn**
   - ✅
   - ✅
@@ -32475,6 +32565,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
 * - **browsertime-tp6-bytecode-firefox-cnn**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-chrome-cnn**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-cnn**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-essential-firefox-cnn**
@@ -32734,7 +32834,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -32807,9 +32907,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-ebay**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-ebay**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-ebay**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-ebay**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-ebay**
@@ -32939,9 +33054,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-ebay**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-ebay**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-ebay**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-ebay**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-ebay**
@@ -32991,7 +33121,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -33054,6 +33184,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-espn**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-espn**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-espn**
   - ✅
   - ✅
@@ -33156,6 +33296,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-espn**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-espn**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-espn**
   - ✅
   - ✅
@@ -33198,7 +33348,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -33261,6 +33411,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-expedia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-expedia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-expedia**
   - ✅
   - ✅
@@ -33363,6 +33523,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-expedia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-expedia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-expedia**
   - ✅
   - ✅
@@ -33405,7 +33575,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -33478,9 +33648,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-facebook**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-facebook**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-facebook**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-facebook**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-facebook**
@@ -33610,9 +33795,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-facebook**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-facebook**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-facebook**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-facebook**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-facebook**
@@ -33662,7 +33862,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -33749,9 +33949,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-fandom**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-fandom**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-fandom**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-fandom**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-fandom**
@@ -33928,9 +34143,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-fandom**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-fandom**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-fandom**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-fandom**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-fandom**
@@ -33985,7 +34215,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -34059,9 +34289,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-google-docs**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-google-docs**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-google-docs**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-google-docs**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-google-docs**
@@ -34191,9 +34436,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-google-docs**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-google-docs**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-google-docs**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-google-docs**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-google-docs**
@@ -34243,7 +34503,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -34315,9 +34575,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-google-mail**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-google-mail**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-google-mail**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-google-mail**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-google-mail**
@@ -34447,9 +34722,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-google-mail**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-google-mail**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-google-mail**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-google-mail**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-google-mail**
@@ -34499,7 +34789,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -34571,9 +34861,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-google-search**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-google-search**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-google-search**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-google-search**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-google-search**
@@ -34703,9 +35008,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-google-search**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-google-search**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-google-search**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-google-search**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-google-search**
@@ -34755,7 +35075,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -34843,9 +35163,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-google-slides**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-google-slides**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-google-slides**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-google-slides**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-google-slides**
@@ -35022,9 +35357,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-google-slides**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-google-slides**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-google-slides**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-google-slides**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-google-slides**
@@ -35079,7 +35429,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -35152,9 +35502,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-imdb**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-imdb**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-imdb**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-imdb**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-imdb**
@@ -35284,9 +35649,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-imdb**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-imdb**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-imdb**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-imdb**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-imdb**
@@ -35336,7 +35716,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -35410,6 +35790,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-imgur**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-imgur**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-imgur**
   - ✅
   - ✅
@@ -35542,6 +35932,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-imgur**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-imgur**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-imgur**
   - ✅
   - ✅
@@ -35594,7 +35994,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -35682,9 +36082,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-instagram**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-instagram**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-instagram**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-instagram**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-instagram**
@@ -35861,9 +36276,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-instagram**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-instagram**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-instagram**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-instagram**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-instagram**
@@ -35918,7 +36348,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -35991,9 +36421,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-linkedin**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-linkedin**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-linkedin**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-linkedin**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-linkedin**
@@ -36123,9 +36568,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-linkedin**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-linkedin**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-linkedin**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-linkedin**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-linkedin**
@@ -36175,7 +36635,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -36248,9 +36708,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-microsoft**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-microsoft**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-microsoft**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-microsoft**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-microsoft**
@@ -36380,9 +36855,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-microsoft**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-microsoft**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-microsoft**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-microsoft**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-microsoft**
@@ -36432,7 +36922,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -36505,9 +36995,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-netflix**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-netflix**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-netflix**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-netflix**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-netflix**
@@ -36637,9 +37142,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-netflix**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-netflix**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-netflix**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-netflix**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-netflix**
@@ -36689,7 +37209,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -36752,6 +37272,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-office**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-office**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-office**
   - ✅
   - ✅
@@ -36854,6 +37384,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-office**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-office**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-office**
   - ✅
   - ✅
@@ -37096,7 +37636,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -37168,9 +37708,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-outlook**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-outlook**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-outlook**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-outlook**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-outlook**
@@ -37300,9 +37855,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-outlook**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-outlook**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-outlook**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-outlook**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-outlook**
@@ -37352,7 +37922,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -37424,9 +37994,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-paypal**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-paypal**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-paypal**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-paypal**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-paypal**
@@ -37556,9 +38141,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-paypal**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-paypal**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-paypal**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-paypal**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-paypal**
@@ -37608,7 +38208,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -37681,9 +38281,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-pinterest**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-pinterest**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-pinterest**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-pinterest**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-pinterest**
@@ -37813,9 +38428,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-pinterest**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-pinterest**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-pinterest**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-pinterest**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-pinterest**
@@ -37865,7 +38495,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -37938,9 +38568,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-reddit**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-reddit**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-reddit**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-reddit**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-reddit**
@@ -38070,9 +38715,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-reddit**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-reddit**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-reddit**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-reddit**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-reddit**
@@ -38522,7 +39182,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -38595,9 +39255,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-tumblr**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-tumblr**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-tumblr**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-tumblr**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-tumblr**
@@ -38727,9 +39402,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-tumblr**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-tumblr**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-tumblr**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-tumblr**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-tumblr**
@@ -38779,7 +39469,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -38866,9 +39556,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-twitter**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-twitter**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-twitter**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-twitter**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-twitter**
@@ -39045,9 +39750,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-twitter**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-twitter**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-twitter**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-twitter**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-twitter**
@@ -39302,7 +40022,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -39365,6 +40085,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-wikia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-wikia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-wikia**
   - ✅
   - ✅
@@ -39467,6 +40197,16 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-wikia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-wikia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-wikia**
   - ✅
   - ✅
@@ -39509,7 +40249,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -39597,9 +40337,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-wikipedia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-wikipedia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-wikipedia**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-wikipedia**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-wikipedia**
@@ -39776,9 +40531,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-wikipedia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-wikipedia**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-wikipedia**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-wikipedia**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-wikipedia**
@@ -39833,7 +40603,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: false
 * **browser cycles**: 25
 * **expected**: pass
@@ -39920,9 +40690,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-yahoo-mail**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-yahoo-mail**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-yahoo-mail**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-yahoo-mail**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-yahoo-mail**
@@ -40099,9 +40884,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - ✅
   - ❌
   - ❌
+* - **browsertime-tp6-essential-chrome-yahoo-mail**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-essential-custom-car-yahoo-mail**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-essential-firefox-yahoo-mail**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-yahoo-mail**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-yahoo-mail**
@@ -40156,7 +40956,7 @@ Tests for page-load performance. The links direct to the actual websites that ar
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change), [largestContentfulPaint](raptor-metrics.md#largest-contentful-paint)
 * **alert threshold**: 2.0
-* **apps**: firefox
+* **apps**: firefox, chrome, safari, custom-car
 * **benchmark page**: true
 * **browser cycles**: 25
 * **expected**: pass
@@ -40229,9 +41029,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-youtube**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-youtube**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-youtube**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-youtube**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-youtube**
@@ -40361,9 +41176,24 @@ Tests for page-load performance. The links direct to the actual websites that ar
   - autoland
   - mozilla-release
   - mozilla-beta
+* - **browsertime-tp6-chrome-youtube**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
+* - **browsertime-tp6-custom-car-youtube**
+  - ❌
+  - ❌
+  - ❌
+  - ❌
 * - **browsertime-tp6-firefox-youtube**
   - ✅
   - ✅
+  - ❌
+  - ❌
+* - **browsertime-tp6-live-chrome-youtube**
+  - ❌
+  - ❌
   - ❌
   - ❌
 * - **browsertime-tp6-live-firefox-youtube**
@@ -41303,7 +42133,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#17`
@@ -41383,7 +42213,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#20`
@@ -41463,7 +42293,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#23`
@@ -41543,7 +42373,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#26`
@@ -41623,7 +42453,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#29`
@@ -41703,7 +42533,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#32`
@@ -41783,7 +42613,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#35`
@@ -41863,7 +42693,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#38`
@@ -41943,7 +42773,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#41`
@@ -42023,7 +42853,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#44`
@@ -42103,7 +42933,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#47`
@@ -42183,7 +43013,7 @@ A set of test pages that are run as live sites instead of recorded versions. The
 
 * **alert on**: [fcp](raptor-metrics.md#first-paint), [loadtime](raptor-metrics.md#load-time), [ContentfulSpeedIndex](raptor-metrics.md#contentful-speed-index), [PerceptualSpeedIndex](raptor-metrics.md#perceptual-speed-index), [SpeedIndex](raptor-metrics.md#speed-index), [FirstVisualChange](raptor-metrics.md#first-visual-change), [LastVisualChange](raptor-metrics.md#last-visual-change)
 * **alert threshold**: 2.0
-* **apps**: geckoview, fenix, refbrow, chrome-m, firefox
+* **apps**: geckoview, fenix, refbrow, chrome-m, firefox, chrome
 * **browser cycles**: 15
 * **expected**: pass
 * **link searchfox**: {searchfox}`testing/raptor/raptor/tests/tp6/live/browsertime-live.toml#50`
