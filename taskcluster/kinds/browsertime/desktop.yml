@@ -110,8 +110,6 @@ browsertime-tp6:
             by-app:
                 chrome:
                     - (?!macosx1470).*shippable.*
-                safari:
-                    - (?!macosx1470).*macos.*shippable.*
                 custom-car:
                     - macosx1500.*shippable.*
                     - linux.*shippable.*
@@ -153,7 +151,7 @@ browsertime-tp6:
                         default: []
         treeherder-symbol: Btime(tp6)
     raptor:
-        apps: [firefox, chrome, custom-car]
+        apps: [firefox]
         test: tp6
         run-visual-metrics: true
         subtests:
@@ -220,15 +218,6 @@ browsertime-responsiveness:
 browsertime-tp6-essential:
     <<: *tp6-defaults
     <<: &tp6-essential-defaults
-        limit-platforms:
-            by-app:
-                chrome:
-                    - linux.*shippable.*
-                    - windows.*shippable.*
-                custom-car:
-                    - linux.*shippable.*
-                    - windows.*-64.*shippable.*
-                default: []
         mozharness:
             extra-options:
                 by-test-platform:
@@ -243,7 +232,7 @@ browsertime-tp6-essential:
                         - --conditioned-profile=settled
                         - --extra-profiler-run
         raptor:
-            apps: [firefox, chrome, custom-car]
+            apps: [firefox]
             test: tp6
             run-visual-metrics: true
             subtests:
@@ -755,7 +744,7 @@ browsertime-tp6-live:
             - --live-sites
             - --extra-profiler-run
     raptor:
-        apps: [firefox, chrome, safari]
+        apps: [firefox]
         test: tp6
         run-visual-metrics: true
         lull-schedule:
@@ -763,85 +752,31 @@ browsertime-tp6-live:
                 .*shippable.*: 1w
                 default: ""
         subtests:
-            by-app:
-                safari:
-                    - amazon
-                    - [bing-search, bing]
-                    - ebay
-                    # - [facebook, fb] Perma fails on osx 10.15.7
-                    - fandom
-                    - [google-docs, gdocs]
-                    - [google-mail, gmail]
-                    - [google-search, gsearch]
-                    - [google-slides, gslides]
-                    - imdb
-                    - imgur
-                    # - instagram # (see bug 1736999)
-                    - linkedin
-                    - microsoft
-                    # - netflix # Perma fails on osx 10.15.7 (Bug 1802922)
-                    # - office (site loads blank page if not signed in)
-                    # - outlook Perma fails on osx 10.15.7
-                    - paypal
-                    - pinterest
-                    - reddit
-                    - tumblr
-                    # - twitter Perma fails on osx 10.15.7
-                    - wikipedia
-                    - yahoo-mail
-                    - youtube
-                chrome:
-                    - amazon
-                    - [bing-search, bing]
-                    - ebay
-                    - [facebook, fb]
-                    - fandom
-                    - [google-docs, gdocs]
-                    - [google-mail, gmail]
-                    - [google-search, gsearch]
-                    - [google-slides, gslides]
-                    - imdb
-                    # - imgur (see bugs 1825337 & 1817420)
-                    - instagram
-                    - linkedin
-                    - microsoft
-                    - netflix
-                    # - office (site loads blank page if not signed in)
-                    - outlook
-                    - paypal
-                    - pinterest
-                    - reddit
-                    - tumblr
-                    - twitter
-                    - wikipedia
-                    - yahoo-mail
-                    - youtube
-                default:
-                    - amazon
-                    - [bing-search, bing]
-                    - ebay
-                    - [facebook, fb]
-                    - fandom
-                    - [google-docs, gdocs]
-                    - [google-mail, gmail]
-                    - [google-search, gsearch]
-                    - [google-slides, gslides]
-                    - imdb
-                    - imgur
-                    - instagram
-                    - linkedin
-                    - microsoft
-                    - netflix
-                    # - office (site loads blank page if not signed in)
-                    - outlook
-                    - paypal
-                    - pinterest
-                    - reddit
-                    - tumblr
-                    - twitter
-                    - wikipedia
-                    - yahoo-mail
-                    - youtube
+            - amazon
+            - [bing-search, bing]
+            - ebay
+            - [facebook, fb]
+            - fandom
+            - [google-docs, gdocs]
+            - [google-mail, gmail]
+            - [google-search, gsearch]
+            - [google-slides, gslides]
+            - imdb
+            - imgur
+            - instagram
+            - linkedin
+            - microsoft
+            - netflix
+            # - office (site loads blank page if not signed in)
+            - outlook
+            - paypal
+            - pinterest
+            - reddit
+            - tumblr
+            - twitter
+            - wikipedia
+            - yahoo-mail
+            - youtube
     run-on-projects: []
     treeherder-symbol: Btime-live(tp6)
     tier: 3
