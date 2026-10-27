@@ -353,6 +353,11 @@ class JujutsuRepository(Repository):
         files = [mozpath.normsep(p) for p in self._run("file", "list").splitlines()]
         return FileListFinder(files)
 
+    def _get_tracked_files(self, patterns):
+        fileset = " | ".join(f'root-glob:"{pattern}"' for pattern in patterns)
+        files = self._run("file", "list", fileset).splitlines()
+        return sorted(mozpath.normsep(p) for p in files)
+
     def get_ignored_files_finder(self):
         raise Exception("unimplemented")
 
