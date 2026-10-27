@@ -114,6 +114,7 @@ export const inventory = [
         l10nId: "devtools-settings-toolbox-errorcount",
         type: "boolean",
         pref: "devtools.command-button-errorcount.enabled",
+        hidden: "unsupportedButton",
         changeAction: "updateToolboxButtons",
       },
       {
@@ -121,6 +122,7 @@ export const inventory = [
         l10nId: "devtools-settings-toolbox-pick",
         type: "boolean",
         pref: "devtools.command-button-pick.enabled",
+        hidden: "unsupportedButton",
         changeAction: "updateToolboxButtons",
       },
       {
@@ -128,6 +130,7 @@ export const inventory = [
         l10nId: "devtools-settings-toolbox-frames",
         type: "boolean",
         pref: "devtools.command-button-frames.enabled",
+        hidden: "unsupportedButton",
         changeAction: "updateToolboxButtons",
       },
       {
@@ -135,6 +138,7 @@ export const inventory = [
         l10nId: "devtools-settings-toolbox-experimental-prefs",
         type: "boolean",
         pref: "devtools.command-button-experimental-prefs.enabled",
+        hidden: "unsupportedButton",
         changeAction: "updateToolboxButtons",
       },
       {
@@ -142,6 +146,7 @@ export const inventory = [
         l10nId: "devtools-settings-toolbox-responsive",
         type: "boolean",
         pref: "devtools.command-button-responsive.enabled",
+        hidden: "unsupportedButton",
         changeAction: "updateToolboxButtons",
       },
       {
@@ -149,6 +154,7 @@ export const inventory = [
         l10nId: "devtools-settings-toolbox-screenshot",
         type: "boolean",
         pref: "devtools.command-button-screenshot.enabled",
+        hidden: "unsupportedButton",
         changeAction: "updateToolboxButtons",
       },
       {
@@ -156,6 +162,7 @@ export const inventory = [
         l10nId: "devtools-settings-toolbox-rulers",
         type: "boolean",
         pref: "devtools.command-button-rulers.enabled",
+        hidden: "unsupportedButton",
         changeAction: "updateToolboxButtons",
       },
       {
@@ -163,6 +170,7 @@ export const inventory = [
         l10nId: "devtools-settings-toolbox-measure",
         type: "boolean",
         pref: "devtools.command-button-measure.enabled",
+        hidden: "unsupportedButton",
         changeAction: "updateToolboxButtons",
       },
       {
@@ -170,6 +178,7 @@ export const inventory = [
         l10nId: "devtools-settings-toolbox-jstracer",
         type: "boolean",
         pref: "devtools.command-button-jstracer.enabled",
+        hidden: "unsupportedButton",
         changeAction: "updateToolboxButtons",
       },
     ],
@@ -215,6 +224,19 @@ export const conditions = {
   unsupportedTool: ({ toolbox, setting }) => {
     const tool = getToolForPref(setting.pref);
     return !tool.isToolSupported(toolbox);
+  },
+
+  unsupportedButton: ({ toolbox, setting }) => {
+    if (!toolbox) {
+      return false;
+    }
+    const button = toolbox.toolbarButtons?.find(
+      definition => definition.visibilityswitch === setting.pref
+    );
+    if (!button) {
+      throw new Error(`No toolbox button uses the ${setting.pref} pref.`);
+    }
+    return !button.isToolSupported(toolbox);
   },
 };
 
