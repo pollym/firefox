@@ -50,7 +50,6 @@ Bookmarks.prototype = {
       if (!children) {
         throw new Error("Invalid Bookmarks.plist format");
       }
-      this.available = 0;
 
       let collection =
         dict.get("Title") == "com.apple.ReadingList"
@@ -210,7 +209,6 @@ Bookmarks.prototype = {
         let readingListTitle = await MigrationUtils.getLocalizedString(
           "migration-imported-safari-reading-list"
         );
-        this.available++;
         folderGuid = (
           await MigrationUtils.insertBookmarkWrapper({
             parentGuid: lazy.PlacesUtils.bookmarks.menuGuid,
@@ -281,7 +279,6 @@ Bookmarks.prototype = {
     for (const entry of entries) {
       let type = entry.get("WebBookmarkType");
       if (type == "WebBookmarkTypeList" && entry.has("Children")) {
-        this.available++;
         let convertedChildren = await this._convertEntries(
           entry.get("Children"),
           bookmarkURLToUUIDMap
@@ -293,7 +290,6 @@ Bookmarks.prototype = {
           children: convertedChildren.convertedEntries,
         });
       } else if (type == "WebBookmarkTypeLeaf" && entry.has("URLString")) {
-        this.available++;
         // Check we understand this URL before adding it:
         let url = entry.get("URLString");
         if (!URL.canParse(url)) {
@@ -416,13 +412,6 @@ async function GetHistoryResource(aShouldCheckForHistory) {
       let historyRows;
 
       try {
-        let availableRows = await MigrationUtils.getRowsFromDBWithoutLocks(
-          dbPath,
-          "Safari history",
-          "SELECT COUNT(*) FROM history_visits;"
-        );
-        this.available = availableRows[0].getResultByName("COUNT(*)");
-
         historyRows = await MigrationUtils.getRowsFromDBWithoutLocks(
           dbPath,
           "Safari history",
@@ -515,17 +504,14 @@ SearchStrings.prototype = {
   type: MigrationUtils.resourceTypes.OTHERDATA,
 
   migrate: function SS_migrate(aCallback) {
-    let resource = this;
     this._mainPreferencesPropertyList.read(
       MigrationUtils.wrapMigrateFunction(function migrateSearchStrings(aDict) {
         if (!aDict) {
           throw new Error("Could not get preferences dictionary");
         }
 
-        resource.available = 0;
         if (aDict.has("RecentSearchStrings")) {
           let recentSearchStrings = aDict.get("RecentSearchStrings");
-          resource.available = recentSearchStrings?.length ?? 0;
           if (recentSearchStrings && recentSearchStrings.length) {
             let changes = recentSearchStrings.map(searchString => ({
               op: "add",

@@ -9,7 +9,6 @@ const lazy = {};
 
 ChromeUtils.defineESModuleGetters(lazy, {
   AMBrowserExtensionsImport: "resource://gre/modules/AddonManager.sys.mjs",
-  FormHistory: "resource://gre/modules/FormHistory.sys.mjs",
   LoginHelper: "resource://gre/modules/LoginHelper.sys.mjs",
   PlacesUIUtils: "moz-src:///browser/components/places/PlacesUIUtils.sys.mjs",
   PlacesUtils: "resource://gre/modules/PlacesUtils.sys.mjs",
@@ -192,9 +191,7 @@ class MigrationUtils {
         "about:welcome",
         "about:welcome?*",
         "about:preferences",
-        "about:preferences?*",
         "about:settings",
-        "about:settings?*",
         "chrome://browser/content/migration/migration-dialog-window.html",
         "chrome://browser/content/spotlight.html",
         "about:firefoxview",
@@ -689,21 +686,15 @@ class MigrationUtils {
     }
 
     if (aOpener?.openPreferences) {
-      let preferencesArgs = {
-        urlParams: { migrationEntrypoint: entrypoint },
-      };
       if (aOptions.entrypoint == this.MIGRATION_ENTRYPOINTS.NEWTAB) {
         if (aboutWelcomeBehavior == "autoclose") {
-          return aOpener.openPreferences(
-            "general-migrate-autoclose",
-            preferencesArgs
-          );
+          return aOpener.openPreferences("general-migrate-autoclose");
         } else if (aboutWelcomeBehavior == "standalone") {
           openStandaloneWindow(false /* blocking */);
           return Promise.resolve();
         }
       }
-      return aOpener.openPreferences("general-migrate", preferencesArgs);
+      return aOpener.openPreferences("general-migrate");
     }
 
     // If somehow we failed to open about:preferences, fall back to opening
@@ -826,7 +817,6 @@ class MigrationUtils {
     history: 0,
     cards: 0,
     extensions: 0,
-    formdata: 0,
   };
 
   getImportedCount(type) {
@@ -896,19 +886,16 @@ class MigrationUtils {
         }
       }
     }
+    this._importQuantities.history += pageInfos.length;
     if (gKeepUndoData) {
       this.#updateHistoryUndo(pageInfos);
     }
-    return lazy.PlacesUtils.history.insertMany(pageInfos, () => {
-      this._importQuantities.history++;
-    });
+    return lazy.PlacesUtils.history.insertMany(pageInfos);
   }
 
   async insertLoginsWrapper(logins) {
+    this._importQuantities.logins += logins.length;
     let inserted = await lazy.LoginHelper.maybeImportLogins(logins);
-    this._importQuantities.logins += inserted.filter(
-      entry => entry.result == "added"
-    ).length;
     // Note that this means that if we import a login that has a newer password
     // than we know about, we will update the login, and an undo of the import
     // will not revert this. This seems preferable over removing the login
@@ -987,6 +974,7 @@ class MigrationUtils {
   }
 
   async insertCreditCardsWrapper(cards) {
+    this._importQuantities.cards += cards.length;
     let { formAutofillStorage } = ChromeUtils.importESModule(
       "resource://autofill/FormAutofillStorage.sys.mjs"
     );
@@ -995,16 +983,10 @@ class MigrationUtils {
     for (let card of cards) {
       try {
         await formAutofillStorage.creditCards.add(card);
-        this._importQuantities.cards++;
       } catch (e) {
         console.error("Failed to insert credit card due to error: ", e, card);
       }
     }
-  }
-
-  async insertFormHistoryWrapper(addOps) {
-    await lazy.FormHistory.update(addOps);
-    this._importQuantities.formdata += addOps.length;
   }
 
   /**
@@ -1196,9 +1178,6 @@ class MigrationUtils {
 
     /** Migration is being started from about:firefoxview */
     FIREFOX_VIEW: "firefox_view",
-
-    /** Migration is being started from the wizard embedded in about:welcome */
-    ABOUTWELCOME: "aboutwelcome",
   });
 
   /**

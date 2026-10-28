@@ -88,20 +88,9 @@ async function promiseMigration(
   }
 
   // Start the migration.
-  let availableQuantity;
-  migrator.migrate(
-    resourceType,
-    null,
-    aProfile,
-    (migratedType, _success, _details, available) => {
-      if (migratedType == resourceType) {
-        availableQuantity = available;
-      }
-    }
-  );
+  migrator.migrate(resourceType, null, aProfile);
 
-  await Promise.all(promises);
-  return availableQuantity;
+  return Promise.all(promises);
 }
 
 /**

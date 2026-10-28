@@ -377,9 +377,9 @@ add_task(async function test_importExistingLogins() {
     "Check there are still the same number of logins after re-importing the data"
   );
   Assert.equal(
+    logins.length,
     MigrationUtils._importQuantities.logins,
-    TEST_LOGINS.length - newLogins.length,
-    "Check telemetry only counts the logins that were newly added."
+    "Check telemetry matches the actual import."
   );
 
   for (let i = 0; i < newLogins.length; i++) {

@@ -18,6 +18,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   ChromeMigrationUtils:
     "moz-src:///browser/components/migration/ChromeMigrationUtils.sys.mjs",
   FileUtils: "resource://gre/modules/FileUtils.sys.mjs",
+  FormHistory: "resource://gre/modules/FormHistory.sys.mjs",
   NetUtil: "resource://gre/modules/NetUtil.sys.mjs",
   PlacesUtils: "resource://gre/modules/PlacesUtils.sys.mjs",
   Qihoo360seMigrationUtils:
@@ -71,18 +72,6 @@ function convertBookmarks(items, bookmarkURLAccumulator, errorAccumulator) {
     }
   }
   return itemsToInsert;
-}
-
-function countBookmarks(items) {
-  let count = 0;
-  for (let item of items) {
-    if (item.type == "url") {
-      count++;
-    } else if (item.type == "folder") {
-      count += 1 + countBookmarks(item.children ?? []);
-    }
-  }
-  return count;
 }
 
 /**
@@ -466,7 +455,6 @@ export class ChromeProfileMigrator extends MigratorBase {
         if (!rows) {
           return;
         }
-        this.available = rows.length;
 
         // If there are no relevant rows, return before initializing crypto and
         // thus prompting for Keychain access on macOS.
@@ -643,7 +631,6 @@ export class ChromeProfileMigrator extends MigratorBase {
 
     return {
       type: MigrationUtils.resourceTypes.PAYMENT_METHODS,
-      available: rows.length,
 
       async migrate(aCallback) {
         let loginCrypto;
@@ -770,7 +757,7 @@ async function GetBookmarksResource(aProfileFolder, aBrowserKey) {
     type: MigrationUtils.resourceTypes.BOOKMARKS,
 
     migrate(aCallback) {
-      return (async () => {
+      return (async function () {
         let gotErrors = false;
         let errorGatherer = function () {
           gotErrors = true;
@@ -828,10 +815,6 @@ async function GetBookmarksResource(aProfileFolder, aBrowserKey) {
             bookmarkJSONs.map(json => json.roots.synced?.children)
           ),
         };
-        this.available = Object.values(mergedRoots).reduce(
-          (sum, children) => sum + countBookmarks(children),
-          0
-        );
 
         // Import each Chrome bookmark root into its corresponding Gecko folder.
         for (let [rootName, parentGuid] of [
@@ -902,13 +885,11 @@ async function GetHistoryResource(aProfileFolder) {
     "Chrome history",
     countQuery
   );
-  let available = countRows[0].getResultByName("COUNT(*)");
-  if (!available) {
+  if (!countRows[0].getResultByName("COUNT(*)")) {
     return null;
   }
   return {
     type: MigrationUtils.resourceTypes.HISTORY,
-    available,
 
     migrate(aCallback) {
       (async function () {
@@ -1006,13 +987,11 @@ async function GetFormdataResource(aProfileFolder) {
     "Chrome formdata",
     countQuery
   );
-  let available = countRows[0].getResultByName("COUNT(*)");
-  if (!available) {
+  if (!countRows[0].getResultByName("COUNT(*)")) {
     return null;
   }
   return {
     type: MigrationUtils.resourceTypes.FORMDATA,
-    available,
 
     async migrate(aCallback) {
       let query =
@@ -1052,7 +1031,7 @@ async function GetFormdataResource(aProfileFolder) {
       }
 
       try {
-        await MigrationUtils.insertFormHistoryWrapper(addOps);
+        await lazy.FormHistory.update(addOps);
       } catch (e) {
         console.error(e);
         aCallback(false);
@@ -1080,7 +1059,6 @@ async function GetExtensionsResource(aProfileId, aBrowserKey = "chrome") {
 
   return {
     type: MigrationUtils.resourceTypes.EXTENSIONS,
-    available: extensions.length,
     async migrate(callback) {
       let ids = extensions.map(extension => extension.id);
       let [progressValue, importedExtensions] =

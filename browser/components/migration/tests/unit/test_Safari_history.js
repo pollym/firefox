@@ -68,15 +68,7 @@ add_task(async function testHistoryImport() {
   await PlacesUtils.history.clear();
 
   let migrator = await MigrationUtils.getMigrator("safari");
-  let availableQuantity = await promiseMigration(
-    migrator,
-    MigrationUtils.resourceTypes.HISTORY
-  );
-  Assert.equal(
-    availableQuantity,
-    TEST_URLS.length,
-    "Available history visits reported correctly."
-  );
+  await promiseMigration(migrator, MigrationUtils.resourceTypes.HISTORY);
 
   for (let urlInfo of TEST_URLS) {
     let entry = await PlacesUtils.history.fetch(urlInfo.url, {

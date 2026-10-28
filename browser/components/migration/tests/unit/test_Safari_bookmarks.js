@@ -55,10 +55,7 @@ add_task(async function () {
     observerNotified = true;
   }, "browser-set-toolbar-visibility");
 
-  let availableQuantity = await promiseMigration(
-    migrator,
-    MigrationUtils.resourceTypes.BOOKMARKS
-  );
+  await promiseMigration(migrator, MigrationUtils.resourceTypes.BOOKMARKS);
   PlacesUtils.observers.removeListener(["bookmark-added"], listener);
 
   // Check the bookmarks have been imported to all the expected parents.
@@ -70,11 +67,6 @@ add_task(async function () {
     MigrationUtils._importQuantities.bookmarks,
     itemCount,
     "Telemetry reporting correct."
-  );
-  Assert.equal(
-    availableQuantity,
-    itemCount,
-    "Available bookmarks reported correctly."
   );
 
   // Check that favicons migrated
