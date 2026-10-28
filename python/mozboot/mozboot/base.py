@@ -576,14 +576,13 @@ class BaseBootstrapper:
 
     def cargo_tools_installed(self):
         """Return True if all cargo developer tools are already installed."""
-        _, cargo_bin = self.cargo_home()
-        extra = [str(cargo_bin)]
-        return all(which(tool, extra_search_dirs=extra) for tool in self.CARGO_TOOLS)
+        bin_dir = str(self.mozbuild_bin_dir())
+        return all(which(tool, path=bin_dir) for tool in self.CARGO_TOOLS)
 
     def ensure_cargo_tools(self):
         """Install required developer tools from prebuilt toolchain artifacts."""
-        cargo_home, cargo_bin = self.cargo_home()
-        cargo_bin.mkdir(parents=True, exist_ok=True)
+        bin_dir = self.mozbuild_bin_dir()
+        bin_dir.mkdir(parents=True, exist_ok=True)
 
         print("Installing cargo tools: {}...".format(", ".join(self.CARGO_TOOLS)))
         for tool in self.CARGO_TOOLS:
@@ -592,7 +591,7 @@ class BaseBootstrapper:
                 print(f"Could not install {tool}.")
                 continue
             exe = Path(tool_dir) / (tool + rust.exe_suffix())
-            dest = cargo_bin / exe.name
+            dest = bin_dir / exe.name
             dest.unlink(missing_ok=True)
             shutil.copy2(exe, dest)
 

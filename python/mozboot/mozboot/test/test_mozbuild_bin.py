@@ -15,6 +15,7 @@ from unittest import mock
 from mach.util import win_to_msys_path
 from mozunit import main
 
+from mozboot import rust
 from mozboot.base import BaseBootstrapper
 
 SH = shutil.which("sh")
@@ -280,12 +281,11 @@ class TestMozbuildBin(unittest.TestCase):
         )
         self.assertFalse((self.home / ".zshenv").exists())
 
-    def test_npm_tools_installed(self):
-        self.bootstrapper.NPM_TOOLS = ("some-cli",)
+    def _check_tools_installed(self, tools_attr, tools_installed, suffix):
+        setattr(self.bootstrapper, tools_attr, ("some-cli",))
         other_bin = self.home / "other-bin"
         os.environ["PATH"] = str(other_bin)
-
-        name = "some-cli.cmd" if sys.platform.startswith("win") else "some-cli"
+        name = "some-cli" + suffix
 
         def add_tool(bin_dir):
             bin_dir.mkdir()
@@ -293,9 +293,37 @@ class TestMozbuildBin(unittest.TestCase):
             (bin_dir / name).chmod(0o755)
 
         add_tool(other_bin)
-        self.assertFalse(self.bootstrapper.npm_tools_installed())
+        self.assertFalse(tools_installed())
         add_tool(self.bin_dir)
-        self.assertTrue(self.bootstrapper.npm_tools_installed())
+        self.assertTrue(tools_installed())
+
+    def test_npm_tools_installed(self):
+        self._check_tools_installed(
+            "NPM_TOOLS",
+            self.bootstrapper.npm_tools_installed,
+            ".cmd" if sys.platform.startswith("win") else "",
+        )
+
+    def test_cargo_tools_installed(self):
+        self._check_tools_installed(
+            "CARGO_TOOLS", self.bootstrapper.cargo_tools_installed, rust.exe_suffix()
+        )
+
+    def test_cargo_tools(self):
+        artifacts = self.home / "artifacts"
+        exe = artifacts / "some-cli" / ("some-cli" + rust.exe_suffix())
+        exe.parent.mkdir(parents=True)
+        exe.write_text("new")
+        self.bin_dir.mkdir()
+        (self.bin_dir / exe.name).write_text("old")
+
+        self.bootstrapper.CARGO_TOOLS = ("some-cli",)
+        self.bootstrapper.install_toolchain_artifact = lambda tool: str(
+            artifacts / tool
+        )
+        self.bootstrapper.ensure_cargo_tools()
+
+        self.assertEqual((self.bin_dir / exe.name).read_text(), "new")
 
     @unittest.skipIf(sys.platform.startswith("win"), "Needs a POSIX shell")
     def test_npm_tools(self):
