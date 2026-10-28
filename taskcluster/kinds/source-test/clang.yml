@@ -54,9 +54,6 @@ tidy:
             - type: file
               name: public/code-review/clang-tidy.json
               path: /builds/worker/clang-tidy.json
-            - type: file
-              name: public/profile_resource-usage.json
-              path: /builds/worker/profile_resource-usage.json
 
 external:
     description: Run static-analysis (clang-tidy) on C/C++ patches with external checks
@@ -91,9 +88,6 @@ external:
             - type: file
               name: public/code-review/clang-tidy.json
               path: /builds/worker/clang-tidy.json
-            - type: file
-              name: public/profile_resource-usage.json
-              path: /builds/worker/profile_resource-usage.json
 
 unittest:
     description: Ensure static analysis works correctly

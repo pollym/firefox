@@ -319,6 +319,10 @@ def taskgraph_decision(options, parameters):
             taskgraph_dir / "run-task" / "run-task": f"{ARTIFACTS_DIR}/run-task-git",
             scripts_dir / "robustcheckout.py": ARTIFACTS_DIR,
             scripts_dir / "run-task-setup.py": ARTIFACTS_DIR,
+            scripts_dir / "run_task_resource_monitor.py": ARTIFACTS_DIR,
+            Path(GECKO, "testing", "mozbase", "mozsystemmonitor")
+            / "mozsystemmonitor"
+            / "resourcemonitor.py": ARTIFACTS_DIR,
         }
         for target, dest in to_copy.items():
             shutil.copy2(target, dest)
