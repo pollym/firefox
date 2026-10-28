@@ -22,6 +22,12 @@ ChromeUtils.defineESModuleGetters(lazy, {
   UrlbarShared: "chrome://browser/content/urlbar/UrlbarShared.mjs",
 });
 
+ChromeUtils.defineLazyGetter(
+  lazy,
+  "l10n",
+  () => new Localization(["browser/downloads.ftl"], true)
+);
+
 XPCOMUtils.defineLazyServiceGetter(
   lazy,
   "handlerSvc",
@@ -59,6 +65,10 @@ Integration.downloads.defineESModuleGetter(
 );
 
 const HTML_NS = "http://www.w3.org/1999/xhtml";
+
+function formatValue(id, args) {
+  return lazy.l10n.formatValueSync(id, args);
+}
 
 var gDownloadElementButtons = Object.freeze({
   cancel: {
@@ -171,7 +181,7 @@ export var DownloadsViewUI = {
     let [size, unit] = lazy.DownloadUtils.convertByteUnits(
       download.target.size
     );
-    return lazy.DownloadsCommon.strings.sizeWithUnits(size, unit);
+    return formatValue("downloads-size-with-units", { size, unit });
   },
 
   /**
@@ -628,14 +638,14 @@ DownloadsViewUI.DownloadElementShell.prototype = {
       new Date(this.download.endTime)
     );
 
-    let firstPart = lazy.DownloadsCommon.strings.statusSeparator(
-      stateLabel,
-      displayHost
-    );
-    let fullStatus = lazy.DownloadsCommon.strings.statusSeparator(
-      firstPart,
-      displayDate
-    );
+    let firstPart = formatValue("downloads-status-separator", {
+      start: stateLabel,
+      end: displayHost,
+    });
+    let fullStatus = formatValue("downloads-status-separator", {
+      start: firstPart,
+      end: displayDate,
+    });
 
     if (!this.isPanel) {
       this.showStatus(fullStatus);
@@ -772,19 +782,19 @@ DownloadsViewUI.DownloadElementShell.prototype = {
             // label, for example "Completed - 1.5 MB". When the pointer is over
             // the main area of the item, this label is replaced with a
             // description of the default action, which opens the file.
-            let status = lazy.DownloadsCommon.strings.stateCompleted;
+            let status = formatValue("downloads-state-completed");
             if (sizeWithUnits) {
-              status = lazy.DownloadsCommon.strings.statusSeparator(
-                status,
-                sizeWithUnits
-              );
+              status = formatValue("downloads-status-separator", {
+                start: status,
+                end: sizeWithUnits,
+              });
             }
             this.showStatus(status, { l10n: { id: "downloads-open-file" } });
           } else {
             // In the Downloads View, we show the file size in place of the
             // state label, for example "1.5 MB - example.com - 1:45 PM".
             this.showStatusWithDetails(
-              sizeWithUnits || lazy.DownloadsCommon.strings.sizeUnknown
+              sizeWithUnits || formatValue("downloads-size-unknown")
             );
           }
           this.showButton("show");
@@ -797,7 +807,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
         if (this.download.error.becauseBlockedByParentalControls) {
           // This download was blocked permanently by parental controls.
           this.showStatusWithDetails(
-            lazy.DownloadsCommon.strings.stateBlockedParentalControls
+            formatValue("downloads-state-blocked-parental-controls")
           );
           this.hideButton();
         } else if (
@@ -842,7 +852,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
         } else {
           // This download failed without being blocked, and can be restarted.
           this.showStatusWithDetails(
-            lazy.DownloadsCommon.strings.stateFailed,
+            formatValue("downloads-state-failed"),
             this.download.error.localizedReason
           );
           this.showButton("retry");
@@ -860,27 +870,25 @@ DownloadsViewUI.DownloadElementShell.prototype = {
             totalBytes
           );
           this.showStatus(
-            lazy.DownloadsCommon.strings.statusSeparatorBeforeNumber(
-              lazy.DownloadsCommon.strings.statePaused,
-              transfer
-            )
+            formatValue("downloads-status-separator-before-number", {
+              start: formatValue("downloads-state-paused"),
+              end: transfer,
+            })
           );
           this.showButton("cancel");
           progressPaused = true;
         } else {
           // This download was canceled.
-          this.showStatusWithDetails(
-            lazy.DownloadsCommon.strings.stateCanceled
-          );
+          this.showStatusWithDetails(formatValue("downloads-state-canceled"));
           this.showButton("retry");
         }
       } else {
         // This download was added to the global list before it started. While
         // we still support this case, at the moment it can only be triggered by
         // internally developed add-ons and regression tests, and should not
-        // happen unless there is a bug. This means the stateStarting string can
-        // probably be removed when converting the localization to Fluent.
-        this.showStatus(lazy.DownloadsCommon.strings.stateStarting);
+        // happen unless there is a bug. This means the downloads-state-starting
+        // string can probably be removed.
+        this.showStatus(formatValue("downloads-state-starting"));
         this.showButton("cancel");
       }
 
@@ -907,28 +915,27 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     }
   },
 
-  getContentAnalysisErrorTitle(strings, cancelError) {
+  getContentAnalysisErrorTitle(cancelError) {
+    let args = { agent: lazy.contentAnalysisAgentName };
     switch (cancelError) {
       case Ci.nsIContentAnalysisResponse.eNoAgent:
-        return strings.contentAnalysisNoAgentError(
-          lazy.contentAnalysisAgentName
-        );
+        return formatValue("downloads-content-analysis-no-agent-error", args);
       case Ci.nsIContentAnalysisResponse.eInvalidAgentSignature:
-        return strings.contentAnalysisInvalidAgentSignatureError(
-          lazy.contentAnalysisAgentName
+        return formatValue(
+          "downloads-content-analysis-invalid-agent-signature-error",
+          args
         );
       case Ci.nsIContentAnalysisResponse.eTimeout:
-        return strings.contentAnalysisTimeoutError(
-          lazy.contentAnalysisAgentName
-        );
+        return formatValue("downloads-content-analysis-timeout-error", args);
       case Ci.nsIContentAnalysisResponse.eErrorOther:
-        return strings.contentAnalysisUnspecifiedError(
-          lazy.contentAnalysisAgentName
+        return formatValue(
+          "downloads-content-analysis-unspecified-error",
+          args
         );
       default:
         // This also handles the case when cancelError is undefined
         // because the request wasn't cancelled at all.
-        return strings.blockedByContentAnalysis;
+        return formatValue("downloads-blocked-by-content-analysis");
     }
   },
 
@@ -937,7 +944,6 @@ DownloadsViewUI.DownloadElementShell.prototype = {
    * The title or details could be raw strings or l10n objects.
    */
   get rawBlockedTitleAndDetails() {
-    let s = lazy.DownloadsCommon.strings;
     if (
       !this.download.error ||
       (!this.download.error.becauseBlockedByReputationCheck &&
@@ -947,17 +953,29 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     }
     switch (this.download.error.reputationCheckVerdict) {
       case lazy.Downloads.Error.BLOCK_VERDICT_UNCOMMON:
-        return [s.blockedUncommon2, [s.unblockTypeUncommon2, s.unblockTip2]];
+        return [
+          formatValue("downloads-blocked-uncommon"),
+          [
+            formatValue("downloads-unblock-type-uncommon"),
+            formatValue("downloads-unblock-tip"),
+          ],
+        ];
       case lazy.Downloads.Error.BLOCK_VERDICT_INSECURE:
         return [
-          s.blockedPotentiallyInsecure,
-          [s.unblockInsecure2, s.unblockTip2],
+          formatValue("downloads-blocked-potentially-insecure"),
+          [
+            formatValue("downloads-unblock-insecure"),
+            formatValue("downloads-unblock-tip"),
+          ],
         ];
       case lazy.Downloads.Error.BLOCK_VERDICT_POTENTIALLY_UNWANTED:
         if (this.download.error.becauseBlockedByReputationCheck) {
           return [
-            s.blockedPotentiallyUnwanted,
-            [s.unblockTypePotentiallyUnwanted2, s.unblockTip2],
+            formatValue("downloads-blocked-potentially-unwanted"),
+            [
+              formatValue("downloads-unblock-type-potentially-unwanted"),
+              formatValue("downloads-unblock-tip"),
+            ],
           ];
         }
         if (!this.download.error.becauseBlockedByContentAnalysis) {
@@ -967,12 +985,21 @@ DownloadsViewUI.DownloadElementShell.prototype = {
           break;
         }
         return [
-          s.warnedByContentAnalysis,
-          [s.unblockTypeContentAnalysisWarn, s.unblockContentAnalysisWarnTip],
+          formatValue("downloads-warned-by-content-analysis"),
+          [
+            formatValue("downloads-unblock-type-content-analysis-warn"),
+            formatValue("downloads-unblock-content-analysis-warn-tip"),
+          ],
         ];
       case lazy.Downloads.Error.BLOCK_VERDICT_MALWARE:
         if (this.download.error.becauseBlockedByReputationCheck) {
-          return [s.blockedMalware, [s.unblockTypeMalware, s.unblockTip2]];
+          return [
+            formatValue("downloads-blocked-malware"),
+            [
+              formatValue("downloads-unblock-type-malware"),
+              formatValue("downloads-unblock-tip"),
+            ],
+          ];
         }
         if (!this.download.error.becauseBlockedByContentAnalysis) {
           // We expect one of becauseBlockedByReputationCheck or
@@ -982,10 +1009,12 @@ DownloadsViewUI.DownloadElementShell.prototype = {
         }
         return [
           this.getContentAnalysisErrorTitle(
-            s,
             this.download.error.contentAnalysisCancelError
           ),
-          [s.unblockContentAnalysis1, s.unblockContentAnalysis2],
+          [
+            formatValue("downloads-unblock-content-analysis-blocked"),
+            formatValue("downloads-unblock-content-analysis-override"),
+          ],
         ];
       case lazy.Downloads.Error.BLOCK_VERDICT_DOWNLOAD_SPAM: {
         let title = {
@@ -1009,15 +1038,15 @@ DownloadsViewUI.DownloadElementShell.prototype = {
 
   showDeletedOrMissing() {
     this.element.removeAttribute("exists");
-    let stringKey;
+    let l10nId;
     if (this.download.deleted && this.download.error?.becauseBlocked) {
-      stringKey = "fileBlockedAndDeleted";
+      l10nId = "downloads-file-blocked-and-deleted";
     } else if (this.download.deleted) {
-      stringKey = "fileDeleted";
+      l10nId = "downloads-file-deleted";
     } else {
-      stringKey = "fileMovedOrMissing";
+      l10nId = "downloads-file-moved-or-missing";
     }
-    let label = lazy.DownloadsCommon.strings[stringKey];
+    let label = formatValue(l10nId);
     this.showStatusWithDetails(label, label);
     this.hideButton();
   },
