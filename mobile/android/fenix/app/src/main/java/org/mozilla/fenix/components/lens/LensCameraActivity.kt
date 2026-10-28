@@ -488,19 +488,13 @@ class LensCameraActivity : AppCompatActivity() {
 
         private const val STATE_PERMISSION_REQUESTED = "permission_requested"
 
-        /**
-         * Result intent extra naming the upload method that produced the image, read by `LensFeature` to attribute the
-         * Google Lens search telemetry.
-         */
-        internal const val EXTRA_IMAGE_SOURCE = "lens_image_source"
-
         internal const val IMAGE_SOURCE_CAMERA = "camera"
 
         internal const val IMAGE_SOURCE_PHOTO_PICKER = "photo_picker"
 
         /**
-         * Result intent extra carrying the Lens results URL of an image this activity already uploaded. When present,
-         * the result carries no image URI and the search telemetry has already been recorded.
+         * Result intent extra carrying the Lens results URL of the image this activity uploaded. The search telemetry
+         * has already been recorded.
          */
         internal const val EXTRA_LENS_RESULT_URL = "lens_result_url"
 
