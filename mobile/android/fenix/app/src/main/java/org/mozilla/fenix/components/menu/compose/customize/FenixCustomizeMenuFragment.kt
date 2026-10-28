@@ -4,12 +4,22 @@
 
 package org.mozilla.fenix.components.menu.compose.customize
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.Modifier
+import androidx.fragment.compose.content
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import mozilla.components.compose.menu.CustomizeMenuFragment
 import mozilla.components.compose.menu.store.MenuState
 import mozilla.components.compose.menu.store.MenuStore
+import mozilla.components.compose.menu.ui.customize.CustomizeMenuContent
+import mozilla.components.compose.menu.ui.customize.CustomizeMenuTopAppBar
 import mozilla.components.feature.automotive.isAndroidAutomotiveAvailable
 import org.mozilla.fenix.components.menu.DefaultMenuHost
 import org.mozilla.fenix.components.menu.MenuAccessPoint
@@ -23,6 +33,7 @@ import org.mozilla.fenix.components.menu.middleware.MenuMiddleware
 import org.mozilla.fenix.components.menu.middleware.MenuTelemetryMiddleware
 import org.mozilla.fenix.ext.openSetDefaultBrowserOption
 import org.mozilla.fenix.ext.requireComponents
+import org.mozilla.fenix.theme.FirefoxTheme
 import org.mozilla.fenix.translations.TranslationsEnabledSettings
 
 /** Fenix implementation of [CustomizeMenuFragment]. */
@@ -89,5 +100,24 @@ class FenixCustomizeMenuFragment : CustomizeMenuFragment() {
             menuViewScope = viewLifecycleOwner.lifecycle.coroutineScope,
             applicationScope = components.applicationScope,
         )
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View = content {
+        FirefoxTheme {
+            Scaffold(
+                topBar = {
+                    CustomizeMenuTopAppBar(onNavigateBack = { findNavController().popBackStack() })
+                }
+            ) { paddingValues ->
+                CustomizeMenuContent(
+                    menuStore = menuStore,
+                    modifier = Modifier.padding(paddingValues),
+                )
+            }
+        }
     }
 }
