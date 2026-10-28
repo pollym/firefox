@@ -5598,9 +5598,10 @@ WebRenderCommandsResult nsDisplayViewTransitionCapture::CreateWebRenderCommands(
   Maybe<wr::SnapshotInfo> si;
   nsPresContext* pc = mFrame->PresContext();
   nsIFrame* capturedFrame =
-      mIsRoot ? pc->FrameConstructor()->GetRootElementStyleFrame() : mFrame;
+      mIsRoot ? pc->FrameConstructor()->GetRootElementStyleFrame()
+              : nsLayoutUtils::FirstContinuationOrIBSplitSibling(mFrame);
   auto captureRect =
-      ViewTransition::CapturedInkOverflowRectForFrame(mFrame, mIsRoot);
+      ViewTransition::CapturedInkOverflowRectForFrame(capturedFrame, mIsRoot);
   auto* vt = pc->Document()->GetActiveViewTransition();
   auto key = [&]() -> Maybe<wr::SnapshotImageKey> {
     if (NS_WARN_IF(!vt)) {
@@ -5674,11 +5675,17 @@ WebRenderCommandsResult nsDisplayViewTransitionCapture::CreateWebRenderCommands(
   if (key) {
     vt->UpdateActiveRectForCapturedFrame(capturedFrame, aSc.GetInheritedScale(),
                                          captureRect);
+    // The capture rect is relative to the first fragment of the captured
+    // element, but we might be a merged item for another fragment.
+    const nsPoint offsetToCapturedFrame =
+        mIsRoot || capturedFrame == mFrame ? nsPoint()
+                                           : capturedFrame->GetOffsetTo(mFrame);
 
     si.emplace(wr::SnapshotInfo{
         .key = *key,
         .area = wr::ToLayoutRect(LayoutDeviceRect::FromAppUnits(
-            captureRect + ToReferenceFrame(), pc->AppUnitsPerDevPixel())),
+            captureRect + offsetToCapturedFrame + ToReferenceFrame(),
+            pc->AppUnitsPerDevPixel())),
         .detached = true,
     });
     params.snapshot = si.ptr();
