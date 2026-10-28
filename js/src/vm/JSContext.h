@@ -1233,6 +1233,10 @@ struct JS_PUBLIC_API JSContext : public JS::RootingContext,
  public:
   js::TestingFunctionData* getOrCreateTestingFunctionData();
 
+  js::TestingFunctionData* maybeTestingFunctionData() {
+    return testingFunctionData_.ref().get();
+  }
+
   js::TestingFunctionData& testingFunctionData() {
     MOZ_ASSERT(testingFunctionData_.ref());
     return *testingFunctionData_.ref();

@@ -67,7 +67,8 @@
 #include "jit/JitRuntime.h"
 #include "jit/JitScript.h"
 #include "jit/TrialInlining.h"
-#include "js/Array.h"        // JS::NewArrayObject
+#include "js/AllocationRecording.h"  // JS::{Enable,Disable}RecordingAllocations
+#include "js/Array.h"                // JS::NewArrayObject
 #include "js/ArrayBuffer.h"  // JS::{DetachArrayBuffer,GetArrayBufferLengthAndData,NewArrayBufferWithContents}
 #include "js/CallAndConstruct.h"  // JS::Call, JS::IsCallable, JS::IsConstructor, JS_CallFunction
 #include "js/CharacterEncoding.h"
@@ -3707,6 +3708,127 @@ static bool EnableTrackAllocations(JSContext* cx, unsigned argc, Value* vp) {
 
 static bool DisableTrackAllocations(JSContext* cx, unsigned argc, Value* vp) {
   SetAllocationMetadataBuilder(cx, nullptr);
+  return true;
+}
+
+static void RecordAllocation(JS::RecordAllocationInfo&& info) {
+  TestingFunctionData& data = TlsContext.get()->testingFunctionData();
+  MOZ_ASSERT(data.recordedAllocations.isSome());
+  RecordedAllocations& recorded = *data.recordedAllocations;
+
+  UniqueTwoByteChars typeName;
+  if (info.typeName) {
+    typeName = DuplicateString(info.typeName);
+    if (!typeName) {
+      return;
+    }
+  }
+  UniqueChars className;
+  if (info.className) {
+    className = DuplicateString(info.className);
+    if (!className) {
+      return;
+    }
+  }
+  UniqueTwoByteChars descriptiveTypeName;
+  if (info.descriptiveTypeName) {
+    descriptiveTypeName = DuplicateString(info.descriptiveTypeName);
+    if (!descriptiveTypeName) {
+      return;
+    }
+  }
+
+  (void)recorded.emplaceBack(std::move(typeName), std::move(className),
+                             std::move(descriptiveTypeName), info.coarseType,
+                             info.size, info.inNursery);
+}
+
+static bool StartRecordingAllocations(JSContext* cx, unsigned argc, Value* vp) {
+  CallArgs args = CallArgsFromVp(argc, vp);
+
+  double probability = 1.0;
+  if (args.hasDefined(0)) {
+    if (!ToNumber(cx, args[0], &probability)) {
+      return false;
+    }
+    if (!(probability >= 0.0 && probability <= 1.0)) {
+      JS_ReportErrorASCII(cx, "probability must be between 0 and 1");
+      return false;
+    }
+  }
+
+  TestingFunctionData* data = cx->getOrCreateTestingFunctionData();
+  if (!data) {
+    return false;
+  }
+  if (data->recordedAllocations.isNothing()) {
+    data->recordedAllocations.emplace();
+  }
+
+  JS::EnableRecordingAllocations(cx, RecordAllocation, probability);
+
+  args.rval().setUndefined();
+  return true;
+}
+
+template <typename CharT>
+static bool DefineStringOrNullProperty(JSContext* cx, HandleObject obj,
+                                       const char* name, const CharT* chars) {
+  RootedValue val(cx, NullValue());
+  if (chars) {
+    JSString* str = NewStringCopyZ<CanGC>(cx, chars);
+    if (!str) {
+      return false;
+    }
+    val.setString(str);
+  }
+  return JS_DefineProperty(cx, obj, name, val, JSPROP_ENUMERATE);
+}
+
+static bool StopRecordingAllocations(JSContext* cx, unsigned argc, Value* vp) {
+  CallArgs args = CallArgsFromVp(argc, vp);
+
+  TestingFunctionData* data = cx->maybeTestingFunctionData();
+  if (!data || data->recordedAllocations.isNothing()) {
+    JS_ReportErrorASCII(cx, "not recording allocations");
+    return false;
+  }
+
+  JS::DisableRecordingAllocations(cx);
+  RecordedAllocations recorded = std::move(*data->recordedAllocations);
+  data->recordedAllocations.reset();
+
+  Rooted<ArrayObject*> result(cx, NewDenseEmptyArray(cx));
+  if (!result) {
+    return false;
+  }
+
+  RootedObject obj(cx);
+  for (const RecordedAllocation& entry : recorded) {
+    obj = NewPlainObject(cx);
+    if (!obj) {
+      return false;
+    }
+    if (!DefineStringOrNullProperty(cx, obj, "typeName",
+                                    entry.typeName.get()) ||
+        !DefineStringOrNullProperty(cx, obj, "className",
+                                    entry.className.get()) ||
+        !DefineStringOrNullProperty(cx, obj, "descriptiveTypeName",
+                                    entry.descriptiveTypeName.get()) ||
+        !DefineStringOrNullProperty(cx, obj, "coarseType", entry.coarseType) ||
+        !JS_DefineProperty(cx, obj, "size", double(entry.size),
+                           JSPROP_ENUMERATE) ||
+        !JS_DefineProperty(cx, obj, "inNursery",
+                           entry.inNursery ? TrueHandleValue : FalseHandleValue,
+                           JSPROP_ENUMERATE)) {
+      return false;
+    }
+    if (!NewbornArrayPush(cx, result, ObjectValue(*obj))) {
+      return false;
+    }
+  }
+
+  args.rval().setObject(*result);
   return true;
 }
 
@@ -10531,6 +10653,16 @@ static const JSFunctionSpecWithHelp TestingFunctions[] = {
     JS_FN_HELP("disableTrackAllocations", DisableTrackAllocations, 0, 0,
 "disableTrackAllocations()",
 "  Stop capturing the JS stack at every allocation."),
+
+    JS_FN_HELP("startRecordingAllocations", StartRecordingAllocations, 1, 0,
+"startRecordingAllocations([probability])",
+"  Start recording allocations for all realms using the allocation recording\n"
+"  API that is used by the Firefox profiler. Each object is recorded with the\n"
+"  given probability (default 1)."),
+
+    JS_FN_HELP("stopRecordingAllocations", StopRecordingAllocations, 0, 0,
+"stopRecordingAllocations()",
+"  Stop recording allocations and return an array of the recorded allocations."),
 
     JS_FN_HELP("setTestFilenameValidationCallback", SetTestFilenameValidationCallback, 0, 0,
 "setTestFilenameValidationCallback()",

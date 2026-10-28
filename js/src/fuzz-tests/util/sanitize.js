@@ -87,6 +87,8 @@ function sanitizeGlobal(g) {
     ignoreUnhandledRejections: function () { },
     enableTrackAllocations: function () { },
     disableTrackAllocations: function () { },
+    startRecordingAllocations: function () { },
+    stopRecordingAllocations: function () { return []; },
     setTestFilenameValidationCallback: function () { },
   };
 
