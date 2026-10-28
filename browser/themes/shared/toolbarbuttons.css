@@ -306,7 +306,7 @@ toolbar .toolbarbutton-1 {
 
 #PanelUI-menu-button {
   /* Adds padding to end of toolbar while making that space click the first button */
-  padding-inline-end: var(--toolbar-padding-inline);
+  padding-inline-end: var(--toolbar-end-edge-padding, var(--toolbar-padding-inline));
 }
 
 toolbar .toolbaritem-combined-buttons {
