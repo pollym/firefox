@@ -534,6 +534,47 @@ bool BaseCompiler::beginFunction() {
     return false;
   }
 
+  // GenerateFunctionPrologue pushes exactly one wasm::Frame's worth of
+  // stuff, and none of the values are GC pointers.  Hence:
+  const size_t frameWords = sizeof(Frame) / sizeof(void*);
+  if (!stackMapGenerator_.machineStackTracker.pushNonGCPointers(frameWords)) {
+    return false;
+  }
+
+  // The IndirectCallBadSig trap in the prologue fires when the caller's and
+  // callee's signatures differ, so the types and number of arguments specified
+  // by the callee's signature can't be trusted here.  About the best we can do
+  // is to create a map that matches the size of the callee's frame but marks no
+  // entries as being refs.  This seems reasonable given that IndirectCallBadSig
+  // doesn't resume.  The map must be created before any stack args are marked
+  // as refs.
+  CallIndirectId callIndirectId =
+      CallIndirectId::forFunc(codeMeta_, func_.index);
+  StackMap* badSigStackMap = nullptr;
+  if (compilerEnv_.debugEnabled() &&
+      callIndirectId.kind() != CallIndirectIdKind::None) {
+    ExitStubMapVector badSigExtras;
+    if (!stackMapGenerator_.generateStackmapEntriesForTrapExit(args,
+                                                               &badSigExtras)) {
+      return false;
+    }
+    // Ensure no refs get into the final badSigStackMap via badSigExtras, per
+    // comment above.
+    for (bool& b : badSigExtras) {
+      b = false;
+    }
+    // stackmap for: signature-mismatch trap in the checked call entry.  Per
+    // comment above, logic here assumes that the trap won't resume, hence the
+    // assertion.
+    const Trap trapKind = Trap::IndirectCallBadSig;
+    MOZ_ASSERT(!wasm::TrapMightResume(trapKind));
+    if (!stackMapGenerator_.createStackMap(Some(trapKind), badSigExtras,
+                                           HasDebugFrameWithLiveRefs::No, stk_,
+                                           &badSigStackMap)) {
+      return false;
+    }
+  }
+
   // Identify GC-managed pointers passed on the stack.
   for (ABIArgIter i(args, ABIKind::Wasm); !i.done(); i++) {
     ABIArg argLoc = *i;
@@ -542,23 +583,21 @@ bool BaseCompiler::beginFunction() {
       uint32_t offset = argLoc.offsetFromArgBase();
       MOZ_ASSERT(offset < inboundStackArgBytes);
       MOZ_ASSERT(offset % sizeof(void*) == 0);
-      stackMapGenerator_.machineStackTracker.setGCPointer(offset /
-                                                          sizeof(void*));
+      stackMapGenerator_.machineStackTracker.setGCPointer(
+          offset / sizeof(void*) + frameWords);
     }
   }
 
   perfSpewer_.startRecording();
   perfSpewer_.markStartOffset(masm.currentOffset());
   perfSpewer_.recordOffset(masm, "Prologue");
+  FaultingCodeRange badSigTrap;
   GenerateFunctionPrologue(
-      masm, CallIndirectId::forFunc(codeMeta_, func_.index),
+      masm, callIndirectId,
       compilerEnv_.mode() != CompileMode::Once ? Some(func_.index) : Nothing(),
-      &offsets_);
-
-  // GenerateFunctionPrologue pushes exactly one wasm::Frame's worth of
-  // stuff, and none of the values are GC pointers.  Hence:
-  if (!stackMapGenerator_.machineStackTracker.pushNonGCPointers(
-          sizeof(Frame) / sizeof(void*))) {
+      &offsets_, &badSigTrap);
+  if (badSigStackMap && badSigTrap.isValid() &&
+      !stackMaps_->add(badSigTrap.resumeOffset(), badSigStackMap)) {
     return false;
   }
 
@@ -13178,8 +13217,8 @@ bool js::wasm::BaselineCompileFunctions(const CodeMetadata& codeMeta,
 
     // Do the check.  This asserts if the check fails.
     auto checkThisTrapKind_debugMode = [](Trap t) -> bool {
-      // In debug mode, we check most trap kinds.
-      return t != Trap::IndirectCallBadSig;
+      // In debug mode, we check all trap kinds.
+      return true;
     };
     auto checkThisTrapKind_normalMode = [](Trap t) -> bool {
       // Trap kinds to check in non-debug mode
