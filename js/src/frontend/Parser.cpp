@@ -8770,15 +8770,15 @@ GeneralParser<ParseHandler, Unit>::fieldInitializerOpt(
       bool isPrivate = propAtom && handler_.isPrivateName(propName);
       bool isPlainName = propAtom && (isPrivate || !this->parserAtoms().isIndex(
                                                        propAtom, &index));
-      bool isZeroLiteral =
-          initializerExpr->isKind(ParseNodeKind::NumberExpr) &&
-          initializerExpr->template as<NumericLiteral>().value() == 0;
+      bool isNumberLiteral = initializerExpr->isKind(ParseNodeKind::NumberExpr);
       bool hasMaxInlinedFields =
           classInitializedMembers.inlinableFields.length() >=
           MemberInitializers::MaxInlinedFields;
-      if (isPlainName && isZeroLiteral && !hasMaxInlinedFields) {
+      if (isPlainName && isNumberLiteral && !hasMaxInlinedFields) {
+        double literalValue =
+            initializerExpr->template as<NumericLiteral>().value();
         if (!classInitializedMembers.inlinableFields.append(
-                InlinedField{propAtom, isPrivate})) {
+                InlinedField{propAtom, isPrivate, literalValue})) {
           js::ReportOutOfMemory(fc_);
           return errorResult();
         }
