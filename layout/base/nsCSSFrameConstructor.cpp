@@ -1503,19 +1503,17 @@ void nsCSSFrameConstructor::CreateGeneratedContent(
     }
 
     case Type::MozLabelContent: {
+      nsAutoString value;
+      aOriginatingElement.GetAttr(nsGkAtoms::value, value);
+
       nsAutoString accesskey;
       if (!aOriginatingElement.GetAttr(nsGkAtoms::accesskey, accesskey) ||
           accesskey.IsEmpty() || !LookAndFeel::GetMenuAccessKey()) {
         // Easy path: just return a regular value attribute content.
-        nsCOMPtr<nsIContent> content;
-        NS_NewAttributeContent(mDocument->NodeInfoManager(), nsGkAtoms::value,
-                               getter_AddRefs(content));
-        aAddChild(content);
+        RefPtr c = CreateGenConTextNode(aState, value, nullptr);
+        aAddChild(c);
         return;
       }
-
-      nsAutoString value;
-      aOriginatingElement.GetAttr(nsGkAtoms::value, value);
 
       auto AppendAccessKeyLabel = [&] {
         // Always append accesskey text in uppercase, see bug 1806167.
@@ -1586,38 +1584,6 @@ void nsCSSFrameConstructor::CreateGeneratedContent(
             aState, Substring(value, *accessKeyStart + accesskey.Length()),
             nullptr);
         aAddChild(valueEnd);
-      }
-      break;
-    }
-    case Type::MozAltContent: {
-      // Use the "alt" attribute; if that fails and the node is an HTML
-      // <input>, try the value attribute and then fall back to some default
-      // localized text we have.
-      // XXX what if the 'alt' attribute is added later, how will we
-      // detect that and do the right thing here?
-      if (aOriginatingElement.HasAttr(nsGkAtoms::alt)) {
-        nsCOMPtr<nsIContent> content;
-        NS_NewAttributeContent(mDocument->NodeInfoManager(), nsGkAtoms::alt,
-                               getter_AddRefs(content));
-        aAddChild(content);
-        return;
-      }
-
-      if (aOriginatingElement.IsHTMLElement(nsGkAtoms::input)) {
-        if (aOriginatingElement.HasAttr(nsGkAtoms::value)) {
-          nsCOMPtr<nsIContent> content;
-          NS_NewAttributeContent(mDocument->NodeInfoManager(), nsGkAtoms::value,
-                                 getter_AddRefs(content));
-          aAddChild(content);
-          return;
-        }
-
-        nsAutoString temp;
-        nsContentUtils::GetMaybeLocalizedString(
-            PropertiesFile::FORMS_PROPERTIES, "Submit", mDocument, temp);
-        RefPtr c = CreateGenConTextNode(aState, temp, nullptr);
-        aAddChild(c);
-        return;
       }
       break;
     }
@@ -7238,7 +7204,7 @@ void nsCSSFrameConstructor::WillDestroyFrameTree() {
 // XXXbz I'd really like this method to go away. Once we have inline-block and
 // I can just use that for sized broken images, that can happen, maybe.
 //
-// NOTE(emilio): This needs to match MozAltContent handling.
+// NOTE(emilio): This needs to match the UA sheet.
 void nsCSSFrameConstructor::GetAlternateTextFor(const Element& aElement,
                                                 nsAString& aAltText) {
   // The "alt" attribute specifies alternate text that is rendered

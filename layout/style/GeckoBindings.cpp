@@ -393,6 +393,12 @@ const StyleLockedDeclarationBlock* Gecko_GetViewTransitionDynamicRule(
   return vt->GetDynamicRuleFor(*aElement);
 }
 
+void Gecko_GetSubmitString(const Document* aDocument, nsAString* aResult) {
+  MOZ_ASSERT(NS_IsMainThread());
+  nsContentUtils::GetMaybeLocalizedString(PropertiesFile::FORMS_PROPERTIES,
+                                          "Submit", aDocument, *aResult);
+}
+
 const StyleLockedDeclarationBlock* Gecko_GetExtraContentStyleDeclarations(
     const Element* aElement) {
   if (const auto* cell = HTMLTableCellElement::FromNode(aElement)) {
@@ -1277,12 +1283,14 @@ void ShutdownServo() {
   URLExtraData::Shutdown();
 }
 
-void AssertIsMainThreadOrServoFontMetricsLocked() {
+#ifdef DEBUG
+void AssertIsMainThreadOrServoFFILocked() {
   if (!NS_IsMainThread()) {
     MOZ_ASSERT(sServoFFILock);
     sServoFFILock->AssertCurrentThreadOwns();
   }
 }
+#endif
 
 }  // namespace mozilla
 
