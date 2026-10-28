@@ -535,7 +535,7 @@ export default class IPProtectionContentElement extends MozLitElement {
       id="site-rules-control"
       type="ghost"
       data-l10n-id="site-rules-manage-rules-link-text"
-      iconsrc="chrome://browser/skin/permissions.svg"
+      iconsrc="chrome://browser/content/ipprotection/assets/vpn-website-rules-icon.svg"
       @click=${this.handleClickSiteRulesLink}
     >
     </moz-button>`;
