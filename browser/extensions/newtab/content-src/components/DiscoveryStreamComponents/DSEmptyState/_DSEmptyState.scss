@@ -41,13 +41,13 @@
   }
 
   h2 {
-    font-size: inherit;
+    font-size: var(--font-size-heading-medium);
     font-weight: var(--font-weight-heading);
     margin: 0;
   }
 
   p {
-    margin: 0;
+    margin: var(--space-small) 0 0;
   }
 }
 
