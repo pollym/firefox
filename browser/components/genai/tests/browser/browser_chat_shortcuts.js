@@ -1663,8 +1663,10 @@ add_task(async function test_more_actions_toggle_updates_bar() {
 });
 
 /**
- * Check that turning off the last action in the three-dot menu turns the whole
- * menu off, as unchecking the last action in Settings does.
+ * Check that turning off the last action in the three-dot menu explains that
+ * the menu will go away, and turns it off only once the three-dot menu closes,
+ * as unchecking the last action in Settings does. Turning an action back on
+ * first cancels it.
  */
 add_task(async function test_more_actions_uncheck_all_turns_menu_off() {
   Services.fog.testResetFOG();
@@ -1672,22 +1674,78 @@ add_task(async function test_more_actions_uncheck_all_turns_menu_off() {
 
   await BrowserTestUtils.withNewTab("data:text/plain,hi", async browser => {
     const panel = await showSelectionMenu(browser);
-    await openMoreActions();
+    const moreActionsPanel = await openMoreActions();
+    const notice = document.getElementById("more-actions-all-off-notice");
+    const enabledPref = "browser.highlightToSearch.enabled";
 
     await clickToggle("more-actions-copy-toggle");
     await clickToggle("more-actions-search-toggle");
     Assert.equal(panel.state, "open", "The bar stays open with an action left");
     Assert.ok(
-      Services.prefs.getBoolPref("browser.highlightToSearch.enabled"),
+      Services.prefs.getBoolPref(enabledPref),
       "The menu stays on with an action left"
     );
+    Assert.ok(
+      BrowserTestUtils.isHidden(notice),
+      "No notice with an action left"
+    );
 
-    const panelHidden = BrowserTestUtils.waitForEvent(panel, "popuphidden");
     await clickToggle("more-actions-ai-toggle");
+    await document.l10n.translateElements([notice]);
+    Assert.ok(BrowserTestUtils.isVisible(notice), "The notice is shown");
+    Assert.ok(notice.textContent.trim(), "The notice says what will happen");
+    const chevron = notice.querySelector(".more-actions-notice-chevron");
+    Assert.ok(
+      chevron && BrowserTestUtils.isVisible(chevron),
+      "The path to the setting is separated by a chevron icon"
+    );
+    Assert.ok(
+      !notice.textContent.includes(">"),
+      "No greater-than sign is used as a separator"
+    );
+    Assert.equal(notice.getAttribute("role"), "status", "It is announced");
+    Assert.ok(Services.prefs.getBoolPref(enabledPref), "The menu is still on");
+    Assert.equal(panel.state, "open", "The bar is still open");
+    for (const id of [
+      "ai-action-button",
+      "search-action-button",
+      "copy-action-button",
+      "more-actions-separator",
+    ]) {
+      Assert.ok(document.getElementById(id).hidden, `${id} is hidden`);
+    }
+    Assert.ok(
+      BrowserTestUtils.isVisible(
+        document.getElementById("more-actions-button")
+      ),
+      "Only the three-dot button is left"
+    );
+
+    await clickToggle("more-actions-search-toggle");
+    Assert.ok(BrowserTestUtils.isHidden(notice), "Turning one on removes it");
+    let menuHidden = BrowserTestUtils.waitForEvent(
+      moreActionsPanel,
+      "popuphidden"
+    );
+    EventUtils.synthesizeKey("KEY_Escape", {}, window);
+    await menuHidden;
+    Assert.ok(
+      Services.prefs.getBoolPref(enabledPref),
+      "Closing the three-dot menu with an action on keeps the menu on"
+    );
+    Assert.equal(panel.state, "open", "The bar stays open");
+
+    await openMoreActions();
+    await clickToggle("more-actions-search-toggle");
+    Assert.ok(BrowserTestUtils.isVisible(notice), "The notice is back");
+    menuHidden = BrowserTestUtils.waitForEvent(moreActionsPanel, "popuphidden");
+    const panelHidden = BrowserTestUtils.waitForEvent(panel, "popuphidden");
+    EventUtils.synthesizeKey("KEY_Escape", {}, window);
+    await menuHidden;
     await panelHidden;
     Assert.ok(
-      !Services.prefs.getBoolPref("browser.highlightToSearch.enabled"),
-      "Turning off the last action turns the menu off"
+      !Services.prefs.getBoolPref(enabledPref),
+      "Closing the three-dot menu with nothing left turns the menu off"
     );
 
     const toggled = Glean.selectionMenu.optionToggled.testGetValue();
@@ -1697,9 +1755,11 @@ add_task(async function test_more_actions_uncheck_all_turns_menu_off() {
         ["copy", "false", "menu"],
         ["search", "false", "menu"],
         ["ai", "false", "menu"],
+        ["search", "true", "menu"],
+        ["search", "false", "menu"],
         ["master", "false", "uncheck_all"],
       ],
-      "The menu turning itself off is recorded"
+      "The menu turning itself off is recorded once, when it happens"
     );
   });
 
