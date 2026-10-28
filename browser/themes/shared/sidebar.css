@@ -483,10 +483,8 @@ menuseparator + #sidebar-extensions-separator {
   }
 
   &[uidensity="compact"] {
-    /* 28px icon button + 2 * 4px = 36px collapsed sidebar. */
-    --sidebar-launcher-button-padding-inline: 4px;
-    /* Match the size of compact toolbar buttons. */
-    --sidebar-launcher-button-size: calc(var(--icon-size-small) + 2 * var(--toolbarbutton-padding-inner-compact));
+    /* 32px icon button + 2 * 2px = 36px collapsed sidebar. */
+    --sidebar-launcher-button-padding-inline: 2px;
 
     --sidebar-expanded-launcher-width: 240px;
 
