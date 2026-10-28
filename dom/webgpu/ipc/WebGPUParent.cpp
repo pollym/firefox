@@ -17,6 +17,7 @@
 #include "mozilla/layers/RemoteTextureMap.h"
 #include "mozilla/layers/TextureHost.h"
 #include "mozilla/layers/WebRenderTextureHost.h"
+#include "mozilla/webgpu/FrontBufferSnapshot.h"
 #include "mozilla/webgpu/SharedTexture.h"
 #include "mozilla/webgpu/ffi/wgpu.h"
 
@@ -404,6 +405,11 @@ class PresentationData {
   const RawId mDeviceId;
   const RawId mQueueId;
   Maybe<RawId> mLastSubmittedTextureId;
+  // `WebGPUParent::DeviceCreateSwapChain` already validated that:
+  //  - the format is either R8G8B8A8 or B8G8R8A8 (bpp = 4)
+  //  - width and height are > 0
+  //  - width * bpp (= stride) <= std::numeric_limits<uint32_t>::max()
+  //  - width * bpp * height (= len) <= std::numeric_limits<size_t>::max()
   const layers::RGBDescriptor mDesc;
 
   uint64_t mSubmissionIndex = 0;
@@ -927,19 +933,16 @@ struct ReadbackSnapshotRequest {
   ReadbackSnapshotRequest(const ffi::WGPUGlobal* aContext,
                           RefPtr<PresentationData>& aData,
                           ffi::WGPUBufferId aBufferId,
-                          ipc::SharedMemoryMapping aDestMapping,
-                          size_t aDestStride)
+                          FrontBufferSnapshot& aSnapshot)
       : mContext(aContext),
         mData(aData),
         mBufferId(aBufferId),
-        mDestMapping(std::move(aDestMapping)),
-        mDestStride(aDestStride) {}
+        mSnapshot(aSnapshot) {}
 
   const ffi::WGPUGlobal* mContext;
   RefPtr<PresentationData> mData;
   const ffi::WGPUBufferId mBufferId;
-  ipc::SharedMemoryMapping mDestMapping;
-  const size_t mDestStride;
+  FrontBufferSnapshot& mSnapshot;
 };
 
 static void ReadbackSnapshotCallback(uint8_t* userdata,
@@ -976,23 +979,26 @@ static void ReadbackSnapshotCallback(uint8_t* userdata,
     return;
   }
 
-  uint8_t* src = mapped->AsSpan().data();
-  uint8_t* dst = req->mDestMapping.DataAs<uint8_t>();
+  const auto& descSize = data->mDesc.size();
+  const size_t bytesPerRow = static_cast<size_t>(descSize.width) * 4;
 
   const size_t src_stride = static_cast<size_t>(data->mBufferStride);
-  const size_t bytesPerRow = static_cast<size_t>(data->mDesc.size().width) * 4;
   MOZ_RELEASE_ASSERT(src_stride >= bytesPerRow);
-  MOZ_RELEASE_ASSERT(req->mDestStride >= bytesPerRow);
 
-  // The height is in bounds for both buffers since we previously created a new
-  // destination buffer with the same height of the source.
-  for (auto row = 0; row < data->mDesc.size().height; ++row) {
-    memcpy(dst, src, bytesPerRow);
-    if (bytesPerRow < req->mDestStride) {
-      memset(dst + bytesPerRow, 0, req->mDestStride - bytesPerRow);
+  auto handle =
+      ipc::shared_memory::Create(bytesPerRow * size_t(descSize.height));
+  auto mapping = handle.Map();
+  if (handle && mapping) {
+    uint8_t* src = mapped->AsSpan().data();
+    uint8_t* dst = mapping.DataAs<uint8_t>();
+
+    for (auto row = 0; row < descSize.height; ++row) {
+      memcpy(dst, src, bytesPerRow);
+      src += src_stride;
+      dst += bytesPerRow;
     }
-    src += src_stride;
-    dst += req->mDestStride;
+    req->mSnapshot = {std::move(handle), uint32_t(descSize.width),
+                      uint32_t(descSize.height), bytesPerRow};
   }
 
   // Release the lock on the mapped range, so the unmap doesn't deadlock.
@@ -1004,16 +1010,7 @@ static void ReadbackSnapshotCallback(uint8_t* userdata,
 ipc::IPCResult WebGPUParent::GetFrontBufferSnapshot(
     const layers::RemoteTextureOwnerId& aOwnerId,
     const RawId& aCommandEncoderId, const RawId& aCommandBufferId,
-    ipc::MutableSharedMemoryHandle& aHandle, gfx::IntSize& aSize,
-    uint32_t& aByteStride) {
-  auto setOutParams = [&aHandle, &aSize, &aByteStride](
-                          ipc::MutableSharedMemoryHandle&& handle, auto size,
-                          auto stride) {
-    aHandle = std::move(handle);
-    aSize = size;
-    aByteStride = stride;
-  };
-
+    FrontBufferSnapshot& aSnapshot) {
   const auto& lookup = mPresentationDataMap.find(aOwnerId);
   if (lookup == mPresentationDataMap.end()) {
     // This can happen if `GPUCanvasContext.configure()` was called with an
@@ -1025,34 +1022,23 @@ ipc::IPCResult WebGPUParent::GetFrontBufferSnapshot(
   RefPtr<PresentationData> data = lookup->second.get();
   data->mReadbackSnapshotCallbackCalled = false;
 
-  const Maybe<int32_t> maybeStride =
-      layers::ImageDataSerializer::GetRGBStride(data->mDesc);
-  if (maybeStride.isNothing()) {
-    return IPC_OK();
-  }
-  const auto stride = maybeStride.value();
   const auto& size = data->mDesc.size();
 
-  if (size.width > INT16_MAX || size.height > INT16_MAX || stride > INT16_MAX) {
-    return IPC_OK();
-  }
-
-  const auto len = CheckedInt<size_t>(size.height) * stride;
-  if (!len.isValid()) {
-    return IPC_OK();
-  }
-
-  auto handle = ipc::shared_memory::Create(len.value());
-  auto mapping = handle.Map();
-  if (!handle || !mapping) {
+  if (size.width > INT16_MAX || size.height > INT16_MAX) {
     return IPC_OK();
   }
 
   if (data->mLastSubmittedTextureId.isNothing()) {
     // No commands referencing the canvas have ever been submitted, so it's
     // blank.
-    memset(mapping.DataAs<uint8_t>(), 0, mapping.Size());
-    setOutParams(std::move(handle), size, stride);
+    const size_t bytesPerRow = static_cast<size_t>(size.width) * 4;
+    auto handle = ipc::shared_memory::Create(bytesPerRow * size_t(size.height));
+    auto mapping = handle.Map();
+    if (handle && mapping) {
+      memset(mapping.DataAs<uint8_t>(), 0, mapping.Size());
+    }
+    aSnapshot = {std::move(handle), uint32_t(size.width), uint32_t(size.height),
+                 bytesPerRow};
     return IPC_OK();
   }
 
@@ -1066,9 +1052,7 @@ ipc::IPCResult WebGPUParent::GetFrontBufferSnapshot(
     if (!data->mUseSharedTextureInSwapChain) {
       ffi::wgpu_server_device_poll(mContext.get(), data->mDeviceId, true);
     }
-    mRemoteTextureOwner->GetLatestBufferSnapshot(aOwnerId, mapping, size,
-                                                 stride);
-    setOutParams(std::move(handle), size, stride);
+    aSnapshot = mRemoteTextureOwner->GetLatestBufferSnapshot(aOwnerId);
     return IPC_OK();
   }
 
@@ -1129,7 +1113,7 @@ ipc::IPCResult WebGPUParent::GetFrontBufferSnapshot(
   }
 
   auto snapshotRequest = std::make_unique<ReadbackSnapshotRequest>(
-      mContext.get(), data, bufferId, std::move(mapping), stride);
+      mContext.get(), data, bufferId, aSnapshot);
 
   ffi::WGPUBufferMapAsyncStatus status = ffi::wgpu_server_buffer_map_blocking(
       mContext.get(), data->mDeviceId, bufferId, 0, bufferSize,
@@ -1142,7 +1126,6 @@ ipc::IPCResult WebGPUParent::GetFrontBufferSnapshot(
   // Check if ReadbackSnapshotCallback is called.
   MOZ_RELEASE_ASSERT(data->mReadbackSnapshotCallbackCalled == true);
 
-  setOutParams(std::move(handle), size, stride);
   return IPC_OK();
 }
 

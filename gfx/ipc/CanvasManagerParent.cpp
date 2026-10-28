@@ -216,17 +216,16 @@ mozilla::ipc::IPCResult CanvasManagerParent::RecvGetSnapshot(
     if (aCommandBufferId.isNothing()) {
       return IPC_FAIL(this, "invalid CommandBufferId");
     }
-    IntSize size;
-    uint32_t stride = 0;
+    webgpu::FrontBufferSnapshot snapshot;
     mozilla::ipc::IPCResult rv = webgpu->GetFrontBufferSnapshot(
-        *aOwnerId, *aCommandEncoderId, *aCommandBufferId, buffer.shmem, size,
-        stride);
+        *aOwnerId, *aCommandEncoderId, *aCommandBufferId, snapshot);
     if (!rv) {
       return rv;
     }
-    buffer.surfSize.x = static_cast<uint32_t>(size.width);
-    buffer.surfSize.y = static_cast<uint32_t>(size.height);
-    buffer.byteStride = stride;
+    buffer.shmem = std::move(snapshot.handle);
+    buffer.surfSize.x = snapshot.width;
+    buffer.surfSize.y = snapshot.height;
+    buffer.byteStride = snapshot.byteStride;
   } else {
     return IPC_FAIL(this, "unsupported protocol");
   }

@@ -11,6 +11,7 @@
 #include "mozilla/WeakPtr.h"
 #include "mozilla/dom/ipc/IdType.h"
 #include "mozilla/webgpu/ExternalTexture.h"
+#include "mozilla/webgpu/FrontBufferSnapshot.h"
 #include "mozilla/webgpu/MappedRangeGuard.h"
 #include "mozilla/webgpu/PWebGPUParent.h"
 #include "mozilla/webgpu/ffi/wgpu.h"
@@ -74,8 +75,7 @@ class WebGPUParent final : public PWebGPUParent, public SupportsWeakPtr {
   ipc::IPCResult GetFrontBufferSnapshot(
       const layers::RemoteTextureOwnerId& aOwnerId,
       const RawId& aCommandEncoderId, const RawId& aCommandBufferId,
-      ipc::MutableSharedMemoryHandle& aHandle, gfx::IntSize& aSize,
-      uint32_t& aByteStride);
+      FrontBufferSnapshot& aSnapshot);
 
   void ActorDestroy(ActorDestroyReason aWhy) override;
 

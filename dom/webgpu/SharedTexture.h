@@ -6,8 +6,8 @@
 #define SharedTexture_H_
 
 #include "mozilla/gfx/Point.h"
-#include "mozilla/ipc/SharedMemoryMapping.h"
 #include "mozilla/layers/LayersSurfaces.h"
+#include "mozilla/webgpu/FrontBufferSnapshot.h"
 #include "mozilla/webgpu/WebGPUTypes.h"
 #include "mozilla/webgpu/ffi/wgpu.h"
 #include "nsTArray.h"
@@ -42,8 +42,7 @@ class SharedTexture {
 
   virtual Maybe<layers::SurfaceDescriptor> ToSurfaceDescriptor() = 0;
 
-  virtual void GetSnapshot(const ipc::SharedMemoryMapping& aDestMapping,
-                           size_t aDestStride) {}
+  virtual FrontBufferSnapshot GetSnapshot() { return {}; }
 
   virtual SharedTextureDMABuf* AsSharedTextureDMABuf() { return nullptr; }
 

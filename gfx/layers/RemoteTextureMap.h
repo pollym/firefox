@@ -42,7 +42,8 @@ class SharedSurface;
 
 namespace webgpu {
 class SharedTexture;
-}
+struct FrontBufferSnapshot;
+}  // namespace webgpu
 
 namespace layers {
 
@@ -240,10 +241,8 @@ class RemoteTextureOwnerClient final {
                    const SurfaceDescriptor& aDesc);
   void PushDummyTexture(const RemoteTextureId aTextureId,
                         const RemoteTextureOwnerId aOwnerId);
-  void GetLatestBufferSnapshot(
-      const RemoteTextureOwnerId aOwnerId,
-      const mozilla::ipc::SharedMemoryMapping& aDestMapping,
-      const gfx::IntSize& aDestSize, size_t aDestStride);
+  webgpu::FrontBufferSnapshot GetLatestBufferSnapshot(
+      const RemoteTextureOwnerId aOwnerId);
   UniquePtr<TextureData> GetRecycledTextureData(
       const gfx::IntSize& aSize, gfx::SurfaceFormat aFormat,
       TextureType aTextureType,
@@ -299,10 +298,8 @@ class RemoteTextureMap {
                      const RemoteTextureOwnerId aOwnerId,
                      const base::ProcessId aForPid);
 
-  void GetLatestBufferSnapshot(
-      const RemoteTextureOwnerId aOwnerId, const base::ProcessId aForPid,
-      const mozilla::ipc::SharedMemoryMapping& aDestMapping,
-      const gfx::IntSize& aDestSize, size_t aDestStride);
+  webgpu::FrontBufferSnapshot GetLatestBufferSnapshot(
+      const RemoteTextureOwnerId aOwnerId, const base::ProcessId aForPid);
 
   void RegisterTextureOwner(
       const RemoteTextureOwnerId aOwnerId, const base::ProcessId aForPid,
