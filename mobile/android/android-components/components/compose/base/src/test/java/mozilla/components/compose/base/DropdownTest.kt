@@ -21,13 +21,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class Dropdown2Test {
+class DropdownTest {
     @get:Rule val composeTestRule = createComposeRule()
 
     @Test
     fun `WHEN the dropdown is clicked THEN the dropdown items are displayed`() {
         composeTestRule.setContent {
-            Dropdown2(
+            Dropdown(
                 label = "Dropdown label",
                 placeholder = "Dropdown placeholder",
                 dropdownItems =
@@ -51,7 +51,7 @@ class Dropdown2Test {
     @Test
     fun `WHEN the dropdown is opened THEN the selected item is displayed in the dropdown and context menu`() {
         composeTestRule.setContent {
-            Dropdown2(
+            Dropdown(
                 label = "Dropdown label",
                 placeholder = "Dropdown placeholder",
                 dropdownItems =
@@ -83,7 +83,7 @@ class Dropdown2Test {
     fun `WHEN a dropdown item is selected THEN the selected item changes`() {
         var selectedIndex by mutableStateOf(0)
         composeTestRule.setContent {
-            Dropdown2(
+            Dropdown(
                 label = "Dropdown label",
                 placeholder = "Dropdown placeholder",
                 dropdownItems =

@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import java.util.Locale
-import mozilla.components.compose.base.Dropdown2
+import mozilla.components.compose.base.Dropdown
 import mozilla.components.compose.base.InfoCard
 import mozilla.components.compose.base.InfoType
 import mozilla.components.compose.base.LinkText
@@ -338,7 +338,7 @@ private fun TranslationsDialogContentInPortraitMode(
             }
 
         translateFromLanguages?.let {
-            Dropdown2(
+            Dropdown(
                 label = header,
                 placeholder = stringResource(R.string.translations_bottom_sheet_default_dropdown_selection),
                 dropdownItems =
@@ -357,7 +357,7 @@ private fun TranslationsDialogContentInPortraitMode(
 
         if (translationError !is TranslationError.LanguageNotSupportedError) {
             translateToLanguages?.let {
-                Dropdown2(
+                Dropdown(
                     label = stringResource(id = R.string.translations_bottom_sheet_translate_to),
                     placeholder = stringResource(R.string.translations_bottom_sheet_default_dropdown_selection),
                     dropdownItems =
@@ -396,7 +396,7 @@ private fun TranslationsDialogContentInLandscapeMode(
                 }
 
             translateFromLanguages?.let {
-                Dropdown2(
+                Dropdown(
                     label = header,
                     placeholder = stringResource(R.string.translations_bottom_sheet_default_dropdown_selection),
                     dropdownItems =
@@ -415,7 +415,7 @@ private fun TranslationsDialogContentInLandscapeMode(
 
             if (translationError !is TranslationError.LanguageNotSupportedError) {
                 translateToLanguages?.let {
-                    Dropdown2(
+                    Dropdown(
                         label = stringResource(id = R.string.translations_bottom_sheet_translate_to),
                         placeholder = stringResource(R.string.translations_bottom_sheet_default_dropdown_selection),
                         dropdownItems =

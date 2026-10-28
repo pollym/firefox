@@ -26,7 +26,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import mozilla.components.compose.base.Dropdown2
+import mozilla.components.compose.base.Dropdown
 import mozilla.components.compose.base.annotation.FlexibleWindowPreview
 import mozilla.components.compose.base.button.FilledButton
 import mozilla.components.compose.base.menu.MenuItem
@@ -205,7 +205,7 @@ private fun GleanDebugSendPingsSection(
     onSendPing: () -> Unit,
 ) {
     Column(modifier = Modifier.padding(horizontal = FirefoxTheme.layout.space.dynamic400)) {
-        Dropdown2(
+        Dropdown(
             label = "Ping Type",
             placeholder = "",
             dropdownItems =

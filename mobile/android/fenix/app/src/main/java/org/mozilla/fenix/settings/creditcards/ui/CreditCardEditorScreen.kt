@@ -45,7 +45,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.Dropdown2
+import mozilla.components.compose.base.Dropdown
 import mozilla.components.compose.base.annotation.FlexibleWindowLightDarkPreview
 import mozilla.components.compose.base.button.DestructiveButton
 import mozilla.components.compose.base.button.FilledButton
@@ -358,7 +358,7 @@ private fun ExpirationDateDropdown(
     modifier: Modifier = Modifier,
     onItemSelected: (Int) -> Unit,
 ) {
-    Dropdown2(
+    Dropdown(
         modifier = modifier,
         label = label,
         dropdownItems =

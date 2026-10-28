@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import mozilla.components.compose.base.Dropdown2
+import mozilla.components.compose.base.Dropdown
 import mozilla.components.compose.base.LinkText
 import mozilla.components.compose.base.LinkTextState
 import mozilla.components.compose.base.annotation.FlexibleWindowPreview
@@ -379,7 +379,7 @@ private fun ProviderDropdown(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
     ) {
-        Dropdown2(
+        Dropdown(
             label = stringResource(R.string.preference_doh_choose_provider),
             placeholder = placeholder,
             dropdownItems = dropdownItems,
