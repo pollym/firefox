@@ -21880,7 +21880,7 @@ extern "C" void callback_interface_method_0_0(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod00>(aUniffiHandle, label, value);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod00>(aUniffiHandle, label, value);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler0);
 }
 /**
@@ -21944,7 +21944,7 @@ extern "C" void callback_interface_method_0_1(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod01>(aUniffiHandle, label, value);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod01>(aUniffiHandle, label, value);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler0);
 }
 /**
@@ -22000,7 +22000,7 @@ extern "C" void callback_interface_method_0_2(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod02>(aUniffiHandle, label);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod02>(aUniffiHandle, label);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler0);
 }
 /**
@@ -22064,7 +22064,7 @@ extern "C" void callback_interface_method_0_3(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod03>(aUniffiHandle, label, value);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod03>(aUniffiHandle, label, value);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler0);
 }
 /**
@@ -22128,7 +22128,7 @@ extern "C" void callback_interface_method_0_4(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod04>(aUniffiHandle, label, value);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod04>(aUniffiHandle, label, value);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler0);
 }
 
@@ -22218,7 +22218,7 @@ extern "C" void callback_interface_method_1_0(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod10>(aUniffiHandle, contextId, creationDate);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod10>(aUniffiHandle, contextId, creationDate);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler1);
 }
 /**
@@ -22274,7 +22274,7 @@ extern "C" void callback_interface_method_1_1(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod11>(aUniffiHandle, oldContextId);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod11>(aUniffiHandle, oldContextId);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler1);
 }
 
@@ -22345,7 +22345,7 @@ extern "C" void callback_interface_method_5_0(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod50>(aUniffiHandle);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod50>(aUniffiHandle);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler5);
 }
 
@@ -22423,7 +22423,7 @@ extern "C" void callback_interface_method_6_0(
   void* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod60>(aUniffiHandle, event);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod60>(aUniffiHandle, event);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler6);
 }
 
@@ -22707,7 +22707,7 @@ extern "C" void callback_interface_method_4_0(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod40>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod40>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -22787,7 +22787,7 @@ extern "C" void callback_interface_method_4_1(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod41>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod41>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -22867,7 +22867,7 @@ extern "C" void callback_interface_method_4_2(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod42>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod42>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -22987,7 +22987,7 @@ extern "C" void callback_interface_method_7_0(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod70>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod70>(
         aUniffiHandle,
         request,
         settings,
@@ -23093,7 +23093,7 @@ extern "C" void callback_interface_method_8_0(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod80>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod80>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -23173,7 +23173,7 @@ extern "C" void callback_interface_method_8_1(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod81>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod81>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -23261,7 +23261,7 @@ extern "C" void callback_interface_method_8_2(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod82>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod82>(
         aUniffiHandle,
         value,
         aUniffiForeignFutureCallback,
@@ -23350,7 +23350,7 @@ extern "C" void callback_interface_method_8_3(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod83>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod83>(
         aUniffiHandle,
         numbers,
         aUniffiForeignFutureCallback,
@@ -23635,7 +23635,7 @@ extern "C" void callback_interface_method_12_0(
   RustBuffer* aUniffiOutReturn,
   RustCallStatus* uniffiOutStatus
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod120>(aUniffiHandle);
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod120>(aUniffiHandle);
   AsyncCallbackMethodHandlerBase::ScheduleAsyncCall(std::move(handler), &gUniffiCallbackHandler12);
 }
 
@@ -23733,7 +23733,7 @@ extern "C" void callback_interface_method_10_0(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod100>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod100>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -23813,7 +23813,7 @@ extern "C" void callback_interface_method_10_1(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod101>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod101>(
         aUniffiHandle,
         aUniffiForeignFutureCallback,
         aUniffiForeignFutureCallbackData);
@@ -23901,7 +23901,7 @@ extern "C" void callback_interface_method_10_2(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod102>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod102>(
         aUniffiHandle,
         value,
         aUniffiForeignFutureCallback,
@@ -23990,7 +23990,7 @@ extern "C" void callback_interface_method_10_3(
   // it.
   ForeignFutureDroppedCallbackStruct *aUniffiOutForeignFuture
 ) {
-  auto handler = std::make_unique<CallbackInterfaceMethod103>(
+  UniquePtr<AsyncCallbackMethodHandlerBase> handler = std::make_unique<CallbackInterfaceMethod103>(
         aUniffiHandle,
         numbers,
         aUniffiForeignFutureCallback,
