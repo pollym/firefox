@@ -1168,10 +1168,14 @@ document.addEventListener(
       return;
     }
     let { subcategory } = event.detail;
+    let entrypoint = window.gMainPane.getMigrationEntrypointFromURL();
     if (subcategory == "migrate") {
-      window.gMainPane.showMigrationWizardDialog();
+      window.gMainPane.showMigrationWizardDialog({ entrypoint });
     } else if (subcategory == "migrate-autoclose") {
-      window.gMainPane.showMigrationWizardDialog({ closeTabWhenDone: true });
+      window.gMainPane.showMigrationWizardDialog({
+        closeTabWhenDone: true,
+        entrypoint,
+      });
     }
   }
 );

@@ -693,12 +693,17 @@ var gMainPane = {
       return false;
     }
     if (subcategory == "migrate") {
-      this.showMigrationWizardDialog();
+      this.showMigrationWizardDialog({
+        entrypoint: this.getMigrationEntrypointFromURL(),
+      });
       return true;
     }
 
     if (subcategory == "migrate-autoclose") {
-      this.showMigrationWizardDialog({ closeTabWhenDone: true });
+      this.showMigrationWizardDialog({
+        closeTabWhenDone: true,
+        entrypoint: this.getMigrationEntrypointFromURL(),
+      });
     }
 
     return false;
@@ -1493,9 +1498,33 @@ var gMainPane = {
   },
 
   /**
-   * Displays the migration wizard dialog in an HTML dialog.
+   * Returns the migration entrypoint passed in the migrationEntrypoint URL
+   * parameter by MigrationUtils.showMigrationWizard, if any.
+   *
+   * @returns {string}
    */
-  async showMigrationWizardDialog({ closeTabWhenDone = false } = {}) {
+  getMigrationEntrypointFromURL() {
+    return (
+      URL.fromURI(document.documentURIObject).searchParams.get(
+        "migrationEntrypoint"
+      ) ?? MigrationUtils.MIGRATION_ENTRYPOINTS.PREFERENCES
+    );
+  },
+
+  /**
+   * Displays the migration wizard dialog in an HTML dialog.
+   *
+   * @param {object} [options]
+   * @param {boolean} [options.closeTabWhenDone=false]
+   *   True if the tab should close once the dialog is closed.
+   * @param {string} [options.entrypoint]
+   *   The MigrationUtils.MIGRATION_ENTRYPOINTS value for where the wizard
+   *   was opened from.
+   */
+  async showMigrationWizardDialog({
+    closeTabWhenDone = false,
+    entrypoint = MigrationUtils.MIGRATION_ENTRYPOINTS.PREFERENCES,
+  } = {}) {
     let migrationWizardDialog = document.getElementById(
       "migrationWizardDialog"
     );
@@ -1518,6 +1547,10 @@ var gMainPane = {
         }
       );
     }
+    migrationWizardDialog.firstElementChild.setAttribute(
+      "entrypoint",
+      entrypoint
+    );
     migrationWizardDialog.firstElementChild.requestState();
 
     migrationWizardDialog.addEventListener(
