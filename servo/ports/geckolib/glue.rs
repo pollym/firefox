@@ -11544,19 +11544,14 @@ fn compute_arbritrary_substitution_functions(
         .refs
         .iter()
         .filter_map(|reference| {
-            if !reference.is_attr_with_type() {
-                return None;
-            }
-
-            let value = custom_properties::get_attr_value_for_cycle_resolution(
-                &reference.name,
-                &reference.attribute_data,
-                &variable_value.url_data,
-                &mut attribute_tracker,
-            )
-            .ok()?;
-
-            Some((reference.name.clone(), Some(value)))
+            let attr = match &reference.function {
+                style::substitution::SubstitutionFunction::Attr(attr) if attr.has_type() => attr,
+                _ => return None,
+            };
+            let value = attr
+                .value_for_cycle_resolution(&variable_value.url_data, &mut attribute_tracker)
+                .ok()?;
+            Some((attr.name.clone(), Some(value)))
         })
         .collect();
     let substitution_functions = custom_properties::ComputedSubstitutionFunctions::new(
@@ -11564,7 +11559,7 @@ fn compute_arbritrary_substitution_functions(
         Some(attributes),
     );
 
-    let Ok(result) = custom_properties::substitute(
+    let Ok(result) = style::substitution::substitute(
         &variable_value,
         // TODO(Bug 2071366) - Thread the property being explained through InspectorUtils so
         // that random() resolves the same way it does in the cascade.
