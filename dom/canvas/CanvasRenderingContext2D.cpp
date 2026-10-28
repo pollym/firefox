@@ -10,6 +10,7 @@
 #include "CanvasImageCache.h"
 #include "CanvasUtils.h"
 #include "GeckoBindings.h"
+#include "ImageData.h"
 #include "ImageEncoder.h"
 #include "ImageRegion.h"
 #include "LayerUserData.h"
@@ -118,6 +119,7 @@
 #include "nsTArray.h"
 #include "nsWrapperCacheInlines.h"
 #include "nsXULElement.h"
+#include "qcms.h"
 
 #undef free  // apparently defined by some windows header, clashing with a
              // free() method in SkTypes.h
@@ -153,6 +155,34 @@ static PredefinedColorSpace GetColorSpaceFromImageDataSettings(
     const ImageDataSettings& aSettings, PredefinedColorSpace aColorSpace) {
   return aSettings.mColorSpace.WasPassed() ? aSettings.mColorSpace.Value()
                                            : aColorSpace;
+}
+// basically a wrapper over qcms_transform for now
+class ColorSpaceConverter {
+ public:
+  explicit ColorSpaceConverter(NotNull<qcms_transform*> aTransform)
+      : mTransform(aTransform) {}
+
+  void ConvertColorspace(uint8_t* src, uint8_t* dst, size_t len) const {
+    qcms_transform_data(mTransform, src, dst, len);
+  }
+
+ private:
+  NotNull<qcms_transform*> mTransform;
+};
+
+static Maybe<ColorSpaceConverter> GetColorSpaceConverter(
+    PredefinedColorSpace aSrc, PredefinedColorSpace aDst) {
+  qcms_transform* rawTransform = nullptr;
+
+  if (!StaticPrefs::gfx_canvas_colorspace_enabled() || aSrc == aDst) {
+    return Nothing();
+  }
+
+  rawTransform = aDst == PredefinedColorSpace::Display_p3
+                     ? gfxPlatform::GetCMSRGBP3Transform()
+                     : gfxPlatform::GetCMSP3RGBTransform();
+
+  return Some(ColorSpaceConverter(WrapNotNull(rawTransform)));
 }
 
 // Adds Save() / Restore() calls to the scope.
@@ -6784,7 +6814,7 @@ already_AddRefed<ImageData> CanvasRenderingContext2D::GetImageData(
   RecordCanvasUsage(CanvasExtractionAPI::GetImageData, CSSIntSize(w, h));
 
   JS::Rooted<JSObject*> array(aCx);
-  aError = GetImageDataArray(aCx, aSx, aSy, w, h, aSubjectPrincipal,
+  aError = GetImageDataArray(aCx, aSx, aSy, w, h, colorSpace, aSubjectPrincipal,
                              array.address());
   if (aError.Failed()) {
     return nullptr;
@@ -6806,7 +6836,8 @@ static IntRect ClipImageDataTransfer(IntRect& aSrc, const IntPoint& aDestOffset,
 
 nsresult CanvasRenderingContext2D::GetImageDataArray(
     JSContext* aCx, int32_t aX, int32_t aY, uint32_t aWidth, uint32_t aHeight,
-    nsIPrincipal& aSubjectPrincipal, JSObject** aRetval) {
+    PredefinedColorSpace aColorSpace, nsIPrincipal& aSubjectPrincipal,
+    JSObject** aRetval) {
   MOZ_ASSERT(aWidth && aHeight);
 
   // Restrict the typed array length to INT32_MAX because that's all we support.
@@ -6880,6 +6911,9 @@ nsresult CanvasRenderingContext2D::GetImageDataArray(
     return NS_ERROR_OUT_OF_MEMORY;
   }
 
+  // instantiate a colorspace converter if needed
+  auto csConverter = GetColorSpaceConverter(mColorSpace, aColorSpace);
+
   do {
     uint8_t* randomData;
     const IntSize size = readback->GetSize();
@@ -6926,6 +6960,24 @@ nsresult CanvasRenderingContext2D::GetImageDataArray(
                         aWidth * 4, SurfaceFormat::R8G8B8A8,
                         dstWriteRect.Size());
     }
+    // transform it from the local colorspace if distinct from own canvas
+    // colorspace
+    if (csConverter) {
+      const int32_t dstStride = aWidth * 4;
+      const int32_t rowBytes = dstWriteRect.width * 4;
+      if (dstWriteRect.x == 0 && rowBytes == dstStride) {
+        csConverter->ConvertColorspace(
+            dst, dst,
+            AssertedCast<size_t>(dstWriteRect.width) *
+                AssertedCast<size_t>(dstWriteRect.height));
+      } else {
+        for (int32_t row = 0; row < dstWriteRect.height; ++row) {
+          uint8_t* rowData = dst + row * dstStride;
+          csConverter->ConvertColorspace(
+              rowData, rowData, AssertedCast<size_t>(dstWriteRect.width));
+        }
+      }
+    }
   } while (false);
 
   readback->Unmap();
@@ -6949,7 +7001,8 @@ void CanvasRenderingContext2D::EnsureErrorTarget() {
 void CanvasRenderingContext2D::PutImageData(ImageData& aImageData, int32_t aDx,
                                             int32_t aDy, ErrorResult& aRv) {
   RootedSpiderMonkeyInterface<Uint8ClampedArray> arr(RootingCx());
-  PutImageData_explicit(aDx, aDy, aImageData, false, 0, 0, 0, 0, aRv);
+  PutImageData_explicit(aDx, aDy, aImageData, false, 0, 0, 0, 0,
+                        aImageData.ColorSpace(), aRv);
 }
 
 void CanvasRenderingContext2D::PutImageData(ImageData& aImageData, int32_t aDx,
@@ -6959,13 +7012,14 @@ void CanvasRenderingContext2D::PutImageData(ImageData& aImageData, int32_t aDx,
                                             int32_t aDirtyHeight,
                                             ErrorResult& aRv) {
   PutImageData_explicit(aDx, aDy, aImageData, true, aDirtyX, aDirtyY,
-                        aDirtyWidth, aDirtyHeight, aRv);
+                        aDirtyWidth, aDirtyHeight, aImageData.ColorSpace(),
+                        aRv);
 }
 
 void CanvasRenderingContext2D::PutImageData_explicit(
     int32_t aX, int32_t aY, ImageData& aImageData, bool aHasDirtyRect,
     int32_t aDirtyX, int32_t aDirtyY, int32_t aDirtyWidth, int32_t aDirtyHeight,
-    ErrorResult& aRv) {
+    PredefinedColorSpace aColorSpace, ErrorResult& aRv) {
   RootedSpiderMonkeyInterface<Uint8ClampedArray> arr(RootingCx());
   if (!arr.Init(aImageData.GetDataObject())) {
     return aRv.ThrowInvalidStateError(
@@ -7077,23 +7131,42 @@ void CanvasRenderingContext2D::PutImageData_explicit(
     dstFormat = sourceSurface->GetFormat();
   }
 
-  arr.ProcessData(
-      [&](const Span<uint8_t>& aData, JS::AutoCheckCannotGC&& nogc) {
-        // Verify that the length hasn't changed.
-        if (aData.Length() != width * height * 4) {
-          // FIXME Should this call ReleaseBits/Unmap?
-          return aRv.ThrowInvalidStateError("Invalid width or height");
+  auto csConverter = GetColorSpaceConverter(aColorSpace, mColorSpace);
+
+  arr.ProcessData([&](const Span<uint8_t>& aData,
+                      JS::AutoCheckCannotGC&& nogc) {
+    // Verify that the length hasn't changed.
+    if (aData.Length() != width * height * 4) {
+      // FIXME Should this call ReleaseBits/Unmap?
+      return aRv.ThrowInvalidStateError("Invalid width or height");
+    }
+
+    int32_t srcStride = width * 4;
+    uint8_t* srcData = aData.Elements() + srcRect.y * srcStride + srcRect.x * 4;
+    const SurfaceFormat premulFormat = mOpaque ? SurfaceFormat::X8R8G8B8_UINT32
+                                               : SurfaceFormat::A8R8G8B8_UINT32;
+    if (csConverter) {
+      const int32_t rowBytes = dirtyRect.width * 4;
+      if (srcRect.x == 0 && rowBytes == srcStride && rowBytes == dstStride) {
+        csConverter->ConvertColorspace(
+            srcData, dstData,
+            AssertedCast<size_t>(dirtyRect.width) *
+                AssertedCast<size_t>(dirtyRect.height));
+      } else {
+        for (int32_t row = 0; row < dirtyRect.height; ++row) {
+          csConverter->ConvertColorspace(srcData + row * srcStride,
+                                         dstData + row * dstStride,
+                                         AssertedCast<size_t>(dirtyRect.width));
         }
-
-        uint8_t* srcData =
-            aData.Elements() + srcRect.y * (width * 4) + srcRect.x * 4;
-
-        PremultiplyData(srcData, width * 4, SurfaceFormat::R8G8B8A8, dstData,
-                        dstStride,
-                        mOpaque ? SurfaceFormat::X8R8G8B8_UINT32
-                                : SurfaceFormat::A8R8G8B8_UINT32,
-                        dirtyRect.Size());
-      });
+      }
+      // dstData has the converted in-place pixels, premultiply in place
+      PremultiplyData(dstData, dstStride, SurfaceFormat::R8G8B8A8, dstData,
+                      dstStride, premulFormat, dirtyRect.Size());
+    } else {
+      PremultiplyData(srcData, srcStride, SurfaceFormat::R8G8B8A8, dstData,
+                      dstStride, premulFormat, dirtyRect.Size());
+    }
+  });
 
   // Ensure surfaces unmapped before potential error exit.
   if (lockedBits) {

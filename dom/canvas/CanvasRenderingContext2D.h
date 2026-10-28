@@ -644,13 +644,15 @@ class CanvasRenderingContext2D : public nsICanvasRenderingContextInternal,
 
   nsresult GetImageDataArray(JSContext* aCx, int32_t aX, int32_t aY,
                              uint32_t aWidth, uint32_t aHeight,
+                             PredefinedColorSpace aColorSpace,
                              nsIPrincipal& aSubjectPrincipal,
                              JSObject** aRetval);
 
   void PutImageData_explicit(int32_t aX, int32_t aY, ImageData&,
                              bool aHasDirtyRect, int32_t aDirtyX,
                              int32_t aDirtyY, int32_t aDirtyWidth,
-                             int32_t aDirtyHeight, ErrorResult&);
+                             int32_t aDirtyHeight,
+                             PredefinedColorSpace aColorSpace, ErrorResult&);
 
   bool CopyBufferProvider(layers::PersistentBufferProvider& aOld,
                           gfx::DrawTarget& aTarget, gfx::IntRect aCopyRect);
