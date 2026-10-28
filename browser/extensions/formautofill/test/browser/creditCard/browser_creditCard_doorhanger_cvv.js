@@ -565,10 +565,11 @@ add_task(async function test_card_details_cover_every_combination() {
           `The expiration is shown only when there is one: ${text}`
         );
         is(
-          text.includes("CVC •••"),
+          text.includes("CVC"),
           !!securityCode,
           `The security code is noted only when there is one: ${text}`
         );
+        ok(!text.includes("•••"), `The details have no hidden digits: ${text}`);
       }
     }
   }
