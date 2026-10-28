@@ -5202,34 +5202,32 @@ export class Tabbrowser {
 
       tabs.push(tab);
 
+      // A tab whose group is not in the window's groups list is restored
+      // ungrouped: appending it to the top-level fragment is what gives it a
+      // position.
+      let tabGroup = tabGroupWorkingData.get(tabData.groupId);
+
       if (tabData.pinned) {
         this.pinTab(tab);
         // Then ensure all the tab open/pinning information is sent.
         this.#fireTabOpen(tab, {});
-      } else if (tabData.groupId) {
-        let { groupId } = tabData;
-        const tabGroup = tabGroupWorkingData.get(groupId);
-        // if a tab refers to a tab group we don't know, skip any group
-        // processing
+      } else if (tabGroup) {
+        if (!splitView) {
+          tabGroup.containingTabsFragment.appendChild(tab);
+        } else if (splitView?.node) {
+          tabGroup.containingTabsFragment.appendChild(splitView.node);
+        }
 
-        if (tabGroup) {
-          if (!splitView) {
-            tabGroup.containingTabsFragment.appendChild(tab);
-          } else if (splitView?.node) {
-            tabGroup.containingTabsFragment.appendChild(splitView.node);
-          }
-
-          // if this is the first time encountering a tab group, create its
-          // DOM node once and place it in the tabs bar fragment
-          if (!tabGroup.node) {
-            tabGroup.node = this.#createTabGroup(
-              tabGroup.stateData.id,
-              tabGroup.stateData.color,
-              tabGroup.stateData.collapsed,
-              tabGroup.stateData.name
-            );
-            tabsFragment.appendChild(tabGroup.node);
-          }
+        // if this is the first time encountering a tab group, create its
+        // DOM node once and place it in the tabs bar fragment
+        if (!tabGroup.node) {
+          tabGroup.node = this.#createTabGroup(
+            tabGroup.stateData.id,
+            tabGroup.stateData.color,
+            tabGroup.stateData.collapsed,
+            tabGroup.stateData.name
+          );
+          tabsFragment.appendChild(tabGroup.node);
         }
       } else {
         if (tab.hidden) {

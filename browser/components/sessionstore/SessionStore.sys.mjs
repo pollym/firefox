@@ -6726,13 +6726,21 @@ class _SessionStore {
     // If we restore the selected tab, make sure it goes first.
     let selectedIndex = aTabs.indexOf(tabbrowser.selectedTab);
     if (selectedIndex > -1) {
-      this.#restoreTab(tabbrowser.selectedTab, aTabData[selectedIndex]);
+      try {
+        this.#restoreTab(tabbrowser.selectedTab, aTabData[selectedIndex]);
+      } catch (ex) {
+        this.#log.error(ex);
+      }
     }
 
     // Restore all tabs.
     for (let t = 0; t < aTabs.length; t++) {
       if (t != selectedIndex) {
-        this.#restoreTab(aTabs[t], aTabData[t]);
+        try {
+          this.#restoreTab(aTabs[t], aTabData[t]);
+        } catch (ex) {
+          this.#log.error(ex);
+        }
       }
     }
   }
@@ -6785,6 +6793,15 @@ class _SessionStore {
       (tab.splitview && tab.splitview == tabbrowser.selectedTab.splitview);
     let isBrowserInserted = browser.isConnected;
 
+    // Every tab the tabbrowser inserts gets a position from
+    // #updateTabsAfterInsert(). Check for one before the window is marked busy,
+    // so that a tab that cannot be restored leaves that state untouched.
+    if (tab.index === undefined) {
+      throw new Error(
+        "Shouldn't be trying to restore a tab that has no position"
+      );
+    }
+
     // Increase the busy state counter before modifying the tab.
     this.#setWindowStateBusy(window);
 
@@ -6792,14 +6809,6 @@ class _SessionStore {
     // we collect their data for the first time when saving state.
     DirtyWindows.add(window);
 
-    // TODO: Check whether this is reachable at all. Every tab the tabbrowser
-    // inserts gets indexed by #updateTabsAfterInsert(), so a tab arriving here
-    // should always have a position.
-    if (tab.index === undefined) {
-      throw new Error(
-        "Shouldn't be trying to restore a tab that has no position"
-      );
-    }
     // Update the tab state in case we shut down without being notified.
     this.#windows[this.#windowIds.get(window)].tabs[tab.index] = tabData;
 
