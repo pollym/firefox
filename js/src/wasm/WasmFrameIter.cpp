@@ -151,17 +151,20 @@ WasmFrameIter::WasmFrameIter(JitActivation* activation, wasm::Frame* fp)
     currentFrameStackSwitched_ = dynamicSwitchToMainStack;
 #endif
 
-    // The debugEnabled() relies on valid value of resumePCinCurrentFrame_
-    // to identify DebugFrame. Normally this field is updated at popFrame().
-    // The only case when this can happend is during IndirectCallBadSig
-    // trapping and stack unwinding. The top frame will never be at ReturnStub
-    // callsite, except during IndirectCallBadSig unwinding.
-    CallSite site;
-    if (code_->lookupCallSite(unwoundPC, &site) &&
-        site.kind() == CallSiteKind::ReturnStub) {
+    // If wasm::StartUnwinding unwound the trapping frame (which only happens
+    // for IndirectCallBadSig), the current frame is the caller's, so its
+    // resume PC is the call site in the caller, not the trap's resume PC in
+    // the callee.  Stackmap lookup and debugEnabled() rely on this.  The top
+    // frame will never be at a ReturnStub callsite, except in this case.
+    if (trapData.unwoundFrame) {
       MOZ_ASSERT(trapData.trap == Trap::IndirectCallBadSig);
       resumePCinCurrentFrame_ = (uint8_t*)unwoundPC;
     } else {
+#ifdef DEBUG
+      CallSite site;
+      MOZ_ASSERT(!(code_->lookupCallSite(unwoundPC, &site) &&
+                   site.kind() == CallSiteKind::ReturnStub));
+#endif
       resumePCinCurrentFrame_ = (uint8_t*)trapData.resumePC;
     }
 
