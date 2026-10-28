@@ -716,9 +716,10 @@
             "default": "{button.text.color.ghost.active}",
             "forcedColors": "{button.text.color.menu.hover}",
             "nova": {
+              "comment": "TODO Bug 2085254 - Update Figma so menu items use the ghost text colors in dark too",
               "value": {
-                "light": "{button.text.color.ghost.active}",
-                "dark": "{button.text.color.active}"
+                "default": "{button.text.color.ghost.active}",
+                "forcedColors": "{button.text.color.menu.hover}"
               }
             }
           }
@@ -726,20 +727,42 @@
         "disabled": {
           "value": {
             "default": "{button.text.color.ghost.disabled}",
-            "forcedColors": "{button.text.color.disabled}"
+            "forcedColors": "{button.text.color.disabled}",
+            "nova": {
+              "comment": "TODO Bug 2085254 - Update Figma so menu items use the ghost text colors in dark too",
+              "value": {
+                "default": "{button.text.color.ghost.disabled}",
+                "forcedColors": "{button.text.color.disabled}"
+              }
+            }
           }
         },
         "hover": {
           "value": {
             "default": "{button.text.color.ghost.hover}",
-            "forcedColors": "-moz-menuhovertext"
+            "forcedColors": "-moz-menuhovertext",
+            "nova": {
+              "comment": "TODO Bug 2085254 - Update Figma so menu items use the ghost text colors in dark too",
+              "value": {
+                "default": "{button.text.color.ghost.hover}",
+                "forcedColors": "-moz-menuhovertext"
+              }
+            }
           }
         },
         "selected": {
           "value": {
             "default": "{button.text.color.ghost.selected}",
             "forcedColors": "{button.text.color.primary.selected}",
-            "nativeTheme": "currentColor"
+            "nativeTheme": "currentColor",
+            "nova": {
+              "comment": "TODO Bug 2085254 - Update Figma so menu items use the ghost text colors in dark too",
+              "value": {
+                "default": "{button.text.color.ghost.selected}",
+                "forcedColors": "{button.text.color.primary.selected}",
+                "nativeTheme": "currentColor"
+              }
+            }
           }
         }
       },
