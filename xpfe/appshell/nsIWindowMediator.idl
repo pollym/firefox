@@ -76,12 +76,22 @@ interface nsIWindowMediator: nsISupports
     */
   mozIDOMWindowProxy getMostRecentWindow(in wstring aWindowType);
 
+  /** Identical to getMostRecentWindow except:
+    * @return an nsIAppWindows
+    */
+  nsIAppWindow getMostRecentAppWindow(in wstring aWindowType);
+
   /** This is a shortcut for getMostRecentWindow('navigator:browser'), but
     * if that fails it also tries 'navigator:geckoview' and 'mail:3pane'.
     *
     * @return the topmost browser window
     */
   mozIDOMWindowProxy getMostRecentBrowserWindow();
+
+  /** Identical to getMostRecentBrowserWindow except:
+    * @return an nsIAppWindows
+    */
+  nsIAppWindow getMostRecentBrowserAppWindow();
 
   /**
    * Same as getMostRecentWindow, but ignores private browsing
