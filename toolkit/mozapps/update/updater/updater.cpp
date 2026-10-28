@@ -2609,6 +2609,7 @@ void PatchIfFile::Finish(int status) {
 #  include "EnterprisePoliciesFlagFile.h"
 #  include "nsWindowsRestart.cpp"
 #  include "nsWindowsHelpers.h"
+#  include "PostUpdateEnvironment.h"
 #  include "uachelper.h"
 #  ifdef MOZ_MAINTENANCE_SERVICE
 #    include "pathhash.h"
@@ -2762,23 +2763,16 @@ bool LaunchWinPostProcess(const WCHAR* installationDir,
   si.lpDesktop = const_cast<LPWSTR>(L"");  // -Wwritable-strings
   PROCESS_INFORMATION pi = {0};
 
-  // Invoke post-update with a minimal environment to avoid environment
-  // variables intended to relaunch Firefox impacting post-update operations, in
-  // particular background tasks.  The updater will invoke the callback
-  // application with the current (non-minimal) environment.
-  //
-  // N.b.: two null terminating characters!  The first terminates a non-existent
-  // key-value pair, the second (automatically added) terminates the block of
-  // key-value pairs.
-  const WCHAR* emptyEnvironment = L"\0";
+  PostUpdateEnvironment postUpdateEnvironment{sElevationType};
 
   bool ok =
       CreateProcessW(exefullpath, cmdline,
                      nullptr,  // no special security attributes
                      nullptr,  // no special thread attributes
                      false,    // don't inherit filehandles
-                     0,        // No special process creation flags
-                     (LPVOID)emptyEnvironment, workingDirectory, &si, &pi);
+                     CREATE_UNICODE_ENVIRONMENT, postUpdateEnvironment.get(),
+                     workingDirectory, &si, &pi);
+
   free(cmdline);
   if (ok) {
     LOG(("LaunchWinPostProcess - Waiting for process to complete"));
