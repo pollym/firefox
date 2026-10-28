@@ -113,7 +113,11 @@ class LensCameraActivity : AppCompatActivity() {
     @VisibleForTesting
     internal fun handleGalleryResult(uri: Uri?) {
         if (uri == null) return
-        uploadOverlay.start(uri, isPrivate = intent.getBooleanExtra(EXTRA_IS_PRIVATE, false))
+        uploadOverlay.start(
+            uri,
+            isPrivate = intent.getBooleanExtra(EXTRA_IS_PRIVATE, false),
+            source = IMAGE_SOURCE_PHOTO_PICKER,
+        )
     }
 
     private val qrGalleryLauncher =
