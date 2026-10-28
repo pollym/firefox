@@ -111,30 +111,30 @@ class MOZ_STACK_CLASS gfxOTSContext : public ots::OTSContext {
 
   virtual ots::TableAction GetTableAction(uint32_t aTag) override {
     auto isShapingTable = [](uint32_t aTag) -> bool {
-      return // Tables used by OT layout:
-             aTag == TRUETYPE_TAG('B', 'A', 'S', 'E') ||
-             aTag == TRUETYPE_TAG('G', 'D', 'E', 'F') ||
-             aTag == TRUETYPE_TAG('G', 'P', 'O', 'S') ||
-             aTag == TRUETYPE_TAG('G', 'S', 'U', 'B') ||
-             aTag == TRUETYPE_TAG('J', 'S', 'T', 'F') ||
-             aTag == TRUETYPE_TAG('k', 'e', 'r', 'n') ||
-             // Tables used by AAT layout:
-             aTag == TRUETYPE_TAG('a', 'n', 'k', 'r') ||
-             aTag == TRUETYPE_TAG('b', 's', 'l', 'n') ||
-             aTag == TRUETYPE_TAG('f', 'e', 'a', 't') ||
-             aTag == TRUETYPE_TAG('j', 'u', 's', 't') ||
-             aTag == TRUETYPE_TAG('k', 'e', 'r', 'x') ||
-             aTag == TRUETYPE_TAG('m', 'o', 'r', 't') ||
-             aTag == TRUETYPE_TAG('m', 'o', 'r', 'x') ||
-             aTag == TRUETYPE_TAG('p', 'r', 'o', 'p') ||
-             aTag == TRUETYPE_TAG('t', 'r', 'a', 'k') ||
-             // Tables used by Graphite2:
-             aTag == TRUETYPE_TAG('F', 'e', 'a', 't') ||
-             aTag == TRUETYPE_TAG('G', 'l', 'a', 't') ||
-             aTag == TRUETYPE_TAG('G', 'l', 'o', 'c') ||
-             aTag == TRUETYPE_TAG('S', 'i', 'l', 'e') ||
-             aTag == TRUETYPE_TAG('S', 'i', 'l', 'f') ||
-             aTag == TRUETYPE_TAG('S', 'i', 'l', 'l');
+      return  // Tables used by OT layout:
+          aTag == TRUETYPE_TAG('B', 'A', 'S', 'E') ||
+          aTag == TRUETYPE_TAG('G', 'D', 'E', 'F') ||
+          aTag == TRUETYPE_TAG('G', 'P', 'O', 'S') ||
+          aTag == TRUETYPE_TAG('G', 'S', 'U', 'B') ||
+          aTag == TRUETYPE_TAG('J', 'S', 'T', 'F') ||
+          aTag == TRUETYPE_TAG('k', 'e', 'r', 'n') ||
+          // Tables used by AAT layout:
+          aTag == TRUETYPE_TAG('a', 'n', 'k', 'r') ||
+          aTag == TRUETYPE_TAG('b', 's', 'l', 'n') ||
+          aTag == TRUETYPE_TAG('f', 'e', 'a', 't') ||
+          aTag == TRUETYPE_TAG('j', 'u', 's', 't') ||
+          aTag == TRUETYPE_TAG('k', 'e', 'r', 'x') ||
+          aTag == TRUETYPE_TAG('m', 'o', 'r', 't') ||
+          aTag == TRUETYPE_TAG('m', 'o', 'r', 'x') ||
+          aTag == TRUETYPE_TAG('p', 'r', 'o', 'p') ||
+          aTag == TRUETYPE_TAG('t', 'r', 'a', 'k') ||
+          // Tables used by Graphite2:
+          aTag == TRUETYPE_TAG('F', 'e', 'a', 't') ||
+          aTag == TRUETYPE_TAG('G', 'l', 'a', 't') ||
+          aTag == TRUETYPE_TAG('G', 'l', 'o', 'c') ||
+          aTag == TRUETYPE_TAG('S', 'i', 'l', 'e') ||
+          aTag == TRUETYPE_TAG('S', 'i', 'l', 'f') ||
+          aTag == TRUETYPE_TAG('S', 'i', 'l', 'l');
     };
     if (mDropShapingTables && isShapingTable(aTag)) {
       return ots::TABLE_ACTION_DROP;
