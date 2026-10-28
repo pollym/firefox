@@ -142,6 +142,9 @@ class CodeGenerator final : public CodeGeneratorSpecific {
                              const wasm::TrapSiteDesc& trapSiteDesc);
 
  private:
+  template <typename T>
+  void emitPreBarrier(const MInstruction* mir, const T& address);
+
   void emitPostWriteBarrier(const LAllocation* obj);
   void emitPostWriteBarrier(Register objreg);
   void emitPostWriteBarrierS(Address address, Register prev, Register next);
@@ -161,7 +164,8 @@ class CodeGenerator final : public CodeGeneratorSpecific {
                                           Register indexScratch,
                                           Register kindScratch,
                                           ValueOperand result);
-  void visitStoreSlotByIteratorIndexCommon(Register object,
+  void visitStoreSlotByIteratorIndexCommon(const MInstruction* mir,
+                                           Register object,
                                            Register indexScratch,
                                            Register kindScratch,
                                            ValueOperand value);
