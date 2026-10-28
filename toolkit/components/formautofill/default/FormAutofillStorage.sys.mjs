@@ -214,7 +214,8 @@ export class FormAutofillStorage extends FormAutofillStorageBase {
    *
    * A write that lands while the copy is running goes to the store that is
    * still serving, so it is in the source after the source has been read and
-   * never reaches the target. The window is the length of one bulk copy.
+   * may not reach the target. A copy into Rust hears it and fails rather than
+   * switching.
    */
   #queueAddressMigration() {
     this.#addressSwitch = (this.#addressSwitch ?? this.initialize())
