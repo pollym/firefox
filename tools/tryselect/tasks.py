@@ -279,8 +279,10 @@ def generate_tasks(
         key = cache_key(
             attr, generator.parameters, disable_target_task_filter, target_tasks_method
         )
+        SystemResourceMonitor.begin_marker("Taskgraph", f"write {attr} cache")
         with open(os.path.join(cache_dir, key), "w") as fh:
             json.dump(tg.to_json(), fh)
+        SystemResourceMonitor.end_marker("Taskgraph", f"write {attr} cache")
         return add_chunk_patterns(tg)
 
     monitor = None
