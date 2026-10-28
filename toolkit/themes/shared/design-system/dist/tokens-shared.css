@@ -432,6 +432,10 @@
     /* Not using --force-outline-offset for links because that's intended for elements with a background, and we only want a slight offset here while not overlapping adjacent text */
     --link-focus-outline-offset: 1px;
 
+    /** motion **/
+    --motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --motion-easing-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+
     /** opacity **/
     --opacity-deemphasized: 0.8;
     --opacity-deemphasized-strong: 0.6;

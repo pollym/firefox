@@ -2037,6 +2037,13 @@ export const tokensTable = {
     { value: "var(--button-font-weight)", name: "--select-font-weight" },
     { value: "var(--font-weight)", name: "--select-option-font-weight" },
   ],
+  motion: [
+    { value: "cubic-bezier(0.2, 0, 0, 1)", name: "--motion-easing-emphasized" },
+    {
+      value: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+      name: "--motion-easing-standard",
+    },
+  ],
   size: [
     { value: "40px", name: "--size-image-xsmall" },
     { value: "48px", name: "--size-image-small" },
@@ -4041,6 +4048,8 @@ export const variableLookupTable = {
   "font-weight-semibold": "600",
   "font-weight-bold": "700",
   "font-weight-heading": "var(--font-weight-semibold)",
+  "motion-easing-emphasized": "cubic-bezier(0.2, 0, 0, 1)",
+  "motion-easing-standard": "cubic-bezier(0.2, 0.8, 0.2, 1)",
   "size-image-xsmall": "40px",
   "size-image-small": "48px",
   "size-image-medium": "56px",

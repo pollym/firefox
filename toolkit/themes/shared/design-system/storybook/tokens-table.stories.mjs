@@ -248,6 +248,7 @@ class TokensTable extends LitElement {
     link: this.linkTemplate,
     margin: this.spaceAndSizeTemplate,
     "min-height": this.spaceAndSizeTemplate,
+    motion: this.motionTemplate,
     outline: this.outlineTemplate,
     padding: this.paddingTemplate,
     "box-shadow": this.shadowTemplate,
@@ -417,6 +418,14 @@ class TokensTable extends LitElement {
         style="gap: ${value};"
       >
         ${items}
+      </div>
+    `;
+  }
+
+  motionTemplate(_, value) {
+    return html`
+      <div class="motion-preview">
+        <div class="item" style="animation-timing-function: ${value};"></div>
       </div>
     `;
   }

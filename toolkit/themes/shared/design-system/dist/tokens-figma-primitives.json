@@ -41,6 +41,8 @@
   "focus/outline/inset": -2,
   "focus/outline/offset": 2,
   "focus/outline/width": 2,
+  "motion/easing/emphasized": "cubic-bezier(0.2, 0, 0, 1)",
+  "motion/easing/standard": "cubic-bezier(0.2, 0.8, 0.2, 1)",
   "size/image/xsmall": 40,
   "size/image/small": 48,
   "size/image/medium": 56,

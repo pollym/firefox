@@ -179,7 +179,7 @@ registerCleanupFunction(() => {
 });
 
 add_task(async function test_toolbar_button_toggle_uses_launcher_tokens() {
-  const emphasized = getToken("--motion-ease-emphasized");
+  const emphasized = getToken("--motion-easing-emphasized");
 
   const hide = await captureTransition(
     () => toggleWithShortcut(),
@@ -303,7 +303,7 @@ add_task(async function test_expand_on_hover_duration_default() {
 });
 
 add_task(async function test_panel_transitions_use_panel_tokens() {
-  const emphasized = getToken("--motion-ease-emphasized");
+  const emphasized = getToken("--motion-easing-emphasized");
 
   const open = await captureTransition(
     () => pressShortcut("key_gotoHistory"),
@@ -331,7 +331,7 @@ add_task(async function test_panel_transitions_use_panel_tokens() {
   const contentFade = getDurationToken(
     "--motion-dur-sidebar-panel-content-fade"
   );
-  const standard = getToken("--motion-ease-standard");
+  const standard = getToken("--motion-easing-standard");
   assertGroupTiming(switched.animations, contentFade, standard, "Panel switch");
   const fades = switched.animations.filter(a =>
     /^::view-transition-(old|new)\(sidebar-box\)$/.test(a.effect.pseudoElement)
@@ -454,7 +454,7 @@ add_task(async function test_expand_on_hover_duration_pref() {
       "Waiting for expand on hover to be enabled"
     );
     await controller.waitUntilStable();
-    const emphasized = getToken("--motion-ease-emphasized");
+    const emphasized = getToken("--motion-easing-emphasized");
 
     win.windowUtils.disableNonTestMouseEvents(true);
     const expand = await captureTransition(
