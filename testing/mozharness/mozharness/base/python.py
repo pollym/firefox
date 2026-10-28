@@ -879,6 +879,20 @@ class ResourceMonitoringMixin(PerfherderResourceOptionsMixin):
         # Get upload directory to pass to stop() for artifact markers
         upload_dir = self.query_abs_dirs()["abs_blob_upload_dir"]
 
+        if self._resource_monitor.forwarding:
+            # The parent monitor records resource usage and reports it.
+            if self.resource_monitor_perfherder_id:
+                perfherder_name, perfherder_options = (
+                    self.resource_monitor_perfherder_id
+                )
+                self._resource_monitor.forward_perfherder(
+                    perfherder_name,
+                    perfherder_options + self.perfherder_resource_options(),
+                    upload_dir if "MOZ_AUTOMATION" in os.environ else None,
+                )
+            self._resource_monitor.stop(upload_dir=upload_dir)
+            return
+
         self._resource_monitor.stop(upload_dir=upload_dir)
         self._log_resource_usage()
 
@@ -959,56 +973,10 @@ class ResourceMonitoringMixin(PerfherderResourceOptionsMixin):
         # Write out Perfherder data if configured.
         if self.resource_monitor_perfherder_id:
             perfherder_name, perfherder_options = self.resource_monitor_perfherder_id
-
-            suites = []
-            overall = []
-
-            if cpu_percent:
-                overall.append({
-                    "name": "cpu_percent",
-                    "value": cpu_percent,
-                })
-
-            overall.extend([
-                {"name": "io_write_bytes", "value": io.write_bytes},
-                {"name": "io.read_bytes", "value": io.read_bytes},
-                {"name": "io_write_time", "value": io.write_time},
-                {"name": "io_read_time", "value": io.read_time},
-            ])
-
-            suites.append({
-                "name": "%s.overall" % perfherder_name,
-                "extraOptions": perfherder_options + self.perfherder_resource_options(),
-                "subtests": overall,
-            })
-
-            for phase in rm.phases.keys():
-                phase_duration = rm.phases[phase][1] - rm.phases[phase][0]
-                subtests = [
-                    {
-                        "name": "time",
-                        "value": phase_duration,
-                    }
-                ]
-                cpu_percent = rm.aggregate_cpu_percent(phase=phase, per_cpu=False)
-                if cpu_percent is not None:
-                    subtests.append({
-                        "name": "cpu_percent",
-                        "value": rm.aggregate_cpu_percent(phase=phase, per_cpu=False),
-                    })
-
-                # We don't report I/O during each step because measured I/O
-                # is system I/O and that I/O can be delayed (e.g. writes will
-                # buffer before being flushed and recorded in our metrics).
-                suites.append({
-                    "name": "%s.%s" % (perfherder_name, phase),
-                    "subtests": subtests,
-                })
-
-            data = {
-                "framework": {"name": "job_resource_usage"},
-                "suites": suites,
-            }
+            data = rm.perfherder_data(
+                perfherder_name,
+                perfherder_options + self.perfherder_resource_options(),
+            )
 
             schema_path = perfherder_schema_path()
             with open(schema_path, "rb") as fh:

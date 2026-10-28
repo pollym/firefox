@@ -309,6 +309,7 @@ def taskgraph_decision(command_context, **options):
         finally:
             if monitor is not None:
                 monitor.stop()
+            if monitor is not None and not monitor.forwarding:
                 upload_dir = pathlib.Path(moz_upload_dir)
                 profile_path = upload_dir / "profile_build_resources.json"
                 with open(profile_path, "w", encoding="utf-8", newline="\n") as f:
