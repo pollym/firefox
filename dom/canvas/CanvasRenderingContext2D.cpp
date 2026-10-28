@@ -76,7 +76,6 @@
 #include "mozilla/dom/VideoFrame.h"
 #include "mozilla/dom/WorkerPrivate.h"
 #include "mozilla/gfx/2D.h"
-#include "mozilla/gfx/CanvasShutdownManager.h"
 #include "mozilla/gfx/DataSurfaceHelpers.h"
 #include "mozilla/gfx/Filters.h"
 #include "mozilla/gfx/Helpers.h"
@@ -1265,6 +1264,7 @@ CanvasRenderingContext2D::~CanvasRenderingContext2D() {
 
 nsresult CanvasRenderingContext2D::Initialize() {
   if (NS_WARN_IF(!AddShutdownObserver())) {
+    mHasShutdown = true;
     return NS_ERROR_FAILURE;
   }
 
@@ -1404,26 +1404,6 @@ void CanvasRenderingContext2D::OnShutdown() {
   mHasShutdown = true;
 }
 
-bool CanvasRenderingContext2D::AddShutdownObserver() {
-  auto* const canvasManager = CanvasShutdownManager::Get();
-  if (NS_WARN_IF(!canvasManager)) {
-    mHasShutdown = true;
-    return false;
-  }
-
-  canvasManager->AddShutdownObserver(this);
-  return true;
-}
-
-void CanvasRenderingContext2D::RemoveShutdownObserver() {
-  auto* const canvasManager = CanvasShutdownManager::MaybeGet();
-  if (!canvasManager) {
-    return;
-  }
-
-  canvasManager->RemoveShutdownObserver(this);
-}
-
 void CanvasRenderingContext2D::OnRemoteCanvasLost() {
   // We only lose context / data if we are using remote canvas, which is only
   // for accelerated targets.
@@ -1487,6 +1467,23 @@ void CanvasRenderingContext2D::OnRemoteCanvasRestored() {
           gfxCriticalNote << gfx::hexa(self.get()) << " accel canvas restored";
         }
       }));
+}
+
+void CanvasRenderingContext2D::OnRemoteCanvasReset(
+    const nsTArray<layers::RemoteTextureOwnerId>& aOwnerIds) {
+  auto* bufferProvider = GetBufferProvider();
+  if (!bufferProvider) {
+    return;
+  }
+
+  Maybe<layers::RemoteTextureOwnerId> ownerId =
+      bufferProvider->GetRemoteTextureOwnerId();
+  if (!ownerId || !aOwnerIds.Contains(*ownerId)) {
+    return;
+  }
+
+  OnRemoteCanvasLost();
+  OnRemoteCanvasRestored();
 }
 
 void CanvasRenderingContext2D::SetStyleFromString(const nsACString& aStr,
@@ -2232,6 +2229,7 @@ NS_IMETHODIMP
 CanvasRenderingContext2D::InitializeWithDrawTarget(
     nsIDocShell* aShell, NotNull<gfx::DrawTarget*> aTarget) {
   if (NS_WARN_IF(!AddShutdownObserver())) {
+    mHasShutdown = true;
     return NS_ERROR_FAILURE;
   }
 
