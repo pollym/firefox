@@ -156,8 +156,8 @@ Maybe<layers::SurfaceDescriptor> SharedTextureD3D11::ToSurfaceDescriptor() {
       /* hasKeyedMutex */ false, Some(mFencesHolderId)));
 }
 
-void SharedTextureD3D11::GetSnapshot(const ipc::Shmem& aDestShmem,
-                                     size_t aDestStride) {
+void SharedTextureD3D11::GetSnapshot(
+    const ipc::SharedMemoryMapping& aDestMapping, size_t aDestStride) {
   RefPtr<ID3D11Device> device;
   mTexture->GetDevice(getter_AddRefs(device));
   if (!device) {
@@ -203,7 +203,7 @@ void SharedTextureD3D11::GetSnapshot(const ipc::Shmem& aDestShmem,
   }
 
   uint8_t* src = static_cast<uint8_t*>(map.pData);
-  uint8_t* dst = aDestShmem.get<uint8_t>();
+  uint8_t* dst = aDestMapping.DataAs<uint8_t>();
 
   const size_t src_stride = static_cast<size_t>(map.RowPitch);
   const size_t bytesPerRow = static_cast<size_t>(mWidth) * 4;

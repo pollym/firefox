@@ -100,8 +100,8 @@ SharedTextureMacIOSurface::ToSurfaceDescriptor() {
       Some(mFencesHolderId)));
 }
 
-void SharedTextureMacIOSurface::GetSnapshot(const ipc::Shmem& aDestShmem,
-                                            size_t aDestStride) {
+void SharedTextureMacIOSurface::GetSnapshot(
+    const ipc::SharedMemoryMapping& aDestMapping, size_t aDestStride) {
   if (!mSurface->Lock()) {
     gfxCriticalNoteOnce << "Failed to lock MacIOSurface";
     return;
@@ -109,7 +109,7 @@ void SharedTextureMacIOSurface::GetSnapshot(const ipc::Shmem& aDestShmem,
 
   const size_t src_stride = mSurface->GetBytesPerRow();
   uint8_t* src = (uint8_t*)mSurface->GetBaseAddress();
-  uint8_t* dst = aDestShmem.get<uint8_t>();
+  uint8_t* dst = aDestMapping.DataAs<uint8_t>();
 
   const size_t bytesPerRow = static_cast<size_t>(mWidth) * 4;
   MOZ_RELEASE_ASSERT(src_stride >= bytesPerRow);

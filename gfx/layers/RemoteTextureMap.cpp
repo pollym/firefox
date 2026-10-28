@@ -260,11 +260,12 @@ void RemoteTextureOwnerClient::PushDummyTexture(
 }
 
 void RemoteTextureOwnerClient::GetLatestBufferSnapshot(
-    const RemoteTextureOwnerId aOwnerId, const mozilla::ipc::Shmem& aDestShmem,
+    const RemoteTextureOwnerId aOwnerId,
+    const mozilla::ipc::SharedMemoryMapping& aDestMapping,
     const gfx::IntSize& aDestSize, size_t aDestStride) {
   MOZ_ASSERT(IsRegistered(aOwnerId));
   RemoteTextureMap::Get()->GetLatestBufferSnapshot(
-      aOwnerId, mForPid, aDestShmem, aDestSize, aDestStride);
+      aOwnerId, mForPid, aDestMapping, aDestSize, aDestStride);
 }
 
 UniquePtr<TextureData> RemoteTextureOwnerClient::GetRecycledTextureData(
@@ -524,8 +525,8 @@ bool RemoteTextureMap::RemoveTexture(const RemoteTextureId aTextureId,
 
 void RemoteTextureMap::GetLatestBufferSnapshot(
     const RemoteTextureOwnerId aOwnerId, const base::ProcessId aForPid,
-    const mozilla::ipc::Shmem& aDestShmem, const gfx::IntSize& aDestSize,
-    size_t aDestStride) {
+    const mozilla::ipc::SharedMemoryMapping& aDestMapping,
+    const gfx::IntSize& aDestSize, size_t aDestStride) {
   // The compositable ref of remote texture should be updated in mMonitor lock.
   CompositableTextureHostRef textureHostRef;
   RefPtr<TextureHost> releasingTexture;  // Release outside the monitor
@@ -584,14 +585,14 @@ void RemoteTextureMap::GetLatestBufferSnapshot(
     // `aDestSize`. Just assert here to make sure they match.
     MOZ_RELEASE_ASSERT(src_size == aDestSize);
 
-    sharedTexture->GetSnapshot(aDestShmem, aDestStride);
+    sharedTexture->GetSnapshot(aDestMapping, aDestStride);
   } else if (auto* bufferTextureHost = textureHostRef->AsBufferTextureHost()) {
     const auto src_size = bufferTextureHost->GetSize();
     // We already checked above that `textureHost->GetSize()` matches
     // `aDestSize`.
 
     uint8_t* src = bufferTextureHost->GetBuffer();
-    uint8_t* dst = aDestShmem.get<uint8_t>();
+    uint8_t* dst = aDestMapping.DataAs<uint8_t>();
 
     const Maybe<int32_t> maybe_src_stride = ImageDataSerializer::GetRGBStride(
         bufferTextureHost->GetBufferDescriptor());

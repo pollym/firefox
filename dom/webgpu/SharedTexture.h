@@ -6,16 +6,13 @@
 #define SharedTexture_H_
 
 #include "mozilla/gfx/Point.h"
+#include "mozilla/ipc/SharedMemoryMapping.h"
 #include "mozilla/layers/LayersSurfaces.h"
 #include "mozilla/webgpu/WebGPUTypes.h"
 #include "mozilla/webgpu/ffi/wgpu.h"
 #include "nsTArray.h"
 
 namespace mozilla {
-
-namespace ipc {
-class Shmem;
-}
 
 namespace layers {
 class TextureHost;
@@ -45,7 +42,8 @@ class SharedTexture {
 
   virtual Maybe<layers::SurfaceDescriptor> ToSurfaceDescriptor() = 0;
 
-  virtual void GetSnapshot(const ipc::Shmem& aDestShmem, size_t aDestStride) {}
+  virtual void GetSnapshot(const ipc::SharedMemoryMapping& aDestMapping,
+                           size_t aDestStride) {}
 
   virtual SharedTextureDMABuf* AsSharedTextureDMABuf() { return nullptr; }
 

@@ -1256,9 +1256,8 @@ RefPtr<gfx::SourceSurface> ClientWebGLContext::GetFrontBufferSnapshot(
   if (!res.shmem) return nullptr;
 
   const auto& surfSize = res.surfSize;
-  const webgl::RaiiShmem shmem{child, res.shmem.ref()};
-  if (!shmem) return nullptr;
-  const auto& shmemBytes = shmem.ByteRange();
+  const auto shmemMapping = res.shmem.Map();
+  if (!shmemMapping) return nullptr;
   if (!surfSize.x) return nullptr;  // Zero means failure.
 
   const auto stride = surfSize.x * 4;
@@ -1274,15 +1273,15 @@ RefPtr<gfx::SourceSurface> ClientWebGLContext::GetFrontBufferSnapshot(
       MOZ_ASSERT(false);
       return nullptr;
     }
-    MOZ_RELEASE_ASSERT(shmemBytes.length() == byteSize);
+    MOZ_RELEASE_ASSERT(shmemMapping.Size() == byteSize);
     if (requireAlphaPremult && options.alpha && !options.premultipliedAlpha) {
       bool rv = gfx::PremultiplyData(
-          shmemBytes.begin().get(), stride, gfx::SurfaceFormat::R8G8B8A8,
+          shmemMapping.DataAs<uint8_t>(), stride, gfx::SurfaceFormat::R8G8B8A8,
           map.GetData(), map.GetStride(), gfx::SurfaceFormat::B8G8R8A8,
           surf->GetSize());
       MOZ_RELEASE_ASSERT(rv, "PremultiplyData failed!");
     } else {
-      bool rv = gfx::SwizzleData(shmemBytes.begin().get(), stride,
+      bool rv = gfx::SwizzleData(shmemMapping.DataAs<uint8_t>(), stride,
                                  gfx::SurfaceFormat::R8G8B8A8, map.GetData(),
                                  map.GetStride(), gfx::SurfaceFormat::B8G8R8A8,
                                  surf->GetSize());

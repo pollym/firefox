@@ -101,8 +101,8 @@ Maybe<layers::SurfaceDescriptor> SharedTextureDMABuf::ToSurfaceDescriptor() {
   return Some(sd);
 }
 
-void SharedTextureDMABuf::GetSnapshot(const ipc::Shmem& aDestShmem,
-                                      size_t aDestStride) {
+void SharedTextureDMABuf::GetSnapshot(
+    const ipc::SharedMemoryMapping& aDestMapping, size_t aDestStride) {
   const RefPtr<gfx::SourceSurface> surface = mSurface->GetAsSourceSurface();
   if (!surface) {
     MOZ_ASSERT_UNREACHABLE("unexpected to be called");
@@ -124,7 +124,7 @@ void SharedTextureDMABuf::GetSnapshot(const ipc::Shmem& aDestShmem,
   }
 
   uint8_t* src = static_cast<uint8_t*>(map.GetData());
-  uint8_t* dst = aDestShmem.get<uint8_t>();
+  uint8_t* dst = aDestMapping.DataAs<uint8_t>();
 
   const size_t src_stride = static_cast<size_t>(map.GetStride());
   const size_t bytesPerRow = static_cast<size_t>(mWidth) * 4;

@@ -20,6 +20,7 @@
 #include "mozilla/UniquePtr.h"
 #include "mozilla/gfx/Point.h"  // for IntSize
 #include "mozilla/gfx/Types.h"  // for SurfaceFormat
+#include "mozilla/ipc/SharedMemoryMapping.h"
 #include "mozilla/ipc/Shmem.h"
 #include "mozilla/layers/CompositorTypes.h"  // for TextureFlags, etc
 #include "mozilla/layers/LayersSurfaces.h"   // for SurfaceDescriptor
@@ -239,10 +240,10 @@ class RemoteTextureOwnerClient final {
                    const SurfaceDescriptor& aDesc);
   void PushDummyTexture(const RemoteTextureId aTextureId,
                         const RemoteTextureOwnerId aOwnerId);
-  void GetLatestBufferSnapshot(const RemoteTextureOwnerId aOwnerId,
-                               const mozilla::ipc::Shmem& aDestShmem,
-                               const gfx::IntSize& aDestSize,
-                               size_t aDestStride);
+  void GetLatestBufferSnapshot(
+      const RemoteTextureOwnerId aOwnerId,
+      const mozilla::ipc::SharedMemoryMapping& aDestMapping,
+      const gfx::IntSize& aDestSize, size_t aDestStride);
   UniquePtr<TextureData> GetRecycledTextureData(
       const gfx::IntSize& aSize, gfx::SurfaceFormat aFormat,
       TextureType aTextureType,
@@ -298,11 +299,10 @@ class RemoteTextureMap {
                      const RemoteTextureOwnerId aOwnerId,
                      const base::ProcessId aForPid);
 
-  void GetLatestBufferSnapshot(const RemoteTextureOwnerId aOwnerId,
-                               const base::ProcessId aForPid,
-                               const mozilla::ipc::Shmem& aDestShmem,
-                               const gfx::IntSize& aDestSize,
-                               size_t aDestStride);
+  void GetLatestBufferSnapshot(
+      const RemoteTextureOwnerId aOwnerId, const base::ProcessId aForPid,
+      const mozilla::ipc::SharedMemoryMapping& aDestMapping,
+      const gfx::IntSize& aDestSize, size_t aDestStride);
 
   void RegisterTextureOwner(
       const RemoteTextureOwnerId aOwnerId, const base::ProcessId aForPid,

@@ -72,9 +72,10 @@ class WebGPUParent final : public PWebGPUParent, public SupportsWeakPtr {
                      layers::RemoteTextureTxnId aTxnId);
 
   ipc::IPCResult GetFrontBufferSnapshot(
-      IProtocol* aProtocol, const layers::RemoteTextureOwnerId& aOwnerId,
+      const layers::RemoteTextureOwnerId& aOwnerId,
       const RawId& aCommandEncoderId, const RawId& aCommandBufferId,
-      Maybe<Shmem>& aShmem, gfx::IntSize& aSize, uint32_t& aByteStride);
+      ipc::MutableSharedMemoryHandle& aHandle, gfx::IntSize& aSize,
+      uint32_t& aByteStride);
 
   void ActorDestroy(ActorDestroyReason aWhy) override;
 

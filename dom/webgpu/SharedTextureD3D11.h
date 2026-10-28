@@ -40,7 +40,8 @@ class SharedTextureD3D11 final : public SharedTexture {
 
   Maybe<layers::SurfaceDescriptor> ToSurfaceDescriptor() override;
 
-  void GetSnapshot(const ipc::Shmem& aDestShmem, size_t aDestStride) override;
+  void GetSnapshot(const ipc::SharedMemoryMapping& aDestMapping,
+                   size_t aDestStride) override;
 
   SharedTextureD3D11* AsSharedTextureD3D11() override { return this; }
 

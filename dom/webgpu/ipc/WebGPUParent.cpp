@@ -927,17 +927,18 @@ struct ReadbackSnapshotRequest {
   ReadbackSnapshotRequest(const ffi::WGPUGlobal* aContext,
                           RefPtr<PresentationData>& aData,
                           ffi::WGPUBufferId aBufferId,
-                          const ipc::Shmem& aDestShmem, size_t aDestStride)
+                          ipc::SharedMemoryMapping aDestMapping,
+                          size_t aDestStride)
       : mContext(aContext),
         mData(aData),
         mBufferId(aBufferId),
-        mDestShmem(aDestShmem),
+        mDestMapping(std::move(aDestMapping)),
         mDestStride(aDestStride) {}
 
   const ffi::WGPUGlobal* mContext;
   RefPtr<PresentationData> mData;
   const ffi::WGPUBufferId mBufferId;
-  const ipc::Shmem& mDestShmem;
+  ipc::SharedMemoryMapping mDestMapping;
   const size_t mDestStride;
 };
 
@@ -976,7 +977,7 @@ static void ReadbackSnapshotCallback(uint8_t* userdata,
   }
 
   uint8_t* src = mapped->AsSpan().data();
-  uint8_t* dst = req->mDestShmem.get<uint8_t>();
+  uint8_t* dst = req->mDestMapping.DataAs<uint8_t>();
 
   const size_t src_stride = static_cast<size_t>(data->mBufferStride);
   const size_t bytesPerRow = static_cast<size_t>(data->mDesc.size().width) * 4;
@@ -1001,12 +1002,14 @@ static void ReadbackSnapshotCallback(uint8_t* userdata,
 }
 
 ipc::IPCResult WebGPUParent::GetFrontBufferSnapshot(
-    IProtocol* aProtocol, const layers::RemoteTextureOwnerId& aOwnerId,
+    const layers::RemoteTextureOwnerId& aOwnerId,
     const RawId& aCommandEncoderId, const RawId& aCommandBufferId,
-    Maybe<Shmem>& aShmem, gfx::IntSize& aSize, uint32_t& aByteStride) {
-  auto setOutParams = [&aShmem, &aSize, &aByteStride](Shmem&& shmem, auto size,
-                                                      auto stride) {
-    aShmem.emplace(std::move(shmem));
+    ipc::MutableSharedMemoryHandle& aHandle, gfx::IntSize& aSize,
+    uint32_t& aByteStride) {
+  auto setOutParams = [&aHandle, &aSize, &aByteStride](
+                          ipc::MutableSharedMemoryHandle&& handle, auto size,
+                          auto stride) {
+    aHandle = std::move(handle);
     aSize = size;
     aByteStride = stride;
   };
@@ -1039,16 +1042,17 @@ ipc::IPCResult WebGPUParent::GetFrontBufferSnapshot(
     return IPC_OK();
   }
 
-  Shmem shmem;
-  if (!AllocShmem(len.value(), &shmem)) {
+  auto handle = ipc::shared_memory::Create(len.value());
+  auto mapping = handle.Map();
+  if (!handle || !mapping) {
     return IPC_OK();
   }
 
   if (data->mLastSubmittedTextureId.isNothing()) {
     // No commands referencing the canvas have ever been submitted, so it's
     // blank.
-    memset(shmem.get<uint8_t>(), 0, shmem.Size<uint8_t>());
-    setOutParams(std::move(shmem), size, stride);
+    memset(mapping.DataAs<uint8_t>(), 0, mapping.Size());
+    setOutParams(std::move(handle), size, stride);
     return IPC_OK();
   }
 
@@ -1062,8 +1066,9 @@ ipc::IPCResult WebGPUParent::GetFrontBufferSnapshot(
     if (!data->mUseSharedTextureInSwapChain) {
       ffi::wgpu_server_device_poll(mContext.get(), data->mDeviceId, true);
     }
-    mRemoteTextureOwner->GetLatestBufferSnapshot(aOwnerId, shmem, size, stride);
-    setOutParams(std::move(shmem), size, stride);
+    mRemoteTextureOwner->GetLatestBufferSnapshot(aOwnerId, mapping, size,
+                                                 stride);
+    setOutParams(std::move(handle), size, stride);
     return IPC_OK();
   }
 
@@ -1124,7 +1129,7 @@ ipc::IPCResult WebGPUParent::GetFrontBufferSnapshot(
   }
 
   auto snapshotRequest = std::make_unique<ReadbackSnapshotRequest>(
-      mContext.get(), data, bufferId, shmem, stride);
+      mContext.get(), data, bufferId, std::move(mapping), stride);
 
   ffi::WGPUBufferMapAsyncStatus status = ffi::wgpu_server_buffer_map_blocking(
       mContext.get(), data->mDeviceId, bufferId, 0, bufferSize,
@@ -1137,7 +1142,7 @@ ipc::IPCResult WebGPUParent::GetFrontBufferSnapshot(
   // Check if ReadbackSnapshotCallback is called.
   MOZ_RELEASE_ASSERT(data->mReadbackSnapshotCallbackCalled == true);
 
-  setOutParams(std::move(shmem), size, stride);
+  setOutParams(std::move(handle), size, stride);
   return IPC_OK();
 }
 
