@@ -3702,12 +3702,12 @@ static bool CallFunctionWithAsyncStack(JSContext* cx, unsigned argc,
 }
 
 static bool EnableTrackAllocations(JSContext* cx, unsigned argc, Value* vp) {
-  SetAllocationMetadataBuilder(cx, &SavedStacks::metadataBuilder);
+  cx->realm()->enableAllocationMetadataBuilder();
   return true;
 }
 
 static bool DisableTrackAllocations(JSContext* cx, unsigned argc, Value* vp) {
-  SetAllocationMetadataBuilder(cx, nullptr);
+  cx->realm()->disableAllocationMetadataBuilder();
   return true;
 }
 
@@ -10576,9 +10576,7 @@ static const JSFunctionSpecWithHelp TestingFunctions[] = {
 
     JS_FN_HELP("enableTrackAllocations", EnableTrackAllocations, 0, 0,
 "enableTrackAllocations()",
-"  Start capturing the JS stack at every allocation. Note that this sets an\n"
-"  object metadata callback that will override any other object metadata\n"
-"  callback that may be set."),
+"  Start capturing the JS stack at every allocation."),
 
     JS_FN_HELP("disableTrackAllocations", DisableTrackAllocations, 0, 0,
 "disableTrackAllocations()",

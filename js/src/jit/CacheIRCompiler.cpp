@@ -5498,14 +5498,15 @@ bool CacheIRCompiler::emitGuardXrayNoExpando(ObjOperandId objId) {
 }
 
 bool CacheIRCompiler::emitAssertNoAllocationMetadataBuilder(
-    uint32_t builderAddrOffset) {
+    uint32_t hasBuilderAddrOffset) {
   JitSpew(JitSpew_Codegen, "%s", __FUNCTION__);
   AutoScratchRegister scratch(allocator, masm);
 
   Label ok;
-  StubFieldOffset builderField(builderAddrOffset, StubField::Type::RawPointer);
-  emitLoadStubField(builderField, scratch);
-  masm.branchPtr(Assembler::Equal, Address(scratch, 0), ImmWord(0), &ok);
+  StubFieldOffset hasBuilderField(hasBuilderAddrOffset,
+                                  StubField::Type::RawPointer);
+  emitLoadStubField(hasBuilderField, scratch);
+  masm.branch32(Assembler::Equal, Address(scratch, 0), Imm32(0), &ok);
   masm.assumeUnreachable("Unexpected allocation metadata builder");
   masm.bind(&ok);
 
