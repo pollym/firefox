@@ -84,6 +84,21 @@ class SummarizePageMenuItemProviderTest {
     }
 
     @Test
+    fun `GIVEN target is CustomizeMenu WHEN providing the item THEN show item without click events`() = runTest {
+        val provider = provider(target = MenuTarget.CustomizeMenu)
+
+        assertEquals(
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_summarize_page)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_lightning_24),
+                onClickEvent = null,
+                state = MenuItemState.DEFAULT,
+            ),
+            provider.itemFlow.value,
+        )
+    }
+
+    @Test
     fun `WHEN the page cannot be summarized THEN keep summarizing as not available`() = runTest {
         val provider = provider(eligibilityChecker = eligibilityChecker(isEligible = false))
 

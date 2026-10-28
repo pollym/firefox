@@ -5,6 +5,7 @@
 package org.mozilla.fenix.shortcut
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -47,17 +48,21 @@ class AddToHomeScreenMenuItemProvider(
 ) : MenuItemProvider {
     // Whether the launcher accepts shortcuts at all is a property of the device, so it cannot change while the menu
     // is shown.
-    private val isPinningSupported = webAppUseCases.isPinningSupported()
+    private val isPinningSupported by lazy(LazyThreadSafetyMode.NONE) { webAppUseCases.isPinningSupported() }
 
     override val itemFlow: StateFlow<MenuItem?> =
-        browserStore.stateFlow
-            .map { state -> addToHomeScreenItem(hasPageShown = target.browserSessionFrom(state) != null) }
-            .stateIn(
-                scope = scope,
-                started = SharingStarted.Eagerly,
-                initialValue =
-                    addToHomeScreenItem(hasPageShown = target.browserSessionFrom(browserStore.state) != null),
-            )
+        if (target == MenuTarget.CustomizeMenu) {
+            MutableStateFlow(DEFAULT_MENU_ITEM)
+        } else {
+            browserStore.stateFlow
+                .map { state -> addToHomeScreenItem(hasPageShown = target.browserSessionFrom(state) != null) }
+                .stateIn(
+                    scope = scope,
+                    started = SharingStarted.Eagerly,
+                    initialValue =
+                        addToHomeScreenItem(hasPageShown = target.browserSessionFrom(browserStore.state) != null),
+                )
+        }
 
     /**
      * The item to show, or `null` if there is no page to add or the device cannot show shortcuts.
@@ -67,17 +72,12 @@ class AddToHomeScreenMenuItemProvider(
     private fun addToHomeScreenItem(hasPageShown: Boolean): MenuItem? {
         if (!hasPageShown || !isPinningSupported) return null
 
-        return StandardMenuItem(
+        return DEFAULT_MENU_ITEM.copy(
             title =
-                MenuItemTitle(
-                    Text.Resource(
-                        when (webAppUseCases.isInstallable()) {
-                            true -> R.string.browser_menu_add_app_to_homescreen
-                            else -> R.string.browser_menu_add_to_homescreen
-                        }
-                    )
-                ),
-            icon = MenuItemIconRes(iconsR.drawable.mozac_ic_add_to_homescreen_24),
+                when (webAppUseCases.isInstallable()) {
+                    true -> MenuItemTitle(Text.Resource(R.string.browser_menu_add_app_to_homescreen))
+                    else -> DEFAULT_MENU_ITEM.title
+                },
             onClickEvent = MenuAction.Navigate.AddToHomeScreen,
         )
     }
@@ -101,5 +101,13 @@ class AddToHomeScreenMenuItemProvider(
                 }
             false -> menu.navigate(MenuFragmentDirections.actionMenuFragmentToCreateShortcutFragment())
         }
+    }
+
+    companion object {
+        private val DEFAULT_MENU_ITEM =
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_add_to_homescreen)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_add_to_homescreen_24),
+            )
     }
 }

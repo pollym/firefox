@@ -21,6 +21,7 @@ import mozilla.components.compose.base.text.Text
 import mozilla.components.compose.menu.data.MenuItemTitle
 import mozilla.components.compose.menu.data.StandardMenuItem
 import mozilla.components.compose.menu.ui.MenuItemIconRes
+import mozilla.components.compose.menu.ui.MenuItemState
 import mozilla.components.concept.engine.EngineSession.LoadUrlFlags
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.ui.icons.R as iconsR
@@ -42,6 +43,22 @@ class RefreshMenuItemProviderTest {
 
         assertNull(provider.itemFlow.value)
     }
+
+    @Test
+    fun `GIVEN target is CustomizeMenu WHEN building the refresh menu item THEN return refresh menu item without click event`() =
+        runTest {
+            val provider = provider(BrowserStore(), target = MenuTarget.CustomizeMenu)
+
+            assertEquals(
+                StandardMenuItem(
+                    title = MenuItemTitle(Text.Resource(R.string.browser_menu_refresh)),
+                    icon = MenuItemIconRes(iconsR.drawable.mozac_ic_arrow_clockwise_24),
+                    onClickEvent = null,
+                    state = MenuItemState.DEFAULT,
+                ),
+                provider.itemFlow.value,
+            )
+        }
 
     @Test
     fun `GIVEN the current page is loading WHEN building the refresh menu item THEN return stop menu item`() = runTest {

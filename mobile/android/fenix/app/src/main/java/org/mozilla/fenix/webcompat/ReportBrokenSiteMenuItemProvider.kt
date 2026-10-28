@@ -5,6 +5,7 @@
 package org.mozilla.fenix.webcompat
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -57,13 +58,17 @@ class ReportBrokenSiteMenuItemProvider(
     private val scope: CoroutineScope,
 ) : MenuItemProvider {
     override val itemFlow: StateFlow<MenuItem?> =
-        browserStore.stateFlow
-            .map { state -> target.browserSessionFrom(state).reportBrokenSiteItem() }
-            .stateIn(
-                scope = scope,
-                started = SharingStarted.Eagerly,
-                initialValue = target.browserSessionFrom(browserStore.state).reportBrokenSiteItem(),
-            )
+        if (target == MenuTarget.CustomizeMenu) {
+            MutableStateFlow(DEFAULT_MENU_ITEM)
+        } else {
+            browserStore.stateFlow
+                .map { state -> target.browserSessionFrom(state).reportBrokenSiteItem() }
+                .stateIn(
+                    scope = scope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = target.browserSessionFrom(browserStore.state).reportBrokenSiteItem(),
+                )
+        }
 
     override fun handles(event: MenuEvent) = event == MenuAction.Navigate.WebCompatReporter
 
@@ -98,20 +103,26 @@ class ReportBrokenSiteMenuItemProvider(
             )
         }
     }
-}
 
-private fun SessionState?.reportBrokenSiteItem(): MenuItem? {
-    val url = this?.content?.url ?: return null
+    private fun SessionState?.reportBrokenSiteItem(): MenuItem? {
+        val url = this?.content?.url ?: return null
 
-    return StandardMenuItem(
-        title = MenuItemTitle(Text.Resource(R.string.browser_menu_webcompat_reporter_2)),
-        icon = MenuItemIconRes(iconsR.drawable.mozac_ic_lightbulb_24),
-        onClickEvent = MenuAction.Navigate.WebCompatReporter,
-        // There is nothing to report about the pages the browser itself shows.
-        state =
-            when (url.isAboutUrl() || url.isContentUrl()) {
-                true -> MenuItemState.DISABLED
-                else -> MenuItemState.DEFAULT
-            },
-    )
+        return DEFAULT_MENU_ITEM.copy(
+            onClickEvent = MenuAction.Navigate.WebCompatReporter,
+            // There is nothing to report about the pages the browser itself shows.
+            state =
+                when (url.isAboutUrl() || url.isContentUrl()) {
+                    true -> MenuItemState.DISABLED
+                    else -> MenuItemState.DEFAULT
+                },
+        )
+    }
+
+    companion object {
+        private val DEFAULT_MENU_ITEM =
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_webcompat_reporter_2)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_lightbulb_24),
+            )
+    }
 }

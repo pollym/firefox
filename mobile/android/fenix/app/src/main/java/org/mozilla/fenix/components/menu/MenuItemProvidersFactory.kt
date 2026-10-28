@@ -118,6 +118,7 @@ class MenuItemProvidersFactory(
             FenixMenuItem.IPProtection ->
                 VpnMenuItemProvider(
                     ipProtectionStore = ipProtectionStore,
+                    target = target,
                     scope = menuViewScope,
                 )
 
@@ -132,7 +133,11 @@ class MenuItemProvidersFactory(
                     applicationScope = applicationScope,
                 )
 
-            FenixMenuItem.FindInPage -> FindInPageMenuItemProvider(appStore = appStore)
+            FenixMenuItem.FindInPage ->
+                FindInPageMenuItemProvider(
+                    appStore = appStore,
+                    target = target,
+                )
 
             FenixMenuItem.DesktopSite ->
                 DesktopSiteMenuItemProvider(
@@ -292,17 +297,22 @@ class MenuItemProvidersFactory(
                     printContent = useCases.sessionUseCases.printContent,
                 )
 
-            FenixMenuItem.History -> HistoryMenuItemProvider()
+            FenixMenuItem.History -> HistoryMenuItemProvider(target = target)
 
-            FenixMenuItem.Bookmarks -> BookmarksScreenMenuItemProvider()
+            FenixMenuItem.Bookmarks -> BookmarksScreenMenuItemProvider(target = target)
 
             FenixMenuItem.Downloads ->
                 DownloadsMenuItemProvider(
                     appStore = appStore,
+                    target = target,
                     scope = menuViewScope,
                 )
 
-            FenixMenuItem.Passwords -> PasswordsMenuItemProvider(isAutofillSupported = settings.isAutofillSupported)
+            FenixMenuItem.Passwords ->
+                PasswordsMenuItemProvider(
+                    isAutofillSupported = settings.isAutofillSupported,
+                    target = target,
+                )
 
             FenixMenuItem.MozillaAccount ->
                 MozillaAccountMenuItemProvider(
@@ -310,12 +320,13 @@ class MenuItemProvidersFactory(
                     httpClient = httpClient,
                     context = context,
                     accessPoint = accessPoint,
+                    target = target,
                     scope = menuViewScope,
                 )
 
-            FenixMenuItem.CustomizeHomepage -> CustomizeHomepageMenuItemProvider()
+            FenixMenuItem.CustomizeHomepage -> CustomizeHomepageMenuItemProvider(target = target)
 
-            FenixMenuItem.Settings -> SettingsMenuItemProvider()
+            FenixMenuItem.Settings -> SettingsMenuItemProvider(target = target)
 
             FenixMenuItem.Quit ->
                 QuitMenuItemProvider(
@@ -324,6 +335,7 @@ class MenuItemProvidersFactory(
                     deleteBrowsingDataController = { deleteBrowsingDataController },
                     quitApplicationDelegate = quitApplicationDelegate,
                     applicationScope = applicationScope,
+                    target = target,
                 )
         }
 

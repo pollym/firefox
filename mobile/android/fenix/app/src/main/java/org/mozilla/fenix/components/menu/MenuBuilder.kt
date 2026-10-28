@@ -68,7 +68,21 @@ class MenuBuilder(private val registry: MenuItemsRegistry) {
 
     private fun MenuSectionConfiguration.toGroup(shownItems: List<ShownMenuItem>) =
         when (presentationMode) {
-            Row -> MenuItemsGroup.Row(id = id, items = shownItems, isSticky = isSticky)
-            Grid -> MenuItemsGroup.Grid(id = id, items = shownItems, isSticky = isSticky)
+            Row ->
+                MenuItemsGroup.Row(
+                    id = id,
+                    items = shownItems,
+                    isSticky = isSticky,
+                    isDisabled = isDisabled,
+                    isHidden = isHidden,
+                )
+            Grid ->
+                MenuItemsGroup.Grid(
+                    id = id,
+                    items = shownItems,
+                    isSticky = isSticky,
+                    isDisabled = isDisabled,
+                    isHidden = isHidden,
+                )
         }
 }

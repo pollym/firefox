@@ -23,6 +23,7 @@ import mozilla.components.compose.base.text.Text
 import mozilla.components.compose.menu.data.MenuItemTitle
 import mozilla.components.compose.menu.data.StandardMenuItem
 import mozilla.components.compose.menu.ui.MenuItemIconRes
+import mozilla.components.compose.menu.ui.MenuItemState
 import mozilla.components.feature.pwa.WebAppUseCases
 import mozilla.components.ui.icons.R as iconsR
 import org.junit.Test
@@ -58,6 +59,22 @@ class AddToHomeScreenMenuItemProviderTest {
         val provider = provider(webAppUseCases = webAppUseCases(isPinningSupported = false))
 
         assertNull(provider.itemFlow.value)
+    }
+
+    @Test
+    fun `GIVEN target is CustomizeMenu WHEN providing the item THEN show item without click events`() = runTest {
+        val provider =
+            provider(webAppUseCases = webAppUseCases(isInstallable = false), target = MenuTarget.CustomizeMenu)
+
+        assertEquals(
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_add_to_homescreen)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_add_to_homescreen_24),
+                onClickEvent = null,
+                state = MenuItemState.DEFAULT,
+            ),
+            provider.itemFlow.value,
+        )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

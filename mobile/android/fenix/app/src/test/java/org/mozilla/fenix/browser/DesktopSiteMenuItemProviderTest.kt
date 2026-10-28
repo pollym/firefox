@@ -45,6 +45,23 @@ class DesktopSiteMenuItemProviderTest {
     }
 
     @Test
+    fun `GIVEN target is CustomizeMenu WHEN building the desktop site menu item THEN show it as default state without click event`() =
+        runTest {
+            val provider = provider(BrowserStore(), target = MenuTarget.CustomizeMenu)
+
+            assertEquals(
+                StandardMenuItem(
+                    title = MenuItemTitle(Text.Resource(R.string.browser_menu_desktop_site)),
+                    icon = MenuItemIconRes(iconsR.drawable.mozac_ic_device_desktop_24),
+                    onClickEvent = null,
+                    state = MenuItemState.DEFAULT,
+                    role = Role.Switch,
+                ),
+                provider.itemFlow.value,
+            )
+        }
+
+    @Test
     fun `GIVEN the mobile version is shown WHEN building the desktop site menu item THEN offer switching to desktop mode`() =
         runTest {
             val provider = provider(browserStore(desktopMode = false))

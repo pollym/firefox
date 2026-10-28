@@ -32,21 +32,20 @@ import org.mozilla.fenix.components.menu.store.MenuAction
 class OpenInFirefoxMenuItemProvider(
     appName: String,
     private val appStore: AppStore,
-    private val target: MenuTarget = MenuTarget.BrowserTab,
+    private val target: MenuTarget,
 ) : MenuItemProvider {
     private val isSandboxCustomTab = (target as? MenuTarget.CustomTab)?.isSandboxed == true
     override val itemFlow: StateFlow<MenuItem?> =
         MutableStateFlow(
-            StandardMenuItem(
-                title = MenuItemTitle(Text.Resource(R.string.browser_menu_open_in_fenix, listOf(appName))),
-                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_external_link_24),
-                onClickEvent = MenuAction.OpenInFirefox,
-                state =
-                    when {
-                        isSandboxCustomTab -> MenuItemState.DISABLED
-                        else -> MenuItemState.DEFAULT
-                    },
-            )
+            defaultMenuItem(appName)
+                .copy(
+                    onClickEvent = MenuAction.OpenInFirefox,
+                    state =
+                        when {
+                            isSandboxCustomTab -> MenuItemState.DISABLED
+                            else -> MenuItemState.DEFAULT
+                        },
+                )
         )
 
     override fun handles(event: MenuEvent) = event == MenuAction.OpenInFirefox
@@ -55,5 +54,13 @@ class OpenInFirefoxMenuItemProvider(
         if (isSandboxCustomTab) return
         menu.dismiss()
         appStore.dispatch(AppAction.OpenInFirefoxStarted)
+    }
+
+    companion object {
+        private fun defaultMenuItem(appName: String) =
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_open_in_fenix, listOf(appName))),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_external_link_24),
+            )
     }
 }

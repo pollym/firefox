@@ -30,7 +30,12 @@ class OpenInFirefoxMenuItemProviderTest {
 
     @Test
     fun `WHEN building the item THEN offer opening in the application`() = runTest {
-        val provider = OpenInFirefoxMenuItemProvider(appName = APP_NAME, appStore = appStore)
+        val provider =
+            OpenInFirefoxMenuItemProvider(
+                appName = APP_NAME,
+                appStore = appStore,
+                target = MenuTarget.BrowserTab,
+            )
 
         assertEquals(
             StandardMenuItem(
@@ -44,7 +49,12 @@ class OpenInFirefoxMenuItemProviderTest {
 
     @Test
     fun `WHEN clicking the item THEN close the menu and request opening in Firefox`() = runTest {
-        val provider = OpenInFirefoxMenuItemProvider(appName = APP_NAME, appStore = appStore)
+        val provider =
+            OpenInFirefoxMenuItemProvider(
+                appName = APP_NAME,
+                appStore = appStore,
+                target = MenuTarget.BrowserTab,
+            )
 
         provider.onEvent(MenuAction.OpenInFirefox, menu)
 
@@ -89,7 +99,12 @@ class OpenInFirefoxMenuItemProviderTest {
 
     @Test
     fun `WHEN asked about the events of other items THEN don't handle them`() = runTest {
-        val provider = OpenInFirefoxMenuItemProvider(appName = APP_NAME, appStore = appStore)
+        val provider =
+            OpenInFirefoxMenuItemProvider(
+                appName = APP_NAME,
+                appStore = appStore,
+                target = MenuTarget.BrowserTab,
+            )
 
         assertFalse(provider.handles(MenuAction.OpenInApp))
         assertFalse(provider.handles(MenuAction.Navigate.Settings))

@@ -49,6 +49,7 @@ import org.mozilla.fenix.GleanMetrics.Vpn
 import org.mozilla.fenix.NavGraphDirections
 import org.mozilla.fenix.R
 import org.mozilla.fenix.components.accounts.FenixFxAEntryPoint
+import org.mozilla.fenix.components.menu.MenuTarget
 import org.mozilla.fenix.components.menu.fake.FakeMenuHost
 import org.mozilla.fenix.components.menu.fake.reachableEvents
 import org.mozilla.fenix.components.menu.store.MenuAction
@@ -138,6 +139,26 @@ class VpnMenuItemProviderTest {
         val provider = provider(eligibleStore(Uninitialized))
 
         assertNull((provider.itemFlow.value as StandardMenuItem).summary)
+    }
+
+    @Test
+    fun `GIVEN target is CustomizeMenu WHEN building the menu item THEN show it without click events`() = runTest {
+        val provider =
+            VpnMenuItemProvider(
+                eligibleStore(Uninitialized),
+                target = MenuTarget.CustomizeMenu,
+                scope = backgroundScope,
+            )
+
+        assertEquals(
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.ip_protection_toggle_label)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_globe_24),
+                onClickEvent = null,
+                state = MenuItemState.DEFAULT,
+            ),
+            provider.itemFlow.value,
+        )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -246,8 +267,10 @@ class VpnMenuItemProviderTest {
         NavGraphDirections.actionGlobalIpProtectionFragment(entrypoint = FenixFxAEntryPoint.IPProtectionMainMenu)
 
     // The item is kept up to date on a scope that runTest cancels at the end of each test.
-    private fun TestScope.provider(ipProtectionStore: IPProtectionStore) =
-        VpnMenuItemProvider(ipProtectionStore = ipProtectionStore, scope = backgroundScope)
+    private fun TestScope.provider(
+        ipProtectionStore: IPProtectionStore,
+        target: MenuTarget = MenuTarget.BrowserTab,
+    ) = VpnMenuItemProvider(ipProtectionStore = ipProtectionStore, target = target, scope = backgroundScope)
 
     private fun eligibleStore(proxyStatus: ProxyStatus) =
         IPProtectionStore(

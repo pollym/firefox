@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -55,17 +56,23 @@ class SummarizePageMenuItemProvider(
     private val isPageEligible = MutableStateFlow(false)
 
     override val itemFlow: StateFlow<MenuItem?> =
-        combine(browserStore.stateFlow, isPageEligible) { state, isEligible ->
-                state.summarizePageItem(isPageEligible = isEligible)
-            }
-            .stateIn(
-                scope = scope,
-                started = SharingStarted.Eagerly,
-                initialValue = browserStore.state.summarizePageItem(isPageEligible = isPageEligible.value),
-            )
+        if (target == MenuTarget.CustomizeMenu) {
+            MutableStateFlow(DEFAULT_MENU_ITEM).asStateFlow()
+        } else {
+            combine(browserStore.stateFlow, isPageEligible) { state, isEligible ->
+                    state.summarizePageItem(isPageEligible = isEligible)
+                }
+                .stateIn(
+                    scope = scope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = browserStore.state.summarizePageItem(isPageEligible = isPageEligible.value),
+                )
+        }
 
     init {
-        scope.launch { resolvePageEligibility() }
+        if (target != MenuTarget.CustomizeMenu) {
+            scope.launch { resolvePageEligibility() }
+        }
     }
 
     private suspend fun resolvePageEligibility() {
@@ -113,24 +120,31 @@ class SummarizePageMenuItemProvider(
             isHighlighted = summarizationSettings.shouldHighlightMenuItem && isNormalTab,
         )
     }
-}
 
-private fun summarizePageItem(
-    isEnabled: Boolean,
-    isHighlighted: Boolean,
-) =
-    StandardMenuItem(
-        title = MenuItemTitle(Text.Resource(R.string.browser_menu_summarize_page)),
-        icon = MenuItemIconRes(iconsR.drawable.mozac_ic_lightning_24, isHighlighted = isHighlighted),
-        onClickEvent = MenuAction.Navigate.Summarizer,
-        onShownEvent = MenuAction.OnSummarizationMenuExposed,
-        showNewIndicator = true,
-        state =
-            when (isEnabled) {
-                true -> MenuItemState.DEFAULT
-                else -> MenuItemState.DISABLED
-            },
-    )
+    private fun summarizePageItem(
+        isEnabled: Boolean,
+        isHighlighted: Boolean,
+    ) =
+        DEFAULT_MENU_ITEM.copy(
+            icon = MenuItemIconRes(iconsR.drawable.mozac_ic_lightning_24, isHighlighted = isHighlighted),
+            onClickEvent = MenuAction.Navigate.Summarizer,
+            onShownEvent = MenuAction.OnSummarizationMenuExposed,
+            showNewIndicator = true,
+            state =
+                when (isEnabled) {
+                    true -> MenuItemState.DEFAULT
+                    else -> MenuItemState.DISABLED
+                },
+        )
+
+    companion object {
+        private val DEFAULT_MENU_ITEM =
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_summarize_page)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_lightning_24),
+            )
+    }
+}
 
 /** Whether this menu item is the summarization one. */
 internal fun StandardMenuItem.isSummarizePageMenuItem() = onClickEvent == MenuAction.Navigate.Summarizer

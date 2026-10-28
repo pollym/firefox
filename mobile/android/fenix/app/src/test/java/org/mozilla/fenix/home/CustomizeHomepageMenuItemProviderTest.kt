@@ -15,6 +15,7 @@ import mozilla.components.ui.icons.R as iconsR
 import org.junit.Test
 import org.mozilla.fenix.NavGraphDirections
 import org.mozilla.fenix.R
+import org.mozilla.fenix.components.menu.MenuTarget
 import org.mozilla.fenix.components.menu.fake.FakeMenuHost
 import org.mozilla.fenix.components.menu.fake.reachableEvents
 import org.mozilla.fenix.components.menu.store.MenuAction
@@ -22,7 +23,7 @@ import org.mozilla.fenix.components.menu.store.MenuAction
 class CustomizeHomepageMenuItemProviderTest {
     @Test
     fun `WHEN providing the item THEN offer customizing the homepage`() {
-        val provider = CustomizeHomepageMenuItemProvider()
+        val provider = CustomizeHomepageMenuItemProvider(target = MenuTarget.BrowserTab)
 
         assertEquals(
             StandardMenuItem(
@@ -38,14 +39,15 @@ class CustomizeHomepageMenuItemProviderTest {
     fun `WHEN clicking the item THEN show the homepage settings in place of the menu`() {
         val menu = FakeMenuHost()
 
-        CustomizeHomepageMenuItemProvider().onEvent(MenuAction.Navigate.CustomizeHomepage, menu)
+        CustomizeHomepageMenuItemProvider(target = MenuTarget.BrowserTab)
+            .onEvent(MenuAction.Navigate.CustomizeHomepage, menu)
 
         assertEquals(NavGraphDirections.actionGlobalHomeSettingsFragment(), menu.directions)
     }
 
     @Test
     fun `WHEN building the item THEN handle all events it can dispatch and no others`() {
-        val provider = CustomizeHomepageMenuItemProvider()
+        val provider = CustomizeHomepageMenuItemProvider(target = MenuTarget.BrowserTab)
 
         val events = requireNotNull(provider.itemFlow.value).reachableEvents()
 

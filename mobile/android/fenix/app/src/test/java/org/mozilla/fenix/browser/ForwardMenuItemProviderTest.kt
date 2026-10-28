@@ -61,6 +61,22 @@ class ForwardMenuItemProviderTest {
         }
 
     @Test
+    fun `GIVEN target is CustomizeMenu WHEN building the forward menu item THEN return an enabled menu item without click events`() =
+        runTest {
+            val provider = createProvider(BrowserStore(), backgroundScope, target = MenuTarget.CustomizeMenu)
+
+            val expected =
+                StandardMenuItem(
+                    title = MenuItemTitle(Text.Resource(R.string.browser_menu_forward)),
+                    icon = MenuItemIconRes(iconsR.drawable.mozac_ic_forward_24),
+                    onClickEvent = null,
+                    onLongClickEvent = null,
+                    state = MenuItemState.DEFAULT,
+                )
+            assertEquals(expected, provider.itemFlow.value)
+        }
+
+    @Test
     fun `GIVEN a selected tab WHEN clicking the item THEN close the menu and navigate forward in that tab`() = runTest {
         var isDismissedWhenGoingForward = false
         every { goForward(tabId = TAB_ID) } answers { isDismissedWhenGoingForward = menu.isDismissed }

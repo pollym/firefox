@@ -12,10 +12,12 @@ import mozilla.components.compose.base.text.Text
 import mozilla.components.compose.menu.data.MenuItemTitle
 import mozilla.components.compose.menu.data.StandardMenuItem
 import mozilla.components.compose.menu.ui.MenuItemIconRes
+import mozilla.components.compose.menu.ui.MenuItemState
 import mozilla.components.ui.icons.R as iconsR
 import org.junit.Test
 import org.mozilla.fenix.R
 import org.mozilla.fenix.components.menu.MenuFragmentDirections
+import org.mozilla.fenix.components.menu.MenuTarget
 import org.mozilla.fenix.components.menu.fake.FakeMenuHost
 import org.mozilla.fenix.components.menu.fake.reachableEvents
 import org.mozilla.fenix.components.menu.store.MenuAction
@@ -23,7 +25,7 @@ import org.mozilla.fenix.components.menu.store.MenuAction
 class PasswordsMenuItemProviderTest {
     @Test
     fun `GIVEN autofill is supported WHEN building the menu item THEN provide the item for opening the saved passwords`() {
-        val provider = PasswordsMenuItemProvider(isAutofillSupported = true)
+        val provider = PasswordsMenuItemProvider(isAutofillSupported = true, target = MenuTarget.BrowserTab)
 
         assertEquals(
             StandardMenuItem(
@@ -36,8 +38,23 @@ class PasswordsMenuItemProviderTest {
     }
 
     @Test
+    fun `GIVEN target is CustomizeMenu WHEN building the menu item THEN provide item without click event`() {
+        val provider = PasswordsMenuItemProvider(isAutofillSupported = false, target = MenuTarget.CustomizeMenu)
+
+        assertEquals(
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_passwords)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_login_24),
+                onClickEvent = null,
+                state = MenuItemState.DEFAULT,
+            ),
+            provider.itemFlow.value,
+        )
+    }
+
+    @Test
     fun `GIVEN autofill is not supported WHEN building the menu item THEN hide it`() {
-        val provider = PasswordsMenuItemProvider(isAutofillSupported = false)
+        val provider = PasswordsMenuItemProvider(isAutofillSupported = false, target = MenuTarget.BrowserTab)
 
         assertNull(provider.itemFlow.value)
     }
@@ -46,14 +63,15 @@ class PasswordsMenuItemProviderTest {
     fun `WHEN clicking the item THEN show the saved passwords in place of the menu`() {
         val menu = FakeMenuHost()
 
-        PasswordsMenuItemProvider(isAutofillSupported = true).onEvent(MenuAction.Navigate.Passwords, menu)
+        PasswordsMenuItemProvider(isAutofillSupported = true, target = MenuTarget.BrowserTab)
+            .onEvent(MenuAction.Navigate.Passwords, menu)
 
         assertEquals(MenuFragmentDirections.actionMenuFragmentToLoginsListFragment(), menu.directions)
     }
 
     @Test
     fun `WHEN building the item THEN handle all events it can dispatch and no others`() {
-        val provider = PasswordsMenuItemProvider(isAutofillSupported = true)
+        val provider = PasswordsMenuItemProvider(isAutofillSupported = true, target = MenuTarget.BrowserTab)
 
         val events = requireNotNull(provider.itemFlow.value).reachableEvents()
 

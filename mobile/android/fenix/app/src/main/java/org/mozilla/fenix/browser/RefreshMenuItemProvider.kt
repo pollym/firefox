@@ -5,8 +5,10 @@
 package org.mozilla.fenix.browser
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -44,14 +46,18 @@ class RefreshMenuItemProvider(
     scope: CoroutineScope,
 ) : MenuItemProvider {
     override val itemFlow: StateFlow<MenuItem?> =
-        browserStore.stateFlow
-            .distinctUntilChangedBy { target.browserSessionFrom(it)?.content?.loading }
-            .map { it.refreshItem() }
-            .stateIn(
-                scope = scope,
-                started = SharingStarted.Eagerly,
-                initialValue = browserStore.state.refreshItem(),
-            )
+        if (target == MenuTarget.CustomizeMenu) {
+            MutableStateFlow(DEFAULT_MENU_ITEM).asStateFlow()
+        } else {
+            browserStore.stateFlow
+                .distinctUntilChangedBy { target.browserSessionFrom(it)?.content?.loading }
+                .map { it.refreshItem() }
+                .stateIn(
+                    scope = scope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = browserStore.state.refreshItem(),
+                )
+        }
 
     override fun handles(event: MenuEvent) = event is MenuAction.Navigate.Reload || event == MenuAction.Navigate.Stop
 
@@ -89,12 +95,18 @@ class RefreshMenuItemProvider(
                     onClickEvent = MenuAction.Navigate.Stop,
                 )
             } else {
-                StandardMenuItem(
-                    title = MenuItemTitle(Text.Resource(R.string.browser_menu_refresh)),
-                    icon = MenuItemIconRes(iconsR.drawable.mozac_ic_arrow_clockwise_24),
+                DEFAULT_MENU_ITEM.copy(
                     onClickEvent = MenuAction.Navigate.Reload(bypassCache = false),
                     onLongClickEvent = MenuAction.Navigate.Reload(bypassCache = true),
                 )
             }
         }
+
+    companion object {
+        private val DEFAULT_MENU_ITEM =
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_refresh)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_arrow_clockwise_24),
+            )
+    }
 }

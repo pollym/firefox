@@ -27,6 +27,7 @@ import mozilla.components.compose.menu.ui.MenuItemState
 import mozilla.components.ui.icons.R as iconsR
 import org.junit.Test
 import org.mozilla.fenix.R
+import org.mozilla.fenix.components.menu.MenuTarget
 import org.mozilla.fenix.components.menu.fake.FakeMenuHost
 import org.mozilla.fenix.components.menu.fake.reachableEvents
 import org.mozilla.fenix.components.menu.store.MenuAction
@@ -61,6 +62,21 @@ class QuitMenuItemProviderTest {
     }
 
     @Test
+    fun `GIVEN customize menu target WHEN providing the item THEN show default item`() {
+        val provider = createProvider(deletesBrowsingDataOnQuit = false, target = MenuTarget.CustomizeMenu)
+
+        assertEquals(
+            StandardMenuItem(
+                title =
+                    MenuItemTitle(Text.Resource(R.string.browser_menu_delete_browsing_data_on_quit, listOf(APP_NAME))),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_cross_circle_fill_24),
+                state = MenuItemState.WARNING,
+            ),
+            provider.itemFlow.value,
+        )
+    }
+
+    @Test
     fun `WHEN clicking the item THEN close the menu and quit only after deleting the browsing data`() = runTest {
         val onDeletionComplete = slot<() -> Unit>()
         coEvery { deleteBrowsingDataController.clearBrowsingDataOnQuit(capture(onDeletionComplete)) } just Runs
@@ -89,6 +105,7 @@ class QuitMenuItemProviderTest {
     private fun createProvider(
         deletesBrowsingDataOnQuit: Boolean,
         applicationScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined),
+        target: MenuTarget = MenuTarget.BrowserTab,
     ) =
         QuitMenuItemProvider(
             appName = APP_NAME,
@@ -96,6 +113,7 @@ class QuitMenuItemProviderTest {
             deleteBrowsingDataController = { deleteBrowsingDataController },
             quitApplicationDelegate = { quitCount++ },
             applicationScope = applicationScope,
+            target = target,
         )
 
     private companion object {

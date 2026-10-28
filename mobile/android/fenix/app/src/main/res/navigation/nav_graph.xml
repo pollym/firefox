@@ -1928,7 +1928,7 @@
 
     <fragment
       android:id="@+id/fenixCustomizeMenuFragment"
-      android:name="org.mozilla.fenix.components.menu.FenixCustomizeMenuFragment"
+      android:name="org.mozilla.fenix.components.menu.compose.customize.FenixCustomizeMenuFragment"
       android:label="FenixCustomizeMenuFragment" />
 
     <navigation

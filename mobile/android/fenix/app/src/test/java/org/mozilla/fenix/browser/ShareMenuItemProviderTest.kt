@@ -21,6 +21,7 @@ import mozilla.components.compose.base.text.Text
 import mozilla.components.compose.menu.data.MenuItemTitle
 import mozilla.components.compose.menu.data.StandardMenuItem
 import mozilla.components.compose.menu.ui.MenuItemIconRes
+import mozilla.components.compose.menu.ui.MenuItemState
 import mozilla.components.concept.engine.prompt.ShareData
 import mozilla.components.ui.icons.R as iconsR
 import org.junit.Test
@@ -48,6 +49,21 @@ class ShareMenuItemProviderTest {
                 title = MenuItemTitle(Text.Resource(R.string.browser_menu_share)),
                 icon = MenuItemIconRes(iconsR.drawable.mozac_ic_share_android_24),
                 onClickEvent = MenuAction.Navigate.Share,
+            ),
+            provider.itemFlow.value,
+        )
+    }
+
+    @Test
+    fun `GIVEN target is CustomizeMenu WHEN building the share menu item THEN return menu item without click event`() {
+        val provider = createProvider(target = MenuTarget.CustomizeMenu)
+
+        assertEquals(
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_share)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_share_android_24),
+                onClickEvent = null,
+                state = MenuItemState.DEFAULT,
             ),
             provider.itemFlow.value,
         )

@@ -68,6 +68,22 @@ class BackMenuItemProviderTest {
         }
 
     @Test
+    fun `GIVEN target is CustomizeMenu WHEN building the back menu item THEN return an enabled menu item without click events`() =
+        runTest {
+            val provider = createProvider(BrowserStore(), backgroundScope, target = MenuTarget.CustomizeMenu)
+
+            val expected =
+                StandardMenuItem(
+                    title = MenuItemTitle(Text.Resource(R.string.browser_menu_back)),
+                    icon = MenuItemIconRes(iconsR.drawable.mozac_ic_back_24),
+                    onClickEvent = null,
+                    onLongClickEvent = null,
+                    state = MenuItemState.DEFAULT,
+                )
+            assertEquals(expected, provider.itemFlow.value)
+        }
+
+    @Test
     fun `GIVEN a selected tab WHEN clicking the item THEN close the menu and navigate back in that tab`() = runTest {
         var isDismissedWhenGoingBack = false
         every { goBack(tabId = TAB_ID) } answers { isDismissedWhenGoingBack = menu.isDismissed }

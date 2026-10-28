@@ -17,6 +17,7 @@ import mozilla.components.compose.base.text.Text
 import mozilla.components.compose.menu.data.MenuItemTitle
 import mozilla.components.compose.menu.data.StandardMenuItem
 import mozilla.components.compose.menu.ui.MenuItemIconRes
+import mozilla.components.compose.menu.ui.MenuItemState
 import mozilla.components.ui.icons.R as iconsR
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -85,6 +86,34 @@ class SaveToCollectionMenuItemProviderTest {
             )
 
         assertEquals(expectedMenuItem(false), provider.itemFlow.value)
+    }
+
+    @Test
+    fun `GIVEN target is CustomizeMenu WHEN building the menu button THEN return a menu item without click event`() {
+        val settings: Settings = mockk {
+            every { collections } returns true
+        }
+        val tabCollectionStorage: TabCollectionStorage = mockk {
+            every { cachedTabCollections } returns emptyList()
+        }
+
+        val provider =
+            SaveToCollectionMenuItemProvider(
+                settings,
+                tabCollectionStorage,
+                browserStore,
+                MenuTarget.CustomizeMenu,
+            )
+
+        assertEquals(
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_save_to_collection_2)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_collection_24),
+                onClickEvent = null,
+                state = MenuItemState.DEFAULT,
+            ),
+            provider.itemFlow.value,
+        )
     }
 
     @Test

@@ -39,13 +39,11 @@ class ShareMenuItemProvider(
     private val shareUseCases: ShareUseCases,
 ) : MenuItemProvider {
     override val itemFlow: StateFlow<MenuItem?> =
-        MutableStateFlow(
-            StandardMenuItem(
-                title = MenuItemTitle(Text.Resource(R.string.browser_menu_share)),
-                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_share_android_24),
-                onClickEvent = MenuAction.Navigate.Share,
-            )
-        )
+        if (target == MenuTarget.CustomizeMenu) {
+            MutableStateFlow(DEFAULT_MENU_ITEM)
+        } else {
+            MutableStateFlow(DEFAULT_MENU_ITEM.copy(onClickEvent = MenuAction.Navigate.Share))
+        }
 
     override fun handles(event: MenuEvent) = event == MenuAction.Navigate.Share
 
@@ -80,5 +78,13 @@ class ShareMenuItemProvider(
         )
 
         shareScreen?.let { menu.navigate(it) } ?: menu.dismiss()
+    }
+
+    companion object {
+        private val DEFAULT_MENU_ITEM =
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_share)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_share_android_24),
+            )
     }
 }

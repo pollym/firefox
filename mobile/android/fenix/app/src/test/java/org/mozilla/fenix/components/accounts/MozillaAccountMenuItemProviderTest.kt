@@ -46,6 +46,7 @@ import org.junit.runner.RunWith
 import org.mozilla.fenix.NavGraphDirections
 import org.mozilla.fenix.R
 import org.mozilla.fenix.components.menu.MenuAccessPoint
+import org.mozilla.fenix.components.menu.MenuTarget
 import org.mozilla.fenix.components.menu.fake.FakeMenuHost
 import org.mozilla.fenix.components.menu.store.MenuAction
 import org.robolectric.RobolectricTestRunner
@@ -69,6 +70,26 @@ class MozillaAccountMenuItemProviderTest {
                 accountState = NotAuthenticated,
             ),
             provider().itemFlow.value,
+        )
+    }
+
+    @Test
+    fun `GIVEN target is CustomizeMenu WHEN providing the item THEN show item without click event`() = runTest {
+        syncState.value = SyncState(accountState = NotAuthenticated)
+
+        assertEquals(
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_sign_in)),
+                summary =
+                    MenuItemSummary(
+                        text = Text.Resource(R.string.browser_menu_sign_in_caption_3),
+                        maxLines = SUMMARY_MAX_LINES,
+                    ),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_avatar_circle_24),
+                onClickEvent = null,
+                state = MenuItemState.DEFAULT,
+            ),
+            provider(target = MenuTarget.CustomizeMenu).itemFlow.value,
         )
     }
 
@@ -272,12 +293,16 @@ class MozillaAccountMenuItemProviderTest {
     }
 
     // The account is observed and its avatar downloaded on a scope that runTest cancels at the end of each test.
-    private fun TestScope.provider(httpClient: Client = mockk(relaxed = true)) =
+    private fun TestScope.provider(
+        httpClient: Client = mockk(relaxed = true),
+        target: MenuTarget = MenuTarget.BrowserTab,
+    ) =
         MozillaAccountMenuItemProvider(
             syncStore = syncStore,
             httpClient = httpClient,
             context = testContext,
             accessPoint = MenuAccessPoint.Browser,
+            target = target,
             scope = backgroundScope,
         )
 

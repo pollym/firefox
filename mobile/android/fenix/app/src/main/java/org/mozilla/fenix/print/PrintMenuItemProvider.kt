@@ -36,17 +36,17 @@ class PrintMenuItemProvider(
     private val printContent: SessionUseCases.PrintContentUseCase,
 ) : MenuItemProvider {
     override val itemFlow: StateFlow<MenuItem?> =
-        MutableStateFlow(
-            if (isAndroidAutomotiveAvailable) {
-                null
-            } else {
-                StandardMenuItem(
-                    title = MenuItemTitle(Text.Resource(R.string.browser_menu_print_2)),
-                    icon = MenuItemIconRes(iconsR.drawable.mozac_ic_print_24),
-                    onClickEvent = MenuAction.PrintRequested,
-                )
-            }
-        )
+        if (target == MenuTarget.CustomizeMenu) {
+            MutableStateFlow(DEFAULT_MENU_ITEM)
+        } else {
+            MutableStateFlow(
+                if (isAndroidAutomotiveAvailable) {
+                    null
+                } else {
+                    DEFAULT_MENU_ITEM.copy(onClickEvent = MenuAction.PrintRequested)
+                }
+            )
+        }
 
     override fun handles(event: MenuEvent) = event == MenuAction.PrintRequested
 
@@ -55,5 +55,13 @@ class PrintMenuItemProvider(
 
         menu.dismiss()
         printContent(tabId = tabId)
+    }
+
+    companion object {
+        private val DEFAULT_MENU_ITEM =
+            StandardMenuItem(
+                title = MenuItemTitle(Text.Resource(R.string.browser_menu_print_2)),
+                icon = MenuItemIconRes(iconsR.drawable.mozac_ic_print_24),
+            )
     }
 }

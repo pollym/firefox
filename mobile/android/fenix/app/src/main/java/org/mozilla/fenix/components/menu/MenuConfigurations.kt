@@ -56,6 +56,12 @@ object MenuConfigurations {
     @VisibleForTesting internal val HOME_MENU_GROUP_4_ID = "home_group_4"
     @VisibleForTesting internal val HOME_MENU_GROUP_5_ID = "home_group_5"
     @VisibleForTesting internal val HOME_MENU_GROUP_6_ID = "home_group_6"
+    @VisibleForTesting internal val CUSTOMIZE_MENU_NAVIGATION_ID = "customize_menu_navigation"
+    @VisibleForTesting internal val CUSTOMIZE_MENU_GROUP_2_ID = "customize_menu_group_2"
+    @VisibleForTesting internal val CUSTOMIZE_MENU_GROUP_3_ID = "customize_menu_group_3"
+    @VisibleForTesting internal val CUSTOMIZE_MENU_GROUP_4_ID = "customize_menu_group_4"
+    @VisibleForTesting internal val CUSTOMIZE_MENU_GROUP_5_ID = "customize_menu_group_5"
+    @VisibleForTesting internal val CUSTOMIZE_MENU_GROUP_6_ID = "customize_menu_group_6"
 
     /** The menu shown while browsing. */
     fun browser(
@@ -124,6 +130,51 @@ object MenuConfigurations {
             )
         return if (isToolbarAtBottom || isExpandedToolbarEnabled) rest + navSection else listOf(navSection) + rest
     }
+
+    /** The menu shown on the customize menu screen. */
+    fun customizeMenu(): List<MenuSectionConfiguration> =
+        listOf(
+            MenuSectionConfiguration(
+                id = CUSTOMIZE_MENU_NAVIGATION_ID,
+                presentationMode = Grid,
+                items = listOf(Back, Forward, Share, Refresh),
+                isSticky = true,
+            ),
+            MenuSectionConfiguration(
+                id = CUSTOMIZE_MENU_GROUP_2_ID,
+                presentationMode = Row,
+                items = listOf(IPProtection),
+            ),
+            MenuSectionConfiguration(
+                id = CUSTOMIZE_MENU_GROUP_3_ID,
+                presentationMode = Row,
+                items =
+                    listOf(
+                        Bookmark,
+                        FindInPage,
+                        DesktopSite,
+                        Translate,
+                        SummarizePage,
+                    ),
+            ),
+            MenuSectionConfiguration(
+                id = CUSTOMIZE_MENU_GROUP_4_ID,
+                presentationMode = Grid,
+                items = listOf(History, Bookmarks, Downloads, Passwords),
+            ),
+            MenuSectionConfiguration(
+                id = CUSTOMIZE_MENU_GROUP_5_ID,
+                presentationMode = Row,
+                items = listOf(MozillaAccount, Settings),
+                isDisabled = true,
+            ),
+            MenuSectionConfiguration(
+                id = CUSTOMIZE_MENU_GROUP_6_ID,
+                presentationMode = Row,
+                items = listOf(AddToHomeScreen, SaveToCollection),
+                isHidden = true,
+            ),
+        )
 
     /** The menu shown on the home screen. */
     fun home(): List<MenuSectionConfiguration> =
