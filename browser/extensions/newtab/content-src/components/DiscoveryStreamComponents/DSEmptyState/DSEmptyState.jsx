@@ -53,16 +53,18 @@ export class DSEmptyState extends React.PureComponent {
   renderButton() {
     if (this.props.status === "waiting" || this.state.waiting) {
       return (
-        <button
-          className="try-again-button waiting"
+        <span
+          className="try-again-spinner"
+          role="status"
           data-l10n-id="newtab-discovery-empty-section-topstories-loading"
         />
       );
     }
 
     return (
-      <button
+      <moz-button
         className="try-again-button"
+        type="primary"
         onClick={this.onReset}
         data-l10n-id="newtab-discovery-empty-section-topstories-try-again-button"
       />

@@ -1028,7 +1028,7 @@ function CardSections({
   const isEmpty = sectionsToRender.length === 0;
 
   return isEmpty ? (
-    <div className="ds-card-grid empty">
+    <div className="ds-card-grid empty sections-empty">
       <DSEmptyState status={data.status} dispatch={dispatch} feed={feed} />
     </div>
   ) : (
