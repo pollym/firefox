@@ -245,7 +245,10 @@ fn run(profile: &Path, firefox_path: &Path) -> ExitCode {
     let _guard = match lifecycle::ProfileGuard::acquire(profile) {
         Ok(Some(guard)) => guard,
         Ok(None) => {
-            // A helper is already serving this profile. Leave it alone.
+            println!(
+                "Another helper is already serving profile {}, exiting",
+                profile.display()
+            );
             return ExitCode::SUCCESS;
         }
         Err(message) => {
@@ -428,7 +431,7 @@ mod tests {
     /// Firefox starts a helper on every launch, so finding one already running
     /// is the ordinary case rather than a failure.
     #[test]
-    fn run_declines_quietly_when_a_helper_already_has_the_profile() {
+    fn run_declines_with_success_when_a_helper_already_has_the_profile() {
         let profile = Path::new(r"c:\profiles\run-declines");
         let firefox_path = Path::new(r"c:\fakepath\firefox.exe");
 
