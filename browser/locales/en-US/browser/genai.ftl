@@ -105,9 +105,6 @@ genai-more-actions-search =
     .label = Search
 genai-more-actions-copy =
     .label = Copy
-# The image is a right-pointing chevron that separates the steps of the path to
-# the setting, in place of a ">" character.
-genai-more-actions-all-off-notice = You won’t see this menu when you select text. Visit Settings <img data-l10n-name="chevron"/> Tabs and browsing to show it again.
 genai-more-actions-manage-settings =
     .label = Manage settings
 

@@ -120,12 +120,20 @@ export class GenAIChild extends JSWindowActorChild {
               userSelected) ||
             delay > lazy.shortcutsDelay
           ) {
-            this.showShortcuts(
-              selectionInfo,
+            this.sendAsyncMessage("GenAI:ShowShortcuts", {
+              ...selectionInfo,
+              contentType: "selection",
               delay,
-              screenX * this.contentWindow.devicePixelRatio,
-              screenY * this.contentWindow.devicePixelRatio
-            );
+              screenXDevPx: screenX * this.contentWindow.devicePixelRatio,
+              screenYDevPx: screenY * this.contentWindow.devicePixelRatio,
+              // For the search action's loadSearch call, mirroring how the
+              // context menu derives its own triggeringPrincipal/policyContainer.
+              principal: this.document.nodePrincipal,
+              policyContainer: lazy.E10SUtils.serializePolicyContainer(
+                this.document.policyContainer
+              ),
+            });
+            this.registerHideEvents();
           }
 
           // Clear the timeout reference after execution
@@ -159,23 +167,6 @@ export class GenAIChild extends JSWindowActorChild {
         sendHide();
         break;
     }
-  }
-
-  showShortcuts(selectionInfo, delay, screenXDevPx, screenYDevPx) {
-    this.sendAsyncMessage("GenAI:ShowShortcuts", {
-      ...selectionInfo,
-      contentType: "selection",
-      delay,
-      screenXDevPx,
-      screenYDevPx,
-      // For the search action's loadSearch call, mirroring how the
-      // context menu derives its own triggeringPrincipal/policyContainer.
-      principal: this.document.nodePrincipal,
-      policyContainer: lazy.E10SUtils.serializePolicyContainer(
-        this.document.policyContainer
-      ),
-    });
-    this.registerHideEvents();
   }
 
   /**
@@ -223,18 +214,6 @@ export class GenAIChild extends JSWindowActorChild {
     switch (name) {
       case "AutoSubmit":
         return await this.autoSubmitClick(data);
-      case "ShowSelectionMenu": {
-        const selectionInfo = this.getSelectionInfo();
-        if (selectionInfo.selection) {
-          this.showShortcuts(
-            selectionInfo,
-            0,
-            data.screenXDevPx,
-            data.screenYDevPx
-          );
-        }
-        return null;
-      }
       default:
         return null;
     }
