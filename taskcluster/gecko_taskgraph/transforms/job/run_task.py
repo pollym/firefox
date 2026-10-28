@@ -214,15 +214,18 @@ def docker_worker_run_task(config, job, taskdesc):
     command.extend(run_command)
     worker["command"] = command
 
-    if run_task_bin == "run-task-hg":
-        profile_path = "/builds/worker/run-task-resource-usage.json"
-        worker["env"]["RUN_TASK_RESOURCE_USAGE"] = profile_path
-        worker["env"]["RUN_TASK_RESOURCE_USAGE_NAME"] = taskdesc["label"]
-        worker.setdefault("artifacts", []).append({
-            "name": RESOURCE_USAGE_ARTIFACT,
-            "path": profile_path,
-            "type": "file",
-        })
+    if run_task_bin == "run-task-git":
+        worker["env"]["RUN_TASK_STARTUP_HOOK"] = (
+            "/builds/worker/bin/run_task_resource_monitor.py"
+        )
+    profile_path = "/builds/worker/run-task-resource-usage.json"
+    worker["env"]["RUN_TASK_RESOURCE_USAGE"] = profile_path
+    worker["env"]["RUN_TASK_RESOURCE_USAGE_NAME"] = taskdesc["label"]
+    worker.setdefault("artifacts", []).append({
+        "name": RESOURCE_USAGE_ARTIFACT,
+        "path": profile_path,
+        "type": "file",
+    })
 
 
 @run_job_using(
@@ -258,38 +261,39 @@ def generic_worker_run_task(config, job, taskdesc):
         "file": "./run-task",
     })
 
-    if run_task_bin == "run-task-hg":
+    worker["mounts"].append({
+        "content": {
+            "url": script_url(config, "run_task_resource_monitor.py"),
+        },
+        "file": "./run_task_resource_monitor.py",
+    })
+    if run_task_bin == "run-task-git":
+        worker["env"]["RUN_TASK_STARTUP_HOOK"] = "run_task_resource_monitor.py"
+    worker["mounts"].append({
+        "content": {
+            "url": script_url(config, "resourcemonitor.py"),
+        },
+        "file": "./mozsystemmonitor/resourcemonitor.py",
+    })
+    for psutil_platform in psutil_platforms(job):
+        fetch_label = f"fetch-{PSUTIL_FETCHES[psutil_platform]}"
+        taskdesc.setdefault("dependencies", {})[fetch_label] = fetch_label
         worker["mounts"].append({
             "content": {
-                "url": script_url(config, "run_task_resource_monitor.py"),
+                "artifact": f"public/psutil-{psutil_platform}.whl",
+                "task-id": {"task-reference": f"<{fetch_label}>"},
             },
-            "file": "./run_task_resource_monitor.py",
+            "directory": f"./resource-monitor-deps/{psutil_platform}",
+            "format": "zip",
         })
-        worker["mounts"].append({
-            "content": {
-                "url": script_url(config, "resourcemonitor.py"),
-            },
-            "file": "./mozsystemmonitor/resourcemonitor.py",
-        })
-        for psutil_platform in psutil_platforms(job):
-            fetch_label = f"fetch-{PSUTIL_FETCHES[psutil_platform]}"
-            taskdesc.setdefault("dependencies", {})[fetch_label] = fetch_label
-            worker["mounts"].append({
-                "content": {
-                    "artifact": f"public/psutil-{psutil_platform}.whl",
-                    "task-id": {"task-reference": f"<{fetch_label}>"},
-                },
-                "directory": f"./resource-monitor-deps/{psutil_platform}",
-                "format": "zip",
-            })
-        profile_path = "run-task-resource-usage.json"
-        worker["env"]["RUN_TASK_RESOURCE_USAGE"] = profile_path
-        worker["env"]["RUN_TASK_RESOURCE_USAGE_NAME"] = taskdesc["label"]
-        worker.setdefault("artifacts", []).append({
-            "name": RESOURCE_USAGE_ARTIFACT,
-            "path": profile_path,
-            "type": "file",
-        })
+    profile_path = "run-task-resource-usage.json"
+    worker["env"]["RUN_TASK_RESOURCE_USAGE"] = profile_path
+    worker["env"]["RUN_TASK_RESOURCE_USAGE_NAME"] = taskdesc["label"]
+    worker.setdefault("artifacts", []).append({
+        "name": RESOURCE_USAGE_ARTIFACT,
+        "path": profile_path,
+        "type": "file",
+    })
 
     if (
         job.get("fetches")

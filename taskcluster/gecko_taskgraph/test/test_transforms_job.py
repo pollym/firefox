@@ -151,8 +151,9 @@ def test_get_platform(worker_os, worker_type, expected):
         ),
     ],
 )
+@pytest.mark.parametrize("repository_type", ["hg", "git"])
 def test_generic_worker_run_task_resource_monitor(
-    monkeypatch, config, worker_os, worker_type, psutil_platforms
+    monkeypatch, config, worker_os, worker_type, psutil_platforms, repository_type
 ):
     job_ = {
         "label": "fake-task-label",
@@ -161,14 +162,21 @@ def test_generic_worker_run_task_resource_monitor(
         "run": dict(run_task.worker_defaults, checkout=False, command="true"),
     }
     taskdesc = {"label": job_["label"], "worker": job_["worker"]}
-    monkeypatch.setitem(config.params, "repository_type", "hg")
+    monkeypatch.setitem(config.params, "repository_type", repository_type)
     run_task.generic_worker_run_task(config, job_, taskdesc)
 
     worker = taskdesc["worker"]
     mounts = {m.get("file") or m.get("directory"): m for m in worker["mounts"]}
+    assert mounts["./run-task"]["content"]["url"].endswith(
+        f"/public/run-task-{repository_type}"
+    )
     assert mounts["./run_task_resource_monitor.py"]["content"]["url"].endswith(
         "/public/run_task_resource_monitor.py"
     )
+    if repository_type == "git":
+        assert worker["env"]["RUN_TASK_STARTUP_HOOK"] == "run_task_resource_monitor.py"
+    else:
+        assert "RUN_TASK_STARTUP_HOOK" not in worker["env"]
     assert mounts["./mozsystemmonitor/resourcemonitor.py"]["content"]["url"].endswith(
         "/public/resourcemonitor.py"
     )
@@ -195,7 +203,8 @@ def test_generic_worker_run_task_resource_monitor(
     } in worker["artifacts"]
 
 
-def test_docker_worker_run_task_resource_monitor(monkeypatch, config):
+@pytest.mark.parametrize("repository_type", ["hg", "git"])
+def test_docker_worker_run_task_resource_monitor(monkeypatch, config, repository_type):
     job_ = {
         "label": "fake-task-label",
         "worker-type": "b-linux-docker-amd",
@@ -203,11 +212,18 @@ def test_docker_worker_run_task_resource_monitor(monkeypatch, config):
         "run": dict(run_task.worker_defaults, checkout=False, command="true"),
     }
     taskdesc = {"label": job_["label"], "worker": job_["worker"]}
-    monkeypatch.setitem(config.params, "repository_type", "hg")
+    monkeypatch.setitem(config.params, "repository_type", repository_type)
     run_task.docker_worker_run_task(config, job_, taskdesc)
 
     worker = taskdesc["worker"]
-    assert worker["command"][0] == "/builds/worker/bin/run-task-hg"
+    assert worker["command"][0] == f"/builds/worker/bin/run-task-{repository_type}"
+    if repository_type == "git":
+        assert (
+            worker["env"]["RUN_TASK_STARTUP_HOOK"]
+            == "/builds/worker/bin/run_task_resource_monitor.py"
+        )
+    else:
+        assert "RUN_TASK_STARTUP_HOOK" not in worker["env"]
     path = worker["env"]["RUN_TASK_RESOURCE_USAGE"]
     assert worker["env"]["RUN_TASK_RESOURCE_USAGE_NAME"] == "fake-task-label"
     assert {

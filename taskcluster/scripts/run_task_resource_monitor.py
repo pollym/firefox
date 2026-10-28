@@ -2,7 +2,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-"""Resource monitoring for run-task.
+"""Startup hook for run-task-git, run in-process via RUN_TASK_STARTUP_HOOK, and
+imported by run-task-hg.
 
 Starts monitoring resource usage if RUN_TASK_RESOURCE_USAGE is set to the path
 of the profile to write when run-task exits. That file is left empty if
@@ -15,6 +16,7 @@ behalf.
 """
 
 import atexit
+import functools
 import json
 import os
 import sys
@@ -104,7 +106,10 @@ def start_monitoring(profile_path):
         metadata["appBuildID"] = os.environ["TASK_ID"]
     if "GECKO_HEAD_REPOSITORY" in os.environ and "GECKO_HEAD_REV" in os.environ:
         repo = os.environ["GECKO_HEAD_REPOSITORY"]
-        metadata["sourceURL"] = f"{repo}/rev/{os.environ['GECKO_HEAD_REV']}"
+        if repo.endswith(".git"):
+            repo = repo[: -len(".git")]
+        kind = "commit" if os.environ.get("GECKO_REPOSITORY_TYPE") == "git" else "rev"
+        metadata["sourceURL"] = f"{repo}/{kind}/{os.environ['GECKO_HEAD_REV']}"
 
     monitor = SystemResourceMonitor(poll_interval=0.1, metadata=metadata)
     monitor.start()
@@ -154,3 +159,62 @@ def stop_resource_monitor(monitor, profile_path, forward_path):
             b"resources",
             b"failed to record resource usage: %s\n" % str(e).encode("utf-8"),
         )
+
+
+def record_phase(monitor, func_name, phase_name):
+    """Wrap run-task's `func_name` so each call is recorded as a phase.
+
+    `phase_name` is called with the function's arguments and returns the name
+    of the phase, or None to not record the call.
+    """
+    run_task = sys.modules["__main__"]
+    func = getattr(run_task, func_name, None)
+    if func is None:
+        print_line(
+            b"setup",
+            b"not recording phases for %s: not found\n" % func_name.encode("utf-8"),
+        )
+        return
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        name = phase_name(*args, **kwargs)
+        if name is None:
+            return func(*args, **kwargs)
+        monitor.begin_phase(name)
+        try:
+            return func(*args, **kwargs)
+        finally:
+            monitor.finish_phase(name)
+
+    setattr(run_task, func_name, wrapper)
+
+
+def main():
+    monitor = start_resource_monitor()
+    if not monitor:
+        return
+
+    # This runs before run-task's main(). None of these functions are called
+    # here: they are replaced in run-task's module by wrappers that record
+    # each call as a phase when run-task's main() later calls them.
+    record_phase(
+        monitor,
+        "vcs_checkout_from_args",
+        lambda options, *args, **kwargs: (
+            f"vcs-checkout ({options['project']})" if options["checkout"] else None
+        ),
+    )
+    record_phase(monitor, "fetch_artifacts", lambda *args, **kwargs: "fetch-artifacts")
+    record_phase(
+        monitor, "install_pip_requirements", lambda *args, **kwargs: "pip-requirements"
+    )
+    record_phase(
+        monitor,
+        "run_command",
+        lambda prefix, *args, **kwargs: "task" if prefix == b"task" else None,
+    )
+
+
+if __name__ == "<run_path>":
+    main()
