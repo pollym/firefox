@@ -587,28 +587,43 @@ bool BaseCompiler::beginFunction() {
   }
 
   // Generate a stack-overflow check and its associated stackmap.
-
   ExitStubMapVector extras;
-  StackMap* functionEntryStackMap;
-  if (!stackMapGenerator_.generateStackmapEntriesForTrapExit(args, &extras) ||
-      // stackmap for: stack overflow check
-      !stackMapGenerator_.createStackMap(Some(Trap::StackOverflow), extras,
-                                         HasDebugFrameWithLiveRefs::No, stk_,
-                                         &functionEntryStackMap)) {
+  if (!stackMapGenerator_.generateStackmapEntriesForTrapExit(args, &extras)) {
     return false;
   }
-
-  OutOfLineCode* oolStackOverflowTrap =
-      addOutOfLineCode(new (alloc_) OutOfLineTrap(
-          Trap::StackOverflow,
-          TrapSiteDesc(BytecodeOffset(func_.bytecodeOffset)), nullptr));
+  // This trap doesn't resume, so its stackmap is only needed for debug-mode
+  // checking.
+  StackMap* stackOverflowStackMap = nullptr;
+  if (compilerEnv_.debugEnabled() &&
+      // stackmap for: the stack overflow check
+      !stackMapGenerator_.createStackMap(Some(Trap::StackOverflow), extras,
+                                         HasDebugFrameWithLiveRefs::No, stk_,
+                                         &stackOverflowStackMap)) {
+    return false;
+  }
+  OutOfLineCode* oolStackOverflowTrap = addOutOfLineCode(new (
+      alloc_) OutOfLineTrap(Trap::StackOverflow,
+                            TrapSiteDesc(BytecodeOffset(func_.bytecodeOffset)),
+                            stackOverflowStackMap));
   if (!oolStackOverflowTrap) {
     return false;
   }
   fr.checkStack(ABINonArgReg0, ABINonArgReg1, oolStackOverflowTrap->entry());
 
+  // Generate an interrupt check and its associated stackmap.  Note this might
+  // not be the same as `stackOverflowStackMap` since the two trap kinds have
+  // different resumabilities.  This trap resumes, and the interrupt handler
+  // can GC, so this stackmap is needed whether or not we're compiling for
+  // debugging.
+  StackMap* checkInterruptStackMap;
+  // stackmap for: the interrupt check
+  if (!stackMapGenerator_.createStackMap(Some(Trap::CheckInterrupt), extras,
+                                         HasDebugFrameWithLiveRefs::No, stk_,
+                                         &checkInterruptStackMap)) {
+    return false;
+  }
   OutOfLineCode* oolInterruptTrap = addOutOfLineCode(new (alloc_) OutOfLineTrap(
-      Trap::CheckInterrupt, trapSiteDesc(), functionEntryStackMap));
+      Trap::CheckInterrupt, trapSiteDesc(), checkInterruptStackMap));
   if (!oolInterruptTrap) {
     return false;
   }
@@ -13164,7 +13179,7 @@ bool js::wasm::BaselineCompileFunctions(const CodeMetadata& codeMeta,
     // Do the check.  This asserts if the check fails.
     auto checkThisTrapKind_debugMode = [](Trap t) -> bool {
       // In debug mode, we check most trap kinds.
-      return t != Trap::IndirectCallBadSig && t != Trap::StackOverflow;
+      return t != Trap::IndirectCallBadSig;
     };
     auto checkThisTrapKind_normalMode = [](Trap t) -> bool {
       // Trap kinds to check in non-debug mode
