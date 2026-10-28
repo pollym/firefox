@@ -261,11 +261,6 @@ void JSRuntime::destroyRuntime() {
 
   gc.finish();
 
-  for (auto [f, data] : cleanupClosures.ref()) {
-    f(data);
-  }
-  cleanupClosures.ref().clear();
-
   js_delete(jitRuntime_.ref());
 
 #ifdef DEBUG

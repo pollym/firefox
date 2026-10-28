@@ -6107,54 +6107,18 @@ static mozilla::Maybe<JS::StructuredCloneScope> ParseCloneScope(
 
 // A custom object that is serializable and transferable using
 // the engine's custom hooks. The callbacks log their activity
-// to a JSRuntime-wide log (tagging actions with IDs to distinguish them).
+// to a per-JSContext log (tagging actions with IDs to distinguish them).
 class CustomSerializableObject : public NativeObject {
   static const size_t ID_SLOT = 0;
   static const size_t DETACHED_SLOT = 1;
   static const size_t BEHAVIOR_SLOT = 2;
   static const size_t NUM_SLOTS = 3;
 
-  static constexpr size_t MAX_LOG_LEN = 100;
+  using ActivityLog = TestingFunctionData::SerializableActivityLog;
 
-  // The activity log should be specific to a JSRuntime.
-  struct ActivityLog {
-    uint32_t buffer[MAX_LOG_LEN];
-    size_t length = 0;
-
-    static MOZ_THREAD_LOCAL(ActivityLog*) self;
-    static ActivityLog* getThreadLog() {
-      if (!self.initialized() || !self.get()) {
-        self.infallibleInit();
-        AutoEnterOOMUnsafeRegion oomUnsafe;
-        self.set(js_new<ActivityLog>());
-        if (!self.get()) {
-          oomUnsafe.crash("allocating activity log");
-        }
-        if (!TlsContext.get()->runtime()->atExit(
-                [](void* vpData) {
-                  auto* log = static_cast<ActivityLog*>(vpData);
-                  js_delete(log);
-                },
-                self.get())) {
-          oomUnsafe.crash("atExit");
-        }
-      }
-      return self.get();
-    }
-
-    static bool log(int32_t id, char action) {
-      return getThreadLog()->logImpl(id, action);
-    }
-
-    bool logImpl(int32_t id, char action) {
-      if (length + 2 > MAX_LOG_LEN) {
-        return false;
-      }
-      buffer[length++] = id;
-      buffer[length++] = uint32_t(action);
-      return true;
-    }
-  };
+  static ActivityLog& activityLog() {
+    return TlsContext.get()->testingFunctionData().serializableActivityLog;
+  }
 
  public:
   enum class Behavior {
@@ -6174,6 +6138,10 @@ class CustomSerializableObject : public NativeObject {
 
   static CustomSerializableObject* Create(JSContext* cx, int32_t id,
                                           Behavior behavior) {
+    if (!cx->getOrCreateTestingFunctionData()) {
+      return nullptr;
+    }
+
     Rooted<CustomSerializableObject*> obj(
         cx, static_cast<CustomSerializableObject*>(JS_NewObject(cx, &class_)));
     if (!obj) {
@@ -6195,7 +6163,7 @@ class CustomSerializableObject : public NativeObject {
   static uint32_t tag() { return JS_SCTAG_USER_MIN; }
 
   static bool log(int32_t id, char action) {
-    return ActivityLog::log(id, action);
+    return activityLog().append(id, action);
   }
   bool log(char action) {
     return log(getReservedSlot(ID_SLOT).toInt32(), action);
@@ -6218,8 +6186,8 @@ class CustomSerializableObject : public NativeObject {
     Rooted<CustomSerializableObject*> obj(
         cx, &args.thisv().toObject().as<CustomSerializableObject>());
 
-    size_t len = ActivityLog::getThreadLog()->length;
-    uint32_t* logBuffer = ActivityLog::getThreadLog()->buffer;
+    size_t len = activityLog().length;
+    uint32_t* logBuffer = activityLog().buffer;
 
     Rooted<ArrayObject*> result(cx, NewDenseFullyAllocatedArray(cx, len));
     if (!result) {
@@ -6248,7 +6216,7 @@ class CustomSerializableObject : public NativeObject {
       JS_ReportErrorASCII(cx, "log may only be assigned null/undefined");
       return false;
     }
-    ActivityLog::getThreadLog()->length = 0;
+    activityLog().length = 0;
     args.rval().setUndefined();
     return true;
   }
@@ -6369,9 +6337,6 @@ class CustomSerializableObject : public NativeObject {
                                   'F');
   }
 };
-
-MOZ_THREAD_LOCAL(CustomSerializableObject::ActivityLog*)
-CustomSerializableObject::ActivityLog::self;
 
 static bool MakeSerializable(JSContext* cx, unsigned argc, Value* vp) {
   CallArgs args = CallArgsFromVp(argc, vp);

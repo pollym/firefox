@@ -52,6 +52,7 @@ class AutoAllocInAtomsZone;
 class AutoMaybeLeaveAtomsZone;
 class AutoRealm;
 struct PortableBaselineStack;
+struct TestingFunctionData;
 
 #ifdef MOZ_EXECUTION_TRACING
 class ExecutionTracer;
@@ -1225,6 +1226,17 @@ struct JS_PUBLIC_API JSContext : public JS::RootingContext,
 #endif
 
   JS::PersistentRooted<js::UniquePtr<js::MicroTaskQueueSet>> microTaskQueues;
+
+ private:
+  js::ContextData<js::UniquePtr<js::TestingFunctionData>> testingFunctionData_;
+
+ public:
+  js::TestingFunctionData* getOrCreateTestingFunctionData();
+
+  js::TestingFunctionData& testingFunctionData() {
+    MOZ_ASSERT(testingFunctionData_.ref());
+    return *testingFunctionData_.ref();
+  }
 }; /* struct JSContext */
 
 inline JSContext* JSRuntime::mainContextFromOwnThread() {
