@@ -157,6 +157,7 @@ class HomeSettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFragm
 
         setupOpeningScreenPreferences()
         setupWeatherPreference()
+        setupWrexhamWidgetPreference()
     }
 
     private fun createMetricPreferenceChangeListener(
@@ -214,6 +215,14 @@ class HomeSettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFragm
             isVisible = fenixSettings.enableHomepageWeatherWidget
             isChecked = fenixSettings.showHomepageWeatherWidget
             onPreferenceChangeListener = createMetricPreferenceChangeListener("weather")
+        }
+    }
+
+    private fun setupWrexhamWidgetPreference() {
+        requirePreference<SwitchPreferenceCompat>(R.string.pref_key_show_homepage_wrexham_widget).apply {
+            isVisible = fenixSettings.enableHomepageWrexhamWidget
+            isChecked = fenixSettings.showHomepageWrexhamWidget
+            onPreferenceChangeListener = createMetricPreferenceChangeListener("wrexham_widget")
         }
     }
 }

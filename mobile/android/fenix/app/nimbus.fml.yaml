@@ -1247,6 +1247,14 @@ features:
         type: Boolean
         default: false
 
+  homepage-wrexham-widget:
+    description: Feature to enable Homepage Wrexham Widget for users on Firefox for Android.
+    variables:
+      enabled:
+        description: If true, Homepage Wrexham Widget is enabled.
+        type: Boolean
+        default: false
+
   webcompat-reporter-enhancements:
     description: Feature to enable WebCompat Reporter enhancements for users on Firefox Android.
     variables:

@@ -4048,8 +4048,9 @@ customize_home:
           toggled.
 
           We currently track: most_visited_sites, jump_back_in,
-          recently_visited, bookmarks, pocket, contile, privacy_report, and
-          weather. We previously tracked bookmarks as recently_saved.
+          recently_visited, bookmarks, pocket, contile, privacy_report,
+          weather, and wrexham_widget. We previously tracked bookmarks as
+          recently_saved.
       enabled:
         type: boolean
         description: "Whether or not the preference is *now* enabled"
@@ -4059,6 +4060,7 @@ customize_home:
       - https://github.com/mozilla-mobile/fenix/pull/1896
       - https://github.com/mozilla-mobile/fenix/pull/26123#issuecomment-1190794469
       - https://github.com/mozilla-mobile/firefox-android/pull/2597
+      - https://phabricator.services.mozilla.com/D337007
     data_sensitivity:
       - technical
       - interaction
