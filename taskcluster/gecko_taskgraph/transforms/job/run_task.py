@@ -217,6 +217,7 @@ def docker_worker_run_task(config, job, taskdesc):
     if run_task_bin == "run-task-hg":
         profile_path = "/builds/worker/run-task-resource-usage.json"
         worker["env"]["RUN_TASK_RESOURCE_USAGE"] = profile_path
+        worker["env"]["RUN_TASK_RESOURCE_USAGE_NAME"] = taskdesc["label"]
         worker.setdefault("artifacts", []).append({
             "name": RESOURCE_USAGE_ARTIFACT,
             "path": profile_path,
@@ -283,6 +284,7 @@ def generic_worker_run_task(config, job, taskdesc):
             })
         profile_path = "run-task-resource-usage.json"
         worker["env"]["RUN_TASK_RESOURCE_USAGE"] = profile_path
+        worker["env"]["RUN_TASK_RESOURCE_USAGE_NAME"] = taskdesc["label"]
         worker.setdefault("artifacts", []).append({
             "name": RESOURCE_USAGE_ARTIFACT,
             "path": profile_path,

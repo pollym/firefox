@@ -6,7 +6,8 @@
 
 Starts monitoring resource usage if RUN_TASK_RESOURCE_USAGE is set to the path
 of the profile to write when run-task exits. That file is left empty if
-resource usage can't be monitored.
+resource usage can't be monitored. The profile is named after
+RUN_TASK_RESOURCE_USAGE_NAME, if set.
 
 Monitors started by processes spawned by the task forward their events,
 markers and phases to this one, and Perfherder data is reported here on their
@@ -96,7 +97,7 @@ def start_monitoring(profile_path):
         print_line(b"setup", b"not monitoring resource usage: no psutil\n")
         return None
 
-    metadata = {"product": "run-task"}
+    metadata = {"product": os.environ.pop("RUN_TASK_RESOURCE_USAGE_NAME", "run-task")}
     if "TASKCLUSTER_WORKER_TYPE" in os.environ:
         metadata["device"] = os.environ["TASKCLUSTER_WORKER_TYPE"]
     if "TASK_ID" in os.environ:

@@ -160,7 +160,7 @@ def test_generic_worker_run_task_resource_monitor(
         "worker": {"implementation": "generic-worker", "os": worker_os, "env": {}},
         "run": dict(run_task.worker_defaults, checkout=False, command="true"),
     }
-    taskdesc = {"worker": job_["worker"]}
+    taskdesc = {"label": job_["label"], "worker": job_["worker"]}
     monkeypatch.setitem(config.params, "repository_type", "hg")
     run_task.generic_worker_run_task(config, job_, taskdesc)
 
@@ -187,6 +187,7 @@ def test_generic_worker_run_task_resource_monitor(
         }
         assert taskdesc["dependencies"][fetch_label] == fetch_label
     assert worker["env"]["RUN_TASK_RESOURCE_USAGE"] == "run-task-resource-usage.json"
+    assert worker["env"]["RUN_TASK_RESOURCE_USAGE_NAME"] == "fake-task-label"
     assert {
         "name": run_task.RESOURCE_USAGE_ARTIFACT,
         "path": "run-task-resource-usage.json",
@@ -201,13 +202,14 @@ def test_docker_worker_run_task_resource_monitor(monkeypatch, config):
         "worker": {"implementation": "docker-worker", "os": "linux", "env": {}},
         "run": dict(run_task.worker_defaults, checkout=False, command="true"),
     }
-    taskdesc = {"worker": job_["worker"]}
+    taskdesc = {"label": job_["label"], "worker": job_["worker"]}
     monkeypatch.setitem(config.params, "repository_type", "hg")
     run_task.docker_worker_run_task(config, job_, taskdesc)
 
     worker = taskdesc["worker"]
     assert worker["command"][0] == "/builds/worker/bin/run-task-hg"
     path = worker["env"]["RUN_TASK_RESOURCE_USAGE"]
+    assert worker["env"]["RUN_TASK_RESOURCE_USAGE_NAME"] == "fake-task-label"
     assert {
         "name": run_task.RESOURCE_USAGE_ARTIFACT,
         "path": path,

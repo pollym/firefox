@@ -69,6 +69,11 @@ tasks:
                       else: {$fromNow: '1 year'}
                   trustDomain: gecko
                   treeherder_link: '[Treeherder job](https://treeherder.mozilla.org/#/jobs?repo=${repository.project}&revision=${push.revision}&selectedTaskRun=${ownTaskId})'
+                  taskName:
+                      $switch:
+                          'tasks_for == "hg-push"': "Gecko Decision Task"
+                          'tasks_for == "action"': "Action: ${action.title}"
+                          $default: "Decision Task for cron job ${cron.job_name}"
               in:
                   taskId: {$if: 'tasks_for != "action"', then: '${ownTaskId}'}
                   taskGroupId:
@@ -83,26 +88,19 @@ tasks:
                   deadline: {$fromNow: '1 day'}
                   expires: {$eval: 'expires'}
                   metadata:
-                      $merge:
-                          - owner: "${ownerEmail}"
-                            source: "${repoUrl}/raw-file/${push.revision}/.taskcluster.yml"
-                          - $if: 'tasks_for == "hg-push"'
-                            then:
-                                name: "Gecko Decision Task"
-                                description: 'The task that creates all of the other tasks in the task graph (${treeherder_link})'
-                            else:
-                                $if: 'tasks_for == "action"'
-                                then:
-                                    name: "Action: ${action.title}"
-                                    description: |
-                                        ${action.description}
+                      owner: "${ownerEmail}"
+                      source: "${repoUrl}/raw-file/${push.revision}/.taskcluster.yml"
+                      name: "${taskName}"
+                      description:
+                          $switch:
+                              'tasks_for == "hg-push"': 'The task that creates all of the other tasks in the task graph (${treeherder_link})'
+                              'tasks_for == "action"': |
+                                  ${action.description}
 
-                                        ${treeherder_link}
+                                  ${treeherder_link}
 
-                                        Action triggered by clientID `${clientId}`
-                                else:
-                                    name: "Decision Task for cron job ${cron.job_name}"
-                                    description: 'Created by a [cron task](https://firefox-ci-tc.services.mozilla.com/tasks/${cron.task_id}) (${treeherder_link})'
+                                  Action triggered by clientID `${clientId}`
+                              $default: 'Created by a [cron task](https://firefox-ci-tc.services.mozilla.com/tasks/${cron.task_id}) (${treeherder_link})'
 
                   provisionerId: "${trustDomain}-${repository.level}"
                   workerType: "decision"
@@ -226,6 +224,7 @@ tasks:
                                 MOZ_UPLOAD_DIR: /builds/worker/artifacts
                                 MOZ_AUTOMATION: '1'
                                 RUN_TASK_RESOURCE_USAGE: /builds/worker/artifacts/profile_run-task-resource-usage.json
+                                RUN_TASK_RESOURCE_USAGE_NAME: "${taskName}"
                                 # mach generates pyc files when reading `mach_commands.py`
                                 # This causes cached_task digest generation to be random for
                                 # some tasks. Disable bytecode generation to work around that.
