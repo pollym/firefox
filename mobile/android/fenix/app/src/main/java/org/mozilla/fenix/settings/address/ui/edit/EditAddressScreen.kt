@@ -34,7 +34,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.map
 import mozilla.components.browser.state.search.RegionState
-import mozilla.components.compose.base.Dropdown
+import mozilla.components.compose.base.Dropdown2
 import mozilla.components.compose.base.annotation.FlexibleWindowPreview
 import mozilla.components.compose.base.button.FilledButton
 import mozilla.components.compose.base.button.OutlinedButton
@@ -158,7 +158,6 @@ private fun TextField(
 }
 
 @Composable
-@Suppress("Deprecation")
 private fun SelectField(
     store: AddressStore,
     field: AddressStructure.Field.SelectField,
@@ -179,7 +178,7 @@ private fun SelectField(
             }
         }
 
-    Dropdown(
+    Dropdown2(
         label = field.localizationKey.localizedString(),
         placeholder = "",
         dropdownItems = items,
