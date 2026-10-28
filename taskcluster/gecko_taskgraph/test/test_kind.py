@@ -3,12 +3,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import multiprocessing
+import time
 from concurrent.futures import ProcessPoolExecutor
 
 import pytest
 from mozsystemmonitor.resourcemonitor import FORWARD_ENV, SystemResourceMonitor
 from mozunit import main
 
+from gecko_taskgraph import record_phase_marker
 from gecko_taskgraph.kind import ProfiledKind
 from gecko_taskgraph.test.conftest import fake_load_graph_config
 
@@ -98,6 +100,19 @@ def test_profiled_kind_without_monitor(kinds_dir):
     kind = ProfiledKind.load(str(kinds_dir), graph_config, "fake")
     assert kind.forward_path is None
     assert len(kind.load_tasks({}, {}, False)) == 3
+
+
+@pytest.mark.parametrize(
+    "name,text", [("full_task_set", "full_task_set"), (None, "failed phase")]
+)
+def test_record_phase_marker(monitor, name, text):
+    start = time.monotonic()
+    end = start + 0.5
+    record_phase_marker(name, start, end)
+    monitor.stop()
+
+    markers = [m[:4] for m in monitor.markers if m[0] == "Taskgraph"]
+    assert markers == [("Taskgraph", start, end, {"type": "Text", "text": text})]
 
 
 if __name__ == "__main__":
