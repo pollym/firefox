@@ -7752,6 +7752,23 @@ Standard benchmarks are third-party tests (i.e. Speedometer) that we have integr
 * **use live sites**: true
 * **Test Task**:
 
+:::{list-table} **{ref}`test-android-em-14-arm64-shippable/opt <hardware-mac-mini-m4>`**
+:widths: 30 15 15 15 15
+:header-rows: 1
+
+* - **Test Name**
+  - mozilla-central
+  - autoland
+  - mozilla-release
+  - mozilla-beta
+* - **browsertime-mobile-fenix-youtube-playback-av1-sfr**
+  - ❌
+  - ✅
+  - ❌
+  - ❌
+:::
+
+
 :::{list-table} **{ref}`test-android-hw-a55-14-0-aarch64-shippable/opt <hardware-samsung-a55>`**
 :widths: 30 15 15 15 15
 :header-rows: 1
@@ -8977,6 +8994,23 @@ Standard benchmarks are third-party tests (i.e. Speedometer) that we have integr
 * **use live sites**: true
 * **Test Task**:
 
+:::{list-table} **{ref}`test-android-em-14-arm64-shippable/opt <hardware-mac-mini-m4>`**
+:widths: 30 15 15 15 15
+:header-rows: 1
+
+* - **Test Name**
+  - mozilla-central
+  - autoland
+  - mozilla-release
+  - mozilla-beta
+* - **browsertime-mobile-fenix-youtube-playback-hfr**
+  - ❌
+  - ✅
+  - ❌
+  - ❌
+:::
+
+
 :::{list-table} **{ref}`test-android-hw-a55-14-0-aarch64-shippable/opt <hardware-samsung-a55>`**
 :widths: 30 15 15 15 15
 :header-rows: 1
@@ -10125,6 +10159,23 @@ Standard benchmarks are third-party tests (i.e. Speedometer) that we have integr
 * **unit**: score
 * **use live sites**: true
 * **Test Task**:
+
+:::{list-table} **{ref}`test-android-em-14-arm64-shippable/opt <hardware-mac-mini-m4>`**
+:widths: 30 15 15 15 15
+:header-rows: 1
+
+* - **Test Name**
+  - mozilla-central
+  - autoland
+  - mozilla-release
+  - mozilla-beta
+* - **browsertime-mobile-fenix-youtube-playback-vp9-sfr**
+  - ❌
+  - ✅
+  - ❌
+  - ❌
+:::
+
 
 :::{list-table} **{ref}`test-android-hw-a55-14-0-aarch64-shippable/opt <hardware-samsung-a55>`**
 :widths: 30 15 15 15 15
