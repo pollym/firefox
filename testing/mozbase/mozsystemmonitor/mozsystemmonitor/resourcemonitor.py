@@ -611,11 +611,14 @@ class SystemResourceMonitor:
     def _format_percent(value):
         return str(round(value, 1)) + "%"
 
-    def __init__(self, poll_interval=1.0, metadata=None):
+    def __init__(self, poll_interval=1.0, metadata=None, forward_to=None):
         """Instantiate a system resource monitor instance.
 
         The instance is configured with a poll interval. This is the interval
         between samples, in float seconds.
+
+        forward_to is the file to forward records to instead of collecting
+        resource usage, overriding FORWARD_ENV.
         """
         self.start_time = None
         self.end_time = None
@@ -690,7 +693,7 @@ class SystemResourceMonitor:
 
         # JSON lines file to forward records to, when a monitor in a parent
         # process accepts them.
-        self._to_parent_path = os.environ.get(FORWARD_ENV)
+        self._to_parent_path = forward_to or os.environ.get(FORWARD_ENV)
         self._to_parent_fd = None
         # JSON lines file into which monitors in child processes forward their
         # records, set by accept_forwarded(), and how far it has been read.
@@ -938,6 +941,12 @@ class SystemResourceMonitor:
         """Whether this monitor forwards its events, markers and phases to a
         monitor in a parent process rather than collecting resource usage."""
         return bool(self._to_parent_path)
+
+    @property
+    def children_forward_path(self):
+        """The file monitors in child processes should forward their records
+        to for them to end up in the same profile as this monitor's, if any."""
+        return self._to_parent_path or self._from_children_path
 
     def start_streaming(self, path):
         """Start streaming profile data to a file as JSON lines.
@@ -3832,3 +3841,22 @@ class SystemResourceMonitor:
         # or after that (hopefully, exit) is not going to be counted, but we
         # assume it's fast enough.
         return profile
+
+
+def _forget_monitor_after_fork():
+    # The process collecting resource usage, and the pipe to it, belong to the
+    # parent. Stopping the inherited monitor would stop the parent's collection,
+    # or deadlock on a lock held by one of the parent's threads, and keeping the
+    # pipe open would keep the collection going if the parent exits without
+    # stopping it.
+    monitor = SystemResourceMonitor.instance
+    if monitor is not None:
+        monitor._running = False
+        if monitor._process:
+            monitor._pipe.close()
+            monitor._process = None
+        SystemResourceMonitor.instance = None
+
+
+if hasattr(os, "register_at_fork"):
+    os.register_at_fork(after_in_child=_forget_monitor_after_fork)
