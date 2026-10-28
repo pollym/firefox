@@ -330,6 +330,22 @@ inline BigInt::Digit BigInt::digitMul(Digit a, Digit b, Digit* high) {
 #endif
 }
 
+inline BigInt::Digit BigInt::digitMulAdd(Digit a, Digit b, Digit c, Digit d,
+                                         Digit* high) {
+  // The result can't overflow: (B - 1)^2 + 2 * (B - 1) = B^2 - 1.
+#if defined(HAVE_TWO_DIGIT)
+  TwoDigit result = static_cast<TwoDigit>(a) * b + c + d;
+  *high = result >> DigitBits;
+  return static_cast<Digit>(result);
+#else
+  Digit carry;
+  Digit low = digitMul(a, b, high);
+  low = digitAdd3(low, c, d, &carry);
+  *high += carry;
+  return low;
+#endif
+}
+
 BigInt::Digit BigInt::digitDiv(Digit high, Digit low, Digit divisor,
                                Digit* remainder) {
   MOZ_ASSERT(high < divisor, "division must not overflow");
@@ -881,20 +897,14 @@ void BigInt::multiplyAccumulateDigits(ConstDigits multiplicand,
   }
 
   size_t n = std::min(multiplicand.size(), acc.size());
+  Digits out = acc.First(n);
+  ConstDigits in = multiplicand.First(n);
   Digit carry = 0;
-  Digit high = 0;
-  size_t i = 0;
-  for (; i < n; i++) {
-    Digit sum = digitAdd3(acc[i], high, carry, &carry);
-    Digit low = digitMul(multiplier, multiplicand[i], &high);
-    Digit lowCarry;
-    acc[i] = digitAdd(sum, low, &lowCarry);
-    carry += lowCarry;
+  for (size_t i = 0; i < n; i++) {
+    out[i] = digitMulAdd(multiplier, in[i], out[i], carry, &carry);
   }
-
-  for (; (carry || high) && i < acc.size(); i++) {
-    acc[i] = digitAdd3(acc[i], high, carry, &carry);
-    high = 0;
+  for (size_t i = n; carry && i < acc.size(); i++) {
+    acc[i] = digitAdd(acc[i], carry, &carry);
   }
 }
 

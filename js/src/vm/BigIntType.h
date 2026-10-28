@@ -517,6 +517,9 @@ class BigInt final : public js::gc::CellWithLengthAndFlags {
   // Compute `a * b`, returning the low half of the result and putting the
   // high half in `*high`.
   static Digit digitMul(Digit a, Digit b, Digit* high);
+  // Return the low digit of `a * b + c + d`, storing the high digit in
+  // `*high`.
+  static Digit digitMulAdd(Digit a, Digit b, Digit c, Digit d, Digit* high);
 
   // Divide `(high << DigitBits) + low` by `divisor`, returning the quotient
   // and storing the remainder in `*remainder`, with the precondition that
