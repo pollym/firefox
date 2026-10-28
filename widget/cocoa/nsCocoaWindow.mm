@@ -5036,6 +5036,8 @@ void nsCocoaWindow::DestroyNativeWindow() {
   // we clear our delegate.
   EndOurNativeTransition();
 
+  mIsWaitingForFullscreenVisibility = false;
+
   // We are about to destroy mWindow. Before we do that, make sure that we
   // hide the window using the Show() method, because it has several side
   // effects that our parent and listeners might be expecting. If we don't
@@ -6462,6 +6464,9 @@ void nsCocoaWindow::CocoaWindowWillEnterFullscreen(bool aFullscreen) {
 void nsCocoaWindow::CocoaWindowDidEnterFullscreen(bool aFullscreen) {
   EndOurNativeTransition();
   mHasStartedNativeFullscreen = false;
+  // AppKit can finish the transition before removing its occluding overlay.
+  mIsWaitingForFullscreenVisibility =
+      !([mWindow occlusionState] & NSWindowOcclusionStateVisible);
   DispatchOcclusionEvent();
 
   bool restoreKeyToPlayer = false;
@@ -7264,11 +7269,17 @@ void nsCocoaWindow::DispatchOcclusionEvent() {
       !mInFullScreenMode && !mHasStartedNativeFullscreen &&
       ([mWindow isKeyWindow] || [mWindow isMainWindow]);
 
+  bool isVisible = [mWindow occlusionState] & NSWindowOcclusionStateVisible;
+  if (mIsWaitingForFullscreenVisibility &&
+      (isVisible || ![NSApp isActive] || ![mWindow isKeyWindow])) {
+    mIsWaitingForFullscreenVisibility = false;
+  }
+
   // Our new occlusion state is true if the window is not visible.
-  bool newOcclusionState =
-      !IsOcclusionTrackingDisabledByEnv() && !keyOrMainNonFullscreen &&
-      !(mHasStartedNativeFullscreen ||
-        ([mWindow occlusionState] & NSWindowOcclusionStateVisible));
+  bool newOcclusionState = !IsOcclusionTrackingDisabledByEnv() &&
+                           !keyOrMainNonFullscreen &&
+                           !(mHasStartedNativeFullscreen ||
+                             mIsWaitingForFullscreenVisibility || isVisible);
 
   // Don't dispatch if the new occlustion state is the same as the current
   // state.
@@ -8126,6 +8137,10 @@ LayoutDeviceIntPoint nsCocoaWindow::GetNativeLockedPoint() {
   NS_OBJC_BEGIN_TRY_IGNORE_BLOCK;
 
   RollUpPopups(nsIRollupListener::AllowAnimations::No);
+
+  if (mGeckoWindow) {
+    mGeckoWindow->DispatchOcclusionEvent();
+  }
 
   ChildViewMouseTracker::ReEvaluateMouseEnterState();
   TextInputHandler::EnsureSecureEventInputDisabled();
