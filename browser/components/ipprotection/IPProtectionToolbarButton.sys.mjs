@@ -19,6 +19,8 @@ ChromeUtils.defineESModuleGetters(lazy, {
     "moz-src:///toolkit/components/ipprotection/IPProtectionService.sys.mjs",
   IPPProxyStates:
     "moz-src:///toolkit/components/ipprotection/IPPProxyManager.sys.mjs",
+  IPProtectionAlertManager:
+    "moz-src:///browser/components/ipprotection/IPProtectionAlertManager.sys.mjs",
   ERRORS: "moz-src:///toolkit/components/ipprotection/IPPProxyManager.sys.mjs",
 });
 
@@ -297,8 +299,9 @@ export class IPProtectionToolbarButton {
     let isPaused = lazy.IPPProxyManager.state === lazy.IPPProxyStates.PAUSED;
 
     // Show error icon when proxy manager is in ERROR state.
-    let hasProxyError =
-      lazy.IPPProxyManager.state === lazy.IPPProxyStates.ERROR;
+    let hasProxyError = lazy.IPProtectionAlertManager.isErrorShown(
+      this.gBrowser
+    );
 
     let isNetworkError =
       options?.error === lazy.ERRORS.NETWORK ||

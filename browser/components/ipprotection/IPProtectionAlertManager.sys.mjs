@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { BANDWIDTH } from "chrome://browser/content/ipprotection/ipprotection-constants.mjs";
+import { getSitePrincipal } from "chrome://browser/content/ipprotection/ipprotection-utils.mjs";
 
 const lazy = {};
 
@@ -12,6 +13,12 @@ ChromeUtils.defineLazyGetter(lazy, "ipProtectionLocalization", () => {
 
 ChromeUtils.defineESModuleGetters(lazy, {
   EveryWindow: "resource:///modules/EveryWindow.sys.mjs",
+  IPPMode:
+    "moz-src:///toolkit/components/ipprotection/IPPChannelFilter.sys.mjs",
+  IPPPrincipalRules:
+    "moz-src:///toolkit/components/ipprotection/IPPSiteRuleManager.sys.mjs",
+  IPPSiteRuleManager:
+    "moz-src:///toolkit/components/ipprotection/IPPSiteRuleManager.sys.mjs",
   IPPProxyManager:
     "moz-src:///toolkit/components/ipprotection/IPPProxyManager.sys.mjs",
   IPPProxyStates:
@@ -128,10 +135,46 @@ class IPProtectionAlertManagerClass {
         break;
       }
       case lazy.IPPProxyStates.ERROR: {
-        this.showErrorPrompts();
+        if (
+          lazy.IPPProxyManager.mode !== lazy.IPPMode.MODE_INCLUSION ||
+          lazy.EveryWindow.readyWindows.some(window =>
+            this.#isIncludedSiteSelected(window.gBrowser)
+          )
+        ) {
+          this.showErrorPrompts();
+        }
         break;
       }
     }
+  }
+
+  /**
+   * Whether the proxy error should be shown for the selected tab of a window.
+   * A failed connection that only carries included sites is not shown on a
+   * tab it does not carry.
+   *
+   * @param {object} gBrowser
+   * @returns {boolean}
+   */
+  isErrorShown(gBrowser) {
+    if (lazy.IPPProxyManager.state !== lazy.IPPProxyStates.ERROR) {
+      return false;
+    }
+    return (
+      lazy.IPPProxyManager.mode !== lazy.IPPMode.MODE_INCLUSION ||
+      this.#isIncludedSiteSelected(gBrowser)
+    );
+  }
+
+  #isIncludedSiteSelected(gBrowser) {
+    const principal = getSitePrincipal(gBrowser);
+    return (
+      !!principal &&
+      lazy.IPPSiteRuleManager.getRule(
+        principal,
+        gBrowser.selectedBrowser.browserId
+      ) === lazy.IPPPrincipalRules.INCLUDED
+    );
   }
 
   /**
@@ -183,11 +226,11 @@ class IPProtectionAlertManagerClass {
       return;
     }
 
+    this.#promptsOpen = false;
+
     for (let window of lazy.EveryWindow.readyWindows) {
       window.gDialogBox.dialog?.close();
     }
-
-    this.#promptsOpen = false;
   }
 
   /**
@@ -217,6 +260,9 @@ class IPProtectionAlertManagerClass {
     }
 
     let result = await Promise.any(promises);
+    if (!this.#promptsOpen) {
+      return;
+    }
     let buttonClicked = result.getProperty("buttonNumClicked");
 
     this.#handlePromptAction(buttonClicked, "paused");
@@ -250,6 +296,9 @@ class IPProtectionAlertManagerClass {
     }
 
     let result = await Promise.any(promises);
+    if (!this.#promptsOpen) {
+      return;
+    }
     let buttonClicked = result.getProperty("buttonNumClicked");
 
     this.#handlePromptAction(buttonClicked, "error");
