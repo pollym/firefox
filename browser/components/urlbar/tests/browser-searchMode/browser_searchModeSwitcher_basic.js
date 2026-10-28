@@ -1,6 +1,10 @@
 /* Any copyright is dedicated to the Public Domain.
    http://creativecommons.org/publicdomain/zero/1.0/ */
 
+ChromeUtils.defineESModuleGetters(this, {
+  PromiseTestUtils: "resource://testing-common/PromiseTestUtils.sys.mjs",
+});
+
 function focusEngineItem(win, popup, engineName) {
   let itemCount = popup.querySelectorAll("panel-item").length;
   for (
@@ -144,6 +148,10 @@ add_task(async function disabled_unified_button() {
 });
 
 add_task(async function basic() {
+  await SpecialPowers.pushPrefEnv({
+    set: [["browser.urlbar.unifiedSearchButton.historyInSearchMode", false]],
+  });
+
   info("Open the urlbar and searchmode switcher popup");
   await UrlbarTestUtils.promiseAutocompleteResultPopup({
     window,
@@ -171,16 +179,17 @@ add_task(async function basic() {
     source: 3,
   });
   await gURLBar.lastQueryContextPromise;
+  observer.disconnect();
+  Assert.ok(
+    !viewOpened,
+    "The view never opened, since the engine had no results to show"
+  );
 
   info("Press the close button and escape search mode");
   gURLBar.querySelector(".searchmode-switcher-close").click();
   await UrlbarTestUtils.assertSearchMode(window, null);
-  observer.disconnect();
-  Assert.equal(
-    viewOpened,
-    UrlbarPrefs.get("unifiedSearchButton.historyInSearchMode"),
-    "The view only opens if historyInSearchMode provides results, since the engine has none"
-  );
+
+  await SpecialPowers.popPrefEnv();
 });
 
 add_task(async function privileged_chicklet() {
@@ -803,6 +812,9 @@ add_task(async function test_readonly() {
 });
 
 add_task(async function test_search_service_fail() {
+  // Exiting search mode requeries, and if the view opens and hides while the
+  // stub is active, the one-offs may reject trying to get the default engine.
+  PromiseTestUtils.allowMatchingRejectionsGlobally(/Initialization failed/);
   let stub = sinon
     .stub(SearchService, "promiseInitialized")
     .get(() => Promise.reject(new Error("Initialization failed")));
