@@ -2451,7 +2451,7 @@ export const tokensTable = {
     },
     {
       value: {
-        default: "inherit",
+        default: "currentColor",
         prefersContrast: "var(--button-text-color)",
         forcedColors: "var(--button-text-color)",
       },
@@ -2459,7 +2459,7 @@ export const tokensTable = {
     },
     {
       value: {
-        default: "inherit",
+        default: "currentColor",
         prefersContrast: "var(--button-text-color-active)",
         forcedColors: "var(--button-text-color-active)",
       },
@@ -2467,15 +2467,15 @@ export const tokensTable = {
     },
     {
       value: {
-        default: "inherit",
-        prefersContrast: "inherit",
+        default: "currentColor",
+        prefersContrast: "currentColor",
         forcedColors: "var(--button-text-color-disabled)",
       },
       name: "--button-text-color-ghost-disabled",
     },
     {
       value: {
-        default: "inherit",
+        default: "currentColor",
         prefersContrast: "var(--button-text-color-hover)",
         forcedColors: "var(--button-text-color-hover)",
       },
@@ -2512,7 +2512,7 @@ export const tokensTable = {
     {
       value: {
         default: "var(--button-text-color-ghost)",
-        prefersContrast: "inherit",
+        prefersContrast: "currentColor",
         forcedColors: "MenuText",
       },
       name: "--button-text-color-menu",
@@ -4414,22 +4414,22 @@ export const variableLookupTable = {
     forcedColors: "GrayText",
   },
   "button-text-color-ghost": {
-    default: "inherit",
+    default: "currentColor",
     prefersContrast: "var(--button-text-color)",
     forcedColors: "var(--button-text-color)",
   },
   "button-text-color-ghost-active": {
-    default: "inherit",
+    default: "currentColor",
     prefersContrast: "var(--button-text-color-active)",
     forcedColors: "var(--button-text-color-active)",
   },
   "button-text-color-ghost-disabled": {
-    default: "inherit",
-    prefersContrast: "inherit",
+    default: "currentColor",
+    prefersContrast: "currentColor",
     forcedColors: "var(--button-text-color-disabled)",
   },
   "button-text-color-ghost-hover": {
-    default: "inherit",
+    default: "currentColor",
     prefersContrast: "var(--button-text-color-hover)",
     forcedColors: "var(--button-text-color-hover)",
   },
@@ -4447,7 +4447,7 @@ export const variableLookupTable = {
   },
   "button-text-color-menu": {
     default: "var(--button-text-color-ghost)",
-    prefersContrast: "inherit",
+    prefersContrast: "currentColor",
     forcedColors: "MenuText",
   },
   "button-text-color-menu-active": {

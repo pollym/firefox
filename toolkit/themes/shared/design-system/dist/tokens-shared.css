@@ -148,10 +148,10 @@
     --button-text-color-destructive-active: var(--button-text-color-destructive);
     --button-text-color-destructive-disabled: var(--button-text-color-destructive);
     --button-text-color-destructive-selected: var(--button-text-color-destructive-active);
-    --button-text-color-ghost: inherit;
-    --button-text-color-ghost-hover: inherit;
-    --button-text-color-ghost-active: inherit;
-    --button-text-color-ghost-disabled: inherit;
+    --button-text-color-ghost: currentColor;
+    --button-text-color-ghost-hover: currentColor;
+    --button-text-color-ghost-active: currentColor;
+    --button-text-color-ghost-disabled: currentColor;
     --button-text-color-ghost-selected: var(--button-text-color-ghost-active);
     --button-text-color-menu: var(--button-text-color-ghost);
     --button-text-color-menu-hover: var(--button-text-color-ghost-hover);
@@ -595,8 +595,8 @@
       --button-text-color-ghost: var(--button-text-color);
       --button-text-color-ghost-hover: var(--button-text-color-hover);
       --button-text-color-ghost-active: var(--button-text-color-active);
-      --button-text-color-ghost-disabled: inherit;
-      --button-text-color-menu: inherit;
+      --button-text-color-ghost-disabled: currentColor;
+      --button-text-color-menu: currentColor;
 
       /** card **/
       --card-border-color: color-mix(in srgb, currentColor 41%, transparent);
