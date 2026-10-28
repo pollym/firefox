@@ -4106,14 +4106,21 @@ pref("extensions.formautofill.addresses.storage.rust.enabled", false);
 // reading from where its addresses are.
 pref("extensions.formautofill.addresses.storage.rust.active", false);
 // Run the migration purely to measure it, while the pref above is still off.
-// The copy is reported through migrate_to_rust and then wiped, once per profile
-// per generation: it is what says whether the real move is safe to make.
+// The copy is reported through migrate_to_rust and then wiped. A failed run is
+// retried on later launches until it succeeds or spends its budget; each
+// generation is measured once per profile. It is what says whether the real
+// move is safe to make.
 pref("extensions.formautofill.addresses.storage.rust.runMigrationTest", false);
 // Which generation of the dry run above this profile has done, so a build that
 // fixes a migration bug can bump it and measure the same profiles again.
 pref("extensions.formautofill.addresses.storage.rust.migrationTestVersion", 0);
+// How many launches have already tried and failed the dry run of the current
+// generation. Managed by Firefox, which records the generation as done after a
+// budget.
+pref("extensions.formautofill.addresses.storage.rust.migrationTestAttempts", 0);
 // How many launches have already tried and failed to migrate. Managed by
-// Firefox, which gives up after a budget.
+// Firefox, which gives up after a budget: the enabled pref above is then
+// treated as false while this stays at the budget.
 pref("extensions.formautofill.addresses.storage.rust.migrationAttempts", 0);
 
 // Move desktop credit cards to the Application Services autofill store. Read at
@@ -4125,9 +4132,10 @@ pref("extensions.formautofill.creditCards.storage.rust.enabled", false);
 // reading from where its cards are.
 pref("extensions.formautofill.creditCards.storage.rust.active", false);
 // Run the migration purely to measure it, while the pref above is still off.
-// The copy is reported through migrate_to_rust and then wiped. Nightly only,
-// and once per profile per generation: it is what says whether the real move is
-// safe to make.
+// The copy is reported through migrate_to_rust and then wiped. A failed run is
+// retried on later launches until it succeeds or spends its budget; each
+// generation is measured once per profile. Nightly only: it is what says whether
+// the real move is safe to make.
 #ifdef NIGHTLY_BUILD
   pref("extensions.formautofill.creditCards.storage.rust.runMigrationTest", true);
 #else
@@ -4136,8 +4144,13 @@ pref("extensions.formautofill.creditCards.storage.rust.active", false);
 // Which generation of the dry run above this profile has done, so a build that
 // fixes a migration bug can bump it and measure the same profiles again.
 pref("extensions.formautofill.creditCards.storage.rust.migrationTestVersion", 0);
+// How many launches have already tried and failed the dry run of the current
+// generation. Managed by Firefox, which records the generation as done after a
+// budget.
+pref("extensions.formautofill.creditCards.storage.rust.migrationTestAttempts", 0);
 // How many launches have already tried and failed to migrate. Managed by
-// Firefox, which gives up after a budget.
+// Firefox, which gives up after a budget: the enabled pref above is then
+// treated as false while this stays at the budget.
 pref("extensions.formautofill.creditCards.storage.rust.migrationAttempts", 0);
 pref("extensions.formautofill.creditCards.supported", "on");
 pref("extensions.formautofill.creditCards.enabled", true);

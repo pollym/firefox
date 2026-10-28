@@ -241,6 +241,11 @@ export class FormAutofillStorage extends FormAutofillStorageBase {
    *  - Neither, with runMigrationTest set and a dry run pending: copy JSON into
    *    Rust to measure it, then empty Rust again.
    *
+   * A profile whose copy into Rust has spent its attempts stays on JSON:
+   * rust.enabled is read as false while the attempts stay spent, and is never
+   * written here, since Nimbus unenrols a profile whose setPref pref changes
+   * under it. Such a profile is not dry run either.
+   *
    * The serving store is the source, and the target ends up matching it.
    * rust.active changes only after a complete copy, so a failed one leaves the
    * profile on the store that still holds everything.
@@ -262,13 +267,21 @@ export class FormAutofillStorage extends FormAutofillStorageBase {
       lazy.RUST_MIGRATIONS[dataType];
     const { collectionName } = lazy.AutofillDataTypes.get(dataType);
     const Migrator = migrator();
-    const enabled = Services.prefs.getBoolPref(enabledPref, false);
     const active = Services.prefs.getBoolPref(activePref, false);
-    const dryRun =
-      !enabled &&
-      !active &&
-      Services.prefs.getBoolPref(testPref, false) &&
-      Migrator.dryRunPending;
+    const enabledByPref = Services.prefs.getBoolPref(enabledPref, false);
+    const testing =
+      !enabledByPref && !active && Services.prefs.getBoolPref(testPref, false);
+    // Asked only when a copy into Rust is wanted: reading the migrator's config
+    // loads the Rust adapter's module.
+    const gaveUp =
+      !active && (enabledByPref || testing) && Migrator.attemptsExhausted;
+    const enabled = enabledByPref && !gaveUp;
+    const dryRun = testing && !gaveUp && Migrator.dryRunPending;
+    if (gaveUp && enabledByPref) {
+      lazy.logger.log(
+        `Not migrating ${collectionName}: every attempt already failed.`
+      );
+    }
     if (enabled == active && !dryRun) {
       return;
     }
@@ -372,6 +385,11 @@ export class FormAutofillStorage extends FormAutofillStorageBase {
     // A dry run always reports false, so only a completed real copy hands the
     // profile over.
     if (!(await copy.maybeRun({ dryRun, wipe: intoRust }))) {
+      if (intoRust && !dryRun && Migrator.attemptsExhausted) {
+        lazy.logger.warn(
+          `Giving up on migrating ${collectionName}: every attempt failed.`
+        );
+      }
       return;
     }
     Services.prefs.setBoolPref(activePref, enabled);

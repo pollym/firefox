@@ -34,6 +34,9 @@ const { OSKeyStore } = ChromeUtils.importESModule(
 const { RustAutofillStore } = ChromeUtils.importESModule(
   "resource://autofill/RustAutofillStore.sys.mjs"
 );
+const { MAX_ATTEMPTS } = ChromeUtils.importESModule(
+  "resource://autofill/AutofillStorageMigrator.sys.mjs"
+);
 
 // See the address migration test: the per-process storage singleton would
 // migrate its own empty store alongside the throwaway ones here.
@@ -59,11 +62,15 @@ const TEST_VERSION_PREF =
   "extensions.formautofill.creditCards.storage.rust.migrationTestVersion";
 const ATTEMPTS_PREF =
   "extensions.formautofill.creditCards.storage.rust.migrationAttempts";
+const TEST_ATTEMPTS_PREF =
+  "extensions.formautofill.creditCards.storage.rust.migrationTestAttempts";
 
 const CVV_SUPPORTED_PREF = "extensions.formautofill.creditCards.cvv.supported";
 const CVV_ENABLED_PREF = "extensions.formautofill.creditCards.cvv.enabled";
 
 const getBool = (pref, def = false) => Services.prefs.getBoolPref(pref, def);
+
+const getInt = (pref, def = 0) => Services.prefs.getIntPref(pref, def);
 
 function setSecurityCodeEnabled(enabled) {
   if (enabled) {
@@ -81,6 +88,7 @@ registerCleanupFunction(() => {
     ACTIVE_PREF,
     TEST_MODE_PREF,
     TEST_VERSION_PREF,
+    TEST_ATTEMPTS_PREF,
     ATTEMPTS_PREF,
     CVV_SUPPORTED_PREF,
     CVV_ENABLED_PREF,
@@ -120,6 +128,7 @@ async function setupStorageWithCards(fileName, names) {
   Services.prefs.setBoolPref(TEST_MODE_PREF, false);
   Services.prefs.clearUserPref(ACTIVE_PREF);
   Services.prefs.clearUserPref(TEST_VERSION_PREF);
+  Services.prefs.clearUserPref(TEST_ATTEMPTS_PREF);
   Services.prefs.clearUserPref(ATTEMPTS_PREF);
   Services.fog.testResetFOG();
   RustAutofillCreditCardsAdapter._instance = null;
@@ -491,6 +500,148 @@ add_task(async function test_dry_run_measures_and_then_undoes_itself() {
   // Wiped afterwards, so a later real migration starts from an empty store.
   const rust = RustAutofillCreditCardsAdapter.getInstance();
   Assert.equal((await rust.getAll()).length, 0, "the dry run emptied itself");
+
+  await s._finalize();
+});
+
+// Every card the copy writes into Rust is rejected until the returned function
+// is called.
+function failCopiesIntoRust() {
+  const orig = RustAutofillCreditCardsAdapter.prototype.addManyWithMeta;
+  RustAutofillCreditCardsAdapter.prototype.addManyWithMeta = records =>
+    Promise.resolve(records.map(() => ({ error: "injected failure" })));
+  return () => {
+    RustAutofillCreditCardsAdapter.prototype.addManyWithMeta = orig;
+  };
+}
+
+add_task(async function test_a_failed_dry_run_is_retried_up_to_the_limit() {
+  let { s } = await setupStorageWithCards("cc-mig-dry-retry.json", ["Ann One"]);
+  const restore = failCopiesIntoRust();
+
+  try {
+    s = await restart(s, { [TEST_MODE_PREF]: true });
+    Assert.equal(migrationEvents().at(-1).extra.result, "error", "it failed");
+    Assert.equal(
+      migrationEvents().at(-1).extra.attempt,
+      "0",
+      "reported as attempt 0"
+    );
+    Assert.equal(getInt(TEST_ATTEMPTS_PREF), 1, "the failure was counted");
+    Assert.equal(getInt(TEST_VERSION_PREF), 0, "and the generation is owed");
+    Assert.equal(getInt(ATTEMPTS_PREF), 0, "from its own budget");
+
+    s = await restart(s);
+    Assert.equal(migrationEvents().length, 2, "the next launch retried");
+    Assert.equal(
+      migrationEvents().at(-1).extra.attempt,
+      "1",
+      "reported as attempt 1"
+    );
+    Assert.equal(getInt(TEST_ATTEMPTS_PREF), 2, "and counted it");
+
+    Services.prefs.setIntPref(TEST_ATTEMPTS_PREF, MAX_ATTEMPTS - 1);
+    s = await restart(s);
+    Assert.equal(
+      migrationEvents().at(-1).extra.attempt,
+      String(MAX_ATTEMPTS - 1),
+      "the last attempt is reported"
+    );
+    Assert.equal(
+      getInt(TEST_VERSION_PREF),
+      1,
+      "and the generation is recorded once the budget is spent"
+    );
+    Assert.ok(
+      !Services.prefs.prefHasUserValue(TEST_ATTEMPTS_PREF),
+      "with its attempt count cleared"
+    );
+
+    const before = migrationEvents().length;
+    s = await restart(s);
+    Assert.equal(migrationEvents().length, before, "and it is not run again");
+  } finally {
+    restore();
+  }
+
+  Assert.ok(!getBool(ACTIVE_PREF), "the dry run never activated Rust");
+  await s._finalize();
+});
+
+add_task(async function test_a_dry_run_that_recovers_is_recorded() {
+  let { s } = await setupStorageWithCards("cc-mig-dry-recover.json", [
+    "Ann One",
+  ]);
+
+  const restore = failCopiesIntoRust();
+  try {
+    s = await restart(s, { [TEST_MODE_PREF]: true });
+  } finally {
+    restore();
+  }
+  Assert.equal(getInt(TEST_ATTEMPTS_PREF), 1, "the first dry run failed");
+
+  s = await restart(s);
+  const event = migrationEvents().at(-1);
+  Assert.equal(event.extra.result, "ok", "the retry succeeded");
+  Assert.equal(event.extra.attempt, "1", "reported as attempt 1");
+  Assert.equal(getInt(TEST_VERSION_PREF), 1, "the generation is recorded");
+  Assert.ok(
+    !Services.prefs.prefHasUserValue(TEST_ATTEMPTS_PREF),
+    "and the attempt count cleared"
+  );
+  Assert.ok(!getBool(ACTIVE_PREF), "without activating Rust");
+
+  await s._finalize();
+});
+
+add_task(async function test_the_migration_gives_up_and_stays_on_json() {
+  let { s } = await setupStorageWithCards("cc-mig-give-up.json", ["Ann One"]);
+  const restore = failCopiesIntoRust();
+
+  try {
+    Services.prefs.setIntPref(ATTEMPTS_PREF, MAX_ATTEMPTS - 1);
+    s = await enableRust(s);
+    Assert.equal(
+      migrationEvents().at(-1).extra.attempt,
+      String(MAX_ATTEMPTS - 1),
+      "the last attempt is reported"
+    );
+    Assert.equal(getInt(ATTEMPTS_PREF), MAX_ATTEMPTS, "and counted");
+    Assert.ok(!getBool(ACTIVE_PREF), "the profile stayed on JSON");
+    Assert.ok(
+      getBool(ENABLED_PREF),
+      "and rust.enabled was left as Nimbus set it"
+    );
+  } finally {
+    restore();
+  }
+
+  // With the copy now able to succeed, neither a re-flip in a running session
+  // nor the next launch tries it again.
+  const before = migrationEvents().length;
+  Services.prefs.setBoolPref(ENABLED_PREF, false);
+  await s._creditCardSwitch;
+  Services.prefs.setBoolPref(ENABLED_PREF, true);
+  await s._creditCardSwitch;
+  Assert.equal(migrationEvents().length, before, "a re-flip does not copy");
+  Assert.ok(!getBool(ACTIVE_PREF), "or switch the store");
+
+  s = await restart(s);
+  Assert.equal(migrationEvents().length, before, "nor does a launch");
+
+  s = await restart(s, { [ENABLED_PREF]: false, [TEST_MODE_PREF]: true });
+  Assert.equal(
+    migrationEvents().length,
+    before,
+    "nor a dry run once rust.enabled is off"
+  );
+  Assert.ok(!getBool(ACTIVE_PREF), "so JSON keeps serving");
+  Assert.equal(
+    (await s.creditCards.getAll()).length,
+    1,
+    "with every card still readable"
+  );
 
   await s._finalize();
 });

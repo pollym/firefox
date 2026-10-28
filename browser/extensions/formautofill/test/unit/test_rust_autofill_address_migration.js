@@ -34,7 +34,7 @@ const { RustAutofillStore } = ChromeUtils.importESModule(
 const { SqlError } = ChromeUtils.importESModule(
   "moz-src:///toolkit/components/uniffi-bindgen-gecko-js/components/generated/RustAutofill.sys.mjs"
 );
-const { AddressStorageMigrator, AutofillStorageMigrator } =
+const { AddressStorageMigrator, AutofillStorageMigrator, MAX_ATTEMPTS } =
   ChromeUtils.importESModule(
     "resource://autofill/AutofillStorageMigrator.sys.mjs"
   );
@@ -79,6 +79,8 @@ const TEST_VERSION_PREF =
   "extensions.formautofill.addresses.storage.rust.migrationTestVersion";
 const ATTEMPTS_PREF =
   "extensions.formautofill.addresses.storage.rust.migrationAttempts";
+const TEST_ATTEMPTS_PREF =
+  "extensions.formautofill.addresses.storage.rust.migrationTestAttempts";
 
 const getInt = (pref, def = 0) => Services.prefs.getIntPref(pref, def);
 
@@ -91,6 +93,7 @@ registerCleanupFunction(() => {
     TEST_MODE_PREF,
     TEST_VERSION_PREF,
     ATTEMPTS_PREF,
+    TEST_ATTEMPTS_PREF,
   ]) {
     Services.prefs.clearUserPref(pref);
   }
@@ -230,6 +233,7 @@ async function setupStorageWithFullRecords(fileName, records) {
   Services.prefs.clearUserPref(ACTIVE_PREF);
   Services.prefs.clearUserPref(TEST_VERSION_PREF);
   Services.prefs.clearUserPref(ATTEMPTS_PREF);
+  Services.prefs.clearUserPref(TEST_ATTEMPTS_PREF);
   Services.fog.testResetFOG();
   // The adapter is a per-process singleton, so a case that reuses one cached by
   // an earlier case never opens the store and cannot observe that work.
@@ -1174,7 +1178,7 @@ add_task(async function test_attempts_are_counted_and_then_given_up_on() {
     );
 
     // Out of budget: no more work, and nothing more reported.
-    Services.prefs.setIntPref(ATTEMPTS_PREF, 3);
+    Services.prefs.setIntPref(ATTEMPTS_PREF, MAX_ATTEMPTS);
     const before = migrationEvents().length;
     s = await restart(s);
     Assert.equal(
@@ -1182,7 +1186,7 @@ add_task(async function test_attempts_are_counted_and_then_given_up_on() {
       before,
       "a profile out of budget stops re-importing on every startup"
     );
-    Assert.equal(getInt(ATTEMPTS_PREF), 3, "and stops counting");
+    Assert.equal(getInt(ATTEMPTS_PREF), MAX_ATTEMPTS, "and stops counting");
   } finally {
     RustAutofillAddressesAdapter.prototype.addManyWithMeta = orig;
   }

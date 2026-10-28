@@ -30,8 +30,9 @@ ChromeUtils.defineESModuleGetters(lazy, {
 });
 
 // Each attempt re-imports the whole profile, so a store that can never be
-// written must not pay that on every startup.
-const MAX_ATTEMPTS = 3;
+// written must not pay that on every startup. Budgets the real migration and
+// the dry run separately.
+export const MAX_ATTEMPTS = 10;
 
 // Twelve or more base64 characters including at least one digit: a guid. The
 // digit is what keeps CamelCase error type names out of the match.
@@ -61,9 +62,10 @@ const errorTextOf = e =>
  * A subclass supplies what differs by collection, as getters rather than
  * instance fields so they are readable from here:
  *
- *  - `config` (static), holding metrics, rustAdapter, testVersionPref, testVersion and
- *    attemptsPref. Rebuilt on each read, so the Glean category and the lazy
- *    module getters inside it resolve at call time rather than at load.
+ *  - `config` (static), holding metrics, rustAdapter, testVersionPref,
+ *    testVersion, testAttemptsPref and attemptsPref. Rebuilt on each read, so
+ *    the Glean category and the lazy module getters inside it resolve at call
+ *    time rather than at load.
  *  - `logger`.
  *  - the `isStoredField()` method, and `fieldDiffers()` if the collection has a
  *    field that does not compare as a string.
@@ -110,6 +112,18 @@ export class AutofillStorageMigrator {
   }
 
   /**
+   * Whether the real copy now owed -- into Rust, or back to JSON -- has failed
+   * MAX_ATTEMPTS times and will not be tried again. Dry runs are counted
+   * separately, on testAttemptsPref.
+   *
+   * @returns {boolean}
+   */
+  static get attemptsExhausted() {
+    const { attemptsPref } = this.config;
+    return Services.prefs.getIntPref(attemptsPref, 0) >= MAX_ATTEMPTS;
+  }
+
+  /**
    * Copy the records across, unless this profile has spent its attempts.
    *
    * Divergence is measured and reported, not acted on: a complete copy is the
@@ -117,9 +131,11 @@ export class AutofillStorageMigrator {
    *
    * @param {object} [options]
    * @param {boolean} [options.dryRun=false] Copy only to measure it: reports
-   *   the run, empties the target again, returns false whatever the outcome,
-   *   and records _testVersion so the same generation never measures twice.
-   *   Spends no attempt budget.
+   *   the run, empties the target again and returns false whatever the
+   *   outcome. A failed run is retried on later launches, counted on
+   *   testAttemptsPref rather than attemptsPref; once it succeeds or spends
+   *   MAX_ATTEMPTS, testVersion is recorded so the same generation never
+   *   measures again.
    * @param {boolean} [options.wipe=true] Empty the target first. See #migrate.
    * @returns {Promise<boolean>} Whether the copy completed. Always false for a
    *   dry run.
@@ -130,20 +146,27 @@ export class AutofillStorageMigrator {
         if (!this.constructor.dryRunPending) {
           return false;
         }
-        await this.#migrateAndReport({ wipe });
+        const { testVersionPref, testVersion, testAttemptsPref } = this.config;
+        this.#attempt = Services.prefs.getIntPref(testAttemptsPref, 0);
+        const { ok } = await this.#migrateAndReport({ wipe });
         // Measured, not read: put the target back the way it was found. Safe to
         // empty because nothing is serving from it -- the dry run only runs
         // while rust.enabled is off -- and the run is recorded on its own pref,
         // so a later real migration still does its own copy.
         await this.wipe();
-        const { testVersionPref, testVersion } = this.config;
-        Services.prefs.setIntPref(testVersionPref, testVersion);
+        const next = this.#attempt + 1;
+        if (ok || next >= MAX_ATTEMPTS) {
+          Services.prefs.setIntPref(testVersionPref, testVersion);
+          Services.prefs.clearUserPref(testAttemptsPref);
+        } else {
+          Services.prefs.setIntPref(testAttemptsPref, next);
+        }
         return false;
       }
 
       const { attemptsPref } = this.config;
       this.#attempt = Services.prefs.getIntPref(attemptsPref, 0);
-      if (this.#attempt >= MAX_ATTEMPTS) {
+      if (this.constructor.attemptsExhausted) {
         this.logger.warn(
           `Not migrating: ${this.#attempt} attempts already failed.`
         );
@@ -632,6 +655,10 @@ export class AddressStorageMigrator extends AutofillStorageMigrator {
       testVersionPref:
         "extensions.formautofill.addresses.storage.rust.migrationTestVersion",
       testVersion: 1,
+      // How many launches have already tried and failed the dry run of the
+      // current generation.
+      testAttemptsPref:
+        "extensions.formautofill.addresses.storage.rust.migrationTestAttempts",
       // How many launches have already tried and failed.
       attemptsPref:
         "extensions.formautofill.addresses.storage.rust.migrationAttempts",
@@ -658,6 +685,8 @@ export class CreditCardStorageMigrator extends AutofillStorageMigrator {
       testVersionPref:
         "extensions.formautofill.creditCards.storage.rust.migrationTestVersion",
       testVersion: 1,
+      testAttemptsPref:
+        "extensions.formautofill.creditCards.storage.rust.migrationTestAttempts",
       attemptsPref:
         "extensions.formautofill.creditCards.storage.rust.migrationAttempts",
     };
