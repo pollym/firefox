@@ -81,8 +81,8 @@ class IPProtectionAlertManagerClass {
         },
         { id: "vpn-paused-alert-close-tabs-button" },
         { id: "vpn-paused-alert-continue-wo-vpn-button" },
-        { id: "vpn-error-alert-title" },
-        { id: "vpn-error-alert-body" },
+        { id: "vpn-error-alert-title-1" },
+        { id: "vpn-error-alert-body-1" },
       ]);
 
       this.#localizationMessages = {
