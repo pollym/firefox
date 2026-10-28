@@ -1217,10 +1217,7 @@ class DownloadsViewItem extends DownloadsViewUI.DownloadElementShell {
       case "downloadsCmd_showBlockedInfo":
         return this.download.hasBlockedData;
     }
-    return DownloadsViewUI.DownloadElementShell.prototype.isCommandEnabled.call(
-      this,
-      aCommand
-    );
+    return super.isCommandEnabled(aCommand);
   }
 
   doCommand(aCommand) {
@@ -1438,15 +1435,14 @@ var DownloadsViewController = {
   // Other functions
 
   updateCommands() {
-    function updateCommandsForObject(object) {
-      for (let name in object) {
-        if (DownloadsViewUI.isCommandName(name)) {
-          goUpdateCommand(name);
-        }
-      }
+    const commands = [
+      ...DownloadsViewUI.getCommandNamesFrom(this),
+      ...DownloadsViewUI.getCommandNamesFrom(DownloadsViewItem),
+    ];
+
+    for (let command of commands) {
+      goUpdateCommand(command);
     }
-    updateCommandsForObject(this);
-    updateCommandsForObject(DownloadsViewItem.prototype);
   },
 
   // Selection-independent commands

@@ -137,6 +137,39 @@ export var DownloadsViewUI = {
   },
 
   /**
+   * Returns the command names defined on a subclass of
+   * DownloadsViewUI.DownloadElementShell or a vanilla object, while also
+   * walking up the inheritance chain (if applicable) to include command names
+   * on any parent classes.
+   *
+   * @param {DownloadsViewUI.DownloadElementShell | object} classOrObject
+   * @returns {string[]}
+   */
+  getCommandNamesFrom(classOrObject) {
+    let commandNames = new Set();
+
+    let current;
+    if (typeof classOrObject == "function") {
+      // This is a class
+      current = classOrObject.prototype;
+    } else {
+      // We assume this is an object.
+      current = classOrObject;
+    }
+
+    for (; current; current = Object.getPrototypeOf(current)) {
+      let descriptors = Object.getOwnPropertyDescriptors(current);
+      for (let descriptor in descriptors) {
+        if (DownloadsViewUI.isCommandName(descriptor)) {
+          commandNames.add(descriptor);
+        }
+      }
+    }
+
+    return [...commandNames];
+  },
+
+  /**
    * Get source url of the download without'http' or'https' prefix.
    */
   getStrippedUrl(download) {
@@ -417,13 +450,11 @@ DownloadsViewUI.BaseView = class {
  * HistoryDownloadElementShell and the DownloadsViewItem for the panel. The
  * history view may use a HistoryDownload object in place of a Download object.
  */
-DownloadsViewUI.DownloadElementShell = function () {};
-
-DownloadsViewUI.DownloadElementShell.prototype = {
+DownloadsViewUI.DownloadElementShell = class {
   /**
    * The richlistitem for the download, initialized by the derived object.
    */
-  element: null,
+  element = null;
 
   /**
    * Manages the "active" state of the shell. By default all the shells are
@@ -436,10 +467,11 @@ DownloadsViewUI.DownloadElementShell.prototype = {
       this.connect();
       this.onChanged();
     }
-  },
+  }
+
   get active() {
     return !!this._active;
-  },
+  }
 
   connect() {
     let document = this.element.ownerDocument;
@@ -497,7 +529,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     progress.className = "downloadProgress";
     progress.setAttribute("max", "100");
     this._downloadTarget.insertAdjacentElement("afterend", progress);
-  },
+  }
 
   /**
    * URI string for the file type icon displayed in the download element.
@@ -520,13 +552,13 @@ DownloadsViewUI.DownloadElementShell.prototype = {
       "?size=32" +
       (this.download.succeeded ? "&state=normal" : "")
     );
-  },
+  }
 
   get browserWindow() {
     return lazy.BrowserWindowTracker.getTopWindow({
       allowFromInactiveWorkspace: true,
     });
-  },
+  }
 
   /**
    * Updates the display name and icon.
@@ -549,7 +581,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
       this._downloadTarget.setAttribute("tooltiptext", displayName);
     }
     this._downloadTypeIcon.setAttribute("src", icon);
-  },
+  }
 
   /**
    * Updates the displayed progress bar.
@@ -568,7 +600,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
       this._downloadProgress.setAttribute("value", value);
     }
     this._downloadProgress.toggleAttribute("paused", !!paused);
-  },
+  }
 
   /**
    * Updates the full status line.
@@ -605,7 +637,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
       this._downloadDetailsHover.setAttribute("value", hoverStatus);
       this._downloadDetailsHover.setAttribute("tooltiptext", hoverStatus);
     }
-  },
+  }
 
   /**
    * Updates the status line combining the given state label with other labels.
@@ -652,7 +684,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     } else {
       this.showStatus(stateLabel, hoverStatus || fullStatus);
     }
-  },
+  }
 
   /**
    * Updates the main action button and makes it visible.
@@ -676,13 +708,13 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     }
     this._downloadButton.setAttribute("class", "downloadButton " + iconClass);
     this._downloadButton.removeAttribute("hidden");
-  },
+  }
 
   hideButton() {
     this._downloadButton.hidden = true;
-  },
+  }
 
-  lastEstimatedSecondsLeft: Infinity,
+  lastEstimatedSecondsLeft = Infinity;
 
   /**
    * This is called when a major state change occurs in the download, but is not
@@ -713,7 +745,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     this.lastEstimatedSecondsLeft = Infinity;
 
     this._updateStateInner();
-  },
+  }
 
   /**
    * This is called for all changes in the download, including progress updates.
@@ -913,7 +945,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     } else {
       this.showProgress("undetermined", 100, progressPaused);
     }
-  },
+  }
 
   getContentAnalysisErrorTitle(cancelError) {
     let args = { agent: lazy.contentAnalysisAgentName };
@@ -937,7 +969,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
         // because the request wasn't cancelled at all.
         return formatValue("downloads-blocked-by-content-analysis");
     }
-  },
+  }
 
   /**
    * Returns [title, [details1, details2]] for blocked downloads.
@@ -1034,7 +1066,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
       "Unexpected reputationCheckVerdict: " +
         this.download.error.reputationCheckVerdict
     );
-  },
+  }
 
   showDeletedOrMissing() {
     this.element.removeAttribute("exists");
@@ -1049,7 +1081,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     let label = formatValue(l10nId);
     this.showStatusWithDetails(label, label);
     this.hideButton();
-  },
+  }
 
   /**
    * Shows the appropriate unblock dialog based on the verdict, and executes the
@@ -1080,7 +1112,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
         return Promise.resolve();
       })
       .catch(console.error);
-  },
+  }
 
   /**
    * Unblocks the downloaded file and opens it.
@@ -1089,11 +1121,12 @@ DownloadsViewUI.DownloadElementShell.prototype = {
    */
   unblockAndOpenDownload() {
     return this.download.unblock().then(() => this.downloadsCmd_open());
-  },
+  }
 
   unblockAndSave() {
     return this.download.unblock();
-  },
+  }
+
   /**
    * Returns the name of the default command to use for the current state of the
    * download, when there is a double click or another default interaction. If
@@ -1118,7 +1151,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
         return "downloadsCmd_showBlockedInfo";
     }
     return "";
-  },
+  }
 
   /**
    * Returns true if the specified command can be invoked on the current item.
@@ -1174,7 +1207,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
         );
     }
     return DownloadsViewUI.isCommandName(aCommand) && !!this[aCommand];
-  },
+  }
 
   doCommand(aCommand) {
     // split off an optional command "modifier" into an argument,
@@ -1183,11 +1216,11 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     if (DownloadsViewUI.isCommandName(command)) {
       this[command](modifier);
     }
-  },
+  }
 
   onButton() {
     this.doCommand(this.buttonCommandName);
-  },
+  }
 
   downloadsCmd_cancel() {
     // This is the correct way to avoid race conditions when cancelling.
@@ -1196,23 +1229,23 @@ DownloadsViewUI.DownloadElementShell.prototype = {
       .removePartialData()
       .catch(console.error)
       .finally(() => this.download.target.refresh());
-  },
+  }
 
   downloadsCmd_confirmBlock() {
     this.download.confirmBlock().catch(console.error);
-  },
+  }
 
   downloadsCmd_open(openWhere = "tab") {
     lazy.DownloadsCommon.openDownload(this.download, {
       openWhere,
     });
-  },
+  }
 
   downloadsCmd_openReferrer() {
     this.element.documentGlobal.openURL(
       this.download.source.referrerInfo.originalReferrer
     );
-  },
+  }
 
   downloadsCmd_pauseResume() {
     if (this.download.stopped) {
@@ -1220,12 +1253,12 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     } else {
       this.download.cancel();
     }
-  },
+  }
 
   downloadsCmd_show() {
     let file = new lazy.FileUtils.File(this.download.target.path);
     lazy.DownloadsCommon.showDownloadedFile(file);
-  },
+  }
 
   downloadsCmd_retry() {
     if (this.download.start) {
@@ -1242,18 +1275,18 @@ DownloadsViewUI.DownloadElementShell.prototype = {
       ? PathUtils.filename(this.download.target.path)
       : null;
     window.DownloadURL(this.download.source.url, targetPath, document);
-  },
+  }
 
   downloadsCmd_delete() {
     // Alias for the 'cmd_delete' command, because it may clash with another
     // controller which causes unexpected behavior as different codepaths claim
     // ownership.
     this.cmd_delete();
-  },
+  }
 
   cmd_delete() {
     lazy.DownloadsCommon.deleteDownload(this.download).catch(console.error);
-  },
+  }
 
   async downloadsCmd_deleteFile() {
     // Remove the download from the session and history downloads, delete part files.
@@ -1261,7 +1294,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
       this.download,
       DownloadsViewUI.clearHistoryOnDelete
     );
-  },
+  }
 
   downloadsCmd_openInSystemViewer() {
     // For this interaction only, pass a flag to override the preferredAction for this
@@ -1269,7 +1302,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     lazy.DownloadsCommon.openDownload(this.download, {
       useSystemDefault: true,
     }).catch(console.error);
-  },
+  }
 
   downloadsCmd_alwaysOpenInSystemViewer() {
     // this command toggles between setting preferredAction for this mime-type to open
@@ -1300,7 +1333,7 @@ DownloadsViewUI.DownloadElementShell.prototype = {
     }
     lazy.handlerSvc.store(mimeInfo);
     lazy.DownloadsCommon.openDownload(this.download).catch(console.error);
-  },
+  }
 
   downloadsCmd_alwaysOpenSimilarFiles() {
     const mimeInfo = lazy.DownloadsCommon.getMimeInfo(this.download);
@@ -1321,5 +1354,5 @@ DownloadsViewUI.DownloadElementShell.prototype = {
       mimeInfo.preferredAction = mimeInfo.saveToDisk;
       lazy.handlerSvc.store(mimeInfo);
     }
-  },
+  }
 };
