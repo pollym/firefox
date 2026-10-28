@@ -363,6 +363,7 @@ for var in (
     "MOZ_JXL",
     "MOZ_SYSTEM_POLICIES",
     "MOZ_SELECTABLE_PROFILES",
+    "MOZ_ENTERPRISE",
     "USE_LIBZ_RS",
 ):
     DEFINES[f"{var}_BOOL"] = "true" if CONFIG[var] else "false"
