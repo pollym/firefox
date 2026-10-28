@@ -26,6 +26,7 @@ import org.mozilla.fenix.ui.efficiency.selectors.MainMenuSelectors
 import org.mozilla.fenix.ui.efficiency.selectors.SearchBarSelectors
 import org.mozilla.fenix.ui.efficiency.selectors.SettingsCustomizeSelectors
 import org.mozilla.fenix.ui.efficiency.selectors.ShareOverlaySelectors
+import org.mozilla.fenix.ui.efficiency.selectors.TabDrawerSelectors
 import org.mozilla.fenix.ui.efficiency.selectors.ToolbarSelectors
 
 class SettingsCustomizeExpandedToolbarTest : BaseTest(LaunchConfig(shouldUseExpandedToolbar = true)) {
@@ -413,5 +414,30 @@ class SettingsCustomizeExpandedToolbarTest : BaseTest(LaunchConfig(shouldUseExpa
             .mozVerify(ToolbarSelectors.NEW_TAB_BUTTON)
             .mozVerify(ToolbarSelectors.TAB_COUNTER_ANY_LAYOUT)
             .mozVerify(ToolbarSelectors.MAIN_MENU_BUTTON)
+    }
+
+    // TestRail link: https://mozilla.testrail.io/index.php?/cases/view/3333225
+    @Critical
+    @Test
+    fun swipeToSwitchExpandedToolbarTabsTest() {
+        val firstWebPage = mockWebServer.getGenericAsset(1)
+        val secondWebPage = mockWebServer.getGenericAsset(2)
+
+        // Disable the edge back-gesture so it doesn't intercept the horizontal swipes on the toolbar.
+        enableOrDisableBackGestureNavigationOnDevice(backGestureNavigationEnabled = false)
+
+        on.browserPage.navigateToPage(firstWebPage.url.toString())
+        on.tabDrawer.navigateToPage().mozClick(TabDrawerSelectors.FAB)
+        on.searchBar
+            .mozEnterText(secondWebPage.url.toString(), SearchBarSelectors.TOOLBAR_IN_EDIT_MODE)
+            .mozPressEnter(SearchBarSelectors.TOOLBAR_IN_EDIT_MODE)
+        on.browserPage.navigateToPage()
+
+        // A fast flick (low step count) on the navigation toolbar switches to the adjacent tab; a slow
+        // drag doesn't register as a tab-switch gesture.
+        on.browserPage.mozSwipeElement(ToolbarSelectors.TOOLBAR, SwipeDirection.RIGHT, steps = 2)
+        on.browserPage.verifyUrl(firstWebPage.url.toString())
+        on.browserPage.mozSwipeElement(ToolbarSelectors.TOOLBAR, SwipeDirection.LEFT, steps = 2)
+        on.browserPage.verifyUrl(secondWebPage.url.toString())
     }
 }
