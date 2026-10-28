@@ -40,7 +40,7 @@ internal fun lensUploadFailureSnackbarState(
 ): SnackbarState =
     when (reason) {
         LensUploadFailure.IMAGE_LOAD ->
-            SnackbarState(message = context.getString(R.string.lens_camera_image_load_failed))
+            SnackbarState(message = context.getString(R.string.lens_camera_image_load_failed_v2))
         LensUploadFailure.UPLOAD ->
             SnackbarState(
                 message = context.getString(R.string.lens_camera_upload_failed),

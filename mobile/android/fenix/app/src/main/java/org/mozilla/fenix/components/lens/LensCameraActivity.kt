@@ -47,8 +47,8 @@ internal const val LENS_IMAGES_DIR = "lens_images"
 
 /**
  * Activity that hosts [LensCameraFragment] for capturing images for Google Lens. Handles camera permission and gallery
- * picking. A captured image is returned as an image URI. A photo picker image is uploaded here by [LensUploadOverlay]
- * and returned as the Lens result URL, so a cancelled or failed upload can fall back to the camera.
+ * picking. A captured or photo picker image is uploaded here by [LensUploadOverlay] and returned as the Lens result
+ * URL, so a cancelled or failed upload can fall back to the camera.
  */
 class LensCameraActivity : AppCompatActivity() {
 
@@ -186,15 +186,14 @@ class LensCameraActivity : AppCompatActivity() {
                     Uri::class.java,
                 )
             if (imageUri != null) {
-                val resultIntent =
-                    Intent().apply {
-                        data = imageUri
-                        putExtra(EXTRA_IMAGE_SOURCE, IMAGE_SOURCE_CAMERA)
-                    }
-                setResult(RESULT_OK, resultIntent)
-            } else {
-                setResult(RESULT_CANCELED)
+                uploadOverlay.start(
+                    imageUri,
+                    isPrivate = intent.getBooleanExtra(EXTRA_IS_PRIVATE, false),
+                    source = IMAGE_SOURCE_CAMERA,
+                )
+                return@setFragmentResultListener
             }
+            setResult(RESULT_CANCELED)
             finish()
         }
 
@@ -495,7 +494,7 @@ class LensCameraActivity : AppCompatActivity() {
          */
         internal const val EXTRA_IMAGE_SOURCE = "lens_image_source"
 
-        @VisibleForTesting internal const val IMAGE_SOURCE_CAMERA = "camera"
+        internal const val IMAGE_SOURCE_CAMERA = "camera"
 
         internal const val IMAGE_SOURCE_PHOTO_PICKER = "photo_picker"
 
