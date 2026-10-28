@@ -225,6 +225,7 @@ tasks:
                                 TASKCLUSTER_VOLUMES: /builds/worker/artifacts
                                 MOZ_UPLOAD_DIR: /builds/worker/artifacts
                                 MOZ_AUTOMATION: '1'
+                                RUN_TASK_RESOURCE_USAGE: /builds/worker/artifacts/profile_run-task-resource-usage.json
                                 # mach generates pyc files when reading `mach_commands.py`
                                 # This causes cached_task digest generation to be random for
                                 # some tasks. Disable bytecode generation to work around that.
