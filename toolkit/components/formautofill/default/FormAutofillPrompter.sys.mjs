@@ -2043,7 +2043,7 @@ export let FormAutofillPrompter = {
     // mode); otherwise add a new record.
     const isUpdate = showUpdateDoorhanger && action != "create";
 
-    this._updateStorageAfterInteractWithPrompt(
+    await this._updateStorageAfterInteractWithPrompt(
       browser,
       storage,
       config.confirmationHint,

@@ -47,6 +47,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   FormAutofillPreferences:
     "resource://autofill/FormAutofillPreferences.sys.mjs",
   FormAutofillPrompter: "resource://autofill/FormAutofillPrompter.sys.mjs",
+  MIGRATION_SAFE_POINT_TOPIC: "resource://autofill/FormAutofillStorage.sys.mjs",
   PassportRecord: "resource://gre/modules/shared/PassportRecord.sys.mjs",
   FirefoxRelay: "resource://gre/modules/FirefoxRelay.sys.mjs",
   LoginHelper: "resource://gre/modules/LoginHelper.sys.mjs",
@@ -804,6 +805,10 @@ export class FormAutofillParent extends JSWindowActorParent {
         await showDoorhanger();
       }
     }
+
+    // The submission's writes, and those of any doorhanger it showed, have
+    // landed by now.
+    Services.obs.notifyObservers(null, lazy.MIGRATION_SAFE_POINT_TOPIC);
   }
 
   /**
@@ -1524,6 +1529,9 @@ export class FormAutofillParent extends JSWindowActorParent {
       value.isFilledOnFieldsUpdate = false;
     });
     section.onFilled(result);
+
+    // A fill writes nothing.
+    Services.obs.notifyObservers(null, lazy.MIGRATION_SAFE_POINT_TOPIC);
 
     // For testing only
     Services.obs.notifyObservers(null, "formautofill-autofill-complete");

@@ -15,6 +15,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
   AutofillDataTypes: "resource://gre/modules/shared/AutofillDataTypes.sys.mjs",
   AutofillTelemetry: "resource://gre/modules/shared/AutofillTelemetry.sys.mjs",
   formAutofillStorage: "resource://autofill/FormAutofillStorage.sys.mjs",
+  MIGRATION_SAFE_POINT_TOPIC: "resource://autofill/FormAutofillStorage.sys.mjs",
 });
 
 class AutofillEditDialog {
@@ -235,6 +236,10 @@ export class EditCreditCardDialog extends AutofillEditDialog {
   constructor(elements, record) {
     elements.fieldContainer._elements.billingAddress.disabled = true;
     super("creditCards", elements, record);
+    // Closing comes after any save has landed.
+    window.addEventListener("unload", () =>
+      Services.obs.notifyObservers(null, lazy.MIGRATION_SAFE_POINT_TOPIC)
+    );
     elements.fieldContainer._elements.ccNumber.addEventListener(
       "blur",
       this._onCCNumberFieldBlur.bind(this)

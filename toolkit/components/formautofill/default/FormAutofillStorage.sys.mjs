@@ -76,6 +76,12 @@ const CREDIT_CARD_RUST_ACTIVE_PREF =
 const CREDIT_CARD_RUST_MIGRATION_TEST_PREF =
   "extensions.formautofill.creditCards.storage.rust.runMigrationTest";
 
+// Sent where a credit card action has finished and left nothing pending: its
+// writes have landed, and nothing still holds a collection to write to later.
+// A copy that waits for the OS key store starts at the first one sent while the
+// key store is unlocked; see #maybeRunMigration.
+export const MIGRATION_SAFE_POINT_TOPIC = "formautofill-migration-safe-point";
+
 // What #maybeRunMigration needs of each collection it moves, by data type. The
 // migrator is looked up rather than held so that its module still loads only
 // once a copy is wanted; its config names the collection's Rust adapter.
@@ -149,9 +155,9 @@ export class FormAutofillStorage extends FormAutofillStorageBase {
   // rather than copying over the same pair of stores at the same time.
   #addressSwitch = null;
   #creditCardSwitch = null;
-  // Whether the OS key store's unlock is observed, which it is while a credit
-  // card copy waits on it; see #maybeRunMigration.
-  #observingUnlock = false;
+  // Whether MIGRATION_SAFE_POINT_TOPIC is observed, which it is while a credit
+  // card copy waits for the OS key store; see #maybeRunMigration.
+  #awaitingSafePoint = false;
 
   /**
    * Settles which store serves addresses at startup, once the JSON store has
@@ -175,10 +181,14 @@ export class FormAutofillStorage extends FormAutofillStorageBase {
   }
 
   observe(subject, topic, data) {
-    if (topic == lazy.OSKeyStore.UNLOCKED_TOPIC) {
-      // Observed only while a copy waits on it, and one unlock is enough.
+    if (topic == MIGRATION_SAFE_POINT_TOPIC) {
+      // Observed only while a copy waits for the key store, and one safe point
+      // with it unlocked is enough.
+      if (!lazy.OSKeyStore.isLoggedIn) {
+        return;
+      }
       Services.obs.removeObserver(this, topic);
-      this.#observingUnlock = false;
+      this.#awaitingSafePoint = false;
       this.#queueCreditCardMigration();
       return;
     }
@@ -197,9 +207,9 @@ export class FormAutofillStorage extends FormAutofillStorageBase {
       Services.prefs.removeObserver(ADDRESS_RUST_ENABLED_PREF, this);
       Services.prefs.removeObserver(CREDIT_CARD_RUST_ENABLED_PREF, this);
     }
-    if (this.#observingUnlock) {
-      this.#observingUnlock = false;
-      Services.obs.removeObserver(this, lazy.OSKeyStore.UNLOCKED_TOPIC);
+    if (this.#awaitingSafePoint) {
+      this.#awaitingSafePoint = false;
+      Services.obs.removeObserver(this, MIGRATION_SAFE_POINT_TOPIC);
     }
     return super._finalize();
   }
@@ -342,23 +352,26 @@ export class FormAutofillStorage extends FormAutofillStorageBase {
     // A profile with no records has nothing to decrypt and goes ahead.
     if (anyRecord) {
       // Wait until something else has unlocked the OS key store, so a copy
-      // into Rust never surfaces a keyring prompt of its own;
-      // OSKeyStore.UNLOCKED_TOPIC retries it. Windows does not wait: its key
-      // store reads the key through CredReadA, which shows no UI. A copy back
-      // does not wait either: while Rust serves, reads use NSS's key and
-      // nothing may unlock the OS key store, so the copy back would never run.
+      // into Rust never surfaces a keyring prompt of its own. It is retried at
+      // the next MIGRATION_SAFE_POINT_TOPIC with the key store unlocked rather
+      // than at the unlock itself, which lands in the middle of a fill or a
+      // save whose writes would then fall inside the copy, or after it into the
+      // store it leaves. Windows does not wait: its key store reads the key
+      // through CredReadA, which shows no UI. A copy back does not wait either:
+      // while Rust serves, reads use NSS's key and nothing may unlock the OS
+      // key store, so the copy back would never run.
       if (
         intoRust &&
         AppConstants.platform != "win" &&
         !lazy.OSKeyStore.isLoggedIn
       ) {
         lazy.logger.log(
-          `Deferring the ${collectionName} migration to an unlock.`
+          `Deferring the ${collectionName} migration to a safe point.`
         );
         this.#reportBlocked(Migrator, "keystore_locked", dryRun);
-        if (!this.#observingUnlock) {
-          Services.obs.addObserver(this, lazy.OSKeyStore.UNLOCKED_TOPIC);
-          this.#observingUnlock = true;
+        if (!this.#awaitingSafePoint) {
+          Services.obs.addObserver(this, MIGRATION_SAFE_POINT_TOPIC);
+          this.#awaitingSafePoint = true;
         }
         return;
       }
