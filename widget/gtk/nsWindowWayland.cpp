@@ -375,6 +375,12 @@ void nsWindowWaylandToplevel::DisableVSyncSource() {
   }
 }
 
+void nsWindowWaylandToplevel::WatchHiddenVSyncSource() {
+  if (mWaylandVsyncSource) {
+    mWaylandVsyncSource->WatchHiddenWindowVSync();
+  }
+}
+
 nsresult nsWindowWayland::SynthesizeNativeMouseMove(
     LayoutDeviceIntPoint aPoint, nsISynthesizedEventCallback* aCallback) {
   if (IsNativePointerLocked()) {
