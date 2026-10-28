@@ -4622,6 +4622,7 @@ class SamplerThread {
 
 #if defined(GP_OS_windows)
   bool mNoTimerResolutionChange = true;
+  HANDLE mHiResTimer = nullptr;
 #endif
 
   struct SpiedThread {
