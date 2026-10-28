@@ -424,7 +424,7 @@ void Realm::setNewObjectMetadata(JSContext* cx, HandleObject obj) {
   cx->check(compartment(), obj);
 
   AutoEnterOOMUnsafeRegion oomUnsafe;
-  if (JSObject* metadata =
+  if (SavedFrame* metadata =
           SavedStacks::buildAllocationMetadata(cx, obj, oomUnsafe)) {
     MOZ_ASSERT(metadata->maybeCCWRealm() == obj->maybeCCWRealm());
     cx->check(metadata);
@@ -445,7 +445,7 @@ void Realm::setNewObjectMetadata(JSContext* cx, HandleObject obj) {
   }
 }
 
-JSObject* js::GetAllocationMetadata(JSObject* obj) {
+SavedFrame* js::GetAllocationMetadata(JSObject* obj) {
   ObjectRealm::ObjectMetadataTable* map =
       ObjectRealm::get(obj).objectMetadataTable.get();
   if (map) {

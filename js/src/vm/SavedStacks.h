@@ -189,8 +189,8 @@ class SavedStacks {
 
   // Return the allocation metadata for a new object: the JavaScript stack at
   // which it was allocated, or nullptr if this allocation wasn't sampled.
-  static JSObject* buildAllocationMetadata(JSContext* cx, HandleObject obj,
-                                           AutoEnterOOMUnsafeRegion& oomUnsafe);
+  static SavedFrame* buildAllocationMetadata(
+      JSContext* cx, HandleObject obj, AutoEnterOOMUnsafeRegion& oomUnsafe);
 
  private:
   SavedFrame::Set frames;

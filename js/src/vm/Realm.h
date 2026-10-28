@@ -207,6 +207,7 @@ class MOZ_NON_TEMPORARY_CLASS PlainObjectCopyPropsCache {
 // (if it was even allocated).
 
 class PropertyIteratorObject;
+class SavedFrame;
 
 struct IteratorHashPolicy {
   struct Lookup {
@@ -257,9 +258,9 @@ class ObjectRealm {
                     js::ZoneAllocPolicy>;
   JS::WeakCache<ModuleScriptSourceSet> moduleScriptSources;
 
-  // Keep track of the metadata objects which can be associated with each JS
-  // object. Both keys and values are in this realm.
-  using ObjectMetadataTable = WeakMap<JSObject*, JSObject*, ZoneAllocPolicy>;
+  // Keep track of the allocation site SavedFrame which can be associated with
+  // each JS object. Both keys and values are in this realm.
+  using ObjectMetadataTable = WeakMap<JSObject*, SavedFrame*, ZoneAllocPolicy>;
   js::UniquePtr<ObjectMetadataTable> objectMetadataTable;
 
   using IteratorCache =
@@ -1048,7 +1049,7 @@ class MOZ_RAII AutoSetNewObjectMetadata {
 };
 
 // Get the allocation metadata associated with an object, or nullptr.
-JSObject* GetAllocationMetadata(JSObject* obj);
+SavedFrame* GetAllocationMetadata(JSObject* obj);
 
 } /* namespace js */
 

@@ -1978,7 +1978,7 @@ void SavedStacks::setSamplingProbability(double probability) {
   bernoulli.setProbability(probability);
 }
 
-JSObject* SavedStacks::buildAllocationMetadata(
+SavedFrame* SavedStacks::buildAllocationMetadata(
     JSContext* cx, HandleObject target, AutoEnterOOMUnsafeRegion& oomUnsafe) {
   RootedObject obj(cx, target);
 
