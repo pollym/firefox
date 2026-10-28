@@ -494,7 +494,7 @@ nsresult nsDocShellLoadState::CreateFromPendingChannel(
 }
 
 static uint32_t WebNavigationFlagsToFixupFlags(nsIURI* aURI,
-                                               const nsACString& aURIString,
+                                               const nsACString& /*aURIString*/,
                                                uint32_t aNavigationFlags) {
   if (aURI) {
     aNavigationFlags &= ~nsIWebNavigation::LOAD_FLAGS_ALLOW_THIRD_PARTY_FIXUP;
@@ -621,7 +621,7 @@ nsresult nsDocShellLoadState::CreateFromLoadURIOptions(
 }
 
 nsresult nsDocShellLoadState::CreateFromLoadURIOptions(
-    BrowsingContext* aBrowsingContext, nsIURI* aURI,
+    BrowsingContext* /*aBrowsingContext*/, nsIURI* aURI,
     const LoadURIOptions& aLoadURIOptions, uint32_t aLoadFlagsOverride,
     nsIInputStream* aPostDataOverride, nsDocShellLoadState** aResult) {
   nsresult rv = NS_OK;

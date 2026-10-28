@@ -203,14 +203,14 @@ void nsSHistoryObserver::PrefChanged(const char* aPref, void* aSelf) {
   static_cast<nsSHistoryObserver*>(aSelf)->PrefChanged(aPref);
 }
 
-void nsSHistoryObserver::PrefChanged(const char* aPref) {
+void nsSHistoryObserver::PrefChanged(const char* /*aPref*/) {
   nsSHistory::UpdatePrefs();
   nsSHistory::GloballyEvictDocumentViewers();
 }
 
 NS_IMETHODIMP
-nsSHistoryObserver::Observe(nsISupports* aSubject, const char* aTopic,
-                            const char16_t* aData) {
+nsSHistoryObserver::Observe(nsISupports* /*aSubject*/, const char* aTopic,
+                            const char16_t* /*aData*/) {
   if (!strcmp(aTopic, "cacheservice:empty-cache") ||
       !strcmp(aTopic, "memory-pressure")) {
     nsSHistory::GloballyEvictAllDocumentViewers();

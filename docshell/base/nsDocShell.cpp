@@ -945,7 +945,7 @@ NS_IMETHODIMP StopDetector::CancelWithReason(nsresult aStatus,
 }
 
 NS_IMETHODIMP
-StopDetector::Cancel(nsresult aStatus) {
+StopDetector::Cancel(nsresult /*aStatus*/) {
   mCanceled = true;
   return NS_OK;
 }
@@ -962,7 +962,7 @@ StopDetector::GetLoadGroup(nsILoadGroup** aLoadGroup) {
 }
 
 NS_IMETHODIMP
-StopDetector::SetLoadGroup(nsILoadGroup* aLoadGroup) { return NS_OK; }
+StopDetector::SetLoadGroup(nsILoadGroup* /*aLoadGroup*/) { return NS_OK; }
 
 NS_IMETHODIMP
 StopDetector::GetLoadFlags(nsLoadFlags* aLoadFlags) {
@@ -981,7 +981,7 @@ StopDetector::SetTRRMode(nsIRequest::TRRMode aTRRMode) {
 }
 
 NS_IMETHODIMP
-StopDetector::SetLoadFlags(nsLoadFlags aLoadFlags) { return NS_OK; }
+StopDetector::SetLoadFlags(nsLoadFlags /*aLoadFlags*/) { return NS_OK; }
 
 bool nsDocShell::MaybeHandleSubframeHistory(
     nsDocShellLoadState* aLoadState, bool aContinueHandlingSubframeHistory) {
@@ -2222,7 +2222,7 @@ nsDocShell::GetZoom(float* aZoom) {
 }
 
 NS_IMETHODIMP
-nsDocShell::SetZoom(float aZoom) { return NS_ERROR_NOT_IMPLEMENTED; }
+nsDocShell::SetZoom(float /*aZoom*/) { return NS_ERROR_NOT_IMPLEMENTED; }
 
 NS_IMETHODIMP
 nsDocShell::GetBusyFlags(BusyFlags* aBusyFlags) {
@@ -4816,13 +4816,13 @@ void nsDocShell::DoGetPositionAndSize(int32_t* aX, int32_t* aY, int32_t* aWidth,
 }
 
 NS_IMETHODIMP
-nsDocShell::SetDimensions(DimensionRequest&& aRequest) {
+nsDocShell::SetDimensions(DimensionRequest&& /*aRequest*/) {
   return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 NS_IMETHODIMP
-nsDocShell::GetDimensions(DimensionKind aDimensionKind, int32_t* aX,
-                          int32_t* aY, int32_t* aCX, int32_t* aCY) {
+nsDocShell::GetDimensions(DimensionKind /*aDimensionKind*/, int32_t* /*aX*/,
+                          int32_t* /*aY*/, int32_t* /*aCX*/, int32_t* /*aCY*/) {
   return NS_ERROR_NOT_IMPLEMENTED;
 }
 
@@ -4845,7 +4845,7 @@ nsDocShell::SetParentWidget(nsIWidget* aParentWidget) {
 }
 
 NS_IMETHODIMP
-nsDocShell::GetNativeHandle(nsAString& aNativeHandle) {
+nsDocShell::GetNativeHandle(nsAString& /*aNativeHandle*/) {
   // the nativeHandle should be accessed from nsIAppWindow
   return NS_ERROR_NOT_IMPLEMENTED;
 }
@@ -4988,7 +4988,7 @@ nsDocShell::GetEnabled(bool* aEnabled) {
 }
 
 NS_IMETHODIMP
-nsDocShell::SetEnabled(bool aEnabled) { return NS_ERROR_NOT_IMPLEMENTED; }
+nsDocShell::SetEnabled(bool /*aEnabled*/) { return NS_ERROR_NOT_IMPLEMENTED; }
 
 NS_IMETHODIMP
 nsDocShell::GetMainWidget(nsIWidget** aMainWidget) {
@@ -5956,8 +5956,9 @@ nsDocShell::OnSecurityChange(nsIWebProgress* aWebProgress, nsIRequest* aRequest,
 }
 
 NS_IMETHODIMP
-nsDocShell::OnContentBlockingEvent(nsIWebProgress* aWebProgress,
-                                   nsIRequest* aRequest, uint32_t aEvent) {
+nsDocShell::OnContentBlockingEvent(nsIWebProgress* /*aWebProgress*/,
+                                   nsIRequest* /*aRequest*/,
+                                   uint32_t /*aEvent*/) {
   MOZ_ASSERT_UNREACHABLE("notification excluded in AddProgressListener(...)");
   return NS_OK;
 }
@@ -6425,7 +6426,7 @@ nsresult nsDocShell::FilterStatusForErrorPage(
   return NS_OK;
 }
 
-nsresult nsDocShell::EndPageLoad(nsIWebProgress* aProgress,
+nsresult nsDocShell::EndPageLoad(nsIWebProgress* /*aProgress*/,
                                  nsIChannel* aChannel, nsresult aStatus) {
   MOZ_LOG(gDocShellLeakLog, LogLevel::Debug,
           ("DOCSHELL %p EndPageLoad status: %" PRIx32 "\n", this,
@@ -6725,7 +6726,7 @@ nsresult nsDocShell::CreateAboutBlankDocumentViewer(
     nsIPolicyContainer* aPolicyContainer, nsIURI* aBaseURI,
     bool aIsInitialDocument,
     const Maybe<nsILoadInfo::CrossOriginEmbedderPolicy>& aCOEP,
-    bool aTryToSaveOldPresentation, bool aCheckPermitUnload,
+    bool /*aTryToSaveOldPresentation*/, bool aCheckPermitUnload,
     WindowGlobalChild* aActor) {
   RefPtr<Document> blankDoc;
   nsCOMPtr<nsIDocumentViewer> viewer;
@@ -9422,7 +9423,7 @@ nsIPrincipal* nsDocShell::GetInheritedPrincipal(
 /* static */ bool nsDocShell::CreateAndConfigureRealChannelForLoadState(
     BrowsingContext* aBrowsingContext, nsDocShellLoadState* aLoadState,
     LoadInfo* aLoadInfo, nsIInterfaceRequestor* aCallbacks,
-    nsDocShell* aDocShell, const OriginAttributes& aOriginAttributes,
+    nsDocShell* /*aDocShell*/, const OriginAttributes& aOriginAttributes,
     nsLoadFlags aLoadFlags, uint32_t aCacheKey, nsresult& aRv,
     nsIChannel** aChannel) {
   MOZ_ASSERT(aLoadInfo);
@@ -10557,9 +10558,9 @@ nsresult nsDocShell::CompleteInitialAboutBlankLoad(
   return NS_OK;
 }
 
-static nsresult AppendSegmentToString(nsIInputStream* aIn, void* aClosure,
+static nsresult AppendSegmentToString(nsIInputStream* /*aIn*/, void* aClosure,
                                       const char* aFromRawSegment,
-                                      uint32_t aToOffset, uint32_t aCount,
+                                      uint32_t /*aToOffset*/, uint32_t aCount,
                                       uint32_t* aWriteCount) {
   // aFromSegment now contains aCount bytes of data.
 
@@ -10912,8 +10913,8 @@ nsresult nsDocShell::ScrollToAnchor(bool aCurHasRef, bool aNewHasRef,
 bool nsDocShell::OnNewURI(nsIURI* aURI, nsIChannel* aChannel,
                           nsIPrincipal* aTriggeringPrincipal,
                           nsIPrincipal* aPrincipalToInherit,
-                          nsIPrincipal* aPartitionedPrincipalToInherit,
-                          nsIPolicyContainer* aPolicyContainer,
+                          nsIPrincipal* /*aPartitionedPrincipalToInherit*/,
+                          nsIPolicyContainer* /*aPolicyContainer*/,
                           bool aAddToGlobalHistory, bool aCloneSHChildren) {
   MOZ_ASSERT(aURI, "uri is null");
   MOZ_ASSERT(!aChannel || !aTriggeringPrincipal, "Shouldn't have both set");
@@ -11660,7 +11661,7 @@ nsDocShell::MaybeFireTraversableTraverseHistory(
 
 nsresult nsDocShell::LoadHistoryEntry(nsDocShellLoadState* aLoadState,
                                       uint32_t aLoadType,
-                                      bool aLoadingCurrentEntry) {
+                                      bool /*aLoadingCurrentEntry*/) {
   if (!IsNavigationAllowed()) {
     return NS_OK;
   }
@@ -12791,7 +12792,7 @@ nsresult nsDocShell::OnLinkClickSync(nsIContent* aContent,
 }
 
 nsresult nsDocShell::OnOverLink(nsIContent* aContent, nsIURI* aURI,
-                                const nsAString& aTargetSpec) {
+                                const nsAString& /*aTargetSpec*/) {
   if (aContent->IsEditable()) {
     return NS_OK;
   }
