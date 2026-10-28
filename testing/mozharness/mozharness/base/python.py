@@ -27,6 +27,7 @@ from mozharness.base.script import (
     PostScriptAction,
     PostScriptRun,
     PreScriptAction,
+    PreScriptRun,
     ScriptMixin,
 )
 
@@ -801,7 +802,8 @@ class ResourceMonitoringMixin(PerfherderResourceOptionsMixin):
     While we would like to record resource usage for the entirety of a script,
     since we require an external package, we can only record resource usage
     after that package is installed (as part of creating the virtualenv).
-    That's just the way things have to be.
+    When forwarding to a monitor in a parent process, psutil isn't needed, so
+    recording starts before the first action if mozsystemmonitor is available.
     """
 
     def __init__(self, *args, **kwargs):
@@ -816,9 +818,29 @@ class ResourceMonitoringMixin(PerfherderResourceOptionsMixin):
         # Perfherder metrics to be reported.
         self.resource_monitor_perfherder_id = None
 
+    @PreScriptRun
+    def _start_forwarding_resource_monitor(self):
+        try:
+            from mozsystemmonitor.resourcemonitor import (
+                FORWARD_ENV,
+                SystemResourceMonitor,
+            )
+        except ImportError:
+            return
+
+        if FORWARD_ENV not in os.environ:
+            return
+
+        self.info("Starting resource monitoring, forwarding to parent monitor.")
+        self._resource_monitor = SystemResourceMonitor()
+        self._resource_monitor.start()
+
     @PostScriptAction("create-virtualenv")
     def _start_resource_monitoring(self, action, success=None):
         self.activate_virtualenv()
+
+        if self._resource_monitor:
+            return
 
         try:
             from mozsystemmonitor.resourcemonitor import SystemResourceMonitor
