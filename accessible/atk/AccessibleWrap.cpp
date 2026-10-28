@@ -621,6 +621,9 @@ AtkRole getRoleCB(AtkObject* aAtkObj) {
               aAtkObj->role == ATK_ROLE_CONTENT_INSERTION) &&
              !IsAtkVersionAtLeast(2, 34)) {
     aAtkObj->role = ATK_ROLE_SECTION;
+  } else if (aAtkObj->role == ATK_ROLE_DIALOG &&
+             acc->IsARIARole(nsGkAtoms::alertdialog)) {
+    aAtkObj->role = ATK_ROLE_ALERT;
   }
 
   return aAtkObj->role;
