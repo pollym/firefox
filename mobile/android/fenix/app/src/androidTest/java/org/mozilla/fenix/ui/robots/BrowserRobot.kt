@@ -279,6 +279,22 @@ class BrowserRobot(private val composeTestRule: ComposeTestRule) {
         }
     }
 
+    fun verifyTheTranslationBannerIsDisplayed(translatedFrom: String, translatedTo: String) {
+        Log.i(TAG, "verifyTheTranslationBannerIsDisplayed: Trying to verify the Translations banner is displayed.")
+        composeTestRule
+            .onNodeWithContentDescription(getStringResource(R.string.translation_toolbar_expand_action))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithContentDescription(getStringResource(R.string.translation_toolbar_close_action))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(
+                getStringResource(R.string.translation_toolbar_translated_from_and_to, translatedFrom, translatedTo)
+            )
+            .assertIsDisplayed()
+        Log.i(TAG, "verifyTheTranslationBannerIsDisplayed: Trying to verified the Translations banner is displayed.")
+    }
+
     fun verifyDRMControlledContentPageContent(expectedText: String) {
         Log.i(
             TAG,
