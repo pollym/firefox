@@ -1059,6 +1059,11 @@ void MaiAtkObject::FireStateChangeEvent(uint64_t aState, bool aEnabled) {
 void a11y::PlatformTextChangeEvent(Accessible* aTarget, const nsAString& aStr,
                                    int32_t aStart, uint32_t aLen,
                                    bool aIsInsert, bool aFromUser) {
+  // The text change signals are defined by AtkText, which is only implemented
+  // by objects with a text role.
+  if (!aTarget->IsTextRole()) {
+    return;
+  }
   MaiAtkObject* atkObj = MAI_ATK_OBJECT(GetWrapperFor(aTarget));
   atkObj->FireTextChangeEvent(aStr, aStart, aLen, aIsInsert, aFromUser);
 }
