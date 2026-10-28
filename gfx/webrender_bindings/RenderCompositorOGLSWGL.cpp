@@ -352,7 +352,7 @@ bool RenderCompositorOGLSWGL::MaybeCaptureScreenPixels(
 
     uint8_t* destBuf = nullptr;
     if (aHardwareBuffer->Lock(AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN, nullptr,
-                              reinterpret_cast<void**>(&destBuf)) < 0) {
+                              reinterpret_cast<void**>(&destBuf))) {
       return true;
     }
     const auto hardwareBufferUnlock =

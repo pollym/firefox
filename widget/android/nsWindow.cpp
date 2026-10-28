@@ -1736,12 +1736,12 @@ class LayerViewSupport final
     MOZ_RELEASE_ASSERT(aHardwareBuffer->mFormat == SurfaceFormat::R8G8B8A8);
 
     UniqueFileHandle acquireFence = aHardwareBuffer->GetAndResetAcquireFence();
-    uint8_t* srcBuf;
+    uint8_t* srcBuf = nullptr;
     res = AHardwareBuffer_lock(aHardwareBuffer->GetNativeBuffer(),
                                AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN,
                                acquireFence.release(), nullptr,
                                reinterpret_cast<void**>(&srcBuf));
-    if (res < 0) {
+    if (res) {
       result->CompleteExceptionally(
           java::sdk::IllegalStateException::New(
               "Failed to lock screen pixels HardwareBuffer")
@@ -1751,6 +1751,7 @@ class LayerViewSupport final
     auto hardwareBufferUnlock = MakeScopeExit([&]() {
       AHardwareBuffer_unlock(aHardwareBuffer->GetNativeBuffer(), nullptr);
     });
+    MOZ_RELEASE_ASSERT(srcBuf);
 
     uint8_t* destBuf;
     res = AndroidBitmap_lockPixels(env, bitmap.Get(),
