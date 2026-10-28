@@ -5950,11 +5950,12 @@ static void EmitPostWriteBarrier(MacroAssembler& masm, CompileRuntime* runtime,
   masm.bind(&exit);
 }
 
-template <typename T>
-void CodeGenerator::emitPreBarrier(const MInstruction* mir, const T& address) {
-  auto* ool =
-      new (alloc()) LambdaOutOfLineCode([this, address](OutOfLineCode& ool) {
-        masm.unguardedCallPreBarrier(address, MIRType::Value);
+template <typename... Addrs>
+void CodeGenerator::emitPreBarrier(const MInstruction* mir,
+                                   const Addrs&... addresses) {
+  auto* ool = new (alloc())
+      LambdaOutOfLineCode([this, addresses...](OutOfLineCode& ool) {
+        (masm.unguardedCallPreBarrier(addresses, MIRType::Value), ...);
         masm.jump(ool.rejoin());
       });
   addOutOfLineCode(ool, mir);
@@ -10395,7 +10396,8 @@ static void TableIteratorFinish(MacroAssembler& masm, Register iter,
 }
 
 template <>
-void CodeGenerator::emitLoadIteratorValues<MapObject>(Register result,
+void CodeGenerator::emitLoadIteratorValues<MapObject>(const MInstruction* mir,
+                                                      Register result,
                                                       Register temp,
                                                       Register front) {
   size_t elementsOffset = NativeObject::offsetOfFixedElements();
@@ -10404,8 +10406,7 @@ void CodeGenerator::emitLoadIteratorValues<MapObject>(Register result,
   Address valueAddress(front, MapObject::Table::Entry::offsetOfValue());
   Address keyElemAddress(result, elementsOffset);
   Address valueElemAddress(result, elementsOffset + sizeof(Value));
-  masm.guardedCallPreBarrier(keyElemAddress, MIRType::Value);
-  masm.guardedCallPreBarrier(valueElemAddress, MIRType::Value);
+  emitPreBarrier(mir, keyElemAddress, valueElemAddress);
   masm.storeValue(keyAddress, keyElemAddress, temp);
   masm.storeValue(valueAddress, valueElemAddress, temp);
 
@@ -10424,14 +10425,15 @@ void CodeGenerator::emitLoadIteratorValues<MapObject>(Register result,
 }
 
 template <>
-void CodeGenerator::emitLoadIteratorValues<SetObject>(Register result,
+void CodeGenerator::emitLoadIteratorValues<SetObject>(const MInstruction* mir,
+                                                      Register result,
                                                       Register temp,
                                                       Register front) {
   size_t elementsOffset = NativeObject::offsetOfFixedElements();
 
   Address keyAddress(front, SetObject::Table::offsetOfEntryKey());
   Address keyElemAddress(result, elementsOffset);
-  masm.guardedCallPreBarrier(keyElemAddress, MIRType::Value);
+  emitPreBarrier(mir, keyElemAddress);
   masm.storeValue(keyAddress, keyElemAddress, temp);
 
   Label skipBarrier;
@@ -10483,7 +10485,7 @@ void CodeGenerator::emitGetNextEntryForIterator(LGetNextEntryForIterator* lir) {
   {
     TableIteratorLoadEntry<TableObject>(masm, iter, temp, front);
 
-    emitLoadIteratorValues<TableObject>(result, temp, front);
+    emitLoadIteratorValues<TableObject>(lir->mir(), result, temp, front);
 
     TableIteratorAdvance<TableObject>(masm, iter, front, dataLength, temp);
 

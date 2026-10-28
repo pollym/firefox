@@ -142,8 +142,8 @@ class CodeGenerator final : public CodeGeneratorSpecific {
                              const wasm::TrapSiteDesc& trapSiteDesc);
 
  private:
-  template <typename T>
-  void emitPreBarrier(const MInstruction* mir, const T& address);
+  template <typename... Addrs>
+  void emitPreBarrier(const MInstruction* mir, const Addrs&... addresses);
 
   void emitPostWriteBarrier(const LAllocation* obj);
   void emitPostWriteBarrier(Register objreg);
@@ -299,7 +299,8 @@ class CodeGenerator final : public CodeGeneratorSpecific {
   void emitGetNextEntryForIterator(LGetNextEntryForIterator* lir);
 
   template <class TableObject>
-  void emitLoadIteratorValues(Register result, Register temp, Register front);
+  void emitLoadIteratorValues(const MInstruction* mir, Register result,
+                              Register temp, Register front);
 
   void emitStringToInt64(LInstruction* lir, Register input, Register64 output);
 
