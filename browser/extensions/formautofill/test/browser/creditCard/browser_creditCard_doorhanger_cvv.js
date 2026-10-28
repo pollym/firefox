@@ -194,8 +194,8 @@ add_task(async function test_save_doorhanger_content() {
     );
     is(
       descriptionL10nId(content),
-      "credit-card-save-payment-method-doorhanger-description-security-code",
-      "The description says the security code is saved"
+      "credit-card-save-payment-method-doorhanger-description",
+      "The doorhanger shows the payment method description"
     );
     is(
       notification.getAttribute("secondarybuttonlabel"),
@@ -257,7 +257,7 @@ add_task(async function test_save_doorhanger_toggle_follows_pref() {
     is(
       descriptionL10nId(content),
       "credit-card-save-payment-method-doorhanger-description",
-      "The description no longer mentions the security code"
+      "The description doesn't change when security codes aren't saved"
     );
     is(
       cardDetailsL10nId(content),
@@ -277,8 +277,8 @@ add_task(async function test_save_doorhanger_toggle_follows_pref() {
     );
     is(
       descriptionL10nId(content),
-      "credit-card-save-payment-method-doorhanger-description-security-code",
-      "The description mentions the security code again"
+      "credit-card-save-payment-method-doorhanger-description",
+      "The description stays the same"
     );
     is(
       cardDetailsL10nId(content),
@@ -337,8 +337,8 @@ add_task(async function test_save_with_toggle_on_stores_security_code() {
     ok(toggle.pressed, "The security codes toggle is on");
     is(
       descriptionL10nId(content),
-      "credit-card-save-payment-method-doorhanger-description-security-code",
-      "The description says the security code is saved"
+      "credit-card-save-payment-method-doorhanger-description",
+      "The doorhanger shows the payment method description"
     );
 
     const onChanged = waitForStorageChangedEvents("add");
@@ -375,7 +375,7 @@ add_task(async function test_save_with_toggle_off_stores_no_security_code() {
     is(
       descriptionL10nId(content),
       "credit-card-save-payment-method-doorhanger-description",
-      "The description no longer mentions the security code"
+      "The description doesn't change when security codes aren't saved"
     );
     is(
       cardDetailsL10nId(content),
@@ -581,7 +581,7 @@ async function checkPlainUpdateContent(content, { withSecurityCode }) {
   is(
     notification.getAttribute("label"),
     await document.l10n.formatValue(
-      "credit-card-update-payment-method-doorhanger-header"
+      "credit-card-update-saved-payment-method-doorhanger-header"
     ),
     "The doorhanger asks to update the payment method"
   );
@@ -734,8 +734,8 @@ async function checkSecurityCodeUpdateContent(content) {
   );
   is(
     descriptionL10nId(content),
-    "credit-card-save-security-code-doorhanger-description",
-    "The description says the security code is saved"
+    "credit-card-save-payment-method-doorhanger-description",
+    "The doorhanger shows the payment method description"
   );
   is(
     cardDetailsL10nId(content),
@@ -840,7 +840,7 @@ add_task(async function test_security_code_toggle_switches_to_plain_update() {
     is(
       notification.getAttribute("label"),
       await document.l10n.formatValue(
-        "credit-card-update-payment-method-doorhanger-header"
+        "credit-card-update-saved-payment-method-doorhanger-header"
       ),
       "The doorhanger asks to update the payment method"
     );
@@ -986,7 +986,7 @@ add_task(
       await clickToggle(toggle);
       await checkNotification(
         {
-          header: "credit-card-update-payment-method-doorhanger-header",
+          header: "credit-card-update-saved-payment-method-doorhanger-header",
           main: "credit-card-capture-update-payment-method-button",
           secondary: "credit-card-capture-save-new-payment-method-button",
           dropdown: false,

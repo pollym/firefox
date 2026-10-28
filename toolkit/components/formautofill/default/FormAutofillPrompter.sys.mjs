@@ -1020,11 +1020,7 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
   }
 
   updateDescription(label) {
-    const { l10nId, securityCodeL10nId } = this.ui.description;
-    const id =
-      securityCodeL10nId && this.savesSecurityCode
-        ? securityCodeL10nId
-        : l10nId;
+    const id = this.ui.description.l10nId;
     label.hidden = !id;
     if (id) {
       this.doc.l10n.setAttributes(label, id);
@@ -1640,8 +1636,6 @@ CONTENT = {
           ? "credit-card-save-payment-method-doorhanger-description"
           : "credit-card-save-doorhanger-description";
       },
-      securityCodeL10nId:
-        "credit-card-save-payment-method-doorhanger-description-security-code",
     },
     content: {},
     footer: {
@@ -1703,7 +1697,7 @@ CONTENT = {
     header: {
       get l10nId() {
         return FormAutofill.isAutofillCreditCardCVVSupported
-          ? "credit-card-update-payment-method-doorhanger-header"
+          ? "credit-card-update-saved-payment-method-doorhanger-header"
           : "credit-card-update-doorhanger-header";
       },
     },
@@ -1753,13 +1747,13 @@ CONTENT = {
       get l10nId() {
         return FormAutofill.isAutofillCreditCardCVVEnabled
           ? "credit-card-save-security-code-doorhanger-header"
-          : "credit-card-update-payment-method-doorhanger-header";
+          : "credit-card-update-saved-payment-method-doorhanger-header";
       },
     },
     description: {
       get l10nId() {
         return FormAutofill.isAutofillCreditCardCVVEnabled
-          ? "credit-card-save-security-code-doorhanger-description"
+          ? "credit-card-save-payment-method-doorhanger-description"
           : null;
       },
     },
