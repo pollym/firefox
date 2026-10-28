@@ -208,22 +208,17 @@ bool WebGLFBAttachPoint::IsComplete(WebGLContext* webgl,
 }
 
 void WebGLFBAttachPoint::DoAttachment(gl::GLContext* const gl) const {
-  DoAttachment(gl, mAttachmentPoint);
-}
-
-void WebGLFBAttachPoint::DoAttachment(gl::GLContext* const gl,
-                                      const GLenum attachmentPoint) const {
   if (Renderbuffer()) {
-    Renderbuffer()->DoFramebufferRenderbuffer(attachmentPoint);
+    Renderbuffer()->DoFramebufferRenderbuffer(mAttachmentPoint);
     return;
   }
 
   if (!Texture()) {
-    MOZ_ASSERT(attachmentPoint != LOCAL_GL_DEPTH_STENCIL_ATTACHMENT);
+    MOZ_ASSERT(mAttachmentPoint != LOCAL_GL_DEPTH_STENCIL_ATTACHMENT);
     // WebGL 2 doesn't have a real attachment for this, and WebGL 1 is defered
     // and only DoAttachment if HasAttachment.
 
-    gl->fFramebufferRenderbuffer(LOCAL_GL_FRAMEBUFFER, attachmentPoint,
+    gl->fFramebufferRenderbuffer(LOCAL_GL_FRAMEBUFFER, mAttachmentPoint,
                                  LOCAL_GL_RENDERBUFFER, 0);
     return;
   }
@@ -238,7 +233,7 @@ void WebGLFBAttachPoint::DoAttachment(gl::GLContext* const gl,
         imageTarget = LOCAL_GL_TEXTURE_CUBE_MAP_POSITIVE_X + Layer();
       }
 
-      if (attachmentPoint == LOCAL_GL_DEPTH_STENCIL_ATTACHMENT) {
+      if (mAttachmentPoint == LOCAL_GL_DEPTH_STENCIL_ATTACHMENT) {
         gl->fFramebufferTexture2D(LOCAL_GL_FRAMEBUFFER,
                                   LOCAL_GL_DEPTH_ATTACHMENT, imageTarget.get(),
                                   texName, MipLevel());
@@ -246,7 +241,7 @@ void WebGLFBAttachPoint::DoAttachment(gl::GLContext* const gl,
                                   LOCAL_GL_STENCIL_ATTACHMENT,
                                   imageTarget.get(), texName, MipLevel());
       } else {
-        gl->fFramebufferTexture2D(LOCAL_GL_FRAMEBUFFER, attachmentPoint,
+        gl->fFramebufferTexture2D(LOCAL_GL_FRAMEBUFFER, mAttachmentPoint,
                                   imageTarget.get(), texName, MipLevel());
       }
       break;
@@ -255,11 +250,11 @@ void WebGLFBAttachPoint::DoAttachment(gl::GLContext* const gl,
     case LOCAL_GL_TEXTURE_2D_ARRAY:
     case LOCAL_GL_TEXTURE_3D:
       if (ZLayerCount() != 1) {
-        gl->fFramebufferTextureMultiview(LOCAL_GL_FRAMEBUFFER, attachmentPoint,
+        gl->fFramebufferTextureMultiview(LOCAL_GL_FRAMEBUFFER, mAttachmentPoint,
                                          texName, MipLevel(), Layer(),
                                          ZLayerCount());
       } else {
-        gl->fFramebufferTextureLayer(LOCAL_GL_FRAMEBUFFER, attachmentPoint,
+        gl->fFramebufferTextureLayer(LOCAL_GL_FRAMEBUFFER, mAttachmentPoint,
                                      texName, MipLevel(), Layer());
       }
       break;
@@ -875,35 +870,22 @@ void WebGLFramebuffer::ResolveAttachmentData() const {
       if (!imageInfo || !imageInfo->mUninitializedSlices)
         continue;  // Nothing attached, or already has data.
 
-      const auto& format = imageInfo->mFormat->format;
-      MOZ_ASSERT(format->estimatedBytesPerPixel <= sizeof(uiZeros));
-      MOZ_ASSERT(format->estimatedBytesPerPixel <= sizeof(iZeros));
-      MOZ_ASSERT(format->estimatedBytesPerPixel <= sizeof(fZeros));
-
-      // Clear every aspect of the image, not just the one for this attachment
-      // point: the image may also be visible through the other depth/stencil
-      // attachment point, here or in another framebuffer.
-      GLenum clearAttachPoint = cur->mAttachmentPoint;
-      if (format->d && format->s) {
-        clearAttachPoint = LOCAL_GL_DEPTH_STENCIL_ATTACHMENT;
-      } else if (format->d) {
-        clearAttachPoint = LOCAL_GL_DEPTH_ATTACHMENT;
-      } else if (format->s) {
-        clearAttachPoint = LOCAL_GL_STENCIL_ATTACHMENT;
-      }
-
       const auto fnClearBuffer = [&]() {
-        switch (clearAttachPoint) {
+        const auto& format = imageInfo->mFormat->format;
+        MOZ_ASSERT(format->estimatedBytesPerPixel <= sizeof(uiZeros));
+        MOZ_ASSERT(format->estimatedBytesPerPixel <= sizeof(iZeros));
+        MOZ_ASSERT(format->estimatedBytesPerPixel <= sizeof(fZeros));
+
+        switch (cur->mAttachmentPoint) {
           case LOCAL_GL_DEPTH_ATTACHMENT:
             gl->fClearBufferfv(LOCAL_GL_DEPTH, 0, fOne);
             break;
           case LOCAL_GL_STENCIL_ATTACHMENT:
             gl->fClearBufferiv(LOCAL_GL_STENCIL, 0, iZeros);
             break;
-          case LOCAL_GL_DEPTH_STENCIL_ATTACHMENT:
-            gl->fClearBufferfi(LOCAL_GL_DEPTH_STENCIL, 0, fOne[0], iZeros[0]);
-            break;
           default:
+            MOZ_ASSERT(cur->mAttachmentPoint !=
+                       LOCAL_GL_DEPTH_STENCIL_ATTACHMENT);
             const uint32_t drawBuffer =
                 cur->mAttachmentPoint - LOCAL_GL_COLOR_ATTACHMENT0;
             MOZ_ASSERT(drawBuffer <= 100);
@@ -932,16 +914,12 @@ void WebGLFramebuffer::ResolveAttachmentData() const {
         const gl::ScopedBindFramebuffer scopedBindFB(gl, scopedFB.FB());
         for (const auto z : IntegerRange(imageInfo->mDepth)) {
           if ((*imageInfo->mUninitializedSlices)[z]) {
-            gl->fFramebufferTextureLayer(LOCAL_GL_FRAMEBUFFER, clearAttachPoint,
-                                         tex->mGLName, cur->MipLevel(), z);
+            gl->fFramebufferTextureLayer(LOCAL_GL_FRAMEBUFFER,
+                                         cur->mAttachmentPoint, tex->mGLName,
+                                         cur->MipLevel(), z);
             fnClearBuffer();
           }
         }
-      } else if (clearAttachPoint != cur->mAttachmentPoint) {
-        const gl::ScopedFramebuffer scopedFB(gl);
-        const gl::ScopedBindFramebuffer scopedBindFB(gl, scopedFB.FB());
-        cur->DoAttachment(gl, clearAttachPoint);
-        fnClearBuffer();
       } else {
         fnClearBuffer();
       }

@@ -95,7 +95,6 @@ class WebGLFBAttachPoint final {
   bool IsComplete(WebGLContext* webgl, nsCString* const out_info) const;
 
   void DoAttachment(gl::GLContext* gl) const;
-  void DoAttachment(gl::GLContext* gl, GLenum attachmentPoint) const;
 
   Maybe<double> GetParameter(WebGLContext* webgl, GLenum attachment,
                              GLenum pname) const;
