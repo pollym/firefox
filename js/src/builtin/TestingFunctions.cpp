@@ -9975,6 +9975,7 @@ static bool RecordIonCompilationForHints(JSContext* cx, unsigned argc,
   jit::JitHintsMap* jitHints = cx->runtime()->jitRuntime()->getJitHintsMap();
   jitHints->setEagerBaselineHint(script);
   if (!jitHints->recordIonCompilation(script)) {
+    ReportOutOfMemory(cx);
     return false;
   }
 
