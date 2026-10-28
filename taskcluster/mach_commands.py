@@ -9,6 +9,7 @@ import logging
 import os
 import pathlib
 import sys
+import tempfile
 import time
 import traceback
 from functools import partial
@@ -282,11 +283,17 @@ def taskgraph_decision(command_context, **options):
 
         in_automation = os.environ.get("MOZ_AUTOMATION") == "1"
         moz_upload_dir = os.environ.get("MOZ_UPLOAD_DIR")
+        monitor = None
+        forward_path = None
         if in_automation and moz_upload_dir:
             monitor = SystemResourceMonitor(poll_interval=0.1)
             monitor.start()
-        else:
-            monitor = None
+            if not monitor.forwarding:
+                fd, forward_path = tempfile.mkstemp(
+                    prefix="taskgraph-", suffix=".jsonl"
+                )
+                os.close(fd)
+                monitor.accept_forwarded(forward_path)
 
         try:
             t_params_start = time.monotonic()
@@ -317,6 +324,8 @@ def taskgraph_decision(command_context, **options):
         finally:
             if monitor is not None:
                 monitor.stop()
+            if forward_path:
+                os.remove(forward_path)
             if monitor is not None and not monitor.forwarding:
                 upload_dir = pathlib.Path(moz_upload_dir)
                 profile_path = upload_dir / "profile_build_resources.json"

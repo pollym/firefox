@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from collections import defaultdict
 
 import mozpack.path as mozpath
@@ -286,6 +287,9 @@ def generate_tasks(
     if not SystemResourceMonitor.instance:
         monitor = SystemResourceMonitor(poll_interval=0.1)
         monitor.start()
+        fd, forward_path = tempfile.mkstemp(prefix="taskgraph-", suffix=".jsonl")
+        os.close(fd)
+        monitor.accept_forwarded(forward_path)
 
     try:
         # Cache both full_task_set and target_task_set regardless of whether or
@@ -296,6 +300,7 @@ def generate_tasks(
     finally:
         if monitor:
             monitor.stop()
+            os.remove(forward_path)
             write_profile(monitor)
 
     os.chdir(cwd)
