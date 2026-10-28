@@ -2481,7 +2481,7 @@ Instance::Instance(JSContext* cx, Handle<WasmInstanceObject*> object,
       ieeeMxcsr_(0),
       wasmMxcsr_(0),
 #endif
-      allocationMetadataBuilder_(nullptr),
+      allocationMetadataBuilder_(cx->realm()->getAllocationMetadataBuilder()),
       addressOfLastBufferedWholeCell_(
           cx->runtime()->gc.addressOfLastBufferedWholeCell()) {
   std::fill(std::begin(baselineScratchWords_), std::end(baselineScratchWords_),
