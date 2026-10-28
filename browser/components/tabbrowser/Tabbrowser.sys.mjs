@@ -5230,6 +5230,15 @@ export class Tabbrowser {
             );
             tabsFragment.appendChild(tabGroup.node);
           }
+        } else {
+          // The unknown group cannot be recreated, so the tab is restored
+          // ungrouped. The append below is what inserts the tab at all: a tab
+          // that is never appended has no position.
+          if (!splitView) {
+            tabsFragment.appendChild(tab);
+          } else if (splitView?.node) {
+            tabsFragment.appendChild(splitView.node);
+          }
         }
       } else {
         if (tab.hidden) {
