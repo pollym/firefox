@@ -917,6 +917,15 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
   }
 
   /**
+   * Whether the card details note a security code.
+   *
+   * @returns {boolean}
+   */
+  get showsSecurityCode() {
+    return this.savesSecurityCode;
+  }
+
+  /**
    * We have not yet sync address and credit card design. After syncing,
    * we should be able to use the same "class"
    */
@@ -1012,10 +1021,17 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
 
   updateDescription(label) {
     const { l10nId, securityCodeL10nId } = this.ui.description;
-    this.doc.l10n.setAttributes(
-      label,
-      securityCodeL10nId && this.savesSecurityCode ? securityCodeL10nId : l10nId
-    );
+    const id =
+      securityCodeL10nId && this.savesSecurityCode
+        ? securityCodeL10nId
+        : l10nId;
+    label.hidden = !id;
+    if (id) {
+      this.doc.l10n.setAttributes(label, id);
+    } else {
+      label.removeAttribute("data-l10n-id");
+      label.textContent = "";
+    }
   }
 
   appendCardDetails(line, name) {
@@ -1034,7 +1050,7 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
       args.year = String(year).slice(-2);
     }
 
-    if (this.savesSecurityCode) {
+    if (this.showsSecurityCode) {
       parts.push("security-code");
       args.securityCode = lazy.CreditCard.formatSecurityCodeName(
         this.newRecord
@@ -1055,25 +1071,6 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
       return;
     }
     this.doc.l10n.setAttributes(line, l10nId, args);
-  }
-
-  appendSecurityCodeCheckbox() {
-    const checkbox = this.doc.createElement("moz-checkbox");
-    checkbox.checked = Services.prefs.getBoolPref(
-      FormAutofill.ENABLED_AUTOFILL_CREDITCARDS_CVV_PREF
-    );
-    checkbox.setAttribute("support-page", "credit-card-autofill");
-    this.doc.l10n.setAttributes(
-      checkbox,
-      "credit-card-doorhanger-save-security-codes-checkbox"
-    );
-    checkbox.addEventListener("change", () => {
-      Services.prefs.setBoolPref(
-        FormAutofill.ENABLED_AUTOFILL_CREDITCARDS_CVV_PREF,
-        checkbox.checked
-      );
-    });
-    this.content.appendChild(checkbox);
   }
 
   appendSecurityCodeToggle() {
@@ -1187,8 +1184,20 @@ export class CreditCardUpdateDoorhanger extends CreditCardSaveDoorhanger {
     super(browser, oldRecord, newRecord, flowId);
   }
 
-  appendSecurityCodeControl() {
-    this.appendSecurityCodeCheckbox();
+  get showsSecurityCode() {
+    return !!this.oldRecord["cc-csc"];
+  }
+
+  appendSecurityCodeControl() {}
+
+  // A form submitted without a security code would otherwise clear the stored
+  // one.
+  recordToSave() {
+    const record = { ...super.recordToSave() };
+    if (!record["cc-csc"]) {
+      delete record["cc-csc"];
+    }
+    return record;
   }
 }
 
@@ -1596,24 +1605,36 @@ CONTENT = {
       tooltiptext: l10n.formatValueSync("autofill-message-tooltip"),
     },
     header: {
-      l10nId: "credit-card-update-doorhanger-header",
+      get l10nId() {
+        return FormAutofill.isAutofillCreditCardCVVSupported
+          ? "credit-card-update-payment-method-doorhanger-header"
+          : "credit-card-update-doorhanger-header";
+      },
     },
     description: {
       get l10nId() {
-        return FormAutofill.isAutofillCreditCardCVVEnabled
-          ? "credit-card-save-doorhanger-description-security-code"
+        return FormAutofill.isAutofillCreditCardCVVSupported
+          ? null
           : "credit-card-update-doorhanger-description";
       },
     },
     content: {},
     footer: {
       mainAction: {
-        l10nId: "credit-card-capture-update-button",
+        get l10nId() {
+          return FormAutofill.isAutofillCreditCardCVVSupported
+            ? "credit-card-capture-update-payment-method-button"
+            : "credit-card-capture-update-button";
+        },
         callbackState: "update",
       },
       secondaryActions: [
         {
-          l10nId: "credit-card-capture-save-new-button",
+          get l10nId() {
+            return FormAutofill.isAutofillCreditCardCVVSupported
+              ? "credit-card-capture-save-new-payment-method-button"
+              : "credit-card-capture-save-new-button";
+          },
           callbackState: "create",
         },
       ],
