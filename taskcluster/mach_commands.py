@@ -290,6 +290,8 @@ def taskgraph_decision(command_context, **options):
 
         try:
             t_params_start = time.monotonic()
+            if monitor is not None:
+                monitor.begin_phase("parameters")
             graph_config = load_graph_config(options.get("root") or "taskcluster")
             register_gecko_taskgraph(graph_config)
             # Honor the graph_config's own register hook (e.g.
@@ -302,10 +304,16 @@ def taskgraph_decision(command_context, **options):
                 graph_config.register()
             parameters = get_decision_parameters(graph_config, options)
             t_params_end = time.monotonic()
+            if monitor is not None:
+                monitor.finish_phase("parameters")
 
             t_taskgraph_start = time.monotonic()
+            if monitor is not None:
+                monitor.begin_phase("taskgraph")
             ret = taskgraph_decision(options, parameters)
             t_taskgraph_end = time.monotonic()
+            if monitor is not None:
+                monitor.finish_phase("taskgraph")
         finally:
             if monitor is not None:
                 monitor.stop()
