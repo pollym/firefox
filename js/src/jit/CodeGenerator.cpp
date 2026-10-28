@@ -2305,10 +2305,13 @@ static void UpdateRegExpStatics(MacroAssembler& masm, Register regexp,
   masm.branchPtr(Assembler::Equal, matchesInputAddress, input, &storeLazyState);
 
   masm.bind(&slowPath);
-  masm.guardedCallPreBarrier(lazySourceAddress, MIRType::String);
+  Label skipPreBarriers;
+  masm.branchTestNeedsMarkingBarrier(Assembler::Zero, &skipPreBarriers);
+  masm.unguardedCallPreBarrier(lazySourceAddress, MIRType::String);
+  masm.unguardedCallPreBarrier(pendingInputAddress, MIRType::String);
+  masm.unguardedCallPreBarrier(matchesInputAddress, MIRType::String);
+  masm.bind(&skipPreBarriers);
   masm.storePtr(temp2, lazySourceAddress);
-  masm.guardedCallPreBarrier(pendingInputAddress, MIRType::String);
-  masm.guardedCallPreBarrier(matchesInputAddress, MIRType::String);
 
   if (initialStringHeap == gc::Heap::Default) {
     // Writing into RegExpStatics tenured memory; must post-barrier.
