@@ -51,6 +51,11 @@ if CONFIG["OS_TARGET"] == "Darwin":
         "TestNativeLayerCA.mm",
     ]
 
+if CONFIG["OS_ARCH"] == "WINNT":
+    SOURCES += [
+        "TestRenderD3D11TextureHost.cpp",
+    ]
+
 UNIFIED_SOURCES += [
     "/gfx/2d/unittest/%s" % p
     for p in [
