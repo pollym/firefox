@@ -13,14 +13,14 @@ transforms:
 
 kind-dependencies:
     - toolchain
-    - build-fat-aar
+    - build
 
 task-defaults:
     attributes:
         build_platform: android
         retrigger: true
     dependencies:
-        build-fat-aar: build-fat-aar-android-geckoview-fat-aar/opt
+        geckoview: build-android-x86_64/opt
     fetches:
         toolchain:
             - android-sdk-linux
@@ -28,7 +28,7 @@ task-defaults:
             - linux64-nimbus-fml
             - android-gradle-dependencies
             - linux64-jdk
-        build-fat-aar:
+        geckoview:
             - target.maven.zip
     run:
         using: gradlew

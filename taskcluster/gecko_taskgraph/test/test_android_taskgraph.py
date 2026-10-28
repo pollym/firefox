@@ -6,6 +6,7 @@
 Tests for the android_taskgraph job handlers and transforms.
 """
 
+import dataclasses
 import os
 
 import pytest
@@ -13,6 +14,7 @@ from android_taskgraph import job
 from android_taskgraph.transforms import build_android_app
 from mozunit import main
 from taskgraph.config import load_graph_config
+from taskgraph.task import Task
 from taskgraph.transforms.base import TransformConfig
 
 from gecko_taskgraph import GECKO
@@ -46,7 +48,7 @@ def test_gradlew_uploads_build_metrics(config, monkeypatch):
         },
         "worker": {"implementation": "docker-worker"},
     }
-    taskdesc = {}
+    taskdesc = {"dependencies": {}}
 
     job.configure_gradlew(config, task, taskdesc)
 
@@ -58,6 +60,49 @@ def test_gradlew_uploads_build_metrics(config, monkeypatch):
         "name": "public/build/build-metrics",
         "path": job.BUILD_METRICS_DIR,
     } in worker["artifacts"]
+
+
+@pytest.mark.parametrize(
+    "kind,mozconfig,archs",
+    [
+        ("build", "android-x86_64/nightly", None),
+        (
+            "build-fat-aar",
+            "android-arm/nightly-android-lints",
+            "armeabi-v7a,arm64-v8a,x86_64",
+        ),
+    ],
+)
+def test_gradlew_geckoview_dependency(config, monkeypatch, kind, mozconfig, archs):
+    monkeypatch.setattr(job, "configure_taskdesc_for_run", lambda *args: None)
+    geckoview = Task(
+        kind=kind,
+        label="geckoview",
+        attributes={},
+        task={
+            "payload": {
+                "env": {
+                    "MOZCONFIG": "mobile/android/config/mozconfigs/android-x86_64/nightly"
+                }
+            }
+        },
+    )
+    config = dataclasses.replace(
+        config, kind_dependencies_tasks={"geckoview": geckoview}
+    )
+    task = {
+        "run": {"using": "gradlew", "gradlew": ["assembleDebug"]},
+        "worker": {"implementation": "docker-worker"},
+    }
+    taskdesc = {"dependencies": {"geckoview": "geckoview"}}
+
+    job.configure_gradlew(config, task, taskdesc)
+
+    env = taskdesc["worker"]["env"]
+    assert env["MOZCONFIG"] == (
+        "/builds/worker/checkouts/gecko/mobile/android/config/mozconfigs/" + mozconfig
+    )
+    assert env.get("MOZ_ANDROID_FAT_AAR_ARCHITECTURES") == archs
 
 
 def test_track_build_times_labels_the_perfherder_series(config):

@@ -95,16 +95,17 @@ def configure_gradlew(config, job, taskdesc):
         ),
         "MOZ_BUILD_DATE": config.params["moz_build_date"],
     })
-    worker["env"].setdefault(
-        "MOZCONFIG",
-        path.join(
-            topsrc_dir,
-            "mobile/android/config/mozconfigs/android-arm/nightly-android-lints",
-        ),
+    geckoview = config.kind_dependencies_tasks.get(
+        taskdesc["dependencies"].get("geckoview")
     )
-    worker["env"].setdefault(
-        "MOZ_ANDROID_FAT_AAR_ARCHITECTURES", "armeabi-v7a,arm64-v8a,x86_64"
-    )
+    if geckoview and geckoview.kind == "build":
+        mozconfig = geckoview.task["payload"]["env"]["MOZCONFIG"]
+    else:
+        mozconfig = "mobile/android/config/mozconfigs/android-arm/nightly-android-lints"
+        worker["env"].setdefault(
+            "MOZ_ANDROID_FAT_AAR_ARCHITECTURES", "armeabi-v7a,arm64-v8a,x86_64"
+        )
+    worker["env"].setdefault("MOZCONFIG", path.join(topsrc_dir, mozconfig))
 
     dummy_secrets = [
         _generate_dummy_secret_command(secret)
