@@ -289,7 +289,9 @@ static uint16_t CreateMaiInterfaces(Accessible* aAccessible) {
     interfaces |= 1 << MAI_INTERFACE_TABLE_CELL;
   }
 
-  if (aAccessible->IsImage()) {
+  const nsRoleMapEntry* roleMapEntry = aAccessible->ARIARoleMap();
+  if (aAccessible->IsImage() ||
+      (roleMapEntry && roleMapEntry->role == roles::GRAPHIC)) {
     interfaces |= 1 << MAI_INTERFACE_IMAGE;
   }
 
