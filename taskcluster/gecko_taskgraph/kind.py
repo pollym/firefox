@@ -10,6 +10,30 @@ from mozsystemmonitor.resourcemonitor import SystemResourceMonitor
 from taskgraph.generator import Kind
 
 
+def _received_tasks(kind, loaded, tasks):
+    SystemResourceMonitor.record_marker(
+        "Kind result",
+        loaded,
+        time.monotonic(),
+        {"type": "Text", "text": f"{kind} ({len(tasks)} tasks)"},
+    )
+    return tasks
+
+
+class _KindTasks(list):
+    """The tasks of a kind, recording a marker covering how long they take to
+    reach the process that loaded the kind in another process, from when they
+    were loaded until they are unpickled."""
+
+    def __init__(self, tasks, kind, loaded):
+        super().__init__(tasks)
+        self.kind = kind
+        self.loaded = loaded
+
+    def __reduce__(self):
+        return (_received_tasks, (self.kind, self.loaded, list(self)))
+
+
 @dataclass(frozen=True)
 class ProfiledKind(Kind):
     """A kind recording how long loading its tasks takes as a marker in the
@@ -46,10 +70,11 @@ class ProfiledKind(Kind):
                 {"type": "Text", "text": f"{self.name} (failed)"},
             )
             raise
+        loaded = time.monotonic()
         SystemResourceMonitor.record_marker(
             "Kind",
             start,
-            time.monotonic(),
+            loaded,
             {"type": "Text", "text": f"{self.name} ({len(tasks)} tasks)"},
         )
-        return tasks
+        return _KindTasks(tasks, self.name, loaded)

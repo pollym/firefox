@@ -9,6 +9,7 @@ import os
 import re
 
 import attr
+from mozsystemmonitor.resourcemonitor import SystemResourceMonitor
 from taskcluster.utils import fromNow
 from taskgraph.util.keyed_by import evaluate_keyed_by
 from taskgraph.util.verify import (
@@ -43,6 +44,16 @@ verifications.add("full_task_graph")(verify_routes_notification_filters)
 verifications.add("full_task_graph")(verify_dependency_tiers)
 
 verifications.add("optimized_task_graph")(verify_always_optimized)
+
+
+def profiled_verifications(name, *args, **kwargs):
+    """Run the verifications of a generation phase, recording a marker covering
+    them in the resource usage profile."""
+    SystemResourceMonitor.begin_marker("Verify", name)
+    try:
+        verifications(name, *args, **kwargs)
+    finally:
+        SystemResourceMonitor.end_marker("Verify", name)
 
 
 @attr.s(frozen=True)

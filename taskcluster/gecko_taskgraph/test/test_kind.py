@@ -68,6 +68,16 @@ def test_profiled_kind_marker(kinds_dir, monitor, start_method):
     assert monitor.start_time < start < end < monitor.end_time
     assert data == {"type": "Text", "text": "fake (3 tasks)"}
 
+    results = [m for m in monitor.markers if m[0] == "Kind result"]
+    if start_method is None:
+        assert results == []
+    else:
+        assert len(results) == 1
+        _, result_start, result_end, result_data, _ = results[0]
+        assert result_start == end
+        assert result_start < result_end < monitor.end_time
+        assert result_data == data
+
 
 def test_profiled_kind_marker_on_failure(kinds_dir, monitor):
     graph_config = fake_load_graph_config(str(kinds_dir))

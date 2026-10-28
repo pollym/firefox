@@ -110,14 +110,14 @@ def register(graph_config):
         dependencies,  # noqa - trigger group_by registration
     )
     from gecko_taskgraph.kind import ProfiledKind
-    from gecko_taskgraph.util.verify import verifications
+    from gecko_taskgraph.util.verify import profiled_verifications
 
     register_mozilla_taskgraph(graph_config)
     register_android_taskgraph(graph_config)
 
     # Don't use the upstream verifications, and replace them with our own.
     # TODO Investigate merging our verifications with upstream.
-    generator.verifications = verifications
+    generator.verifications = profiled_verifications
 
     # Workers loading kinds in parallel find ProfiledKind.load_tasks through
     # the kind instances they are sent, even when not forked.
