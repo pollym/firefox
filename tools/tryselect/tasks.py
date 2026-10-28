@@ -15,7 +15,9 @@ import mozpack.path as mozpath
 import taskgraph
 from mach.util import get_state_dir
 from mozbuild.base import MozbuildObject
+from mozbuild.util import construct_log_filename
 from mozpack.files import FileFinder
+from mozsystemmonitor.resourcemonitor import SystemResourceMonitor
 from moztest.resolve import TestManifestLoader, TestResolver, get_suite_definition
 from taskgraph.generator import TaskGraphGenerator, load_graph_config
 from taskgraph.parameters import ParameterMismatch, parameters_loader
@@ -141,6 +143,16 @@ def suggest_watchman_setup():
     if sys.platform == "win32":
         powershell = WATCHMAN_HINT_POWERSHELL.format(watchman_json=watchman_json)
     print(WATCHMAN_HINT.format(watchman_json=watchman_json, powershell=powershell))
+
+
+def write_profile(monitor):
+    log_subdir = os.path.join("logs", "try")
+    build._ensure_state_subdir_exists(log_subdir)
+    profile_path = build._get_state_filename(
+        construct_log_filename("profile"), subdir=log_subdir
+    )
+    with open(profile_path, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(monitor.as_profile(), f)
 
 
 def cache_key(attr, params, disable_target_task_filter, target_tasks_method):
@@ -270,11 +282,21 @@ def generate_tasks(
             json.dump(tg.to_json(), fh)
         return add_chunk_patterns(tg)
 
-    # Cache both full_task_set and target_task_set regardless of whether or not
-    # --full was requested. Caching is cheap and can potentially save a lot of
-    # time.
-    tg_full = generate("full_task_set")
-    tg_target = generate("target_task_set")
+    monitor = None
+    if not SystemResourceMonitor.instance:
+        monitor = SystemResourceMonitor(poll_interval=0.1)
+        monitor.start()
+
+    try:
+        # Cache both full_task_set and target_task_set regardless of whether or
+        # not --full was requested. Caching is cheap and can potentially save a
+        # lot of time.
+        tg_full = generate("full_task_set")
+        tg_target = generate("target_task_set")
+    finally:
+        if monitor:
+            monitor.stop()
+            write_profile(monitor)
 
     os.chdir(cwd)
     if full:
