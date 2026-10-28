@@ -3842,7 +3842,7 @@ pref("browser.ipProtection.l10nGateVersion", 0);
 // Pref to enable support for site exceptions
 pref("browser.ipProtection.features.siteExceptions", true);
 // Pref to enable support for site inclusions
-pref("browser.ipProtection.features.siteInclusions", false);
+pref("browser.ipProtection.features.siteInclusions", true);
 // Pref to track if the site inclusion prompt has been shown in the VPN panel
 pref("browser.ipProtection.siteInclusionPromptShown", false);
 pref("browser.ipProtection.log", false);
