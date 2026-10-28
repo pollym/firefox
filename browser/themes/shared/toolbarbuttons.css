@@ -130,8 +130,12 @@
 /* Primary toolbar buttons */
 
 .toolbarbutton-1 {
-  :root:not([customizing]) &[disabled] {
+  &[disabled] {
     opacity: var(--toolbarbutton-opacity-disabled);
+
+    :root[customizing] & {
+      opacity: 1;
+    }
   }
 
   /* Special-case the overflow and the hamburger button so they show up disabled
