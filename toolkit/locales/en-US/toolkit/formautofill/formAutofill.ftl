@@ -85,8 +85,10 @@ credit-card-capture-update-button =
 ## and security codes can be saved.
 
 credit-card-update-saved-payment-method-doorhanger-header = Update saved payment method?
-credit-card-capture-save-new-payment-method-button =
-    .label = Save new payment method
+# Saves the submitted details as a new payment method instead of updating
+# the saved one.
+credit-card-capture-save-as-new-payment-method-button =
+    .label = Save as new
     .accessKey = S
 credit-card-capture-update-payment-method-button =
     .label = Update

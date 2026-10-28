@@ -1722,7 +1722,7 @@ CONTENT = {
         {
           get l10nId() {
             return FormAutofill.isAutofillCreditCardCVVSupported
-              ? "credit-card-capture-save-new-payment-method-button"
+              ? "credit-card-capture-save-as-new-payment-method-button"
               : "credit-card-capture-save-new-button";
           },
           callbackState: "create",
@@ -1772,7 +1772,7 @@ CONTENT = {
           get l10nId() {
             return FormAutofill.isAutofillCreditCardCVVEnabled
               ? "credit-card-capture-dismiss-button"
-              : "credit-card-capture-save-new-payment-method-button";
+              : "credit-card-capture-save-as-new-payment-method-button";
           },
           get callbackState() {
             return FormAutofill.isAutofillCreditCardCVVEnabled

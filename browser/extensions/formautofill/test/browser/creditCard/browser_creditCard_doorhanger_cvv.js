@@ -598,7 +598,7 @@ async function checkPlainUpdateContent(content, { withSecurityCode }) {
   );
   is(
     notification.getAttribute("secondarybuttonlabel"),
-    await formatLabel("credit-card-capture-save-new-payment-method-button"),
+    await formatLabel("credit-card-capture-save-as-new-payment-method-button"),
     "The secondary button saves a new payment method"
   );
   ok(
@@ -858,7 +858,9 @@ add_task(async function test_security_code_toggle_switches_to_plain_update() {
     );
     is(
       notification.getAttribute("secondarybuttonlabel"),
-      await formatLabel("credit-card-capture-save-new-payment-method-button"),
+      await formatLabel(
+        "credit-card-capture-save-as-new-payment-method-button"
+      ),
       "The secondary button saves a new payment method"
     );
     ok(
@@ -989,7 +991,7 @@ add_task(
         {
           header: "credit-card-update-saved-payment-method-doorhanger-header",
           main: "credit-card-capture-update-payment-method-button",
-          secondary: "credit-card-capture-save-new-payment-method-button",
+          secondary: "credit-card-capture-save-as-new-payment-method-button",
           dropdown: false,
         },
         "With the toggle off"
