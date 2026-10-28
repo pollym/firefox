@@ -212,7 +212,15 @@ static inline void SafeReleaseNotLostData(RefPtr<webgl::NotLostData>& notLost) {
 
 ClientWebGLContext::~ClientWebGLContext() {
   RemovePostRefreshObserver();
+  RemoveShutdownObserver();
   SafeReleaseNotLostData(mNotLost);
+}
+
+nsresult ClientWebGLContext::Initialize() {
+  if (NS_WARN_IF(!AddShutdownObserver())) {
+    return NS_ERROR_FAILURE;
+  }
+  return NS_OK;
 }
 
 void ClientWebGLContext::JsWarning(const std::string& utf8) const {
@@ -334,11 +342,45 @@ void ClientWebGLContext::Event_webglcontextlost() const {
   const bool useDefaultHandler = DispatchEvent(u"webglcontextlost"_ns);
   if (useDefaultHandler) {
     mLossStatus = webgl::LossStatus::LostForever;
+    mRemoteCanvasLost = false;
   }
 
-  if (mLossStatus == webgl::LossStatus::Lost) {
+  // If we lost the remote canvas, OnRemoteCanvasRestored will restore us.
+  if (mLossStatus == webgl::LossStatus::Lost && !mRemoteCanvasLost) {
     RestoreContext(webgl::LossStatus::Lost);
   }
+}
+
+void ClientWebGLContext::OnRemoteCanvasLost() {
+  if (mLossStatus == webgl::LossStatus::LostForever) {
+    return;
+  }
+
+  mRemoteCanvasLost = true;
+  if (mNotLost) {
+    OnContextLoss(webgl::ContextLossReason::None);
+  }
+}
+
+void ClientWebGLContext::OnRemoteCanvasRestored() {
+  if (!mRemoteCanvasLost) {
+    return;
+  }
+
+  // Dispatch so that we run after any pending webglcontextlost event.
+  const auto weak = WeakPtr<const ClientWebGLContext>(this);
+  const auto fnRun = [weak]() {
+    const auto strong = RefPtr<const ClientWebGLContext>(weak);
+    if (!strong || !strong->mRemoteCanvasLost ||
+        strong->mLossStatus != webgl::LossStatus::Lost) {
+      return;
+    }
+    strong->RestoreContext(webgl::LossStatus::Lost);
+  };
+  already_AddRefed<mozilla::CancelableRunnable> runnable =
+      NS_NewCancelableRunnableFunction(
+          "ClientWebGLContext::OnRemoteCanvasRestored", fnRun);
+  NS_DispatchToCurrentThread(std::move(runnable));
 }
 
 void ClientWebGLContext::RestoreContext(
@@ -394,11 +436,20 @@ void ClientWebGLContext::Event_webglcontextrestored() const {
   const auto mutThis = const_cast<ClientWebGLContext*>(
       this);  // TODO: Make context loss non-mutable.
   if (!mutThis->CreateHostContext(requestSize)) {
+    // The new CanvasManagerChild may already be dead if the remote process
+    // was lost again, so wait for it to be recreated before trying again.
+    if (mRemoteCanvasLost) {
+      mLossStatus = webgl::LossStatus::Lost;
+      JsWarning(mDeferContextCreationError);
+      mDeferContextCreationError.clear();
+      return;
+    }
     mLossStatus = webgl::LossStatus::LostForever;
     mutThis->MaybeThrowContextCreationError();
     return;
   }
 
+  mRemoteCanvasLost = false;
   mResetLayer = true;
 
   (void)DispatchEvent(u"webglcontextrestored"_ns);
@@ -7635,10 +7686,21 @@ NS_INTERFACE_MAP_END
 NS_IMPL_CYCLE_COLLECTING_ADDREF(ClientWebGLContext)
 NS_IMPL_CYCLE_COLLECTING_RELEASE(ClientWebGLContext)
 
-NS_IMPL_CYCLE_COLLECTION_WRAPPERCACHE_WEAK_PTR(
-    ClientWebGLContext, mExtLoseContext, mNotLost,
-    // Don't forget nsICanvasRenderingContextInternal:
-    mCanvasElement, mOffscreenCanvas)
+NS_IMPL_CYCLE_COLLECTION_WRAPPERCACHE_CLASS(ClientWebGLContext)
+
+NS_IMPL_CYCLE_COLLECTION_UNLINK_BEGIN(ClientWebGLContext)
+  tmp->RemoveShutdownObserver();
+  // Don't forget nsICanvasRenderingContextInternal's members.
+  NS_IMPL_CYCLE_COLLECTION_UNLINK(mExtLoseContext, mNotLost, mCanvasElement,
+                                  mOffscreenCanvas)
+  NS_IMPL_CYCLE_COLLECTION_UNLINK_PRESERVED_WRAPPER
+  NS_IMPL_CYCLE_COLLECTION_UNLINK_WEAK_PTR
+NS_IMPL_CYCLE_COLLECTION_UNLINK_END
+
+NS_IMPL_CYCLE_COLLECTION_TRAVERSE_BEGIN(ClientWebGLContext)
+  NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mExtLoseContext, mNotLost, mCanvasElement,
+                                    mOffscreenCanvas)
+NS_IMPL_CYCLE_COLLECTION_TRAVERSE_END
 
 // -----------------------------
 
