@@ -224,7 +224,8 @@ export class UrlbarParent extends JSWindowActorParent {
           message.data.searchTerms,
           message.data.where,
           message.data.inBackground,
-          message.data.browserId
+          message.data.browserId,
+          message.data.searchData
         );
         break;
       case "OpenSearchForm":

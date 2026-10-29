@@ -1467,10 +1467,9 @@ ${
       searchSource: this.getSearchSource(event),
       windowMode: this.windowMode,
     });
-    this._recordSearch({
+    let searchData = this.#getSearchData({
       engine,
       event,
-      where,
       query: searchString,
     });
     openParams.allowInheritPrincipal = false;
@@ -1487,6 +1486,7 @@ ${
       where,
       params: openParams,
       browserId: this.#selectedBrowserId,
+      searchData,
     });
   }
 
@@ -1682,8 +1682,8 @@ ${
     // TODO (Bug 1604927): If the urlbar results are restricted to a specific
     // engine, here we must search with that specific engine; indeed the
     // docshell wouldn't know about our engine restriction.
-    // Also remember to invoke this._recordSearch, after replacing url with
-    // the appropriate engine submission url.
+    // Also remember to pass the search data from this.#getSearchData to the
+    // load, after replacing url with the appropriate engine submission url.
     //
     // The heuristic fetch and its uriFixup fallback are parent-only, and they
     // depend on the current browser's per-tab data and navigation epoch, which
@@ -1995,6 +1995,7 @@ ${
     let loadRequest = resultUrl
       ? { urlLoad: { url: resultUrl, postData: null } }
       : UrlbarShared.getLoadRequestFromResult(result, { element });
+    let searchData = null;
 
     switch (result.type) {
       case UrlbarShared.RESULT_TYPE.URL: {
@@ -2131,10 +2132,9 @@ ${
           result.payload.engine
         );
 
-        this._recordSearch({
+        searchData = this.#getSearchData({
           engine,
           event,
-          where,
           query: result.payload.suggestion || result.payload.query,
           searchActionDetails: actionDetails,
           opensInPrivateWindow: result.payload.inPrivateWindow,
@@ -2345,6 +2345,7 @@ ${
       },
       keepViewOpen,
       browserId,
+      searchData,
     });
   }
 
@@ -2831,11 +2832,10 @@ ${
     let trimmedValue = value.trim();
     this._lastSearchString = trimmedValue;
     if (trimmedValue) {
-      this._recordSearch({
+      let searchData = this.#getSearchData({
         engine: searchEngine,
         query: trimmedValue,
         event,
-        where,
       });
 
       if (where == "current") {
@@ -2861,7 +2861,8 @@ ${
         trimmedValue,
         where,
         inBackground,
-        this.#selectedBrowserId
+        this.#selectedBrowserId,
+        searchData
       );
     } else {
       // Telemetry is handled by the function.
@@ -4000,7 +4001,8 @@ ${
    */
 
   /**
-   * Records search telemetry for a search and adds it to form history.
+   * Gets the data for recording search telemetry and adding the search to form
+   * history. The parent records it once the search's URL is being loaded.
    *
    * @param {object} options
    * @param {PartialSearchEngine|SearchEngine} options.engine
@@ -4009,40 +4011,30 @@ ${
    *   The search query.
    * @param {Event} options.event
    *   The event that triggered this query.
-   * @param {string} [options.where]
-   *   Where the search opens.
    * @param {SearchActionDetails} [options.searchActionDetails]
    *   The details associated with this search query.
    * @param {boolean} [options.opensInPrivateWindow]
    *   Whether the search opens in a new private window.
+   * @returns {Parameters<UrlbarParentController["recordSearch"]>[0]}
    */
-  _recordSearch({
+  #getSearchData({
     engine,
     query,
     event,
-    where = "current",
     searchActionDetails = {},
     opensInPrivateWindow = false,
   }) {
-    const isOneOff = this.view.oneOffSearchButtons?.eventTargetIsAOneOff(event);
-    const searchSource = this.getSearchSource(event);
-
-    let searchData = {
+    return {
       engineId: engine.id,
-      searchSource,
+      searchSource: this.getSearchSource(event),
       query,
       opensInPrivateWindow,
       details: {
         ...searchActionDetails,
-        isOneOff,
+        isOneOff: this.view.oneOffSearchButtons?.eventTargetIsAOneOff(event),
         newtabSessionId: this._handoffSession,
       },
     };
-    if (where.startsWith("tab")) {
-      this.parentController.recordSearchInOpenedTab(searchData);
-    } else {
-      this.parentController.recordSearch(searchData);
-    }
   }
 
   /**
@@ -4245,6 +4237,8 @@ ${
    *   The id of the browser to load into. Defaults to the parent resolving the
    *   selected browser at load time; pass it to pin an asynchronously-resolved
    *   load to the tab selected when it was committed.
+   * @param {?Parameters<UrlbarParentController["recordSearch"]>[0]} [options.searchData]
+   *   For a search, the data the parent records once the load has gone ahead.
    */
   async #loadURL({
     loadRequest,
@@ -4254,6 +4248,7 @@ ${
     resultDetails = null,
     keepViewOpen = false,
     browserId = null,
+    searchData = null,
   }) {
     let keyDownEnterDeferred;
     if (
@@ -4325,6 +4320,7 @@ ${
       params,
       browserId,
       userTypedValue,
+      searchData,
     });
     // Hand the loaded browser's id to the deferred-Enter key up handler so it
     // can focus it parent-side.

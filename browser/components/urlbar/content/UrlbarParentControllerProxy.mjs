@@ -483,7 +483,7 @@ export class UrlbarParentControllerProxy {
   }
 
   /** @type {UrlbarParentController["openSERP"]} */
-  openSERP(engineId, searchTerms, where, inBackground, browserId) {
+  openSERP(engineId, searchTerms, where, inBackground, browserId, searchData) {
     this.#port.sendAsyncMessage("OpenSERP", {
       instanceId: this.#instanceId,
       engineId,
@@ -491,6 +491,7 @@ export class UrlbarParentControllerProxy {
       where,
       inBackground,
       browserId,
+      searchData,
     });
   }
 
