@@ -97,14 +97,17 @@ formautofill.creditcards:
           How many launches had already tried and failed before this one, 0 on
           the first. A retry emits an otherwise identical event, so this is
           what separates a profile that failed once from one failing every
-          time. The migrator gives up after 3.
+          time. The migrator gives up after 10. Always 0 for "to_json", which
+          is not limited.
         type: quantity
       result:
         description: >
           "ok" when the store copied into ended up holding exactly what the
           source holds -- every record arrived and nothing the source lacks
           survived, compared by guid rather than by count -- so the profile
-          could be handed to it; otherwise "error".
+          could be handed to it; otherwise "error". A "to_json" copy hands the
+          profile back to the JSON store either way, so an "error" there means
+          some records did not make it back.
         type: string
       source_total:
         description: >
@@ -2017,14 +2020,17 @@ formautofill.addresses:
           How many launches had already tried and failed before this one, 0 on
           the first. A retry emits an otherwise identical event, so this is
           what separates a profile that failed once from one failing every
-          time. The migrator gives up after 3.
+          time. The migrator gives up after 10. Always 0 for "to_json", which
+          is not limited.
         type: quantity
       result:
         description: >
           "ok" when the store copied into ended up holding exactly what the
           source holds -- every record arrived and nothing the source lacks
           survived, compared by guid rather than by count -- so the profile
-          could be handed to it; otherwise "error".
+          could be handed to it; otherwise "error". A "to_json" copy hands the
+          profile back to the JSON store either way, so an "error" there means
+          some records did not make it back.
         type: string
       source_total:
         description: >
