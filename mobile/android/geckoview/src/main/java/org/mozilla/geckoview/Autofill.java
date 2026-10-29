@@ -33,6 +33,9 @@ import org.mozilla.gecko.util.ThreadUtils;
 
 /** Autofill functionality for forms and input fields. */
 public class Autofill {
+  /** Public constructor for Autofill. */
+  public Autofill() {}
+
   private static final boolean DEBUG = false;
 
   /** Autofill notification type definitions. */
