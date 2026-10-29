@@ -103,12 +103,6 @@ NS_IMETHODIMP MockNetworkLayerController::AddNetAddrOverride(nsINetAddr* aFrom,
     AutoWriteLock lock(mLock);
     mNetAddrOverrides.InsertOrUpdate(addrPort, toAddr);
   }
-  if (nsIOService::UseSocketProcess()) {
-    RefPtr<SocketProcessParent> parent = SocketProcessParent::GetSingleton();
-    if (parent) {
-      (void)parent->SendAddNetAddrOverride(fromAddr, toAddr);
-    }
-  }
   return NS_OK;
 }
 
@@ -117,12 +111,6 @@ NS_IMETHODIMP MockNetworkLayerController::ClearNetAddrOverrides() {
   {
     AutoWriteLock lock(mLock);
     mNetAddrOverrides.Clear();
-  }
-  if (nsIOService::UseSocketProcess()) {
-    RefPtr<SocketProcessParent> parent = SocketProcessParent::GetSingleton();
-    if (parent) {
-      (void)parent->SendClearNetAddrOverrides();
-    }
   }
   return NS_OK;
 }

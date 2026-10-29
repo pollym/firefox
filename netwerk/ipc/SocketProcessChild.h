@@ -107,11 +107,6 @@ class SocketProcessChild final : public PSocketProcessChild {
   Maybe<RefPtr<BackgroundDataBridgeParent>> GetAndRemoveDataBridge(
       uint64_t aChannelId);
 
-  mozilla::ipc::IPCResult RecvClearSessionCache(
-      ClearSessionCacheResolver&& aResolve);
-  mozilla::ipc::IPCResult RecvClearPrivateBrowsingSessionCache(
-      ClearPrivateBrowsingSessionCacheResolver&& aResolve);
-
   already_AddRefed<PTRRServiceChild> AllocPTRRServiceChild(
       const bool& aCaptiveIsPassed, const bool& aParentalControlEnabled,
       const nsTArray<nsCString>& aDNSSuffixList);
@@ -125,29 +120,11 @@ class SocketProcessChild final : public PSocketProcessChild {
   mozilla::ipc::IPCResult RecvPNativeDNSResolverOverrideConstructor(
       PNativeDNSResolverOverrideChild* aActor) override;
 
-  mozilla::ipc::IPCResult RecvNotifyObserver(const nsACString& aTopic,
-                                             const nsAString& aData);
-
-  mozilla::ipc::IPCResult RecvGetSocketData(GetSocketDataResolver&& aResolve);
-  mozilla::ipc::IPCResult RecvGetDNSCacheEntries(
-      GetDNSCacheEntriesResolver&& aResolve);
-  mozilla::ipc::IPCResult RecvGetHttpConnectionData(
-      GetHttpConnectionDataResolver&& aResolve);
-  mozilla::ipc::IPCResult RecvGetHttp3ConnectionStatsData(
-      GetHttp3ConnectionStatsDataResolver&& aResolve);
-  mozilla::ipc::IPCResult RecvGetSSLTokensCacheData(
-      GetSSLTokensCacheDataResolver&& aResolve);
-
   mozilla::ipc::IPCResult RecvInitProxyAutoConfigChild(
       Endpoint<PProxyAutoConfigChild>&& aEndpoint);
 
-  mozilla::ipc::IPCResult RecvRecheckIPConnectivity();
-  mozilla::ipc::IPCResult RecvRecheckDNS();
-
   mozilla::ipc::IPCResult RecvFlushFOGData(FlushFOGDataResolver&& aResolver);
 
-  mozilla::ipc::IPCResult RecvLoadSSLTokensCache(
-      nsTArray<SSLTokensCacheRecordInfo>&& aRecords);
   mozilla::ipc::IPCResult RecvFlushSSLTokensCache(
       FlushSSLTokensCacheResolver&& aResolver);
 
@@ -162,10 +139,6 @@ class SocketProcessChild final : public PSocketProcessChild {
 
   already_AddRefed<psm::IPCClientCertsChild> GetIPCClientCertsActor();
   void CloseIPCClientCertsActor();
-
-  mozilla::ipc::IPCResult RecvAddNetAddrOverride(const NetAddr& aFrom,
-                                                 const NetAddr& aTo);
-  mozilla::ipc::IPCResult RecvClearNetAddrOverrides();
 
  protected:
   friend class SocketProcessImpl;

@@ -27,7 +27,6 @@ class DNSServiceWrapper final : public nsPIDNSService {
   DNSServiceWrapper() = default;
 
   static already_AddRefed<nsIDNSService> GetSingleton();
-  static void SwitchToBackupDNSService();
 
  private:
   ~DNSServiceWrapper() = default;
@@ -36,7 +35,6 @@ class DNSServiceWrapper final : public nsPIDNSService {
 
   mozilla::Mutex mLock{"DNSServiceWrapper.mLock"};
   nsCOMPtr<nsIDNSService> mDNSServiceInUse MOZ_GUARDED_BY(mLock);
-  nsCOMPtr<nsIDNSService> mBackupDNSService;
 };
 
 class nsDNSService final : public mozilla::net::DNSServiceBase,

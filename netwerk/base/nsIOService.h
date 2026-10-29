@@ -132,8 +132,6 @@ class nsIOService final : public nsIIOService,
 
   nsresult LaunchSocketProcess();
 
-  static bool TooManySocketProcessCrash();
-  static void IncreaseSocketProcessCrashCount();
 #ifdef MOZ_WIDGET_ANDROID
   static bool ShouldAddAdditionalSearchHeaders(nsIURI* aURI, bool* val);
 #endif
@@ -248,8 +246,6 @@ class nsIOService final : public nsIIOService,
   nsTHashMap<nsCString, RuntimeProtocolHandler> mRuntimeProtocolHandlers
       MOZ_GUARDED_BY(mLock);
 
-  static uint32_t sSocketProcessCrashedCount;
-
   // These timestamps are needed for collecting telemetry on PR_Connect,
   // PR_ConnectContinue and PR_Close blocking time.  If we spend very long
   // time in any of these functions we want to know if and what network
@@ -267,14 +263,6 @@ class nsIOService final : public nsIIOService,
   // dispatch these events while socket process fires OnProcessLaunchComplete.
   // Note: this array is accessed only on the main thread.
   nsTArray<std::function<void()>> mPendingEvents;
-
-  // The observer notifications need to be forwarded to socket process.
-  nsTHashSet<nsCString> mObserverTopicForSocketProcess;
-  // Some noticications (e.g., NS_XPCOM_SHUTDOWN_OBSERVER_ID) are triggered in
-  // socket process, so we should not send the notifications again.
-  nsTHashSet<nsCString> mSocketProcessTopicBlockedList;
-  // Used to store the topics that are already observed by IOService.
-  nsTHashSet<nsCString> mIOServiceTopicList;
 
   nsCOMPtr<nsIObserverService> mObserverService;
 

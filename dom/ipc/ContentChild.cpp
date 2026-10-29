@@ -2068,11 +2068,6 @@ mozilla::ipc::IPCResult ContentChild::RecvNetworkLinkTypeChange(
   return IPC_OK();
 }
 
-mozilla::ipc::IPCResult ContentChild::RecvSocketProcessCrashed() {
-  nsIOService::IncreaseSocketProcessCrashCount();
-  return IPC_OK();
-}
-
 PRemotePrintJobChild* ContentChild::AllocPRemotePrintJobChild() {
   return new RemotePrintJobChild();
 }

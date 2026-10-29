@@ -77,29 +77,17 @@ class SSLTokensCache : public nsIMemoryReporter,
   static nsresult RemoveAll(const nsACString& aKey);
   static void Clear();
   // Clears the NSS in-memory client session cache (if NSS is initialized)
-  // and all resumption tokens, and (in the parent process) forwards the
-  // clear to the socket process via IPC. This is the entry point for
-  // "clear the TLS session cache" from anywhere in the tree; PSM no longer
-  // has its own copy of this logic.
+  // and all resumption tokens. This is the entry point for "clear the TLS
+  // session cache" from anywhere in the tree; PSM no longer has its own copy
+  // of this logic.
   static void ClearSessionCacheAndTokens();
-  // Forwards the IPC clear request to the socket process; no-op in non-parent
-  // processes.
-  static void ForwardClearToSocketProcess();
-  // Forwards a PBM-scoped cache-clear request to the socket process (parent
-  // only). The socket process clears only PBM SSLTokensCache entries and the
-  // NSS session cache; normal-browsing tokens are preserved.
-  static void ForwardClearPrivateBrowsingToSocketProcess();
   // Remove only private-browsing entries (privateBrowsingId != 0).
   static void ClearPrivateBrowsing();
-  // Socket-process only: clears the NSS in-memory client session cache (if
-  // NSS is initialized) and private-browsing resumption tokens. Invoked by
-  // the socket process in response to a PBM-scoped clear request.
-  static void ClearSessionCacheAndPBMTokens();
   static void RemoveByHostAndOAPattern(
       const nsACString& aHost, const mozilla::OriginAttributesPattern& aPattern)
       MOZ_EXCLUDES(sLock);
-  // Removes aHost's matching resumption tokens, clears the NSS in-memory
-  // client session cache, and forwards the clear to the socket process.
+  // Removes aHost's matching resumption tokens and clears the NSS in-memory
+  // client session cache.
   static void ClearSessionCacheAndTokensForHost(
       const nsACString& aHost, const mozilla::OriginAttributesPattern& aPattern)
       MOZ_EXCLUDES(sLock);
@@ -113,9 +101,6 @@ class SSLTokensCache : public nsIMemoryReporter,
   // Replace the cache with records from IPC; aRestored is their provenance.
   static void DeserializeFromIPC(nsTArray<SSLTokensCacheRecordInfo>&& aRecords,
                                  bool aRestored);
-  // Dispatches DeserializeFromIPC to a background thread.
-  static void DeserializeFromIPCAsync(
-      nsTArray<SSLTokensCacheRecordInfo>&& aRecords, bool aRestored);
 
   // Non-consuming snapshot of all current records, for about:networking.
   static void GetAllRecords(nsTArray<SSLTokensCacheRecordInfo>& aOut);

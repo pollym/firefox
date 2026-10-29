@@ -519,7 +519,6 @@ nsresult nsHttpHandler::Init() {
     obsService->AddObserver(this, "intl:app-locales-changed", true);
     obsService->AddObserver(this, "browser-delayed-startup-finished", true);
     obsService->AddObserver(this, "network:reset-http3-excluded-list", true);
-    obsService->AddObserver(this, "network:socket-process-crashed", true);
     obsService->AddObserver(this, "network:reset_third_party_roots_check",
                             true);
     obsService->AddObserver(this, "idle-daily", true);
@@ -2454,10 +2453,6 @@ nsHttpHandler::Observe(nsISupports* subject, const char* topic,
   } else if (!strcmp(topic, "network:reset-http3-excluded-list")) {
     MutexAutoLock lock(mHttpExclusionLock);
     mExcludedHttp3Origins.Clear();
-  } else if (!strcmp(topic, "network:socket-process-crashed")) {
-    ShutdownConnectionManager();
-    mConnMgr = nullptr;
-    (void)InitConnectionMgr();
   } else if (!strcmp(topic, "idle-daily")) {
     // Submit the local-network-access ping once per day
     if (XRE_IsParentProcess()) {

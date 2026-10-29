@@ -359,13 +359,6 @@ NetworkConnectivityService::RecheckDNS() {
     return NS_OK;
   }
 
-  if (nsIOService::UseSocketProcess()) {
-    RefPtr<SocketProcessParent> parent = SocketProcessParent::GetSingleton();
-    if (parent) {
-      (void)parent->SendRecheckDNS();
-    }
-  }
-
   nsresult rv;
   nsCOMPtr<nsIDNSService> dns = do_GetService(NS_DNSSERVICE_CONTRACTID);
   OriginAttributes attrs;
@@ -541,13 +534,6 @@ NetworkConnectivityService::RecheckIPConnectivity() {
       Preferences::GetBool("network.connectivity-service.enabled", false);
   if (!enabled) {
     return NS_OK;
-  }
-
-  if (nsIOService::UseSocketProcess()) {
-    RefPtr<SocketProcessParent> parent = SocketProcessParent::GetSingleton();
-    if (parent) {
-      (void)parent->SendRecheckIPConnectivity();
-    }
   }
 
   if (xpc::AreNonLocalConnectionsDisabled() &&

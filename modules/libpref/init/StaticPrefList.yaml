@@ -17653,13 +17653,6 @@
   value: true
   mirror: always
 
-# The maximum count that we allow socket prrocess to crash. If this count is
-# reached, we won't use networking over socket process.
-- name: network.max_socket_process_failed_count
-  type: RelaxedAtomicUint32
-  value: 1
-  mirror: always
-
 - name: network.allow_redirect_to_data
   type: RelaxedAtomicBool
   value: false

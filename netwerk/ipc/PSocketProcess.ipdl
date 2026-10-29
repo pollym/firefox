@@ -40,12 +40,7 @@ using mozilla::OriginAttributes from "mozilla/ipc/BackgroundUtils.h";
 using PRTime from "prtime.h";
 [RefCounted] using class nsIURI from "mozilla/ipc/URIUtils.h";
 using struct nsID from "nsID.h";
-using mozilla::net::SocketInfo from "mozilla/net/DashboardTypes.h";
-using mozilla::net::DNSCacheEntries from "mozilla/net/DashboardTypes.h";
-using mozilla::net::HttpRetParams from "mozilla/net/DashboardTypes.h";
-using mozilla::net::Http3ConnectionStatsParams from "mozilla/net/DashboardTypes.h";
 using mozilla::net::SSLTokensCacheRecordInfo from "mozilla/net/DashboardTypes.h";
-using mozilla::net::NetAddr from "mozilla/net/DNS.h";
 using nsIDNSService::DNSFlags from "nsIDNSService.h";
 
 #if defined(XP_WIN)
@@ -70,13 +65,6 @@ struct HttpHandlerInitArgs {
   nsCString mCompatFirefox;
   nsCString mCompatDevice;
   nsCString mDeviceModelId;
-};
-
-struct SocketDataArgs
-{
-  uint64_t totalSent;
-  uint64_t totalRecv;
-  SocketInfo[] info;
 };
 
 struct SocketProcessInitAttributes {
@@ -183,37 +171,17 @@ child:
                                    uint32_t maxBytesPerSecond);
   async PAltSvcTransaction(HttpConnectionInfoCloneArgs aConnInfo,
                            uint32_t aCaps);
-  async ClearSessionCache() returns (void_t ok);
-  async ClearPrivateBrowsingSessionCache() returns (void_t ok);
   async PTRRService(bool aCaptiveIsPassed,
                     bool aParentalControlEnabled,
                     nsCString[] aDNSSuffixList);
   async PNativeDNSResolverOverride();
-  async NotifyObserver(nsCString aTopic, nsString aData);
-
-  async GetSocketData()
-    returns (SocketDataArgs data);
-  async GetDNSCacheEntries()
-    returns (DNSCacheEntries[] entries);
-  async GetHttpConnectionData()
-    returns (HttpRetParams[] params);
-  async GetHttp3ConnectionStatsData()
-    returns (Http3ConnectionStatsParams[] params);
-  async GetSSLTokensCacheData()
-    returns (SSLTokensCacheRecordInfo[] records);
 
   async InitProxyAutoConfigChild(Endpoint<PProxyAutoConfigChild> endpoint);
-
-  async RecheckIPConnectivity();
-  async RecheckDNS();
 
   // Tells the Socket process to flush any pending telemetry.
   // Used in tests and ping assembly. Buffer contains bincoded Rust structs.
   // https://firefox-source-docs.mozilla.org/toolkit/components/glean/dev/ipc.html
   async FlushFOGData() returns (ByteBuf buf);
-
-  // Parent sends persisted TLS session tokens to the socket process on startup.
-  async LoadSSLTokensCache(SSLTokensCacheRecordInfo[] aRecords);
 
   // Parent requests a final TLS session token flush from the socket process
   // before shutdown.
@@ -234,9 +202,6 @@ child:
   */
   async UnblockUntrustedModulesThread();
 #endif  // defined(XP_WIN)
-
-  async AddNetAddrOverride(NetAddr aFrom, NetAddr aTo);
-  async ClearNetAddrOverrides();
 
 both:
   async PDNSRequest(nsCString hostName, nsCString trrServer, int32_t port,

@@ -705,19 +705,6 @@ already_AddRefed<nsIDNSService> DNSServiceWrapper::GetSingleton() {
   return do_AddRef(gDNSServiceWrapper);
 }
 
-// static
-void DNSServiceWrapper::SwitchToBackupDNSService() {
-  if (!gDNSServiceWrapper) {
-    return;
-  }
-
-  gDNSServiceWrapper->mBackupDNSService = nsDNSService::GetSingleton();
-
-  MutexAutoLock lock(gDNSServiceWrapper->mLock);
-  gDNSServiceWrapper->mBackupDNSService.swap(
-      gDNSServiceWrapper->mDNSServiceInUse);
-}
-
 nsIDNSService* DNSServiceWrapper::DNSService() {
   MOZ_ASSERT(XRE_IsParentProcess());
 
