@@ -24,6 +24,7 @@ Read `dom/media/docs/Diagnostics.md` when you read a media bug report.
   became reachable. Do not add a guard that tolerates the state.
 - For behavior that a web page can see, follow the spec steps. Fix the code
   where Firefox does not match the spec, and keep the assertion.
+  `dom/media/docs/Specs.md` lists the spec for each media area.
 - If no real flow can break an invariant, assert it with `MOZ_ASSERT`. Do not
   add a clamp or a warning log for it.
 - Handle and log a failure that can really occur, for example bad input from
