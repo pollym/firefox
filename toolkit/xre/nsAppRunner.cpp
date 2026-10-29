@@ -174,6 +174,11 @@
 
 #include "nsINIParser.h"
 #include "mozilla/Omnijar.h"
+#include "nsZipArchive.h"
+#include "nsContentUtils.h"
+#include "mozilla/JSONStringWriteFuncs.h"
+#include "mozilla/ChromeScriptPath.h"
+#include "mozilla/ErrorNames.h"
 #include "mozilla/StartupTimeline.h"
 #include "mozilla/LateWriteChecks.h"
 
@@ -224,6 +229,9 @@
 #include "nsICrashReporter.h"
 #include "nsIPrefService.h"
 #include "nsIMemoryInfoDumper.h"
+#include "js/ErrorReport.h"
+#include "js/Exception.h"
+#include "js/Wrapper.h"
 #include "js/String.h"
 #if defined(XP_LINUX) && !defined(ANDROID)
 #  include "mozilla/widget/LSBUtils.h"
@@ -6039,6 +6047,70 @@ void AddSandboxAnnotations() MOZ_CAN_RUN_SCRIPT_BOUNDARY {
 }
 #endif /* MOZ_SANDBOX */
 
+static bool IsSystemPrincipalException(JS::Handle<JS::Value> aExn) {
+  if (!aExn.isObject()) {
+    return false;
+  }
+  JSObject* obj = js::UncheckedUnwrap(&aExn.toObject());
+  return nsContentUtils::ObjectPrincipal(obj)->IsSystemPrincipal();
+}
+
+static void AnnotateOmnijarCanaryFailure(JSContext* aCx, nsresult aRv,
+                                         mozilla::Omnijar::Type aOmnijar,
+                                         const nsACString& aEntry) {
+  mozilla::JSONStringWriteFunc<nsAutoCString> json;
+  mozilla::JSONWriter w(json, mozilla::JSONWriter::SingleLineStyle);
+  w.Start();
+  nsAutoCString rvName;
+  mozilla::GetErrorName(aRv, rvName);
+  w.StringProperty("rv", rvName);
+
+  JS::ExceptionStack exnStack(aCx);
+  bool hasException = JS_IsExceptionPending(aCx) &&
+                      JS::StealPendingExceptionStack(aCx, &exnStack);
+  w.BoolProperty("exn", hasException);
+  if (hasException) {
+    bool isChrome = IsSystemPrincipalException(exnStack.exception());
+    w.BoolProperty("exnChrome", isChrome);
+    JS::ErrorReportBuilder builder(aCx);
+    if (builder.init(aCx, exnStack, JS::ErrorReportBuilder::NoSideEffects)) {
+      if (JSErrorReport* report = builder.report()) {
+        w.IntProperty("exnNumber", report->errorNumber);
+        if (isChrome && report->filename) {
+          w.StringProperty(
+              "exnFile",
+              mozilla::MakeStringSpan(mozilla::GetReportableChromeScriptPath(
+                  report->filename.c_str())));
+          w.IntProperty("exnLine", report->lineno);
+        }
+      }
+    }
+  }
+
+  nsCOMPtr<nsIFile> omnijar = mozilla::Omnijar::GetPath(aOmnijar);
+  w.BoolProperty("omnijar", !!omnijar);
+  int64_t omnijarSize = 0;
+  if (omnijar && NS_SUCCEEDED(omnijar->GetFileSize(&omnijarSize))) {
+    w.IntProperty("omnijarSize", omnijarSize);
+  }
+
+  RefPtr<nsZipArchive> zip = mozilla::Omnijar::GetReader(aOmnijar);
+  w.BoolProperty("reader", !!zip);
+  if (zip) {
+    nsZipItem* item = zip->GetItem(aEntry);
+    w.BoolProperty("entry", !!item);
+    if (item) {
+      nsZipItemPtr<char> data(zip, aEntry, /* doCRC */ true);
+      w.IntProperty("entrySize", item->RealSize());
+      w.BoolProperty("entryRead", !!data.Buffer());
+    }
+  }
+  w.End();
+
+  CrashReporter::RecordAnnotationNSCString(
+      CrashReporter::Annotation::OmnijarCanaryFailure, json.StringCRef());
+}
+
 /*
  * XRE_mainRun - Command line startup, profile migration, and
  * the calling of appStartup->Run().
@@ -6275,9 +6347,12 @@ nsresult XREMain::XRE_mainRun() {
       JS::Rooted<JSObject*> mod(jsapi.cx());
       // AppConstants.sys.mjs is small, widely used and most likely will
       // never go away.
+      constexpr auto canaryEntry = "modules/AppConstants.sys.mjs"_ns;
       rv = mozJSModuleLoader::Get()->ImportESModule(
-          jsapi.cx(), "resource://gre/modules/AppConstants.sys.mjs"_ns, &mod);
+          jsapi.cx(), nsAutoCString("resource://gre/"_ns + canaryEntry), &mod);
       if (NS_FAILED(rv)) {
+        AnnotateOmnijarCanaryFailure(jsapi.cx(), rv, mozilla::Omnijar::GRE,
+                                     canaryEntry);
         return NS_ERROR_OMNIJAR_OR_DIR_MISSING;
       }
     }
