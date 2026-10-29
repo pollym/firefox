@@ -187,6 +187,7 @@ internal fun Homepage(
                     HomepageHeader(
                         browsingMode = state.browsingMode,
                         showStoriesButton = headerState.showStoriesButton,
+                        showButtons = headerState.showButtons,
                         browsingModeChanged = browsingModeChanged,
                         onStoriesTapped = { interactor.onDiscoverMoreClicked() },
                     )

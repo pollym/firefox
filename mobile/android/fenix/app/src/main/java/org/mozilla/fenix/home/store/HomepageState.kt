@@ -240,7 +240,10 @@ private fun buildHeaderState(settings: Settings): HeaderState {
             showStoriesButton = settings.showPocketRecommendationsFeature,
         )
     } else {
-        HeaderState.Normal(showStoriesButton = settings.showPocketRecommendationsFeature)
+        HeaderState.Normal(
+            showStoriesButton = settings.showPocketRecommendationsFeature,
+            showButtons = !settings.isHomepageMiddleSearchEnabled,
+        )
     }
 }
 
@@ -258,7 +261,10 @@ private fun buildPrivateHeaderState(settings: Settings): HeaderState {
     return if (settings.privateModeAndStoriesEntryPointEnabled) {
         HeaderState.Experimental.Private
     } else {
-        HeaderState.Normal(showStoriesButton = false)
+        HeaderState.Normal(
+            showStoriesButton = false,
+            showButtons = !settings.isHomepageMiddleSearchEnabled,
+        )
     }
 }
 
@@ -270,8 +276,12 @@ internal sealed class HeaderState {
      * from the wallpaper at render time (see `HomepageHeader`), so no colors are held here.
      *
      * @property showStoriesButton Whether to show the stories button.
+     * @property showButtons Whether to show the stories and private browsing buttons.
      */
-    data class Normal(val showStoriesButton: Boolean) : HeaderState()
+    data class Normal(
+        val showStoriesButton: Boolean,
+        val showButtons: Boolean = true,
+    ) : HeaderState()
 
     /** Represents the experimental states for the entry points experiment. */
     sealed class Experimental : HeaderState() {
