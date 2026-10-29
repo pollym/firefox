@@ -1388,9 +1388,9 @@ export class FormAutofillParent extends JSWindowActorParent {
     }
   }
 
-  // Credit card number will only be filled when it is same-origin with the frame that
-  // triggers the autofilling.
-  #FIELDS_FILLED_WHEN_SAME_ORIGIN = ["cc-number"];
+  // Credit card number and security code will only be filled when they are
+  // same-origin with the frame that triggers the autofilling.
+  #FIELDS_FILLED_WHEN_SAME_ORIGIN = ["cc-number", "cc-csc"];
 
   /**
    * Determines whether a field is eligible for autofill based on its origin.
@@ -1399,7 +1399,7 @@ export class FormAutofillParent extends JSWindowActorParent {
    * 1. Autofill is permitted if the field resides in a frame that shares the same origin
    *    as the field that triggered the autofill action.
    * 2. Autofill is also allowed if the field is same-origin with the top-level frame
-   *    and is not designated as a credit card number field.
+   *    and is not designated as a credit card number or security code field.
    *
    * @param {BorwsingContext} bc
    *        The browsing context the field is in.
@@ -1422,8 +1422,8 @@ export class FormAutofillParent extends JSWindowActorParent {
       return false;
     }
 
-    // Relaxed autofill restrictions: for fields other than the credit card number,
-    // if the field is in a top-level frame or in a first-party origin iframe,
+    // Relaxed autofill restrictions: for fields other than the credit card number
+    // and security code, if the field is in a top-level frame or in a first-party origin iframe,
     // autofill is allowed.
     if (this.#FIELDS_FILLED_WHEN_SAME_ORIGIN.includes(fieldDetail.fieldName)) {
       return false;
