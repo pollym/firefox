@@ -293,6 +293,7 @@ open class DefaultComponents(private val applicationContext: Context) {
     // Intent
     val tabIntentProcessor by lazy {
         TabIntentProcessor(
+            store,
             tabsUseCases,
             searchUseCases.newTabSearch,
             applicationScope = applicationScope,
