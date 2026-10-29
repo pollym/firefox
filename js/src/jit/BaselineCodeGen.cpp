@@ -2551,7 +2551,13 @@ bool BaselineCodeGen<Handler>::emit_Coalesce() {
   masm.loadValue(frame.addressOfStackValue(-1), R0);
 
   Label undefinedOrNull;
-  masm.branchTestNullOrUndefined(Assembler::Equal, R0, &undefinedOrNull);
+
+  {
+    ScratchTagScope tag(masm, R0);
+    masm.splitTagForTest(R0, tag);
+    masm.branchTestUndefined(Assembler::Equal, tag, &undefinedOrNull);
+    masm.branchTestNull(Assembler::Equal, tag, &undefinedOrNull);
+  }
   emitJump();
 
   masm.bind(&undefinedOrNull);
@@ -5815,9 +5821,16 @@ bool BaselineCodeGen<Handler>::emit_CheckObjCoercible() {
   frame.syncStack(0);
   masm.loadValue(frame.addressOfStackValue(-1), R0);
 
-  Label done;
-  masm.branchTestNullOrUndefined(Assembler::NotEqual, R0, &done);
+  Label fail, done;
 
+  {
+    ScratchTagScope tag(masm, R0);
+    masm.splitTagForTest(R0, tag);
+    masm.branchTestUndefined(Assembler::Equal, tag, &fail);
+    masm.branchTestNull(Assembler::NotEqual, tag, &done);
+  }
+
+  masm.bind(&fail);
   prepareVMCall();
 
   pushArg(R0);
@@ -6066,8 +6079,10 @@ bool BaselineCodeGen<Handler>::emit_IsNullOrUndefined() {
   frame.syncStack(0);
 
   Label isNullOrUndefined, done;
-  masm.loadValue(frame.addressOfStackValue(-1), R0);
-  masm.branchTestNullOrUndefined(Assembler::Equal, R0, &isNullOrUndefined);
+  masm.branchTestNull(Assembler::Equal, frame.addressOfStackValue(-1),
+                      &isNullOrUndefined);
+  masm.branchTestUndefined(Assembler::Equal, frame.addressOfStackValue(-1),
+                           &isNullOrUndefined);
   masm.moveValue(BooleanValue(false), R0);
   masm.jump(&done);
 

@@ -1806,7 +1806,15 @@ bool CacheIRCompiler::emitGuardIsNullOrUndefined(ValOperandId inputId) {
     return false;
   }
 
-  masm.branchTestNullOrUndefined(Assembler::NotEqual, input, failure->label());
+  Label success;
+  {
+    ScratchTagScope tag(masm, input);
+    masm.splitTagForTest(input, tag);
+    masm.branchTestNull(Assembler::Equal, tag, &success);
+    masm.branchTestUndefined(Assembler::NotEqual, tag, failure->label());
+  }
+
+  masm.bind(&success);
   return true;
 }
 
@@ -8674,7 +8682,8 @@ bool CacheIRCompiler::emitLoadValueTruthyResult(ValOperandId inputId) {
     ScratchTagScope tag(masm, value);
     masm.splitTagForTest(value, tag);
 
-    masm.branchTestNullOrUndefined(Assembler::Equal, tag, &ifFalse);
+    masm.branchTestUndefined(Assembler::Equal, tag, &ifFalse);
+    masm.branchTestNull(Assembler::Equal, tag, &ifFalse);
 
     Label notBoolean;
     masm.branchTestBoolean(Assembler::NotEqual, tag, &notBoolean);
@@ -9105,7 +9114,13 @@ bool CacheIRCompiler::emitCompareNullUndefinedResult(JSOp op, bool isUndefined,
     ScratchTagScope tag(masm, input);
     masm.splitTagForTest(input, tag);
 
-    masm.branchTestNullOrUndefined(Assembler::Equal, tag, &nullOrLikeUndefined);
+    if (isUndefined) {
+      masm.branchTestUndefined(Assembler::Equal, tag, &nullOrLikeUndefined);
+      masm.branchTestNull(Assembler::Equal, tag, &nullOrLikeUndefined);
+    } else {
+      masm.branchTestNull(Assembler::Equal, tag, &nullOrLikeUndefined);
+      masm.branchTestUndefined(Assembler::Equal, tag, &nullOrLikeUndefined);
+    }
     masm.branchTestObject(Assembler::NotEqual, tag, &notNullOrLikeUndefined);
 
     {

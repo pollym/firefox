@@ -802,15 +802,6 @@ void MacroAssembler::branchTestNull(Condition cond, const ValueOperand& value,
   branchTestNull(cond, scratch2, label);
 }
 
-void MacroAssembler::branchTestNullOrUndefined(Condition cond,
-                                               const ValueOperand& value,
-                                               Label* label) {
-  UseScratchRegisterScope temps(*this);
-  Register scratch2 = temps.Acquire();
-  splitTag(value, scratch2);
-  branchTestNullOrUndefined(cond, scratch2, label);
-}
-
 void MacroAssembler::branchTestObject(Condition cond, const ValueOperand& value,
                                       Label* label) {
   UseScratchRegisterScope temps(*this);

@@ -1359,11 +1359,7 @@ void CodeGenerator::testValueTruthyForType(
 #ifdef DEBUG
   if (skipTypeTest) {
     Label expected;
-    if (type == JSVAL_TYPE_UNDEFINED || type == JSVAL_TYPE_NULL) {
-      masm.branchTestNullOrUndefined(Assembler::Equal, tag, &expected);
-    } else {
-      masm.branchTestType(Assembler::Equal, tag, type, &expected);
-    }
+    masm.branchTestType(Assembler::Equal, tag, type, &expected);
     masm.assumeUnreachable("Unexpected Value type in testValueTruthyForType");
     masm.bind(&expected);
   }
@@ -1373,9 +1369,9 @@ void CodeGenerator::testValueTruthyForType(
   switch (type) {
     case JSVAL_TYPE_UNDEFINED:
     case JSVAL_TYPE_NULL:
-      // Undefined and null are falsy and are tested together.
+      // Undefined and null are falsy.
       if (!skipTypeTest) {
-        masm.branchTestNullOrUndefined(Assembler::Equal, tag, ifFalsy);
+        masm.branchTestType(Assembler::Equal, tag, type, ifFalsy);
       } else {
         masm.jump(ifFalsy);
       }
@@ -1472,25 +1468,11 @@ void CodeGenerator::testValueTruthy(const ValueOperand& value,
 
   mozilla::EnumSet<JSValueType, uint32_t> remaining(defaultOrder);
 
-  auto removeType = [&](JSValueType type) {
-    remaining -= type;
-    // We test for null and undefined at the same time.
-    if (type == JSVAL_TYPE_UNDEFINED) {
-      remaining -= JSVAL_TYPE_NULL;
-    }
-    if (type == JSVAL_TYPE_NULL) {
-      remaining -= JSVAL_TYPE_UNDEFINED;
-    }
-  };
-
   // Generate tests for previously observed types first.
   // The TypeDataList is sorted by descending frequency.
   for (auto& observed : observedTypes) {
     JSValueType type = observed.type();
-    if (!remaining.contains(type)) {
-      continue;
-    }
-    removeType(type);
+    remaining -= type;
 
     testValueTruthyForType(type, tag, value, tempToUnbox, temp, floatTemp,
                            ifTruthy, ifFalsy, ool, /*skipTypeTest*/ false);
@@ -1501,7 +1483,7 @@ void CodeGenerator::testValueTruthy(const ValueOperand& value,
     if (!remaining.contains(type)) {
       continue;
     }
-    removeType(type);
+    remaining -= type;
 
     // We don't need a type test for the last possible type.
     bool skipTypeTest = remaining.isEmpty();
@@ -5813,9 +5795,17 @@ void CodeGenerator::visitGuardValue(LGuardValue* lir) {
 void CodeGenerator::visitGuardNullOrUndefined(LGuardNullOrUndefined* lir) {
   ValueOperand input = ToValue(lir->value());
 
+  ScratchTagScope tag(masm, input);
+  masm.splitTagForTest(input, tag);
+
+  Label done;
+  masm.branchTestNull(Assembler::Equal, tag, &done);
+
   Label bail;
-  masm.branchTestNullOrUndefined(Assembler::NotEqual, input, &bail);
+  masm.branchTestUndefined(Assembler::NotEqual, tag, &bail);
   bailoutFrom(&bail, lir->snapshot());
+
+  masm.bind(&done);
 }
 
 void CodeGenerator::visitGuardIsNotObject(LGuardIsNotObject* lir) {
@@ -10220,10 +10210,16 @@ void CodeGenerator::visitBoxNonStrictThis(LBoxNonStrictThis* lir) {
 
   auto* ool = new (alloc()) LambdaOutOfLineCode([=, this](OutOfLineCode& ool) {
     Label notNullOrUndefined;
-    masm.branchTestNullOrUndefined(Assembler::NotEqual, value,
-                                   &notNullOrUndefined);
-    masm.movePtr(ImmGCPtr(lir->mir()->globalThis()), output);
-    masm.jump(ool.rejoin());
+    {
+      Label isNullOrUndefined;
+      ScratchTagScope tag(masm, value);
+      masm.splitTagForTest(value, tag);
+      masm.branchTestUndefined(Assembler::Equal, tag, &isNullOrUndefined);
+      masm.branchTestNull(Assembler::NotEqual, tag, &notNullOrUndefined);
+      masm.bind(&isNullOrUndefined);
+      masm.movePtr(ImmGCPtr(lir->mir()->globalThis()), output);
+      masm.jump(ool.rejoin());
+    }
 
     masm.bind(&notNullOrUndefined);
 
@@ -13464,8 +13460,8 @@ void CodeGenerator::visitIsNullOrLikeUndefinedV(LIsNullOrLikeUndefinedV* lir) {
       ScratchTagScope tag(masm, value);
       masm.splitTagForTest(value, tag);
 
-      masm.branchTestNullOrUndefined(Assembler::Equal, tag,
-                                     nullOrLikeUndefined);
+      masm.branchTestNull(Assembler::Equal, tag, nullOrLikeUndefined);
+      masm.branchTestUndefined(Assembler::Equal, tag, nullOrLikeUndefined);
 
       // Check whether it's a truthy object or a falsy object that emulates
       // undefined.
@@ -13499,7 +13495,8 @@ void CodeGenerator::visitIsNullOrLikeUndefinedV(LIsNullOrLikeUndefinedV* lir) {
       ScratchTagScope tag(masm, value);
       masm.splitTagForTest(value, tag);
 
-      masm.branchTestNullOrUndefined(Assembler::Equal, tag, &nullOrUndefined);
+      masm.branchTestNull(Assembler::Equal, tag, &nullOrUndefined);
+      masm.branchTestUndefined(Assembler::Equal, tag, &nullOrUndefined);
 
 #if defined(DEBUG) || defined(FUZZING)
       // Check whether it's a truthy object or a falsy object that emulates
@@ -13564,7 +13561,8 @@ void CodeGenerator::visitIsNullOrLikeUndefinedAndBranchV(
     ScratchTagScope tag(masm, value);
     masm.splitTagForTest(value, tag);
 
-    masm.branchTestNullOrUndefined(Assembler::Equal, tag, ifTrueLabel);
+    masm.branchTestNull(Assembler::Equal, tag, ifTrueLabel);
+    masm.branchTestUndefined(Assembler::Equal, tag, ifTrueLabel);
 
     if (extractObject) {
       masm.branchTestObject(Assembler::NotEqual, tag, ifFalseLabel);
@@ -20853,7 +20851,11 @@ void CodeGenerator::visitIsNullOrUndefinedAndBranch(
   Label* ifFalse = getJumpLabelForBranch(ins->ifFalse());
   ValueOperand value = ToValue(ins->input());
 
-  masm.branchTestNullOrUndefined(Assembler::Equal, value, ifTrue);
+  ScratchTagScope tag(masm, value);
+  masm.splitTagForTest(value, tag);
+
+  masm.branchTestNull(Assembler::Equal, tag, ifTrue);
+  masm.branchTestUndefined(Assembler::Equal, tag, ifTrue);
 
   if (!isNextBlock(ins->ifFalse()->lir())) {
     masm.jump(ifFalse);
@@ -21917,7 +21919,8 @@ void CodeGenerator::visitCheckObjCoercible(LCheckObjCoercible* ins) {
   using Fn = bool (*)(JSContext*, HandleValue);
   OutOfLineCode* ool = oolCallVM<Fn, ThrowObjectCoercible>(
       ins, ArgList(checkValue), StoreNothing());
-  masm.branchTestNullOrUndefined(Assembler::Equal, checkValue, ool->entry());
+  masm.branchTestNull(Assembler::Equal, checkValue, ool->entry());
+  masm.branchTestUndefined(Assembler::Equal, checkValue, ool->entry());
   masm.bind(ool->rejoin());
 }
 
