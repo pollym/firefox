@@ -460,6 +460,12 @@ class IDL:
                 return True
         return False
 
+    def needsFunctionTypes(self):
+        for p in self.productions:
+            if p.kind == "interface" and p.attributes.function:
+                return True
+        return False
+
 
 class CDATA:
     kind = "cdata"
