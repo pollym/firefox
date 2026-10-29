@@ -287,9 +287,6 @@ fn run(profile: &Path, firefox_path: &Path) -> ExitCode {
     let task_firefox_path = firefox_path.to_owned();
 
     let worker = thread::spawn(move || {
-        // TODO: all of the websocket work goes here. Connect to the push
-        // service and keep reading notifications until the connection is
-        // closed out from under this thread.
         let interval_time_ms = get_interval_time() * 1000;
         let duration = time::Duration::from_millis(interval_time_ms);
 
