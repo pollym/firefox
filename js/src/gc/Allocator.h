@@ -170,13 +170,20 @@ class MutableHandleBuffer;
 
 template <typename T>
 class BufferHolder {
+#ifdef DEBUG
   JS::Zone* zone;
+#endif
   T* buffer;
 
   friend class MutableHandleBuffer<T>;
 
  public:
-  BufferHolder(JS::Zone* zone, T* buffer) : zone(zone), buffer(buffer) {
+  BufferHolder(JS::Zone* zone, T* buffer)
+      :
+#ifdef DEBUG
+        zone(zone),
+#endif
+        buffer(buffer) {
     MOZ_ASSERT_IF(buffer, IsBufferAllocInZone(buffer, zone));
   }
   inline BufferHolder(JSContext* cx, T* buffer);
@@ -187,6 +194,15 @@ class BufferHolder {
   operator T*() const { return get(); }
   T* operator->() const { return get(); }
   T& operator*() const { return *get(); }
+
+  void set(T* newBuffer) {
+    MOZ_ASSERT_IF(newBuffer, IsBufferAllocInZone(newBuffer, zone));
+    buffer = newBuffer;
+  }
+  BufferHolder& operator=(T* newBuffer) {
+    set(newBuffer);
+    return *this;
+  }
 };
 
 template <typename T>
@@ -200,6 +216,12 @@ class RootedBuffer : public JS::Rooted<BufferHolder<T>> {
   operator T*() const { return get(); }
   T* operator->() const { return get(); }
   T& operator*() const { return *get(); }
+
+  void set(T* newBuffer) { Base::get().set(newBuffer); }
+  RootedBuffer& operator=(T* newBuffer) {
+    set(newBuffer);
+    return *this;
+  }
 };
 
 template <typename T>
@@ -228,8 +250,7 @@ class MutableHandleBuffer : public JS::MutableHandle<BufferHolder<T>> {
 
   void set(T* buffer) {
     BufferHolder<T>& holder = Base::get();
-    MOZ_ASSERT_IF(buffer, IsBufferAllocInZone(buffer, holder.zone));
-    holder.buffer = buffer;
+    holder.set(buffer);
   }
   T* get() const { return Base::get().get(); }
   operator T*() const { return get(); }

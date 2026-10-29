@@ -205,8 +205,8 @@ inline void TraceRoot(JSTracer* trc, const HeapPtr<T>* thingp,
 // Buffers are typically owned by other GC things. Permit creation of 'tenured
 // owned' buffers as part of creating the owning GC thing.
 template <typename T>
-void TraceBufferRoot(JSTracer* trc, JS::Zone* zone, T** bufferp,
-                     const char* name) {
+void TraceBufferRoot(JSTracer* trc, T** bufferp, const char* name) {
+  gc::AssertRootMarkingPhase(trc);
   void** ptrp = reinterpret_cast<void**>(bufferp);
   MOZ_ALWAYS_TRUE(gc::TraceBufferEdgeInternal(trc, ptrp, name));
 }
@@ -214,7 +214,7 @@ void TraceBufferRoot(JSTracer* trc, JS::Zone* zone, T** bufferp,
 template <typename T>
 void BufferHolder<T>::trace(JSTracer* trc) {
   if (buffer) {
-    TraceBufferRoot(trc, zone, &buffer, "BufferHolder buffer");
+    TraceBufferRoot(trc, &buffer, "BufferHolder buffer");
     JS::GCPolicy<T>::trace(trc, buffer, "BufferHolder data");
   }
 }
