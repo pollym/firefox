@@ -8,7 +8,10 @@
 #include <fmt/format.h>
 #include <stdint.h>
 
+#include <iterator>
+
 #include "WordMovementType.h"
+#include "mozilla/Array.h"
 #include "mozilla/Assertions.h"
 #include "mozilla/Attributes.h"
 #include "mozilla/CaretAssociationHint.h"
@@ -1275,9 +1278,9 @@ class nsFrameSelection final {
 
   ////////////BEGIN nsFrameSelection members
 
-  RefPtr<mozilla::dom::Selection>
-      mDomSelections[sizeof(mozilla::kPresentSelectionTypes) /
-                     sizeof(mozilla::SelectionType)];
+  mozilla::Array<RefPtr<mozilla::dom::Selection>,
+                 std::size(mozilla::kPresentSelectionTypes)>
+      mDomSelections;
 
   nsTArray<
       mozilla::CompactPair<RefPtr<nsAtom>, RefPtr<mozilla::dom::Selection>>>
