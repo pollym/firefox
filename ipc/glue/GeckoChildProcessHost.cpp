@@ -1559,8 +1559,6 @@ RefPtr<ProcessLaunchPromise> IosProcessLauncher::DoLaunch() {
   ExtensionKitProcess::Kind kind = ExtensionKitProcess::Kind::WebContent;
   if (mProcessType == GeckoProcessType_GPU) {
     kind = ExtensionKitProcess::Kind::Rendering;
-  } else if (mProcessType == GeckoProcessType_Socket) {
-    kind = ExtensionKitProcess::Kind::Networking;
   }
 
   DarwinObjectPtr<xpc_object_t> bootstrapMessage =

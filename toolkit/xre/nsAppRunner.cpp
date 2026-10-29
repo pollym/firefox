@@ -6979,7 +6979,6 @@ bool XRE_UseNativeEventProcessing() {
   switch (XRE_GetProcessType()) {
 #if defined(XP_DARWIN) || defined(XP_WIN)
     case GeckoProcessType_RDD:
-    case GeckoProcessType_Socket:
       return false;
     case GeckoProcessType_Utility: {
 #  if defined(XP_WIN)

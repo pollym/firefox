@@ -74,10 +74,6 @@ bool ProcessSelectorMatches(ProcessSelector aSelector) {
     return !!(aSelector & Module::ALLOW_IN_RDD_PROCESS);
   }
 
-  if (type == GeckoProcessType_Socket) {
-    return !!(aSelector & (Module::ALLOW_IN_SOCKET_PROCESS));
-  }
-
   if (type == GeckoProcessType_VR) {
     return !!(aSelector & Module::ALLOW_IN_VR_PROCESS);
   }

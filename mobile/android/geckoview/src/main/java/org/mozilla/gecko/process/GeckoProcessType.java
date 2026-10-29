@@ -18,7 +18,7 @@ public enum GeckoProcessType {
   GPU("gpu"),
   VR("vr"),
   RDD("rdd"),
-  SOCKET("socket"),
+  OBSOLETE3("socket"),
   OBSOLETE2("sandboxbroker"),
   FORKSERVER("forkserver"),
   UTILITY("utility"),

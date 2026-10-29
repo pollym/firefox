@@ -204,8 +204,6 @@ void InitializeTracerProvider() {
       [[fallthrough]];
     case GeckoProcessType_Content:
       [[fallthrough]];
-    case GeckoProcessType_Socket:
-      [[fallthrough]];
     case GeckoProcessType_Utility:
       break;
     default:
