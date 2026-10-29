@@ -888,6 +888,11 @@ class Interface:
                         )
                     else:
                         has_method = True
+            if self.base != "nsISupports":
+                raise IDLError(
+                    f"interface '{self.name}' is marked 'function', and does not inherit from nsISupports",
+                    self.location,
+                )
 
         parent.setName(self)
         if self.base is not None:
