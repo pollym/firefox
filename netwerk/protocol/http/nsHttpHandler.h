@@ -228,10 +228,7 @@ class nsHttpHandler final : public nsIHttpProtocolHandler,
   nsHttpAuthCache* AuthCache(bool aPrivate) {
     return aPrivate ? mPrivateAuthCache : mAuthCache;
   }
-  nsHttpConnectionMgr* ConnMgr() {
-    MOZ_ASSERT_IF(nsIOService::UseSocketProcess(), XRE_IsSocketProcess());
-    return mConnMgr->AsHttpConnectionMgr();
-  }
+  nsHttpConnectionMgr* ConnMgr() { return mConnMgr->AsHttpConnectionMgr(); }
 
   AltSvcCache* AltServiceCache() const {
     MOZ_ASSERT(XRE_IsParentProcess());

@@ -96,7 +96,6 @@ using mozilla::dom::ServiceWorkerDescriptor;
 #define NECKO_BUFFER_CACHE_SIZE_PREF "network.buffer.cache.size"
 #define NETWORK_CAPTIVE_PORTAL_PREF "network.captive-portal-service.enabled"
 #define WEBRTC_PREF_PREFIX "media.peerconnection."
-#define NETWORK_DNS_PREF "network.dns."
 #define FORCE_EXTERNAL_PREF_PREFIX "network.protocol-handler.external."
 // prefs for overriding IPAddress->IpAddressSpace mapping
 #define PREF_LNA_IP_ADDR_SPACE_PUBLIC \
@@ -239,27 +238,25 @@ static const char* gCallbackPrefs[] = {
 
 static const char* gCallbackPrefsForSocketProcess[] = {
     WEBRTC_PREF_PREFIX,
-    NETWORK_DNS_PREF,
+    "network.dns.disablePrefetch",
+    "network.dns.high_priority_dispatch",
     "media.webrtc.enable_pq_hybrid_kex",
     "media.webrtc.send_mlkem_keyshare",
-    "network.trr.",
-    "doh-rollout.",
-    "network.dns.disableIPv6",
+    "network.trr.fallback-on-zero-response",
     "network.offline-mirrors-connectivity",
     "network.disable-localhost-when-offline",
     "network.proxy.allow_hijacking_localhost",
     "network.proxy.testing_localhost_is_secure_when_hijacked",
-    "network.connectivity-service.",
-    "network.captive-portal-service.testMode",
     "network.socket.ip_addr_any.disabled",
     "network.socket.attach_mock_network_layer",
     "network.lna.enabled",
-    "network.lna.blocking",
     "network.lna.address_space.private.override",
     "network.lna.address_space.public.override",
-    "network.lna.websocket.enabled",
-    "network.lna.local-network-to-localhost.skip-checks",
     "network.socket.forcePort",
+    "security.tls.",
+    "security.tls13.",
+    "security.ssl.",
+    "security.ssl3.",
     nullptr,
 };
 
@@ -300,17 +297,26 @@ nsresult nsIOService::Init() {
 
   // Register for profile change notifications
   mObserverService = services::GetObserverService();
-  MOZ_ALWAYS_SUCCEEDS(AddObserver(this, kProfileChangeNetTeardownTopic, true));
-  MOZ_ALWAYS_SUCCEEDS(AddObserver(this, kProfileDoChange, true));
-  MOZ_ALWAYS_SUCCEEDS(AddObserver(this, NS_XPCOM_SHUTDOWN_OBSERVER_ID, true));
-  MOZ_ALWAYS_SUCCEEDS(AddObserver(this, NS_NETWORK_LINK_TOPIC, true));
-  MOZ_ALWAYS_SUCCEEDS(AddObserver(this, NS_NETWORK_ID_CHANGED_TOPIC, true));
-  MOZ_ALWAYS_SUCCEEDS(AddObserver(this, NS_WIDGET_WAKE_OBSERVER_TOPIC, true));
+  if (mObserverService) {
+    MOZ_ALWAYS_SUCCEEDS(mObserverService->AddObserver(
+        this, NS_XPCOM_SHUTDOWN_OBSERVER_ID, true));
 
-  // Register observers for sending notifications to nsSocketTransportService
-  if (XRE_IsParentProcess()) {
-    AddObserver(this, "profile-initial-state", true);
-    AddObserver(this, NS_WIDGET_SLEEP_OBSERVER_TOPIC, true);
+    MOZ_ALWAYS_SUCCEEDS(mObserverService->AddObserver(
+        this, kProfileChangeNetTeardownTopic, true));
+    MOZ_ALWAYS_SUCCEEDS(
+        mObserverService->AddObserver(this, kProfileDoChange, true));
+    MOZ_ALWAYS_SUCCEEDS(
+        mObserverService->AddObserver(this, NS_NETWORK_LINK_TOPIC, true));
+    MOZ_ALWAYS_SUCCEEDS(
+        mObserverService->AddObserver(this, NS_NETWORK_ID_CHANGED_TOPIC, true));
+    MOZ_ALWAYS_SUCCEEDS(mObserverService->AddObserver(
+        this, NS_WIDGET_WAKE_OBSERVER_TOPIC, true));
+
+    // Register observers for sending notifications to nsSocketTransportService
+    if (XRE_IsParentProcess()) {
+      mObserverService->AddObserver(this, "profile-initial-state", true);
+      mObserverService->AddObserver(this, NS_WIDGET_SLEEP_OBSERVER_TOPIC, true);
+    }
   }
 
   if (IsSocketProcessChild()) {
@@ -331,33 +337,6 @@ nsresult nsIOService::Init() {
       __func__, []() { RefPtr<nsIDNSService> dns = GetOrInitDNSService(); }));
 
   return NS_OK;
-}
-
-NS_IMETHODIMP
-nsIOService::AddObserver(nsIObserver* aObserver, const char* aTopic,
-                         bool aOwnsWeak) {
-  if (!mObserverService) {
-    return NS_ERROR_FAILURE;
-  }
-
-  return mObserverService->AddObserver(aObserver, aTopic, aOwnsWeak);
-}
-
-NS_IMETHODIMP
-nsIOService::RemoveObserver(nsIObserver* aObserver, const char* aTopic) {
-  return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP
-nsIOService::EnumerateObservers(const char* aTopic,
-                                nsISimpleEnumerator** anEnumerator) {
-  return NS_ERROR_NOT_IMPLEMENTED;
-}
-
-NS_IMETHODIMP nsIOService::NotifyObservers(nsISupports* aSubject,
-                                           const char* aTopic,
-                                           const char16_t* aSomeData) {
-  return NS_ERROR_NOT_IMPLEMENTED;
 }
 
 nsIOService::~nsIOService() {
@@ -596,9 +575,6 @@ bool nsIOService::SocketProcessReady() {
 }
 
 // static
-bool nsIOService::UseSocketProcess(bool /* aCheckAgain */) { return false; }
-
-// static
 void nsIOService::NotifySocketProcessPrefsChanged(const char* aName,
                                                   void* aSelf) {
   static_cast<nsIOService*>(aSelf)->NotifySocketProcessPrefsChanged(aName);
@@ -702,8 +678,7 @@ nsIOService::SocketProcessTelemetryPing() {
 }
 
 NS_IMPL_ISUPPORTS(nsIOService, nsIIOService, nsINetUtil, nsISpeculativeConnect,
-                  nsIObserver, nsIIOServiceInternal, nsISupportsWeakReference,
-                  nsIObserverService)
+                  nsIObserver, nsIIOServiceInternal, nsISupportsWeakReference)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -2266,11 +2241,6 @@ nsIOService::GetSocketProcessLaunched(bool* aResult) {
 
   *aResult = SocketProcessReady();
   return NS_OK;
-}
-
-bool nsIOService::HasObservers(const char* aTopic) {
-  MOZ_ASSERT(false, "Calling this method is unexpected");
-  return false;
 }
 
 NS_IMETHODIMP

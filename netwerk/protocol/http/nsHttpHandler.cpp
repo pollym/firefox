@@ -496,8 +496,7 @@ nsresult nsHttpHandler::Init() {
       static_cast<nsISupports*>(static_cast<void*>(this)),
       NS_HTTP_STARTUP_TOPIC);
 
-  nsCOMPtr<nsIObserverService> obsService =
-      static_cast<nsIObserverService*>(gIOService);
+  nsCOMPtr<nsIObserverService> obsService = services::GetObserverService();
   if (obsService) {
     // register the handler object as a weak callback as we don't need to worry
     // about shutdown ordering.
@@ -1249,10 +1248,6 @@ void nsHttpHandler::PrefsChanged(const char* pref) {
   int32_t val;
 
   LOG(("nsHttpHandler::PrefsChanged [pref=%s]\n", pref));
-
-  if (pref) {
-    gIOService->NotifySocketProcessPrefsChanged(pref);
-  }
 
 #define PREF_CHANGED(p) ((pref == nullptr) || !strcmp(pref, p))
 #define MULTI_PREF_CHANGED(p) \

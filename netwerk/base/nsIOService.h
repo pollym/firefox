@@ -52,8 +52,7 @@ class nsIOService final : public nsIIOService,
                           public nsINetUtil,
                           public nsISpeculativeConnect,
                           public nsSupportsWeakReference,
-                          public nsIIOServiceInternal,
-                          public nsIObserverService {
+                          public nsIIOServiceInternal {
  public:
   NS_DECL_THREADSAFE_ISUPPORTS
   NS_DECL_NSIIOSERVICE
@@ -61,7 +60,6 @@ class nsIOService final : public nsIIOService,
   NS_DECL_NSINETUTIL
   NS_DECL_NSISPECULATIVECONNECT
   NS_DECL_NSIIOSERVICEINTERNAL
-  NS_DECL_NSIOBSERVERSERVICE
 
   // Gets the singleton instance of the IO Service, creating it as needed
   // Returns nullptr on out of memory or failure to initialize.
@@ -109,7 +107,6 @@ class nsIOService final : public nsIIOService,
   bool SocketProcessReady();
   static void NotifySocketProcessPrefsChanged(const char* aName, void* aSelf);
   void NotifySocketProcessPrefsChanged(const char* aName);
-  static bool UseSocketProcess(bool aCheckAgain = false);
 
   bool IsSocketProcessLaunchComplete();
 

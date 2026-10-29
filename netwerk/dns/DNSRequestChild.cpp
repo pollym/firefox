@@ -49,7 +49,6 @@ class ChildDNSRecord : public nsIDNSAddrRecord {
   double mTrrFetchDuration = 0;
   double mTrrFetchDurationNetworkOnly = 0;
   bool mIsTRR = false;
-  bool mResolvedInSocketProcess = false;
   nsIRequest::TRRMode mEffectiveTRRMode = nsIRequest::TRR_DEFAULT_MODE;
   nsITRRSkipReason::value mTRRSkipReason = nsITRRSkipReason::TRR_UNSET;
   uint32_t mTTL = 0;
@@ -93,12 +92,6 @@ ChildDNSRecord::GetCanonicalName(nsACString& result) {
 NS_IMETHODIMP
 ChildDNSRecord::IsTRR(bool* retval) {
   *retval = mIsTRR;
-  return NS_OK;
-}
-
-NS_IMETHODIMP
-ChildDNSRecord::ResolvedInSocketProcess(bool* retval) {
-  *retval = mResolvedInSocketProcess;
   return NS_OK;
 }
 
