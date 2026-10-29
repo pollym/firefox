@@ -12,9 +12,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mozilla.components.lib.installation.blockstore.InstallBlockStore
 import mozilla.components.lib.installation.blockstore.InstallState
+import org.mozilla.fenix.GleanMetrics.Installation
+import org.mozilla.fenix.GleanMetrics.Pings
 
 /**
- * A Worker that records an app open.
+ * A Worker that records an app open and submits the installation ping on the first open after a fresh install.
  *
  * @param context The application context.
  * @param workerParameters Setup parameters for a [CoroutineWorker].
@@ -35,7 +37,14 @@ constructor(
             blockStore
                 .recordAppOpen()
                 .fold(
-                    onSuccess = { Result.success() },
+                    onSuccess = { installState ->
+                        installState?.let {
+                            Installation.installCounter.set(it.installCount.toLong())
+                            it.previousLastSeenDate?.let { date -> Installation.lastSeenDate.set(date) }
+                            Pings.installation.submit()
+                        }
+                        Result.success()
+                    },
                     onFailure = {
                         if (runAttemptCount < InstallationMetricsService.MAX_RETRIES) {
                             Result.retry()
