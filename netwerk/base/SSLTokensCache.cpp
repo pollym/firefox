@@ -514,20 +514,15 @@ static void RemoveLegacyBackingFilesSync(nsIFile* aDbFile) {
 // static
 nsresult SSLTokensCache::Init() {
   MOZ_ASSERT(NS_IsMainThread());
+  MOZ_ASSERT(XRE_IsParentProcess());
 
-  if (XRE_IsParentProcess()) {
-    if (nsCOMPtr<nsIFile> dbFile = ProfileDBFile()) {
-      NS_DispatchBackgroundTask(NS_NewRunnableFunction(
-          "SSLTokensCache::RemoveLegacyBackingFiles",
-          [dbFile]() { RemoveLegacyBackingFilesSync(dbFile); }));
-    }
+  if (nsCOMPtr<nsIFile> dbFile = ProfileDBFile()) {
+    NS_DispatchBackgroundTask(NS_NewRunnableFunction(
+        "SSLTokensCache::RemoveLegacyBackingFiles",
+        [dbFile]() { RemoveLegacyBackingFilesSync(dbFile); }));
   }
 
   StaticMutexAutoLock lock(sLock);
-
-  if (!XRE_IsParentProcess()) {
-    return NS_OK;
-  }
 
   MOZ_ASSERT(!gInstance);
 
@@ -602,12 +597,10 @@ void SSLTokensCache::UnregisterFromServices(SSLTokensCache* aInstance) {
     obs->RemoveObserver(aInstance, "application-background");
     obs->RemoveObserver(aInstance, "idle-daily");
   }
-  if (XRE_IsParentProcess()) {
-    Preferences::UnregisterCallback(&SSLTokensCache::ReconcilePersistence,
-                                    "network.ssl_tokens_cache_persistence");
-    obs->RemoveObserver(aInstance, "profile-after-change");
-    obs->RemoveObserver(aInstance, "last-pb-context-exited");
-  }
+  Preferences::UnregisterCallback(&SSLTokensCache::ReconcilePersistence,
+                                  "network.ssl_tokens_cache_persistence");
+  obs->RemoveObserver(aInstance, "profile-after-change");
+  obs->RemoveObserver(aInstance, "last-pb-context-exited");
 }
 
 SSLTokensCache::SSLTokensCache() { LOG(("SSLTokensCache::SSLTokensCache")); }

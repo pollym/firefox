@@ -186,7 +186,7 @@ class SSLTokensCache : public nsIMemoryReporter,
   // Dispatches open+migrate+load to mDBQueue.
   static void DispatchOpenAndLoad(uint32_t aLoadGen);
   static void OnLoadCompleteNotify(uint32_t aCount);
-  // Builds a TokenCacheRecord from its raw persisted/IPC fields.
+  // Builds a TokenCacheRecord from its raw persisted fields.
   static UniquePtr<TokenCacheRecord> MakeRecord(
       const nsACString& aKey, PRTime aExpirationTime, uint8_t aOverridableError,
       bool aRestored, nsTArray<uint8_t>&& aCompressedPayload);
@@ -271,7 +271,7 @@ class SSLTokensCache : public nsIMemoryReporter,
     // decompressing the payload.
     uint8_t mOverridableError = 0;
     uint64_t mId = 0;
-    // Not part of the on-storage/IPC format; in-memory only, for
+    // Not part of the on-storage format; in-memory only, for
     // about:networking.
     bool mRestored = false;
   };

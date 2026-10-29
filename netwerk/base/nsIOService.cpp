@@ -268,7 +268,9 @@ static const char* gCallbackSecurityPrefs[] = {
 };
 
 nsresult nsIOService::Init() {
-  SSLTokensCache::Init();
+  if (XRE_IsParentProcess()) {
+    SSLTokensCache::Init();
+  }
 
   InitializeCaptivePortalService();
 
@@ -1765,7 +1767,9 @@ nsIOService::Observe(nsISupports* subject, const char* topic,
       mCaptivePortalService = nullptr;
     }
 
-    SSLTokensCache::Shutdown();
+    if (XRE_IsParentProcess()) {
+      SSLTokensCache::Shutdown();
+    }
 
     DestroySocketProcess();
 
