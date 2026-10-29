@@ -693,12 +693,17 @@ var gMainPane = {
       return false;
     }
     if (subcategory == "migrate") {
-      this.showMigrationWizardDialog();
+      this.showMigrationWizardDialog({
+        entrypoint: this.getMigrationEntrypoint(),
+      });
       return true;
     }
 
     if (subcategory == "migrate-autoclose") {
-      this.showMigrationWizardDialog({ closeTabWhenDone: true });
+      this.showMigrationWizardDialog({
+        closeTabWhenDone: true,
+        entrypoint: this.getMigrationEntrypoint(),
+      });
     }
 
     return false;
@@ -1493,9 +1498,32 @@ var gMainPane = {
   },
 
   /**
-   * Displays the migration wizard dialog in an HTML dialog.
+   * Returns the entrypoint MigrationUtils.showMigrationWizard was called with
+   * when it opened about:preferences, if any.
+   *
+   * @returns {string}
    */
-  async showMigrationWizardDialog({ closeTabWhenDone = false } = {}) {
+  getMigrationEntrypoint() {
+    return (
+      MigrationUtils.consumePendingPreferencesEntrypoint() ??
+      MigrationUtils.MIGRATION_ENTRYPOINTS.PREFERENCES
+    );
+  },
+
+  /**
+   * Displays the migration wizard dialog in an HTML dialog.
+   *
+   * @param {object} [options]
+   * @param {boolean} [options.closeTabWhenDone=false]
+   *   True if the tab should close once the dialog is closed.
+   * @param {string} [options.entrypoint]
+   *   The MigrationUtils.MIGRATION_ENTRYPOINTS value for where the wizard
+   *   was opened from.
+   */
+  async showMigrationWizardDialog({
+    closeTabWhenDone = false,
+    entrypoint = MigrationUtils.MIGRATION_ENTRYPOINTS.PREFERENCES,
+  } = {}) {
     let migrationWizardDialog = document.getElementById(
       "migrationWizardDialog"
     );
@@ -1518,6 +1546,10 @@ var gMainPane = {
         }
       );
     }
+    migrationWizardDialog.firstElementChild.setAttribute(
+      "entrypoint",
+      entrypoint
+    );
     migrationWizardDialog.firstElementChild.requestState();
 
     migrationWizardDialog.addEventListener(
