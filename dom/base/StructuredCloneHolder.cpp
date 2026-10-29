@@ -349,7 +349,13 @@ void StructuredCloneHolderBase::Read(
 
   aRv.MightThrowJSException();
 
-  if (!JS_ReadStructuredClone(aCx, *mData, mVersion, mData->scope(), aValue,
+  if (mVersion > JS_STRUCTURED_CLONE_VERSION) {
+    aRv.ThrowDataCloneError(
+        "unsupported future format version for structured clone.");
+    return;
+  }
+
+  if (!JS_ReadStructuredClone(aCx, *mData, mData->scope(), aValue,
                               aCloneDataPolicy,
                               &StructuredCloneHolder::sCallbacks, this)) {
     // NOTE: We steal the exception from the context, as SuppressException in

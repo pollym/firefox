@@ -4234,18 +4234,13 @@ bool JSStructuredCloneReader::read(MutableHandleValue vp, size_t nbytes) {
 }
 
 JS_PUBLIC_API bool JS_ReadStructuredClone(
-    JSContext* cx, const JSStructuredCloneData& buf, uint32_t version,
+    JSContext* cx, const JSStructuredCloneData& buf,
     JS::StructuredCloneScope scope, MutableHandleValue vp,
     const JS::CloneDataPolicy& cloneDataPolicy,
     const JSStructuredCloneCallbacks* optionalCallbacks, void* closure) {
   AssertHeapIsIdle();
   CHECK_THREAD(cx);
 
-  if (version > JS_STRUCTURED_CLONE_VERSION) {
-    JS_ReportErrorNumberASCII(cx, GetErrorMessage, nullptr,
-                              JSMSG_SC_BAD_CLONE_VERSION);
-    return false;
-  }
   const JSStructuredCloneCallbacks* callbacks = optionalCallbacks;
   return ReadStructuredClone(cx, buf, scope, vp, cloneDataPolicy, callbacks,
                              closure);
@@ -4315,8 +4310,8 @@ JS_PUBLIC_API bool JS_StructuredClone(
     }
   }
 
-  return JS_ReadStructuredClone(cx, data, JS_STRUCTURED_CLONE_VERSION, scope,
-                                vp, policy, callbacks, closure);
+  return JS_ReadStructuredClone(cx, data, scope, vp, policy, callbacks,
+                                closure);
 }
 
 JS_PUBLIC_API bool JS_ReadUint32Pair(JSStructuredCloneReader* r, uint32_t* p1,

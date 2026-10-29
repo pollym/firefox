@@ -135,8 +135,8 @@ bool TestCloneObject() {
   CHECK(JS_WriteStructuredClone(cx, v1, &data, scope, JS::CloneDataPolicy(),
                                 nullptr, nullptr, JS::UndefinedHandleValue));
   JS::RootedValue v2(cx);
-  CHECK(JS_ReadStructuredClone(cx, data, JS_STRUCTURED_CLONE_VERSION, scope,
-                               &v2, JS::CloneDataPolicy(), nullptr, nullptr));
+  CHECK(JS_ReadStructuredClone(cx, data, scope, &v2, JS::CloneDataPolicy(),
+                               nullptr, nullptr));
   JS::RootedObject obj2(cx, v2.toObjectOrNull());
   CHECK(VerifyObject(obj2, 8, 12, false));
 
@@ -176,8 +176,7 @@ bool TestTransferObject() {
   CHECK(JS_WriteStructuredClone(cx, v1, &data, scope, policy, nullptr, nullptr,
                                 transferable));
   JS::RootedValue v2(cx);
-  CHECK(JS_ReadStructuredClone(cx, data, JS_STRUCTURED_CLONE_VERSION, scope,
-                               &v2, policy, nullptr, nullptr));
+  CHECK(JS_ReadStructuredClone(cx, data, scope, &v2, policy, nullptr, nullptr));
   JS::RootedObject obj2(cx, v2.toObjectOrNull());
   CHECK(VerifyObject(obj2, 8, 12, true));
   CHECK(JS::IsDetachedArrayBufferObject(obj1));
