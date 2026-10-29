@@ -84,7 +84,6 @@ support-files = [
   "file_bug1700871.html",
 ]
 skip-if = [
-  "os == 'linux' && os_version == '24.04' && arch == 'x86_64' && display == 'x11' && opt", # Bug 1775696
   "os == 'win'", # Bug 1692963
 ]
 
