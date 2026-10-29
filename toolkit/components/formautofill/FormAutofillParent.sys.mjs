@@ -237,6 +237,31 @@ export let FormAutofillStatus = {
     this.updateStatus();
   },
 
+  /**
+   * Loads the store after startup so the saved card counts reach every
+   * metrics ping. Run from the browser-idle-startup category.
+   */
+  loadStorageOnIdle() {
+    if (FormAutofill.isAutofillTypeAvailable(AutofillDataTypes.CREDIT_CARD)) {
+      return lazy.gFormAutofillStorage.initialize();
+    }
+    return undefined;
+  },
+
+  async updateSavedCreditCardCounts() {
+    if (!FormAutofill.isAutofillTypeAvailable(AutofillDataTypes.CREDIT_CARD)) {
+      return;
+    }
+    try {
+      const { total, withSecurityCode } =
+        await lazy.gFormAutofillStorage.creditCards.getSavedCounts();
+      Glean.formautofillCreditcards.savedCount.set(total);
+      Glean.formautofillCreditcards.savedCvvCount.set(withSecurityCode);
+    } catch (e) {
+      lazy.log.error("Could not count the saved credit cards", e);
+    }
+  },
+
   async observe(subject, topic, data) {
     lazy.log.debug("observe:", topic, "with data:", data);
 
@@ -277,7 +302,14 @@ export let FormAutofillStatus = {
           break;
         }
 
-        await this.updateSavedFieldNames();
+        const updates = [this.updateSavedFieldNames()];
+        if (
+          subject?.wrappedJSObject?.collectionName ===
+          AutofillDataTypes.get(AutofillDataTypes.CREDIT_CARD).collectionName
+        ) {
+          updates.push(this.updateSavedCreditCardCounts());
+        }
+        await Promise.all(updates);
         break;
       }
 
@@ -290,8 +322,9 @@ export let FormAutofillStatus = {
   },
 };
 
-// Lazily load the storage JSM to avoid disk I/O until absolutely needed.
-// Once storage is loaded we need to update saved field names and inform content processes.
+// Lazily load the storage, at the first form or on idle after startup for
+// telemetry (see loadStorageOnIdle). Once loaded, update saved field names,
+// inform content processes and report the saved card counts.
 ChromeUtils.defineLazyGetter(lazy, "gFormAutofillStorage", () => {
   let { formAutofillStorage } = ChromeUtils.importESModule(
     "resource://autofill/FormAutofillStorage.sys.mjs"
@@ -301,6 +334,7 @@ ChromeUtils.defineLazyGetter(lazy, "gFormAutofillStorage", () => {
   formAutofillStorage.initialize().then(() => {
     // Update the saved field names to compute the status and update child processes.
     FormAutofillStatus.updateSavedFieldNames();
+    FormAutofillStatus.updateSavedCreditCardCounts();
   });
 
   return formAutofillStorage;
