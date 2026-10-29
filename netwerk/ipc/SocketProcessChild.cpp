@@ -17,7 +17,6 @@
 #include "mozilla/ipc/CrashReporterClient.h"
 #include "mozilla/ipc/ProcessChild.h"
 #include "mozilla/ipc/ProcessUtils.h"
-#include "mozilla/net/AppleFastDatapathProbe.h"
 #include "nsDebugImpl.h"
 #include "nsIXULRuntime.h"
 #include "nsNSSComponent.h"
@@ -192,22 +191,6 @@ mozilla::ipc::IPCResult SocketProcessChild::RecvInit(
   dllSvc->StartUntrustedModulesProcessor(
       aAttributes.mIsReadyForBackgroundProcessing());
 #endif  // defined(XP_WIN)
-
-#if defined(XP_MACOSX) || defined(XP_IOS)
-  if (aAttributes.mAppleFastDatapathProbeAllowed()) {
-    NS_DispatchBackgroundTask(
-        NS_NewRunnableFunction("net::AppleFastDatapathProbe", []() {
-          bool result = InitAppleFastDatapathProbe();
-          NS_DispatchToMainThread(NS_NewRunnableFunction(
-              "net::AppleFastDatapathProbeResult", [result]() {
-                if (SocketProcessChild* child =
-                        SocketProcessChild::GetSingleton()) {
-                  (void)child->SendAppleFastDatapathProbeResult(result);
-                }
-              }));
-        }));
-  }
-#endif  // defined(XP_MACOSX) || defined(XP_IOS)
 
   return IPC_OK();
 }

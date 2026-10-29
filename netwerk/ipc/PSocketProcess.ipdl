@@ -44,9 +44,6 @@ struct SocketProcessInitAttributes {
   bool mIsReadyForBackgroundProcessing;
 #endif
   FileDescriptor? mSandboxBroker;
-#if defined(XP_MACOSX) || defined(XP_IOS)
-  bool mAppleFastDatapathProbeAllowed;
-#endif
 };
 
 [NeedsOtherPid, ChildProc=Socket]
@@ -79,9 +76,6 @@ parent:
 
   async GeckoTraceExport(ByteBuf aBuf);
 
-#if defined(XP_MACOSX) || defined(XP_IOS)
-  async AppleFastDatapathProbeResult(bool aAvailable);
-#endif
 #if defined(XP_WIN)
   async GetModulesTrust(ModuleIdentifiers aModIdents, bool aRunAtNormalPriority)
       returns (ModulesMapResult? modMapResult);

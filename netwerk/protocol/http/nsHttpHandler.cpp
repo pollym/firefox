@@ -105,6 +105,10 @@
 #  include <CoreServices/CoreServices.h>
 #endif
 
+#if defined(XP_MACOSX) || defined(XP_IOS)
+#  include "mozilla/net/AppleFastDatapathProbe.h"
+#endif
+
 //-----------------------------------------------------------------------------
 #include "mozilla/net/HttpChannelChild.h"
 
@@ -361,6 +365,15 @@ nsresult nsHttpHandler::Init() {
       "nsHttpHandler::mIOService", service);
 
   gIOService->LaunchSocketProcess();
+
+#if defined(XP_MACOSX) || defined(XP_IOS)
+  if (XRE_IsParentProcess()) {
+    (void)NS_DispatchToMainThreadQueue(
+        NS_NewRunnableFunction("net::StartAppleFastDatapathProbe",
+                               &StartAppleFastDatapathProbe),
+        EventQueuePriority::Idle);
+  }
+#endif
 
   if (IsNeckoChild()) NeckoChild::InitNeckoChild();
 

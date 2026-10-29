@@ -12,11 +12,8 @@
 #include "mozilla/Telemetry.h"
 #include "mozilla/TelemetryIPC.h"
 #include "mozilla/dom/MemoryReportRequest.h"
-#include "mozilla/glean/NetwerkMetrics.h"
 #include "mozilla/net/DNSRequestParent.h"
-#include "mozilla/net/neqo_glue_ffi_generated.h"
 #include "nsIOService.h"
-#include "nsSocketTransportService2.h"
 #ifdef MOZ_WEBRTC
 #  include "mozilla/dom/BrowserParent.h"
 #  include "mozilla/dom/ContentProcessManager.h"
@@ -229,25 +226,6 @@ mozilla::ipc::IPCResult SocketProcessParent::RecvFOGData(ByteBuf&& aBuf) {
   glean::FOGData(std::move(aBuf));
   return IPC_OK();
 }
-
-#if defined(XP_MACOSX) || defined(XP_IOS)
-mozilla::ipc::IPCResult SocketProcessParent::RecvAppleFastDatapathProbeResult(
-    const bool& aAvailable) {
-  if (mHost) {
-    mHost->mAppleFastDatapathProbeResultReceived = true;
-  }
-  glean::network::apple_fast_datapath_used.Set(aAvailable);
-  // Neqo runs in the parent, so enable the fast path here for its QUIC
-  // sockets.
-  if (aAvailable && gSocketTransportService) {
-    gSocketTransportService->Dispatch(
-        NS_NewRunnableFunction("net::EnableAppleFastPath",
-                               []() { neqo_glue_enable_apple_fast_path(); }),
-        NS_DISPATCH_NORMAL);
-  }
-  return IPC_OK();
-}
-#endif
 
 mozilla::ipc::IPCResult SocketProcessParent::RecvGeckoTraceExport(
     ByteBuf&& aBuf) {
