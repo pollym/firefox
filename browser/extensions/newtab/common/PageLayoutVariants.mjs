@@ -861,7 +861,7 @@ export function resolveThematicSpaceWidgets(config, spaceId, prefs) {
     w =>
       (assigned.has(w.id) || (isCatchAll && !claimed.has(w.id))) &&
       !firstSlotWidgets.has(w.id) &&
-      !isWidgetInSidebar(w, prefs) &&
+      !isWidgetInSidebar(w, prefs, widgetsEnabled) &&
       isWidgetEnabled(w, prefs, widgetsEnabled)
   ).map(w => w.id);
 }

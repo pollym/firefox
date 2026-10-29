@@ -30,7 +30,8 @@
  *                       widget row when its effective size equals "small". Size alone is not
  *                       sufficient — this flag must be set explicitly so that future
  *                       widgets that support "small" but stay in the row are not
- *                       accidentally moved to the sidebar.
+ *                       accidentally moved to the sidebar. The sidebar holds one
+ *                       widget: see resolveSidebarWidget.
  *   systemEnabledPref — system/operator pref that gates this widget independent of the user pref
  *   trainhopEnabledKey — key in trainhopConfig.widgets.* for the enabled override
  *   trainhopSizeKey    — key in trainhopConfig.widgets.* for the size default suggestion
@@ -323,7 +324,7 @@ export const WIDGET_REGISTRY = [
     systemEnabledPref: PREF_WIDGETS_SYSTEM_PRIVACY_ENABLED,
     trainhopEnabledKey: "privacyEnabled",
     trainhopSizeKey: "privacySize",
-    trainhopSidebarKey: null,
+    trainhopSidebarKey: "privacySidebar",
     widgetsSettingsVisibleKey: "privacyVisible",
     widgetsSettingsEnabledKey: "privacyEnabled",
     trainhopNamespace: "widgetPrivacy",
@@ -712,20 +713,47 @@ export function resolveWidgetHasSidebar(widget, prefs) {
 }
 
 /**
+ * Returns the one widget that renders in the inline-end sidebar, or null.
+ *
+ * The sidebar holds a single widget. When more than one qualifies to show, the
+ * first in registry order wins and the rest stay in the widget row. The row and
+ * the layout helpers read this too, so a widget never renders in both places.
+ *
+ * @param {object} prefs - current pref values from the Redux store
+ * @param {boolean} [widgetsEnabled] - the master toggle, passed explicitly when
+ *   the spaces experiment is overriding it
+ * @returns {object|null} a WIDGET_REGISTRY entry
+ */
+export function resolveSidebarWidget(
+  prefs,
+  widgetsEnabled = prefs["widgets.enabled"]
+) {
+  return (
+    WIDGET_REGISTRY.find(
+      w =>
+        resolveWidgetHasSidebar(w, prefs) &&
+        isWidgetEnabled(w, prefs, widgetsEnabled) &&
+        resolveWidgetSize(w, prefs) === "small"
+    ) ?? null
+  );
+}
+
+/**
  * Returns true if the widget renders in the inline-end sidebar rather than the
- * content area. Weather is the only widget that can move there, and only at its
- * small size.
+ * content area.
  *
  * @param {object} widget - a WIDGET_REGISTRY entry
  * @param {object} prefs - current pref values from the Redux store
+ * @param {boolean} [widgetsEnabled] - the master toggle, passed explicitly when
+ *   the spaces experiment is overriding it
  * @returns {boolean}
  */
-export function isWidgetInSidebar(widget, prefs) {
-  return (
-    widget.id === "weather" &&
-    resolveWidgetHasSidebar(widget, prefs) &&
-    resolveWidgetSize(widget, prefs) === "small"
-  );
+export function isWidgetInSidebar(
+  widget,
+  prefs,
+  widgetsEnabled = prefs["widgets.enabled"]
+) {
+  return resolveSidebarWidget(prefs, widgetsEnabled) === widget;
 }
 
 /**
@@ -746,7 +774,8 @@ export function hasContentAreaWidgets(
 ) {
   return WIDGET_REGISTRY.some(
     w =>
-      isWidgetEnabled(w, prefs, widgetsEnabled) && !isWidgetInSidebar(w, prefs)
+      isWidgetEnabled(w, prefs, widgetsEnabled) &&
+      !isWidgetInSidebar(w, prefs, widgetsEnabled)
   );
 }
 

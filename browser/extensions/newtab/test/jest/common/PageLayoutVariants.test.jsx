@@ -1304,6 +1304,25 @@ describe("the thematic spaces variant", () => {
       expect(ids("medium")).toContain("weather");
     });
 
+    it("leaves out Weather in the sidebar when the experiment overrides the master toggle", () => {
+      const ids = resolveThematicSpaceWidgets(CONFIG, "home", {
+        ...thematic,
+        ...ALL_ON,
+        "widgets.enabled": false,
+        "widgets.system.weather.enabled": true,
+        "widgets.weather.enabled": true,
+        "widgets.weather.size": "small",
+        "system.showWeather": true,
+        showWeather: true,
+        trainhopConfig: {
+          ...thematic.trainhopConfig,
+          widgets: { enabled: true },
+        },
+      });
+      expect(ids).toContain("clocks");
+      expect(ids).not.toContain("weather");
+    });
+
     it("is empty for every space when the widgets container is hidden", () => {
       const hidden = { ...ALL_ON, "widgets.system.enabled": false };
       for (const id of ["home", "games", "living"]) {

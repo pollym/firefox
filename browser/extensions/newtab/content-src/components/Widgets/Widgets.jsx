@@ -33,6 +33,7 @@ import {
   resolveWidgetOrder,
   resolveWidgetHasSidebar,
   resolveWidgetSrc,
+  resolveSidebarWidget,
   getHideAllTargets,
 } from "common/WidgetsRegistry.mjs";
 import {
@@ -218,7 +219,7 @@ function Widgets({ widgetIds }) {
 
   // Bug 2034542: these per-widget lookups and all the derived consts below
   // (listsEnabled, timerEnabled, weatherBase, weatherEnabled, weatherSize,
-  // weatherGoesToSidebar, widgetEnabledMap) can be replaced with a single
+  // widgetEnabledMap) can be replaced with a single
   // registry-driven loop once weather's extra enabled conditions
   // (weatherData.initialized, isWeatherEnabled) are either folded into the
   // registry or handled inside the Weather component itself.
@@ -260,12 +261,6 @@ function Widgets({ widgetIds }) {
     weatherBase && weatherData?.initialized && isWeatherEnabled;
 
   const weatherSize = resolveWidgetSize(weatherWidget, prefs);
-  // Weather renders in the sidebar when its effective size is "small" AND the
-  // sidebar placement is active. If a trainhopSidebar override sets hasSidebar
-  // to false, weatherGoesToSidebar is false and the widget falls through to the
-  // row here instead of disappearing.
-  const weatherGoesToSidebar =
-    resolveWidgetHasSidebar(weatherWidget, prefs) && weatherSize === "small";
   const widgetEnabledMap = {};
   for (const widget of widgets) {
     widgetEnabledMap[widget.id] = isWidgetEnabled(
@@ -274,7 +269,13 @@ function Widgets({ widgetIds }) {
       widgetsEnabled
     );
   }
-  widgetEnabledMap.weather = weatherEnabled && !weatherGoesToSidebar;
+  widgetEnabledMap.weather = weatherEnabled;
+
+  // The widget WidgetsSidebar renders must not render in the row as well.
+  const sidebarWidget = resolveSidebarWidget(prefs, widgetsEnabled);
+  if (sidebarWidget) {
+    widgetEnabledMap[sidebarWidget.id] = false;
+  }
 
   // Given an explicit list, keep only those. Callers wanting every enabled
   // widget pass none, which is everything but a thematic space. This map is the
@@ -519,20 +520,22 @@ function Widgets({ widgetIds }) {
 
     // When Nova is enabled, treat the shared header control as a toggle
     // between the default/full widget presentation and the compact one.
-    // Only widgets actually rendered in the sidebar are skipped — that is the
-    // same hasSidebar + size === "small" test used in WidgetsSidebar and by
-    // weatherGoesToSidebar above, not "any small widget". A "small" widget
-    // sitting in the row is resized along with the others so it isn't left
-    // behind by the row toggle. On minimize such a widget lands at "medium"
-    // rather than returning to "small", since the size pref holds the display
-    // state directly and the pre-maximize size isn't retained.
+    // The sidebar widget keeps its "small", and so does a disabled widget
+    // whose placement resolves to the sidebar, so it can return there when
+    // re-enabled. Any other "small" widget sitting in the row, including one
+    // that lost the single sidebar slot, is resized along with the others so
+    // it isn't left behind by the row toggle. On minimize such a widget lands
+    // at "medium" rather than returning to "small", since the size pref holds
+    // the display state directly and the pre-maximize size isn't retained.
     if (novaEnabled) {
       const targetSize = newMaximizedState ? "large" : "medium";
       for (const widget of WIDGET_REGISTRY) {
-        const inSidebar =
+        const keepsSmall =
           resolveWidgetHasSidebar(widget, prefs) &&
-          resolveWidgetSize(widget, prefs) === "small";
-        if (!inSidebar) {
+          resolveWidgetSize(widget, prefs) === "small" &&
+          (widget === sidebarWidget ||
+            !isWidgetEnabled(widget, prefs, widgetsEnabled));
+        if (!keepsSmall) {
           prefUpdates[widget.sizePref] = targetSize;
         }
       }
