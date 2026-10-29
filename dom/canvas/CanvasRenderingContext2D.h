@@ -1027,14 +1027,16 @@ class CanvasRenderingContext2D : public nsICanvasRenderingContextInternal,
   }
 
   /**
-   * Calls UpdateFilter if the canvas's WriteOnly state has changed between the
-   * last call to UpdateFilter and now.
+   * Calls UpdateFilter if the filter description hasn't been built for the
+   * current filter chain yet, or if the canvas's WriteOnly state has changed
+   * between the last call to UpdateFilter and now.
    */
   const gfx::FilterDescription& EnsureUpdatedFilter() {
     bool isWriteOnly = IsWriteOnly() ||
                        (mCanvasElement && mCanvasElement->IsWriteOnly()) ||
                        (mOffscreenCanvas && mOffscreenCanvas->IsWriteOnly());
-    if (CurrentState().filterSourceGraphicTainted != isWriteOnly) {
+    if (!CurrentState().filterDescriptionUpToDate ||
+        CurrentState().filterSourceGraphicTainted != isWriteOnly) {
       // Do not flush here: this runs inside drawing operations that hold raw
       // references to mPath/state, and a flush can run script that resets the
       // context, leading to UAF. Flush already happened at SetFilter() time.
@@ -1181,6 +1183,8 @@ class CanvasRenderingContext2D : public nsICanvasRenderingContextInternal,
     // We keep track of this to ensure that if this gets out of sync with the
     // tainted state of the canvas itself, we update our filters accordingly.
     bool filterSourceGraphicTainted = false;
+    // Whether |filter| has been built for |filterChain| by UpdateFilter().
+    bool filterDescriptionUpToDate = false;
     bool imageSmoothingEnabled = true;
 
     // Whether resolvedFontLang was an explicitly-specified lang or inferred.

@@ -9843,10 +9843,18 @@ pub extern "C" fn Servo_ParseTransformIntoMatrix(
     true
 }
 
+/// How to treat url() filters.
+#[repr(u8)]
+pub enum FilterUrlHandling {
+    Keep,
+    Reject,
+    Ignore,
+}
+
 #[unsafe(no_mangle)]
 pub extern "C" fn Servo_ParseFilters(
     value: &nsACString,
-    ignore_urls: bool,
+    url_handling: FilterUrlHandling,
     data: *mut URLExtraData,
     out: &mut style::OwnedSlice<Filter>,
 ) -> bool {
@@ -9891,8 +9899,12 @@ pub extern "C" fn Servo_ParseFilters(
             Err(..) => return false,
         };
 
-        if ignore_urls && matches!(filter, Filter::Url(_)) {
-            continue;
+        if matches!(filter, Filter::Url(_)) {
+            match url_handling {
+                FilterUrlHandling::Ignore => continue,
+                FilterUrlHandling::Reject => return false,
+                FilterUrlHandling::Keep => {},
+            }
         }
 
         filters.push(filter);

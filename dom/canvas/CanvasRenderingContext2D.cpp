@@ -1175,6 +1175,7 @@ CanvasRenderingContext2D::ContextState::ContextState(const ContextState& aOther)
       filter(aOther.filter),
       filterAdditionalImages(aOther.filterAdditionalImages.Clone()),
       filterSourceGraphicTainted(aOther.filterSourceGraphicTainted),
+      filterDescriptionUpToDate(aOther.filterDescriptionUpToDate),
       imageSmoothingEnabled(aOther.imageSmoothingEnabled),
       explicitLang(aOther.explicitLang) {
   if (aOther.autoSVGFiltersObserver) {
@@ -2968,28 +2969,48 @@ CreateFilterDeclarationForServo(const nsACString& aFilter,
   return CreateDeclarationForServo(eCSSProperty_filter, aFilter, aDocument);
 }
 
-static already_AddRefed<const ComputedStyle> ResolveFilterStyleForServo(
+static bool ResolveFilterStyleForServo(
     const nsACString& aFilterString, const ComputedStyle* aParentStyle,
-    PresShell* aPresShell, ErrorResult& aError) {
+    PresShell* aPresShell, StyleOwnedSlice<StyleFilter>& aFilterChain,
+    ErrorResult& aError) {
+  // Try to parse an absolute filter first without having to go through the
+  // declaration path.
+  if (aParentStyle->EffectiveZoom() == StyleZoom::ONE &&
+      Servo_ParseFilters(&aFilterString, StyleFilterUrlHandling::Reject,
+                         aPresShell->GetDocument()->DefaultStyleAttrURLData(),
+                         &aFilterChain)) {
+    return true;
+  }
+
   RefPtr<StyleLockedDeclarationBlock> declarations =
       CreateFilterDeclarationForServo(aFilterString, aPresShell->GetDocument());
   if (!declarations) {
     // Refuse to accept the filter, but do not throw an error.
-    return nullptr;
+    return false;
   }
 
   // In addition to unparseable values, the spec says we need to reject
   // 'inherit' and 'initial'.
   if (Servo_DeclarationBlock_HasCSSWideKeyword(declarations,
                                                eCSSProperty_filter)) {
-    return nullptr;
+    return false;
   }
 
   ServoStyleSet* styleSet = aPresShell->StyleSet();
-  RefPtr<const ComputedStyle> computedValues =
+  RefPtr<const ComputedStyle> style =
       styleSet->ResolveForDeclarations(aParentStyle, declarations);
 
-  return computedValues.forget();
+  aFilterChain = std::move(style->StyleEffects()->mFilters);
+  return true;
+}
+
+static bool FiltersHaveUrl(Span<const StyleFilter> aFilters) {
+  for (const auto& filter : aFilters) {
+    if (filter.IsUrl()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 bool CanvasRenderingContext2D::ParseFilter(
@@ -3012,12 +3033,8 @@ bool CanvasRenderingContext2D::ParseFilter(
       return false;
     }
 
-    if (NS_WARN_IF(!Servo_ParseFilters(&aString, /* aIgnoreUrls */ true,
-                                       urlExtraData, &aFilterChain))) {
-      return false;
-    }
-
-    return true;
+    return Servo_ParseFilters(&aString, StyleFilterUrlHandling::Ignore,
+                              urlExtraData, &aFilterChain);
   }
 
   const ComputedStyle* parentStyle = GetCurrentFontComputedStyle();
@@ -3025,32 +3042,40 @@ bool CanvasRenderingContext2D::ParseFilter(
     return false;
   }
 
-  RefPtr<const ComputedStyle> style =
-      ResolveFilterStyleForServo(aString, parentStyle, presShell, aError);
-  if (!style) {
-    return false;
-  }
-
-  aFilterChain = style->StyleEffects()->mFilters;
-  return true;
+  return ResolveFilterStyleForServo(aString, parentStyle, presShell,
+                                    aFilterChain, aError);
 }
 
 void CanvasRenderingContext2D::SetFilter(const nsACString& aFilter,
                                          ErrorResult& aError) {
   StyleOwnedSlice<StyleFilter> filterChain;
-  if (ParseFilter(aFilter, filterChain, aError)) {
-    CurrentState().filterString = aFilter;
-    CurrentState().filterChain = std::move(filterChain);
-    if (mCanvasElement) {
-      if (CurrentState().autoSVGFiltersObserver) {
-        CurrentState().autoSVGFiltersObserver->SetIsActive(false);
-      }
-      CurrentState().autoSVGFiltersObserver =
-          SVGObserverUtils::ObserveFiltersForCanvasContext(
-              this, mCanvasElement, CurrentState().filterChain.AsSpan());
-    }
-    UpdateFilter(/* aFlushIfNeeded = */ true);
+  if (!ParseFilter(aFilter, filterChain, aError)) {
+    return;
   }
+
+  ContextState& state = CurrentState();
+  state.filterString = aFilter;
+  state.filterChain = std::move(filterChain);
+  if (state.autoSVGFiltersObserver) {
+    state.autoSVGFiltersObserver->SetIsActive(false);
+    state.autoSVGFiltersObserver = nullptr;
+  }
+
+  // Drop the description built for the old chain.
+  state.filter = FilterDescription();
+  state.filterAdditionalImages.Clear();
+  state.filterDescriptionUpToDate = false;
+
+  if (!FiltersHaveUrl(state.filterChain.AsSpan())) {
+    return;
+  }
+
+  if (mCanvasElement) {
+    state.autoSVGFiltersObserver =
+        SVGObserverUtils::ObserveFiltersForCanvasContext(
+            this, mCanvasElement, state.filterChain.AsSpan());
+  }
+  UpdateFilter(/* aFlushIfNeeded = */ true);
 }
 
 static already_AddRefed<const ComputedStyle> ResolveStyleForServo(
@@ -3291,18 +3316,6 @@ class CanvasUserSpaceMetrics final : public UserSpaceMetricsWithSize {
   nsPresContext* mPresContext;
 };
 
-// The filter might reference an SVG filter that is declared inside this
-// document. Flush frames so that we'll have a SVGFilterFrame to work
-// with.
-static bool FiltersNeedFrameFlush(Span<const StyleFilter> aFilters) {
-  for (const auto& filter : aFilters) {
-    if (filter.IsUrl()) {
-      return true;
-    }
-  }
-  return false;
-}
-
 void CanvasRenderingContext2D::UpdateFilter(bool aFlushIfNeeded) {
   const bool writeOnly = IsWriteOnly() ||
                          (mCanvasElement && mCanvasElement->IsWriteOnly()) ||
@@ -3314,6 +3327,7 @@ void CanvasRenderingContext2D::UpdateFilter(bool aFlushIfNeeded) {
     // reflect the current "taint" status of the canvas
     CurrentState().filter = FilterDescription();
     CurrentState().filterSourceGraphicTainted = writeOnly;
+    CurrentState().filterDescriptionUpToDate = false;
     return;
   }
 
@@ -3321,12 +3335,15 @@ void CanvasRenderingContext2D::UpdateFilter(bool aFlushIfNeeded) {
   // be used on worker threads.
   nsPresContext* presContext = nullptr;
   if (presShell) {
-    if (aFlushIfNeeded &&
-        FiltersNeedFrameFlush(CurrentState().filterChain.AsSpan())) {
+    // The filter might reference an SVG filter that is declared inside this
+    // document. Flush frames so that we'll have a SVGFilterFrame to work
+    // with.
+    if (aFlushIfNeeded && FiltersHaveUrl(CurrentState().filterChain.AsSpan())) {
       presShell->FlushPendingNotifications(FlushType::Frames);
     }
 
     if (presShell->IsDestroying()) [[unlikely]] {
+      CurrentState().filterDescriptionUpToDate = false;
       return;
     }
 
@@ -3358,6 +3375,7 @@ void CanvasRenderingContext2D::UpdateFilter(bool aFlushIfNeeded) {
                              explicitLanguage, canvasStyle, presContext),
       gfxRect(0, 0, mWidth, mHeight), state.filterAdditionalImages);
   state.filterSourceGraphicTainted = writeOnly;
+  state.filterDescriptionUpToDate = true;
 }
 
 //
