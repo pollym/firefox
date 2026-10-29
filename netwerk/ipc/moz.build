@@ -18,8 +18,6 @@ EXPORTS.mozilla.net += [
     "ProxyAutoConfigChild.h",
     "ProxyAutoConfigParent.h",
     "ProxyConfigLookup.h",
-    "SocketProcessBackgroundChild.h",
-    "SocketProcessBackgroundParent.h",
     "SocketProcessBridgeChild.h",
     "SocketProcessBridgeParent.h",
     "SocketProcessChild.h",
@@ -41,8 +39,6 @@ UNIFIED_SOURCES += [
     "ParentChannelWrapper.cpp",
     "ParentProcessDocumentChannel.cpp",
     "ProxyConfigLookup.cpp",
-    "SocketProcessBackgroundChild.cpp",
-    "SocketProcessBackgroundParent.cpp",
     "SocketProcessBridgeChild.cpp",
     "SocketProcessBridgeParent.cpp",
     "SocketProcessChild.cpp",
@@ -67,7 +63,6 @@ IPDL_SOURCES = [
     "NeckoChannelParams.ipdlh",
     "PDocumentChannel.ipdl",
     "PProxyAutoConfig.ipdl",
-    "PSocketProcessBackground.ipdl",
 ]
 
 # needed so --disable-webrtc builds work (yes, a bit messy)

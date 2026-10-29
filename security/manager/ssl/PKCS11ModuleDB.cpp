@@ -685,8 +685,10 @@ PKCS11ModuleDB::ListModules(JSContext* aCx, Promise** aPromise) {
 }
 
 const nsLiteralCString kBuiltInModuleNames[] = {
-    kIPCClientCertsModuleName, kNSSInternalModuleName, kOSClientCertsModuleName,
-    kRemoteCertsModuleName,    kRootModuleName,
+    kNSSInternalModuleName,
+    kOSClientCertsModuleName,
+    kRemoteCertsModuleName,
+    kRootModuleName,
 };
 
 void CollectThirdPartyPKCS11ModuleTelemetry(bool aIsInitialization) {

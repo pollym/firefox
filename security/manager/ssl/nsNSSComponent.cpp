@@ -125,14 +125,6 @@ void TruncateFromLastDirectorySeparator(nsCString& path) {
   path.Truncate(index);
 }
 
-bool LoadIPCClientCerts() {
-  if (!LoadIPCClientCertsModule()) {
-    MOZ_LOG(gPIPNSSLog, LogLevel::Debug, ("failed to load ipcclientcerts"));
-    return false;
-  }
-  return true;
-}
-
 // This function can be called from chrome or content or socket processes
 // to ensure that NSS is initialized.
 bool EnsureNSSInitializedChromeOrContent() {
@@ -183,10 +175,6 @@ bool EnsureNSSInitializedChromeOrContent() {
     if (NS_FAILED(CommonInit())) {
       return false;
     }
-    // If ipcclientcerts fails to load, client certificate authentication won't
-    // work (if networking is done on the socket process). This is preferable
-    // to stopping the program entirely, so treat this as best-effort.
-    (void)NS_WARN_IF(!LoadIPCClientCerts());
     initialized = true;
     return true;
   }

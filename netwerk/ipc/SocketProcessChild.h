@@ -8,7 +8,6 @@
 #include "mozilla/Mutex.h"
 #include "mozilla/ipc/InputStreamUtils.h"
 #include "mozilla/net/PSocketProcessChild.h"
-#include "mozilla/psm/IPCClientCertsChild.h"
 #include "nsRefPtrHashtable.h"
 #include "nsTHashMap.h"
 
@@ -24,7 +23,6 @@ namespace mozilla {
 namespace net {
 
 class ProxyAutoConfigChild;
-class SocketProcessBackgroundChild;
 class SocketProcessBridgeParent;
 
 // The IPC actor implements PSocketProcessChild in child process.
@@ -87,14 +85,9 @@ class SocketProcessChild final : public PSocketProcessChild {
   mozilla::ipc::IPCResult RecvUnblockUntrustedModulesThread();
 #endif  // defined(XP_WIN)
 
-  already_AddRefed<psm::IPCClientCertsChild> GetIPCClientCertsActor();
-  void CloseIPCClientCertsActor();
-
  protected:
   friend class SocketProcessImpl;
   ~SocketProcessChild();
-
-  void InitSocketBackground();
 
  private:
   // Mapping of content process id and the SocketProcessBridgeParent.
@@ -107,10 +100,6 @@ class SocketProcessChild final : public PSocketProcessChild {
   Mutex mMutex{"SocketProcessChild::mMutex"};
 
   bool mShuttingDown MOZ_GUARDED_BY(mMutex) = false;
-
-  nsCOMPtr<nsIEventTarget> mSocketThread;
-  // mIPCClientCertsChild is only accessed on the socket thread.
-  RefPtr<psm::IPCClientCertsChild> mIPCClientCertsChild;
 };
 
 }  // namespace net

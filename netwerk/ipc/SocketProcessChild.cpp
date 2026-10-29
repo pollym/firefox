@@ -29,7 +29,6 @@
 #include "mozilla/ipc/ProcessUtils.h"
 #include "mozilla/net/AppleFastDatapathProbe.h"
 #include "mozilla/net/ProxyAutoConfigChild.h"
-#include "mozilla/net/SocketProcessBackgroundChild.h"
 #include "nsDebugImpl.h"
 #include "nsIDNSService.h"
 #include "nsIXULRuntime.h"
@@ -96,46 +95,6 @@ void CGSShutdownServerConnections();
 };
 #endif
 
-void SocketProcessChild::InitSocketBackground() {
-  Endpoint<PSocketProcessBackgroundParent> parentEndpoint;
-  Endpoint<PSocketProcessBackgroundChild> childEndpoint;
-  if (NS_WARN_IF(NS_FAILED(PSocketProcessBackground::CreateEndpoints(
-          &parentEndpoint, &childEndpoint)))) {
-    return;
-  }
-
-  SocketProcessBackgroundChild::Create(std::move(childEndpoint));
-
-  (void)SendInitSocketBackground(std::move(parentEndpoint));
-}
-
-namespace {
-
-class NetTeardownObserver final : public nsIObserver {
- public:
-  NetTeardownObserver() = default;
-
-  NS_DECL_ISUPPORTS
-  NS_DECL_NSIOBSERVER
-
- private:
-  ~NetTeardownObserver() = default;
-};
-
-NS_IMPL_ISUPPORTS(NetTeardownObserver, nsIObserver)
-
-NS_IMETHODIMP
-NetTeardownObserver::Observe(nsISupports* aSubject, const char* aTopic,
-                             const char16_t* aData) {
-  if (SocketProcessChild* child = SocketProcessChild::GetSingleton()) {
-    child->CloseIPCClientCertsActor();
-  }
-
-  return NS_OK;
-}
-
-}  // namespace
-
 bool SocketProcessChild::Init(mozilla::ipc::UntypedEndpoint&& aEndpoint,
                               const char* aParentBuildID) {
   if (NS_WARN_IF(NS_FAILED(nsThreadManager::get().Init()))) {
@@ -161,8 +120,6 @@ bool SocketProcessChild::Init(mozilla::ipc::UntypedEndpoint&& aEndpoint,
     return false;
   }
 
-  InitSocketBackground();
-
   SetThisProcessName("Socket Process");
 #if defined(XP_MACOSX)
   // Close all current connections to the WindowServer. This ensures that the
@@ -187,14 +144,9 @@ bool SocketProcessChild::Init(mozilla::ipc::UntypedEndpoint&& aEndpoint,
     return false;
   }
 
-  nsCOMPtr<nsIObserverService> obs = services::GetObserverService();
-  if (obs) {
-    nsCOMPtr<nsIObserver> observer = new NetTeardownObserver();
-    (void)obs->AddObserver(observer, "profile-change-net-teardown", false);
-  }
-
-  mSocketThread = mozilla::components::SocketTransport::Service();
-  if (!mSocketThread) {
+  nsCOMPtr<nsIEventTarget> socketThread =
+      mozilla::components::SocketTransport::Service();
+  if (!socketThread) {
     return false;
   }
 
@@ -233,8 +185,6 @@ void SocketProcessChild::ActorDestroy(ActorDestroyReason aWhy) {
 
 void SocketProcessChild::CleanUp() {
   LOG(("SocketProcessChild::CleanUp\n"));
-
-  SocketProcessBackgroundChild::Shutdown();
 
   for (const auto& parent : mSocketProcessBridgeParentMap.Values()) {
     if (parent->CanSend()) {
@@ -458,62 +408,6 @@ SocketProcessChild::RecvUnblockUntrustedModulesThread() {
 bool SocketProcessChild::IsShuttingDown() {
   MutexAutoLock lock(mMutex);
   return mShuttingDown;
-}
-
-void SocketProcessChild::CloseIPCClientCertsActor() {
-  LOG(("SocketProcessChild::CloseIPCClientCertsActor"));
-  MOZ_ASSERT(NS_IsMainThread());
-
-  mSocketThread->Dispatch(NS_NewRunnableFunction(
-      "CloseIPCClientCertsActor", [self = RefPtr{this}]() {
-        LOG(("CloseIPCClientCertsActor"));
-        if (self->mIPCClientCertsChild) {
-          self->mIPCClientCertsChild->Close();
-          self->mIPCClientCertsChild = nullptr;
-        }
-      }));
-}
-
-already_AddRefed<psm::IPCClientCertsChild>
-SocketProcessChild::GetIPCClientCertsActor() {
-  LOG(("SocketProcessChild::GetIPCClientCertsActor"));
-  // Only socket thread can access the mIPCClientCertsChild.
-  if (!OnSocketThread()) {
-    return nullptr;
-  }
-
-  {
-    MutexAutoLock lock(mMutex);
-    if (mShuttingDown) {
-      return nullptr;
-    }
-  }
-
-  if (mIPCClientCertsChild) {
-    RefPtr<psm::IPCClientCertsChild> actorChild = mIPCClientCertsChild;
-    return actorChild.forget();
-  }
-
-  ipc::Endpoint<psm::PIPCClientCertsParent> parentEndpoint;
-  ipc::Endpoint<psm::PIPCClientCertsChild> childEndpoint;
-  psm::PIPCClientCerts::CreateEndpoints(&parentEndpoint, &childEndpoint);
-
-  if (NS_FAILED(SocketProcessBackgroundChild::WithActor(
-          "SendInitIPCClientCerts",
-          [endpoint = std::move(parentEndpoint)](
-              SocketProcessBackgroundChild* aActor) mutable {
-            (void)aActor->SendInitIPCClientCerts(std::move(endpoint));
-          }))) {
-    return nullptr;
-  }
-
-  RefPtr<psm::IPCClientCertsChild> actor = new psm::IPCClientCertsChild();
-  if (!childEndpoint.Bind(actor)) {
-    return nullptr;
-  }
-
-  mIPCClientCertsChild = actor;
-  return actor.forget();
 }
 
 }  // namespace net

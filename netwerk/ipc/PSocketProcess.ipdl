@@ -7,7 +7,6 @@ include protocol PSocketProcessBridge;
 include protocol PProfiler;
 include protocol PWebrtcTCPSocket;
 include protocol PProxyAutoConfig;
-include protocol PSocketProcessBackground;
 
 #if defined(MOZ_SANDBOX) && defined(MOZ_DEBUG) && defined(ENABLE_TESTS)
 include protocol PSandboxTesting;
@@ -76,7 +75,6 @@ parent:
 
   /* tabId is only required for web-proxy support, which isn't always needed */
   async PWebrtcTCPSocket(TabId? tabId);
-  async InitSocketBackground(Endpoint<PSocketProcessBackgroundParent> aEndpoint);
   async PDNSRequest(nsCString hostName, nsCString trrServer, int32_t port,
                     uint16_t type, OriginAttributes originAttributes,
                     DNSFlags flags);

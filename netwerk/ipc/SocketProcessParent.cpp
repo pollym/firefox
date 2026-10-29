@@ -7,7 +7,6 @@
 #include "SSLTokensCache.h"
 #include "SocketProcessHost.h"
 #include "SocketProcessLogging.h"
-#include "TLSClientAuthCertSelection.h"
 #include "mozilla/Atomics.h"
 #include "mozilla/Components.h"
 #include "mozilla/FOGIPC.h"
@@ -18,12 +17,10 @@
 #include "mozilla/dom/MemoryReportRequest.h"
 #include "mozilla/glean/NetwerkMetrics.h"
 #include "mozilla/net/DNSRequestParent.h"
-#include "mozilla/net/SocketProcessBackgroundParent.h"
 #include "mozilla/net/neqo_glue_ffi_generated.h"
 #include "nsHttpConnectionInfo.h"
 #include "nsHttpHandler.h"
 #include "nsIConsoleService.h"
-#include "nsIHttpActivityObserver.h"
 #include "nsIOService.h"
 #include "nsIObserverService.h"
 #include "nsNSSCertificate.h"
@@ -216,28 +213,6 @@ mozilla::ipc::IPCResult SocketProcessParent::RecvPDNSRequestConstructor(
       actor->GetDNSRequest()->AsDNSRequestHandler();
   handler->DoAsyncResolve(aHost, aTrrServer, port, aType, aOriginAttributes,
                           aFlags);
-  return IPC_OK();
-}
-
-mozilla::ipc::IPCResult SocketProcessParent::RecvInitSocketBackground(
-    Endpoint<PSocketProcessBackgroundParent>&& aEndpoint) {
-  if (!aEndpoint.IsValid()) {
-    return IPC_FAIL(this, "Invalid endpoint");
-  }
-
-  nsCOMPtr<nsISerialEventTarget> transportQueue;
-  if (NS_FAILED(NS_CreateBackgroundTaskQueue("SocketBackgroundParentQueue",
-                                             getter_AddRefs(transportQueue)))) {
-    return IPC_FAIL(this, "NS_CreateBackgroundTaskQueue failed");
-  }
-
-  transportQueue->Dispatch(
-      NS_NewRunnableFunction("BindSocketBackgroundParent",
-                             [endpoint = std::move(aEndpoint)]() mutable {
-                               RefPtr<SocketProcessBackgroundParent> parent =
-                                   new SocketProcessBackgroundParent();
-                               endpoint.Bind(parent);
-                             }));
   return IPC_OK();
 }
 
