@@ -3412,10 +3412,10 @@ fn probe_apple_fast_path_inner(send_fd: c_int, recv_fd: c_int) -> io::Result<()>
 }
 
 /// Tests the Apple fast UDP datapath end-to-end using the same neqo-udp code
-/// path used in production. Called during socket process initialisation
-/// with two pre-created, loopback-bound UDP sockets. Returns `true` only if a
-/// datagram with ECN bits set survives the send/receive round-trip through the
-/// `sendmsg_x`/`recvmsg_x` APIs.
+/// path used in production. Called on a background thread in the parent
+/// process with two pre-created, loopback-bound UDP sockets. Returns `true`
+/// only if a datagram with ECN bits set survives the send/receive round-trip
+/// through the `sendmsg_x`/`recvmsg_x` APIs.
 #[cfg(target_vendor = "apple")]
 #[no_mangle]
 pub extern "C" fn neqo_glue_probe_apple_fast_path(send_fd: c_int, recv_fd: c_int) -> bool {

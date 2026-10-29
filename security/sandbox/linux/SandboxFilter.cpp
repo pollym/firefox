@@ -824,8 +824,7 @@ class SandboxPolicyCommon : public SandboxPolicyBase {
 
     // These don't appear to be used in our code at the moment, but
     // they seem low-risk enough to allow to avoid the possibility of
-    // breakage.  (Necko might use MSG_PEEK, but the socket process
-    // overrides this method.)
+    // breakage.  (Necko might use MSG_PEEK.)
     static constexpr int kHarmless = MSG_PEEK | MSG_WAITALL | MSG_TRUNC;
 
     static constexpr int kAllowed = kNeeded | kHarmless;

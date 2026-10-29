@@ -2032,10 +2032,9 @@ nsIOService::SetSimpleURIUnknownRemoteSchemes(
   mSimpleURIUnknownSchemes.SetAndMergeRemoteSchemes(aRemoteSchemes);
 
   if (XRE_IsParentProcess()) {
-    // since we only expect socket, parent and content processes to create URLs
+    // since we only expect parent and content processes to create URLs
     // that need to check the bypass list
     // we only broadcast the list to content processes
-    // (and leave socket process broadcast as todo if necessary)
     //
     // sending only the remote-settings schemes to the content,
     // which already has the pref list

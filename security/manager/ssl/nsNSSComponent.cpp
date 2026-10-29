@@ -125,7 +125,7 @@ void TruncateFromLastDirectorySeparator(nsCString& path) {
   path.Truncate(index);
 }
 
-// This function can be called from chrome or content or socket processes
+// This function can be called from chrome or content processes
 // to ensure that NSS is initialized.
 bool EnsureNSSInitializedChromeOrContent() {
   static Atomic<bool> initialized(false);
