@@ -183,4 +183,33 @@ export const PushNotificationHelperRegistry = {
       // The key does not exist, so there is nothing to prune
     }
   },
+
+  /**
+   * Get the install directories of the push notification helpers of a profile.
+   *
+   * The same profile can be used by push notification helpers from different
+   * installations.
+   *
+   * @param {string} profileDir - Profile directory.
+   * @returns {string[]} Install directories.
+   */
+  getInstallDirsForProfile(profileDir) {
+    const installDirs = [];
+
+    try {
+      withRegistryKey(key => {
+        for (let i = 0; i < key.valueCount; i++) {
+          const name = key.getValueName(i);
+          const parts = splitRegistryValueName(name);
+          if (parts?.profileDir.toLowerCase() == profileDir.toLowerCase()) {
+            installDirs.push(parts.installDir);
+          }
+        }
+      });
+    } catch (e) {
+      // The key does not exist, so there is nothing recorded
+    }
+
+    return installDirs;
+  },
 };
