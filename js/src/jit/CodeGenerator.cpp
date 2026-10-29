@@ -11135,10 +11135,37 @@ void CodeGenerator::visitWasmStoreSlot(LWasmStoreSlot* ins) {
   MNarrowingOp narrowingOp = ins->narrowingOp();
   Register container = ToRegister(ins->containerRef());
   Address addr(container, ins->offset());
-  AnyRegister src = ToAnyRegister(ins->value());
   if (type != MIRType::Int32) {
     MOZ_RELEASE_ASSERT(narrowingOp == MNarrowingOp::None);
   }
+
+  if (ins->value()->isConstant()) {
+    MOZ_ASSERT(type == MIRType::Int32);
+    Imm32 imm(ToInt32(ins->value()));
+    FaultingCodeRange fcr;
+    switch (narrowingOp) {
+      case MNarrowingOp::None:
+        fcr = masm.store32(imm, addr);
+        EmitSignalNullCheckTrapSite(masm, ins, fcr,
+                                    wasm::TrapMachineInsn::Store32);
+        break;
+      case MNarrowingOp::To16:
+        fcr = masm.store16(imm, addr);
+        EmitSignalNullCheckTrapSite(masm, ins, fcr,
+                                    wasm::TrapMachineInsn::Store16);
+        break;
+      case MNarrowingOp::To8:
+        fcr = masm.store8(imm, addr);
+        EmitSignalNullCheckTrapSite(masm, ins, fcr,
+                                    wasm::TrapMachineInsn::Store8);
+        break;
+      default:
+        MOZ_CRASH();
+    }
+    return;
+  }
+
+  AnyRegister src = ToAnyRegister(ins->value());
 
 #ifdef ENABLE_JIT_SIMD
   if (type == MIRType::Simd128) {
@@ -11438,13 +11465,15 @@ void CodeGenerator::visitWasmLoadElementI64(LWasmLoadElementI64* ins) {
 void CodeGenerator::visitWasmStoreSlotI64(LWasmStoreSlotI64* ins) {
   Register container = ToRegister(ins->containerRef());
   Address addr(container, ins->offset());
-  Register64 value = ToRegister64(ins->value());
   // Either 1 or 2 words.  As above we register both transactions in the
   // 2-word case.
 #ifdef JS_64BIT
-  FaultingCodeRange fcr = masm.store64(value, addr);
+  FaultingCodeRange fcr = ins->value().value().isConstant()
+                              ? masm.store64(Imm64(ToInt64(ins->value())), addr)
+                              : masm.store64(ToRegister64(ins->value()), addr);
   EmitSignalNullCheckTrapSite(masm, ins, fcr, wasm::TrapMachineInsn::Store64);
 #else
+  Register64 value = ToRegister64(ins->value());
   FaultingCodeRangePair fcrp = masm.store64(value, addr);
   EmitSignalNullCheckTrapSite(masm, ins, fcrp.first,
                               wasm::TrapMachineInsn::Store32);

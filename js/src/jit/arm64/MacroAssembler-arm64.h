@@ -902,16 +902,15 @@ class MacroAssemblerCompat : public vixl::MacroAssembler {
   FaultingCodeRange store8(Register src, const Address& address) {
     return Strb(ARMRegister(src, 32), toMemOperand(address));
   }
-  void store8(Imm32 imm, const Address& address) {
+  FaultingCodeRange store8(Imm32 imm, const Address& address) {
     if (imm.value == 0) {
-      Strb(vixl::wzr, toMemOperand(address));
-      return;
+      return Strb(vixl::wzr, toMemOperand(address));
     }
     vixl::UseScratchRegisterScope temps(this);
     const ARMRegister scratch32 = temps.AcquireW();
     MOZ_ASSERT(scratch32.asUnsized() != address.base);
     move32(imm, scratch32.asUnsized());
-    Strb(scratch32, toMemOperand(address));
+    return Strb(scratch32, toMemOperand(address));
   }
   FaultingCodeRange store8(Register src, const BaseIndex& address) {
     return doBaseIndex(ARMRegister(src, 32), address, vixl::STRB_w);
@@ -932,16 +931,15 @@ class MacroAssemblerCompat : public vixl::MacroAssembler {
   FaultingCodeRange store16(Register src, const Address& address) {
     return Strh(ARMRegister(src, 32), toMemOperand(address));
   }
-  void store16(Imm32 imm, const Address& address) {
+  FaultingCodeRange store16(Imm32 imm, const Address& address) {
     if (imm.value == 0) {
-      Strh(vixl::wzr, toMemOperand(address));
-      return;
+      return Strh(vixl::wzr, toMemOperand(address));
     }
     vixl::UseScratchRegisterScope temps(this);
     const ARMRegister scratch32 = temps.AcquireW();
     MOZ_ASSERT(scratch32.asUnsized() != address.base);
     move32(imm, scratch32.asUnsized());
-    Strh(scratch32, toMemOperand(address));
+    return Strh(scratch32, toMemOperand(address));
   }
   FaultingCodeRange store16(Register src, const BaseIndex& address) {
     return doBaseIndex(ARMRegister(src, 32), address, vixl::STRH_w);
@@ -1031,16 +1029,15 @@ class MacroAssemblerCompat : public vixl::MacroAssembler {
     Mov(scratch64, uint64_t(address.addr));
     Str(ARMRegister(src, 32), MemOperand(scratch64));
   }
-  void store32(Imm32 imm, const Address& address) {
+  FaultingCodeRange store32(Imm32 imm, const Address& address) {
     if (imm.value == 0) {
-      Str(vixl::wzr, toMemOperand(address));
-      return;
+      return Str(vixl::wzr, toMemOperand(address));
     }
     vixl::UseScratchRegisterScope temps(this);
     const ARMRegister scratch32 = temps.AcquireW();
     MOZ_ASSERT(scratch32.asUnsized() != address.base);
     Mov(scratch32, uint64_t(imm.value));
-    Str(scratch32, toMemOperand(address));
+    return Str(scratch32, toMemOperand(address));
   }
   FaultingCodeRange store32(Register r, const Address& address) {
     return Str(ARMRegister(r, 32), toMemOperand(address));
@@ -1078,8 +1075,8 @@ class MacroAssemblerCompat : public vixl::MacroAssembler {
     storePtr(ImmWord(imm.value), address);
   }
 
-  void store64(Imm64 imm, const Address& address) {
-    storePtr(ImmWord(imm.value), address);
+  FaultingCodeRange store64(Imm64 imm, const Address& address) {
+    return storePtr(ImmWord(imm.value), address);
   }
 
   template <typename S, typename T>
