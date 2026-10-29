@@ -975,7 +975,8 @@ END_TEST(testBufferAllocator_stress)
 // A JS object that holds a buffer-allocated vector.
 class VectorObject : public NativeObject {
  public:
-  using VectorT = GCVector<HeapPtr<JSObject*>, 0, BufferAllocPolicy>;
+  using VectorT =
+      BufferAllocated<GCVector<HeapPtr<JSObject*>, 0, BufferAllocPolicy>>;
 
   enum { VectorSlot, SlotCount };
 
@@ -1124,9 +1125,9 @@ END_TEST(testBufferAllocPolicy_vector)
 // A JS object that holds a buffer-allocated hash set.
 class HashSetObject : public NativeObject {
  public:
-  using HashSetT =
+  using HashSetT = BufferAllocated<
       GCHashSet<HeapPtr<JSObject*>, StableCellHasher<HeapPtr<JSObject*>>,
-                BufferAllocPolicy>;
+                BufferAllocPolicy>>;
 
   enum { HashSetSlot, SlotCount };
 

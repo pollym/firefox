@@ -7,6 +7,8 @@
 #ifndef gc_Allocator_h
 #define gc_Allocator_h
 
+#include "mozilla/Attributes.h"
+
 #include "gc/AllocKind.h"
 #include "gc/GCEnum.h"
 #include "js/HeapAPI.h"
@@ -127,16 +129,26 @@ void FreeBuffer(JS::Zone* zone, void* alloc);
 // memory.
 bool IsGCPointerBufferAlloc(void* alloc);
 
-#ifdef DEBUG
-
 inline void AssertIsBufferAlloc(void* alloc) {
   MOZ_ASSERT(IsGCPointerBufferAlloc(alloc));  // Safe if true.
 }
 
+#ifdef DEBUG
 // Check whether a buffer allocation is part of the specified zone.
 bool IsBufferAllocInZone(void* alloc, JS::Zone* zone);
-
 #endif
+
+class Buffer {
+#ifdef DEBUG
+ public:
+  Buffer() { AssertIsBufferAlloc(this); }
+#endif
+} JS_HAZ_GC_THING;
+
+template <typename T>
+class MOZ_EMPTY_BASES BufferAllocated : public T, public Buffer {
+  using T::T;
+};
 
 bool IsNurseryOwned(JS::Zone* zone, void* alloc);
 
