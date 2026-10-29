@@ -369,9 +369,8 @@ class nsFrameSelection final {
                                           CaretAssociationHint aHint);
 
   [[nodiscard]] bool IsAvailable() const {
-    // mDomSelections is initialized at construction and cleared if the cycle
-    // collector unlink them so that if the first selection is available, the
-    // others should be fine.
+    // The normal selection is created at construction and cleared if the
+    // cycle collector unlinks the selections.
     return !!mDomSelections[0];
   }
 
@@ -557,6 +556,13 @@ class nsFrameSelection final {
    * @param aSelectionType The selection type what you want.
    */
   [[nodiscard]] mozilla::dom::Selection* GetSelection(
+      mozilla::SelectionType aSelectionType) const;
+
+  /**
+   * Like GetSelection(), but returns null for selections not created yet
+   * instead of creating them.
+   */
+  [[nodiscard]] mozilla::dom::Selection* GetExistingSelection(
       mozilla::SelectionType aSelectionType) const;
 
   /**
@@ -1278,8 +1284,11 @@ class nsFrameSelection final {
 
   ////////////BEGIN nsFrameSelection members
 
-  mozilla::Array<RefPtr<mozilla::dom::Selection>,
-                 std::size(mozilla::kPresentSelectionTypes)>
+  // Indexed like kPresentSelectionTypes. Only the normal selection exists from
+  // the start; GetSelection() creates the others when first asked for. The
+  // eHighlight entry stays empty, highlights are in mHighlightSelections.
+  mutable mozilla::Array<RefPtr<mozilla::dom::Selection>,
+                         std::size(mozilla::kPresentSelectionTypes)>
       mDomSelections;
 
   nsTArray<

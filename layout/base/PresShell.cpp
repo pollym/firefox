@@ -1562,6 +1562,14 @@ Selection* PresShell::GetSelection(RawSelectionType aRawSelectionType) {
   return mSelection->GetSelection(ToSelectionType(aRawSelectionType));
 }
 
+Selection* PresShell::GetExistingSelection(RawSelectionType aRawSelectionType) {
+  if (!mSelection) {
+    return nullptr;
+  }
+
+  return mSelection->GetExistingSelection(ToSelectionType(aRawSelectionType));
+}
+
 Selection* PresShell::GetCurrentSelection(SelectionType aSelectionType) {
   if (!mSelection) {
     return nullptr;
