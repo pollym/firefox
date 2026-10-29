@@ -63,6 +63,7 @@ osslicenses-plugin = "0.13.0"
 play-integrity = "1.6.0"
 play-review = "2.0.2"
 play-services-ads-id = "18.3.0"
+play-services-auth-blockstore = "16.4.0"
 play-services-base = "18.11.1"
 play-services-fido = "21.3.1"
 protobuf = "4.36.1"
@@ -246,6 +247,7 @@ play-integrity = { module = "com.google.android.play:integrity", version.ref = "
 play-review = { module = "com.google.android.play:review", version.ref = "play-review" }
 play-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "play-review" }
 play-services-ads-id = { module = "com.google.android.gms:play-services-ads-identifier", version.ref = "play-services-ads-id" }
+play-services-auth-blockstore = { module = "com.google.android.gms:play-services-auth-blockstore", version.ref = "play-services-auth-blockstore" }
 play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "play-services-base" }
 play-services-fido = { module = "com.google.android.gms:play-services-fido", version.ref = "play-services-fido" }
 protobuf-compiler = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }

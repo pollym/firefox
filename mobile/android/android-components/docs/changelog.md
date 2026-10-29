@@ -5,6 +5,8 @@ permalink: /changelog/
 ---
 
 # 161.0 (In Development)
+* **lib-installation-blockstore**
+    * New component that checks for app reinstalls. [Bug 2084343](https://bugzilla.mozilla.org/show_bug.cgi?id=2084343)
 * **support-ktx**
     * Added `String.toSnakeCase`, which returns a camelCase or PascalCase string in snake_case. [Bug 2084683](https://bugzilla.mozilla.org/show_bug.cgi?id=2084683)
 * **feature-app-links**
