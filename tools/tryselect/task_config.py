@@ -617,7 +617,7 @@ class ExistingTasks(ParameterConfig):
             revision = use_existing_tasks[len("rev=") :]
 
         else:
-            raise Exception("Unable to parse '{use_existing_tasks}'!")
+            raise Exception(f"Unable to parse '{use_existing_tasks}'!")
 
         url = self.TREEHERDER_PUSH_URL.format(branch=branch, revision=revision)
         print(f"Using existing tasks from: {url}")
