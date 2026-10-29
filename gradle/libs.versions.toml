@@ -106,7 +106,7 @@ mockk = "1.14.11"
 robolectric = "4.17"
 
 # Third party libraries
-adjust = "5.8.0"
+adjust = "5.8.1"
 androidsvg = "1.4"
 disklrucache = "2.0.2"
 jetbrains-markdown = "0.7.17"
