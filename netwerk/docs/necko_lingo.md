@@ -196,7 +196,7 @@ An IETF transport protocol [RFC9000](https://datatracker.ietf.org/doc/html/rfc90
 Implemented in RUST and maintained by [neqo](https://github.com/mozilla/neqo).
 
 ## Socket Process
-WIP project to move the actions of the socket thread into its own process for the purposes of isolation for security and stability (during crashes).
+A separate, partially sandboxed process that hosts WebRTC networking. HTTP, DNS and WebSocket networking run in the parent process.
 
 ## Socket Thread
 From the main process, a thread that handles opening and reading from the sockets for network communication. \

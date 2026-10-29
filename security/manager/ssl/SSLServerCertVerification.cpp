@@ -494,8 +494,7 @@ void GatherCertificateTransparencyTelemetry(
 }
 
 // This function collects telemetry about certs. It will be called on one of
-// CertVerificationThread. When the socket process is used this will be called
-// on the parent process.
+// CertVerificationThread.
 static void CollectCertTelemetry(
     mozilla::pkix::Result aCertVerificationResult, EVStatus aEVStatus,
     CertVerifier::OCSPStaplingStatus aOcspStaplingStatus,

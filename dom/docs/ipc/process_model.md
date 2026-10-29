@@ -319,7 +319,7 @@ For more details about the planned utility process architecture changes, see [th
 :sandboxed?: yes (socket sandbox policy)
 ```
 
-The socket process is used to separate certain networking operations from the parent process, allowing them to be performed more directly in a partially sandboxed process. The eventual goal is to move all TCP/UDP network operations into this dedicated process, and is being tracked in [Bug 1322426](https://bugzilla.mozilla.org/show_bug.cgi?id=1322426).
+The socket process hosts WebRTC networking in a partially sandboxed process. HTTP, DNS and WebSocket networking run in the parent process.
 
 (fork-server)=
 

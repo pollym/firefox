@@ -759,8 +759,6 @@ void HttpChannelChild::OnTransportAndData(const nsresult& aChannelStatus,
   DoOnDataAvailable(this, stringStream, aOffset, aData.Length());
   stringStream->Close();
 
-  // TODO: Bug 1523916 backpressure needs to take into account if the data is
-  // coming from the main process or from the socket process via PBackground.
   if (NeedToReportBytesRead()) {
     mUnreportBytesRead += aData.Length();
     if (mUnreportBytesRead >= gHttpHandler->SendWindowSize() >> 2) {

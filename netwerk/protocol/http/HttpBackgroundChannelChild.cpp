@@ -201,9 +201,8 @@ IPCResult HttpBackgroundChannelChild::RecvOnTransportAndData(
           return;
         }
 
-        // The HttpTransactionChild in socket process may not know that this
-        // request is cancelled or failed due to the IPC delay. In this case, we
-        // should not forward ODA to HttpChannelChild.
+        // The request may have been cancelled or failed due to the IPC delay.
+        // In this case, we should not forward ODA to HttpChannelChild.
         nsresult channelStatus;
         self->mChannelChild->GetStatus(&channelStatus);
         if (NS_FAILED(channelStatus)) {
@@ -215,7 +214,6 @@ IPCResult HttpBackgroundChannelChild::RecvOnTransportAndData(
             aOnDataAvailableStart);
       };
 
-  // Bug 1641336: Race only happens if the data is from socket process.
   if (IsWaitingOnStartRequest()) {
     LOG(("  > pending until OnStartRequest [offset=%" PRIu64 " count=%zu]\n",
          aOffset, aData.Length()));

@@ -2393,10 +2393,9 @@ nsresult nsHttpChannel::CallOnStartRequest() {
   });
 
   nsresult rv = ValidateMIMEType();
-  // Since ODA and OnStopRequest could be sent from socket process directly, we
-  // need to update the channel status before calling mListener->OnStartRequest.
-  // This is the only way to let child process discard the already received ODA
-  // messages.
+  // We need to update the channel status before calling
+  // mListener->OnStartRequest. This is the only way to let child process
+  // discard the already received ODA messages.
   if (NS_FAILED(rv)) {
     mStatus = rv;
     return mStatus;
@@ -9095,8 +9094,6 @@ void nsHttpChannel::RecordOnStartTelemetry(nsresult aStatus,
   };
 
   if (TRRService::Get() && TRRService::Get()->IsConfirmed()) {
-    // Note this telemetry probe is not working when DNS resolution is done in
-    // the socket process.
     HttpOnStartState state = HttpOnStartState::Others;
     if (NS_SUCCEEDED(aStatus)) {
       state = HttpOnStartState::Success;

@@ -239,8 +239,8 @@ mozilla::ipc::IPCResult SocketProcessParent::RecvAppleFastDatapathProbeResult(
     mHost->mAppleFastDatapathProbeResultReceived = true;
   }
   glean::network::apple_fast_datapath_used.Set(aAvailable);
-  // When neqo runs in the parent (socket process not used for I/O), enable
-  // the fast path here so parent-side QUIC sockets benefit from it too.
+  // Neqo runs in the parent, so enable the fast path here for its QUIC
+  // sockets.
   if (aAvailable && gSocketTransportService) {
     gSocketTransportService->Dispatch(
         NS_NewRunnableFunction("net::EnableAppleFastPath",

@@ -2299,8 +2299,6 @@ nsHttpHandler::Observe(nsISupports* subject, const char* topic,
     // depend on this value.
     mSessionStartTime = NowInSeconds();
 
-    // Since nsHttpHandler::Observe() is also called in socket process, we don't
-    // want to do telemetry twice.
     if (XRE_IsParentProcess()) {
       if (!StaticPrefs::privacy_donottrackheader_enabled()) {
         glean::http::dnt_usage.AccumulateSingleSample(2);

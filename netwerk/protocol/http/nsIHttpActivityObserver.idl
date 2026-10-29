@@ -76,7 +76,7 @@ interface nsIHttpActivityObserver : nsISupports
      * create a |NullHttpChannel|.
      *
      * @param aArgs
-     *        See the definition of |HttpActivityArgs| in PSocketProcess.ipdl.
+     *        See the definition of |HttpActivityArgs| in NeckoChannelParams.ipdlh.
      */
     [noscript, must_use]
     void observeActivityWithArgs(in HttpActivityArgs aArgs,
