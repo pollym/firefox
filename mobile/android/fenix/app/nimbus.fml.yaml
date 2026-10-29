@@ -260,6 +260,21 @@ features:
         value:
           enabled: true
 
+  installation:
+    description: A feature that checks for reinstalls.
+    variables:
+      enabled:
+        type: Boolean
+        description: If true, the install data will be stored in Block Store and reported to Glean.
+        default: false
+    defaults:
+      - channel: developer
+        value:
+          enabled: true
+      - channel: nightly
+        value:
+          enabled: true
+
   setup-checklist:
     description: A feature on the home page that allows the user to track onboarding setup progress.
     variables:
