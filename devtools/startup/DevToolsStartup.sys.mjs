@@ -683,6 +683,11 @@ export class DevToolsStartup {
     if (this.hookedWindows.has(window)) {
       return;
     }
+
+    if (window.document.documentElement.hasAttribute("mini-window")) {
+      return;
+    }
+
     // Key Shortcuts need to be added on all the created windows.
     this.hookKeyShortcuts(window);
 
