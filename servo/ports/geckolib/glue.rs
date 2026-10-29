@@ -1555,7 +1555,7 @@ pub extern "C" fn Servo_Element_IsDisplayNone(element: &RawGeckoElement) -> bool
     let element = GeckoElement(element);
     let data = element
         .borrow_data()
-        .expect("Invoking Servo_Element_IsDisplayContents on unstyled element");
+        .expect("Invoking Servo_Element_IsDisplayNone on unstyled element");
     data.styles.is_display_none()
 }
 
