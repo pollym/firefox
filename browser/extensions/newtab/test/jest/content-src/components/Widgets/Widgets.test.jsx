@@ -1778,7 +1778,7 @@ describe("<Widgets> auto-minimize layout", () => {
   });
 
   it("collapses the section after the configured delay", () => {
-    const { container, store } = renderWidgets(
+    const { container } = renderWidgets(
       makeState({
         "pageLayouts.variant": "auto-minimize-widgets",
         "pageLayouts.autoMinimizeDelayMs": 3000,
@@ -1798,13 +1798,6 @@ describe("<Widgets> auto-minimize layout", () => {
     expect(widgetsContainer(container)).toHaveAttribute(
       "data-section-collapsed"
     );
-    expect(containerActions(store)).toEqual([
-      {
-        action_type: "auto_minimize",
-        action_value: "collapse_section",
-        widget_size: "medium",
-      },
-    ]);
   });
 
   it("prefers the trainhopConfig delay over the pref", () => {
@@ -1917,7 +1910,6 @@ describe("<Widgets> auto-minimize layout", () => {
     act(() => {
       jest.advanceTimersByTime(100);
     });
-    expect(containerActions(store)).toHaveLength(1);
 
     // Any PREF_CHANGED hands the component a fresh prefs object.
     act(() => {
@@ -1930,11 +1922,6 @@ describe("<Widgets> auto-minimize layout", () => {
       jest.advanceTimersByTime(60000);
     });
 
-    expect(
-      containerActions(store).filter(
-        data => data.action_value === "collapse_section"
-      )
-    ).toHaveLength(1);
     expect(widgetsContainer(container)).toHaveAttribute(
       "data-section-collapsed"
     );

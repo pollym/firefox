@@ -414,16 +414,6 @@ function Widgets({ widgetIds }) {
         container?.getBoundingClientRect().height ?? null;
       rowToggleToHeightRef.current = 0;
       setAutoCollapsed(true);
-      dispatch(
-        ac.OnlyToMain({
-          type: at.WIDGETS_CONTAINER_ACTION,
-          data: {
-            action_type: CONTAINER_ACTION_TYPES.AUTO_MINIMIZE,
-            action_value: "collapse_section",
-            widget_size: widgetSize,
-          },
-        })
-      );
     }, autoMinimizeDelayMs);
     return () => globalThis.clearTimeout(timer);
   }, [
@@ -431,8 +421,6 @@ function Widgets({ widgetIds }) {
     autoCollapsed,
     autoMinimizeDelayMs,
     isPageVisible,
-    dispatch,
-    widgetSize,
     widgetsContainerRef,
   ]);
 
