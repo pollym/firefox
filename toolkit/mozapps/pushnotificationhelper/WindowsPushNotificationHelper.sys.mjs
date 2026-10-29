@@ -52,6 +52,14 @@ function launch(args) {
  * only knows how to act on that decision.
  */
 export const WindowsPushNotificationHelper = {
+  get installDir() {
+    return Services.dirsvc.get("GreBinD", Ci.nsIFile).path;
+  },
+
+  get profileDir() {
+    return Services.dirsvc.get("ProfD", Ci.nsIFile).path;
+  },
+
   /**
    * Names the profile a helper serves. A helper is per profile, so this is the
    * whole of its identity.
@@ -59,7 +67,7 @@ export const WindowsPushNotificationHelper = {
    * @returns {string[]} arguments naming the profile.
    */
   get profileArgs() {
-    return ["--profile", Services.dirsvc.get("ProfD", Ci.nsIFile).path];
+    return ["--profile", this.profileDir];
   },
 
   /**
@@ -68,9 +76,9 @@ export const WindowsPushNotificationHelper = {
    */
   start() {
     if (launch(this.profileArgs)) {
-      lazy.PushNotificationHelperRegistry.add();
+      lazy.PushNotificationHelperRegistry.add(this.installDir, this.profileDir);
     }
-    lazy.PushNotificationHelperRegistry.prune();
+    lazy.PushNotificationHelperRegistry.prune(this.installDir);
   },
 
   /**
@@ -80,10 +88,15 @@ export const WindowsPushNotificationHelper = {
    * launch a --stop process on every startup.
    */
   stop() {
-    if (lazy.PushNotificationHelperRegistry.has()) {
+    if (
+      lazy.PushNotificationHelperRegistry.has(this.installDir, this.profileDir)
+    ) {
       launch(["--stop", ...this.profileArgs]);
-      lazy.PushNotificationHelperRegistry.remove();
+      lazy.PushNotificationHelperRegistry.remove(
+        this.installDir,
+        this.profileDir
+      );
     }
-    lazy.PushNotificationHelperRegistry.prune();
+    lazy.PushNotificationHelperRegistry.prune(this.installDir);
   },
 };
