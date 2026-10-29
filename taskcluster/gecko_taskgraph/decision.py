@@ -148,6 +148,7 @@ PER_PROJECT_PARAMETERS = {
         "target_tasks_method": "kaios_tasks",
     },
     "toolchains": {
+        "head_git_repository": "https://github.com/mozilla-firefox/firefox",
         "target_tasks_method": "mozilla_central_tasks",
     },
     # git projects
