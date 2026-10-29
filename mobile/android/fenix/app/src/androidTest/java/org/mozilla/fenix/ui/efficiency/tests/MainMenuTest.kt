@@ -455,7 +455,7 @@ class MainMenuTest : BaseTest() {
         on.mainMenu
             .navigateToPage()
             .mozVerify(MainMenuSelectors.TRY_RECOMMENDED_EXTENSION_BUTTON)
-            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON_UIAUTOMATOR)
+            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON)
             .mozVerifyElementsByGroup(MainMenuSelectors.Group.EXPANDED_EXTENSIONS_MENU_ITEMS)
     }
 
@@ -470,9 +470,9 @@ class MainMenuTest : BaseTest() {
         on.mainMenu
             .navigateToPage()
             .mozVerify(MainMenuSelectors.TRY_RECOMMENDED_EXTENSION_BUTTON)
-            .mozClick(MainMenuSelectors.EXTENSIONS_CHEVRON)
+            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON)
             .mozVerifyElementsByGroup(MainMenuSelectors.Group.EXPANDED_EXTENSIONS_MENU_ITEMS)
-            .mozClick(MainMenuSelectors.EXTENSIONS_CHEVRON)
+            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON)
             .mozVerifyElementAbsent(MainMenuSelectors.DISCOVER_MORE_EXTENSIONS_BUTTON)
         // Parity gap: legacy verifyTheRecommendedAddons asserted three named addons, each with its own
         // "Add <addon>" install button, retrying against a hardcoded candidate list. The port asserts a
@@ -491,7 +491,7 @@ class MainMenuTest : BaseTest() {
         on.mainMenu
             .navigateToPage()
             .mozVerify(MainMenuSelectors.TRY_RECOMMENDED_EXTENSION_BUTTON)
-            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON_UIAUTOMATOR)
+            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON)
         val extension = on.mainMenu.installFirstRecommendedExtension()
 
         // Remove it through Manage extensions -> the add-ons manager.
@@ -515,7 +515,7 @@ class MainMenuTest : BaseTest() {
         on.mainMenu
             .navigateToPage()
             .mozVerify(MainMenuSelectors.TRY_RECOMMENDED_EXTENSION_BUTTON)
-            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON_UIAUTOMATOR)
+            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON)
         val extension = on.mainMenu.installFirstRecommendedExtension()
 
         // Manage extensions opens the add-ons manager, where the extension is listed under Enabled.
@@ -541,7 +541,7 @@ class MainMenuTest : BaseTest() {
         on.mainMenu
             .navigateToPage()
             .mozVerify(MainMenuSelectors.TRY_RECOMMENDED_EXTENSION_BUTTON)
-            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON_UIAUTOMATOR)
+            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON)
         val extension = on.mainMenu.installFirstRecommendedExtension()
 
         // Re-open the Extensions submenu: the collapsed Extensions row now advertises the installed
@@ -550,7 +550,7 @@ class MainMenuTest : BaseTest() {
         on.browserPage.navigateToPage(genericURL.url.toString(), forceNavigation = true)
         on.mainMenu
             .navigateToPage()
-            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON_UIAUTOMATOR)
+            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON)
             .mozVerify(MainMenuSelectors.EXTENSIONS_BUTTON_WITH_INSTALLED_EXTENSION(extension.menuLabel))
             .mozVerifyElementAbsent(MainMenuSelectors.DISCOVER_MORE_EXTENSIONS_BUTTON)
             .mozVerify(MainMenuSelectors.MANAGE_EXTENSIONS_BUTTON)
@@ -568,7 +568,7 @@ class MainMenuTest : BaseTest() {
         on.mainMenu
             .navigateToPage()
             .mozVerify(MainMenuSelectors.TRY_RECOMMENDED_EXTENSION_BUTTON)
-            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON_UIAUTOMATOR)
+            .mozClick(MainMenuSelectors.EXTENSIONS_BUTTON)
         val extension = on.mainMenu.installFirstRecommendedExtension()
 
         // Open the installed extension's detail from Manage extensions and disable it.
