@@ -521,6 +521,7 @@ impl NeqoHttp3Conn {
             .mlkem(false)
             .pmtud(pmtud_enabled)
             .spurious_recovery(spurious_recovery)
+            .abe(static_prefs::pref!("network.http.http3.abe"))
             .hystart_css_baseline(css_baseline);
 
         // 0 means "use neqo's spec-compliant default PTO scaling".
