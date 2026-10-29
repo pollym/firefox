@@ -3888,7 +3888,7 @@ pref("toolkit.rust-components.logging.crates", "");
 pref("toolkit.rust-components.logging.internal-level", "Warn");
 
 // Settings Redesign 2025 prefs
-pref("browser.settings-redesign.enabled", true);
+pref("browser.settings-redesign.enabled", true, locked);
 
 // Gates the in-progress Notifications sub-page and its entry card in
 // Permissions and data. Not part of the settings-redesign section scheme, since
