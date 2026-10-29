@@ -478,7 +478,8 @@ bool IsWaylandEnabled() { return false; }
  * @param fmt
  *        printf-style format string followed by arguments.
  */
-static MOZ_FORMAT_PRINTF(2, 3) void Output(bool isError, const char* fmt, ...) {
+static MOZ_FORMAT_PRINTF(2, 3) void Output([[maybe_unused]] bool isError,
+                                           const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
 
@@ -1655,7 +1656,7 @@ nsXULAppInfo::GetIsWayland(bool* aResult) {
 }
 
 NS_IMETHODIMP
-nsXULAppInfo::GetProcessStartupShortcut(nsAString& aShortcut) {
+nsXULAppInfo::GetProcessStartupShortcut([[maybe_unused]] nsAString& aShortcut) {
 #if defined(XP_WIN)
   if (XRE_IsParentProcess()) {
     aShortcut.Assign(gProcessStartupShortcut);
@@ -1673,7 +1674,7 @@ static Maybe<LauncherRegistryInfo::EnabledState> gLauncherProcessState;
 #endif  // defined(XP_WIN) && defined(MOZ_LAUNCHER_PROCESS)
 
 NS_IMETHODIMP
-nsXULAppInfo::GetLauncherProcessState(uint32_t* aResult) {
+nsXULAppInfo::GetLauncherProcessState([[maybe_unused]] uint32_t* aResult) {
 #if defined(XP_WIN) && defined(MOZ_LAUNCHER_PROCESS)
   SetupLauncherProcessPref();
 
@@ -1927,7 +1928,7 @@ nsXULAppInfo::AppendAppNotesToCrashReport(const nsACString& data) {
 }
 
 NS_IMETHODIMP
-nsXULAppInfo::WriteMinidumpForException(void* aExceptionInfo) {
+nsXULAppInfo::WriteMinidumpForException([[maybe_unused]] void* aExceptionInfo) {
 #ifdef XP_WIN
   return CrashReporter::WriteMinidumpForException(
       static_cast<EXCEPTION_POINTERS*>(aExceptionInfo));
@@ -1937,7 +1938,8 @@ nsXULAppInfo::WriteMinidumpForException(void* aExceptionInfo) {
 }
 
 NS_IMETHODIMP
-nsXULAppInfo::AppendObjCExceptionInfoToAppNotes(void* aException) {
+nsXULAppInfo::AppendObjCExceptionInfoToAppNotes(
+    [[maybe_unused]] void* aException) {
 #ifdef XP_MACOSX
   return CrashReporter::AppendObjCExceptionInfoToAppNotes(aException);
 #else
@@ -2910,11 +2912,10 @@ static nsresult ProfileEncryptionMismatchDialog(const char* aMsgKey,
 #endif  // MOZ_WIDGET_ANDROID
 }
 
-static ReturnAbortOnError ProfileLockedDialog(nsIFile* aProfileDir,
-                                              nsIFile* aProfileLocalDir,
-                                              nsIProfileUnlocker* aUnlocker,
-                                              nsINativeAppSupport* aNative,
-                                              nsIProfileLock** aResult) {
+static ReturnAbortOnError ProfileLockedDialog(
+    nsIFile* aProfileDir, nsIFile* aProfileLocalDir,
+    nsIProfileUnlocker* aUnlocker, nsINativeAppSupport* aNative,
+    [[maybe_unused]] nsIProfileLock** aResult) {
   nsresult rv;
 
   // We aren't going to start this instance so we can unblock other instances
@@ -3033,8 +3034,9 @@ static ReturnAbortOnError ProfileLockedDialog(nsIFile* aProfileDir,
 
 MOZ_CAN_RUN_SCRIPT
 static ReturnAbortOnError ShowProfileDialog(
-    nsIToolkitProfileService* aProfileSvc, nsINativeAppSupport* aNative,
-    const char* aDialogURL, const char* aTelemetryEnvVar) {
+    [[maybe_unused]] nsIToolkitProfileService* aProfileSvc,
+    nsINativeAppSupport* aNative, const char* aDialogURL,
+    const char* aTelemetryEnvVar) {
   nsresult rv;
 
   nsCOMPtr<nsIFile> profD, profLD;

@@ -1887,7 +1887,8 @@ off_t BSPatchFileDecoder::DestinationSize() {
 unsigned int BSPatchFileDecoder::SourceCrc32() { return mHeader.scrc32; }
 
 int BSPatchFileDecoder::Apply(const uint8_t* aCheckedSrcBuf,
-                              size_t aCheckedSrcBufSize, FILE* aDstFile) {
+                              [[maybe_unused]] size_t aCheckedSrcBufSize,
+                              FILE* aDstFile) {
   return MBS_ApplyPatch(&mHeader, mPatchFile, aCheckedSrcBuf, aDstFile);
 }
 #endif  // defined(MOZ_BSPATCH)
@@ -2788,8 +2789,9 @@ bool LaunchWinPostProcess(const WCHAR* installationDir,
 
 #endif
 
-static void LaunchCallbackApp(const NS_tchar* workingDir, int argc,
-                              NS_tchar** argv, bool usingService) {
+static void LaunchCallbackApp(const NS_tchar* workingDir,
+                              [[maybe_unused]] int argc, NS_tchar** argv,
+                              [[maybe_unused]] bool usingService) {
   putenv(const_cast<char*>("MOZ_LAUNCHED_CHILD=1"));
 
   // Run from the specified working directory (see bug 312360).
@@ -3402,7 +3404,7 @@ static int GetUpdateFileName(NS_tchar* fileName, int maxChars) {
   return OK;
 }
 
-static void UpdateThreadFunc(void* param) {
+static void UpdateThreadFunc([[maybe_unused]] void* param) {
   // open ZIP archive and process...
   int rv;
   if (sReplaceRequest) {
