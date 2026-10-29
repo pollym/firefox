@@ -123,6 +123,7 @@ skip-if = [
 ["browser_multiple_popups.js"]
 skip-if = [
   "socketprocess_networking",
+  "macos_vm", # Bug 2084943 - fails only on the macOS tart VMs
 ]
 support-files = ["browser_multiple_popups.html"]
 

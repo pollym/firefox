@@ -85,6 +85,9 @@ skip-if = [
 ]
 
 ["browser_fullscreen_warning.js"]
+skip-if = [
+  "macos_vm", # Bug 2084943 - fails only on the macOS tart VMs
+]
 support-files = ["fullscreen.html"]
 
 ["browser_fullscreen_window_focus.js"]

@@ -126,6 +126,9 @@ support-files = ["blank_webmail.html"]
 ["browser_mailto_user_activation.js"]
 
 ["browser_open_internal_choice_persistence.js"]
+skip-if = [
+  "macos_vm", # Bug 2084943 - fails only on the macOS tart VMs
+]
 support-files = [
   "file_pdf_application_pdf.pdf",
   "file_pdf_application_pdf.pdf^headers^",
