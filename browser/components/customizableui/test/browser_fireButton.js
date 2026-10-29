@@ -242,6 +242,10 @@ add_task(async function test_confirmClearsWholeSession() {
     "non-private",
     "The replacement window is a normal window."
   );
+  Assert.ok(
+    options.keepPinnedTabs,
+    "The replacement window keeps the pinned tabs."
+  );
 
   // With the real Sanitizer this anchors in the replacement window; here the
   // stub leaves the current window in place, so it anchors in this one.

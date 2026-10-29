@@ -1010,7 +1010,8 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
 
     /**
      * Clear the whole browsing session: history, cookies, cache, downloads and
-     * other site data, then close every browser window and open a new one.
+     * other site data, then close every browser window and open a new one
+     * that keeps the pinned tabs.
      *
      * @param {object} aProgress - Receives the Sanitizer's progress.
      * @returns {Promise<object>} The Sanitizer's progress object.
@@ -1019,6 +1020,7 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
       return lazy.Sanitizer.sanitize(this.itemsToClear, {
         ignoreTimespan: true,
         privateStateForNewWindow: "non-private",
+        keepPinnedTabs: true,
         progress: aProgress,
       });
     },
