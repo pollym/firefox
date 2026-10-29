@@ -22,10 +22,6 @@ using namespace mozilla::ipc;
 namespace mozilla {
 namespace net {
 
-void DNSRequestBase::SetIPCActor(DNSRequestActor* aActor) {
-  mIPCActor = aActor;
-}
-
 //-----------------------------------------------------------------------------
 // ChildDNSRecord:
 // A simple class to provide nsIDNSRecord on the child
@@ -424,6 +420,12 @@ DNSRequestSender::DNSRequestSender(const nsACString& aHost,
       mOriginAttributes(aOriginAttributes),
       mFlags(aFlags) {}
 
+DNSRequestSender::~DNSRequestSender() = default;
+
+void DNSRequestSender::SetIPCActor(DNSRequestChild* aActor) {
+  mIPCActor = aActor;
+}
+
 NS_IMETHODIMP
 DNSRequestSender::Cancel(nsresult reason) {
   // we can only do IPC on the MainThread
@@ -439,10 +441,8 @@ DNSRequestSender::Cancel(nsresult reason) {
     return NS_OK;
   }
 
-  if (DNSRequestChild* child = mIPCActor->AsDNSRequestChild()) {
-    (void)child->SendCancelDNSRequest(mHost, mTrrServer, mPort, mType,
-                                      mOriginAttributes, mFlags, reason);
-  }
+  (void)mIPCActor->SendCancelDNSRequest(mHost, mTrrServer, mPort, mType,
+                                        mOriginAttributes, mFlags, reason);
 
   return NS_OK;
 }
@@ -456,7 +456,7 @@ void DNSRequestSender::StartRequest() {
     return;
   }
 
-  if (RefPtr<DNSRequestChild> child = mIPCActor->AsDNSRequestChild()) {
+  if (mIPCActor) {
     if (XRE_IsContentProcess()) {
       mozilla::dom::ContentChild* cc =
           mozilla::ipc::ActorCast<mozilla::dom::ContentChild>(
@@ -466,8 +466,9 @@ void DNSRequestSender::StartRequest() {
       }
 
       // Send request to Parent process.
-      gNeckoChild->SendPDNSRequestConstructor(child, mHost, mTrrServer, mPort,
-                                              mType, mOriginAttributes, mFlags);
+      gNeckoChild->SendPDNSRequestConstructor(mIPCActor, mHost, mTrrServer,
+                                              mPort, mType, mOriginAttributes,
+                                              mFlags);
     } else if (XRE_IsSocketProcess()) {
       // DNS resolution is done in the parent process. Send a DNS request to
       // parent process.
@@ -478,7 +479,8 @@ void DNSRequestSender::StartRequest() {
       }
 
       MOZ_ALWAYS_TRUE(socketProcessChild->SendPDNSRequestConstructor(
-          child, mHost, mTrrServer, mPort, mType, mOriginAttributes, mFlags));
+          mIPCActor, mHost, mTrrServer, mPort, mType, mOriginAttributes,
+          mFlags));
     } else {
       MOZ_ASSERT(false, "Wrong process");
       return;
@@ -534,9 +536,7 @@ bool DNSRequestSender::OnRecvLookupCompleted(const DNSRequestResponse& reply) {
     mTarget->Dispatch(event, NS_DISPATCH_NORMAL);
   }
 
-  if (DNSRequestChild* child = mIPCActor->AsDNSRequestChild()) {
-    (void)mozilla::net::DNSRequestChild::Send__delete__(child);
-  }
+  (void)mozilla::net::DNSRequestChild::Send__delete__(mIPCActor);
 
   return true;
 }
@@ -554,16 +554,15 @@ void DNSRequestSender::OnIPCActorDestroy() {
 // DNSRequestChild
 //-----------------------------------------------------------------------------
 
-DNSRequestChild::DNSRequestChild(DNSRequestBase* aRequest)
-    : DNSRequestActor(aRequest) {
+DNSRequestChild::DNSRequestChild(DNSRequestSender* aRequest)
+    : mDNSRequest(aRequest) {
   aRequest->SetIPCActor(this);
 }
 
 mozilla::ipc::IPCResult DNSRequestChild::RecvLookupCompleted(
     const DNSRequestResponse& reply) {
-  return mDNSRequest->AsDNSRequestSender()->OnRecvLookupCompleted(reply)
-             ? IPC_OK()
-             : IPC_FAIL_NO_REASON(this);
+  return mDNSRequest->OnRecvLookupCompleted(reply) ? IPC_OK()
+                                                   : IPC_FAIL_NO_REASON(this);
 }
 
 void DNSRequestChild::ActorDestroy(ActorDestroyReason) {

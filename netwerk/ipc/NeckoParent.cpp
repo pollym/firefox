@@ -502,8 +502,7 @@ mozilla::ipc::IPCResult NeckoParent::RecvPDNSRequestConstructor(
 
   RefPtr<DNSRequestParent> actor =
       mozilla::ipc::ActorCast<DNSRequestParent>(aActor);
-  RefPtr<DNSRequestHandler> handler =
-      actor->GetDNSRequest()->AsDNSRequestHandler();
+  RefPtr<DNSRequestHandler> handler = actor->GetDNSRequest();
   handler->DoAsyncResolve(aHost, aTrrServer, aPort, aType, aOriginAttributes,
                           aFlags);
   return IPC_OK();

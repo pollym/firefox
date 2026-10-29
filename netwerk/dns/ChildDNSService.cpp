@@ -107,7 +107,7 @@ nsresult ChildDNSService::AsyncResolveInternal(
   RefPtr<DNSRequestSender> sender = new DNSRequestSender(
       hostname, DNSAdditionalInfo::URL(aInfo), DNSAdditionalInfo::Port(aInfo),
       type, aOriginAttributes, flags, listener, target);
-  RefPtr<DNSRequestActor> dnsReq = new DNSRequestChild(sender);
+  RefPtr<DNSRequestChild> dnsReq = new DNSRequestChild(sender);
 
   {
     MutexAutoLock lock(mPendingRequestsLock);

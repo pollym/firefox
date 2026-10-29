@@ -15,35 +15,13 @@
 namespace mozilla {
 namespace net {
 
-class DNSRequestActor;
 class DNSRequestChild;
-class DNSRequestHandler;
 class DNSRequestParent;
-class DNSRequestSender;
-
-// A base class for DNSRequestSender and DNSRequestHandler.
-// Provide interfaces for processing DNS requests.
-class DNSRequestBase : public nsISupports {
- public:
-  explicit DNSRequestBase() = default;
-
-  void SetIPCActor(DNSRequestActor* aActor);
-
-  virtual void OnIPCActorDestroy() = 0;
-
-  virtual DNSRequestSender* AsDNSRequestSender() = 0;
-  virtual DNSRequestHandler* AsDNSRequestHandler() = 0;
-
- protected:
-  virtual ~DNSRequestBase() = default;
-
-  RefPtr<DNSRequestActor> mIPCActor;
-};
 
 // DNSRequestSender is used to send an IPC request to DNSRequestHandler and
 // deliver the result to nsIDNSListener.
 // Note this class is used in the content process and the socket process.
-class DNSRequestSender final : public DNSRequestBase, public nsICancelable {
+class DNSRequestSender final : public nsICancelable {
  public:
   NS_DECL_THREADSAFE_ISUPPORTS
   NS_DECL_NSICANCELABLE
@@ -54,20 +32,19 @@ class DNSRequestSender final : public DNSRequestBase, public nsICancelable {
                    const nsIDNSService::DNSFlags& aFlags,
                    nsIDNSListener* aListener, nsIEventTarget* target);
 
+  void SetIPCActor(DNSRequestChild* aActor);
   bool OnRecvLookupCompleted(const DNSRequestResponse& reply);
-  void OnIPCActorDestroy() override;
+  void OnIPCActorDestroy();
 
   // Sends IPDL request to DNSRequestHandler
   void StartRequest();
   void CallOnLookupComplete();
 
-  DNSRequestSender* AsDNSRequestSender() override { return this; }
-  DNSRequestHandler* AsDNSRequestHandler() override { return nullptr; }
-
  private:
   friend class ChildDNSService;
-  virtual ~DNSRequestSender() = default;
+  virtual ~DNSRequestSender();
 
+  RefPtr<DNSRequestChild> mIPCActor;
   nsCOMPtr<nsIDNSListener> mListener;
   nsCOMPtr<nsIEventTarget> mTarget;
   nsCOMPtr<nsIDNSRecord> mResultRecord;
@@ -82,13 +59,14 @@ class DNSRequestSender final : public DNSRequestBase, public nsICancelable {
 
 // DNSRequestHandler handles the dns request and sends the result back via IPC.
 // Note this class is only used in the parent process.
-class DNSRequestHandler final : public DNSRequestBase, public nsIDNSListener {
+class DNSRequestHandler final : public nsIDNSListener {
  public:
   NS_DECL_THREADSAFE_ISUPPORTS
   NS_DECL_NSIDNSLISTENER
 
   DNSRequestHandler() = default;
 
+  void SetIPCActor(DNSRequestParent* aActor);
   void DoAsyncResolve(const nsACString& hostname, const nsACString& trrServer,
                       int32_t port, uint16_t type,
                       const OriginAttributes& originAttributes,
@@ -100,34 +78,13 @@ class DNSRequestHandler final : public DNSRequestBase, public nsIDNSListener {
                               const OriginAttributes& originAttributes,
                               const nsIDNSService::DNSFlags& flags,
                               const nsresult& reason);
-  void OnIPCActorDestroy() override;
-
-  DNSRequestSender* AsDNSRequestSender() override { return nullptr; }
-  DNSRequestHandler* AsDNSRequestHandler() override { return this; }
+  void OnIPCActorDestroy();
 
  private:
-  virtual ~DNSRequestHandler() = default;
+  virtual ~DNSRequestHandler();
 
+  RefPtr<DNSRequestParent> mIPCActor;
   nsIDNSService::DNSFlags mFlags = nsIDNSService::RESOLVE_DEFAULT_FLAGS;
-};
-
-// Provides some common methods for DNSRequestChild and DNSRequestParent.
-class DNSRequestActor {
- public:
-  NS_INLINE_DECL_PURE_VIRTUAL_REFCOUNTING
-
-  explicit DNSRequestActor(DNSRequestBase* aRequest) : mDNSRequest(aRequest) {}
-
-  virtual bool CanSend() const = 0;
-  virtual DNSRequestChild* AsDNSRequestChild() = 0;
-  virtual DNSRequestParent* AsDNSRequestParent() = 0;
-
-  DNSRequestBase* GetDNSRequest() { return mDNSRequest.get(); };
-
- protected:
-  virtual ~DNSRequestActor() = default;
-
-  RefPtr<DNSRequestBase> mDNSRequest;
 };
 
 }  // namespace net

@@ -199,8 +199,7 @@ mozilla::ipc::IPCResult SocketProcessParent::RecvPDNSRequestConstructor(
     const nsIDNSService::DNSFlags& aFlags) {
   RefPtr<DNSRequestParent> actor =
       mozilla::ipc::ActorCast<DNSRequestParent>(aActor);
-  RefPtr<DNSRequestHandler> handler =
-      actor->GetDNSRequest()->AsDNSRequestHandler();
+  RefPtr<DNSRequestHandler> handler = actor->GetDNSRequest();
   handler->DoAsyncResolve(aHost, aTrrServer, port, aType, aOriginAttributes,
                           aFlags);
   return IPC_OK();

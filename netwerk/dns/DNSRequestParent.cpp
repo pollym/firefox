@@ -25,11 +25,10 @@ namespace net {
 
 NS_IMPL_ISUPPORTS(DNSRequestHandler, nsIDNSListener)
 
-static void SendLookupCompletedHelper(DNSRequestActor* aActor,
-                                      const DNSRequestResponse& aReply) {
-  if (DNSRequestParent* parent = aActor->AsDNSRequestParent()) {
-    (void)parent->SendLookupCompleted(aReply);
-  }
+DNSRequestHandler::~DNSRequestHandler() = default;
+
+void DNSRequestHandler::SetIPCActor(DNSRequestParent* aActor) {
+  mIPCActor = aActor;
 }
 
 void DNSRequestHandler::DoAsyncResolve(const nsACString& hostname,
@@ -54,7 +53,7 @@ void DNSRequestHandler::DoAsyncResolve(const nsACString& hostname,
   }
 
   if (NS_FAILED(rv) && mIPCActor->CanSend()) {
-    SendLookupCompletedHelper(mIPCActor, DNSRequestResponse(rv));
+    (void)mIPCActor->SendLookupCompleted(DNSRequestResponse(rv));
   }
 }
 
@@ -100,7 +99,7 @@ DNSRequestHandler::OnLookupComplete(nsICancelable* request,
         rec->GetTtl(&result.mTTL);
         rec->IsTRR(&result.mIsTRR);
       }
-      SendLookupCompletedHelper(mIPCActor, DNSRequestResponse(result));
+      (void)mIPCActor->SendLookupCompleted(DNSRequestResponse(result));
       return NS_OK;
     }
 
@@ -139,13 +138,11 @@ DNSRequestHandler::OnLookupComplete(nsICancelable* request,
     bool fromStaleCache = false;
     rec->GetFromStaleCache(&fromStaleCache);
 
-    SendLookupCompletedHelper(
-        mIPCActor,
-        DNSRequestResponse(DNSRecord(
-            cname, array, trrFetchDuration, trrFetchDurationNetworkOnly, isTRR,
-            effectiveTRRMode, ttl, lastUpdate, fromStaleCache)));
+    (void)mIPCActor->SendLookupCompleted(DNSRequestResponse(
+        DNSRecord(cname, array, trrFetchDuration, trrFetchDurationNetworkOnly,
+                  isTRR, effectiveTRRMode, ttl, lastUpdate, fromStaleCache)));
   } else {
-    SendLookupCompletedHelper(mIPCActor, DNSRequestResponse(status));
+    (void)mIPCActor->SendLookupCompleted(DNSRequestResponse(status));
   }
 
   return NS_OK;
@@ -157,8 +154,8 @@ void DNSRequestHandler::OnIPCActorDestroy() { mIPCActor = nullptr; }
 // DNSRequestParent functions
 //-----------------------------------------------------------------------------
 
-DNSRequestParent::DNSRequestParent(DNSRequestBase* aRequest)
-    : DNSRequestActor(aRequest) {
+DNSRequestParent::DNSRequestParent(DNSRequestHandler* aRequest)
+    : mDNSRequest(aRequest) {
   aRequest->SetIPCActor(this);
 }
 
@@ -166,8 +163,8 @@ mozilla::ipc::IPCResult DNSRequestParent::RecvCancelDNSRequest(
     const nsCString& hostName, const nsCString& trrServer, const int32_t& port,
     const uint16_t& type, const OriginAttributes& originAttributes,
     const nsIDNSService::DNSFlags& flags, const nsresult& reason) {
-  mDNSRequest->AsDNSRequestHandler()->OnRecvCancelDNSRequest(
-      hostName, trrServer, port, type, originAttributes, flags, reason);
+  mDNSRequest->OnRecvCancelDNSRequest(hostName, trrServer, port, type,
+                                      originAttributes, flags, reason);
   return IPC_OK();
 }
 

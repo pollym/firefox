@@ -12,16 +12,14 @@
 namespace mozilla {
 namespace net {
 
-class DNSRequestParent : public DNSRequestActor, public PDNSRequestParent {
+class DNSRequestParent : public PDNSRequestParent {
  public:
   friend class PDNSRequestParent;
   NS_INLINE_DECL_THREADSAFE_REFCOUNTING(DNSRequestParent, override)
 
-  explicit DNSRequestParent(DNSRequestBase* aRequest);
+  explicit DNSRequestParent(DNSRequestHandler* aRequest);
 
-  bool CanSend() const override { return PDNSRequestParent::CanSend(); }
-  DNSRequestChild* AsDNSRequestChild() override { return nullptr; }
-  DNSRequestParent* AsDNSRequestParent() override { return this; }
+  DNSRequestHandler* GetDNSRequest() { return mDNSRequest; }
 
  private:
   virtual ~DNSRequestParent() = default;
@@ -34,6 +32,8 @@ class DNSRequestParent : public DNSRequestActor, public PDNSRequestParent {
       const OriginAttributes& originAttributes,
       const nsIDNSService::DNSFlags& flags, const nsresult& reason);
   void ActorDestroy(ActorDestroyReason) override;
+
+  RefPtr<DNSRequestHandler> mDNSRequest;
 };
 
 }  // namespace net
