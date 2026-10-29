@@ -291,8 +291,8 @@ nsresult JsepSessionImpl::CreateOfferMsection(const JsepOfferOptions& options,
     // have a different media type ([RFC9429] section 5.2.2). Such a
     // transceiver has not been associated with a mid yet.
     MOZ_ASSERT(!transceiver.IsAssociated() ||
-               lastAnswerMsection->GetMediaType() ==
-                   transceiver.GetMediaType());
+               lastAnswerMsection->GetMediaTypeInfo().MatchesTypeOf(
+                   transceiver.GetMediaTypeInfo()));
     nsresult rv = mSdpHelper.CopyStickyParams(*lastAnswerMsection, msection);
     NS_ENSURE_SUCCESS(rv, rv);
   }
@@ -679,7 +679,8 @@ JsepSession::Result JsepSessionImpl::CreateAnswer(
 nsresult JsepSessionImpl::CreateAnswerMsection(
     const JsepAnswerOptions& options, JsepTransceiver& transceiver,
     const SdpMediaSection& remoteMsection, Sdp* sdp) {
-  MOZ_ASSERT(transceiver.GetMediaType() == remoteMsection.GetMediaType());
+  MOZ_ASSERT(transceiver.GetMediaTypeInfo().MatchesTypeOf(
+      remoteMsection.GetMediaTypeInfo()));
   SdpDirectionAttribute::Direction direction =
       reverse(remoteMsection.GetDirection()) & transceiver.mJsDirection;
   SdpMediaSection& msection =
@@ -2035,7 +2036,8 @@ JsepSession::Result JsepSessionImpl::ValidateLocalDescription(
   for (size_t i = 0; i < description.GetMediaSectionCount(); ++i) {
     auto& origMsection = generated->GetMediaSection(i);
     auto& finalMsection = description.GetMediaSection(i);
-    if (origMsection.GetMediaType() != finalMsection.GetMediaType()) {
+    if (!origMsection.GetMediaTypeInfo().MatchesTypeOf(
+            finalMsection.GetMediaTypeInfo())) {
       JSEP_SET_ERROR("Changing the media-type of m-sections is not allowed");
       return Result(dom::PCError::InvalidModificationError);
     }
@@ -2181,7 +2183,8 @@ JsepSession::Result JsepSessionImpl::ValidateRemoteDescription(
       continue;
     }
 
-    if (oldMsection.GetMediaType() != newMsection.GetMediaType()) {
+    if (!oldMsection.GetMediaTypeInfo().MatchesTypeOf(
+            newMsection.GetMediaTypeInfo())) {
       JSEP_SET_ERROR("Remote description changes the media type of m-line "
                      << i
                      << "; media type changes are only permitted when the "
@@ -2302,7 +2305,8 @@ JsepSession::Result JsepSessionImpl::ValidateAnswer(const Sdp& offer,
     const SdpMediaSection& offerMsection = offer.GetMediaSection(i);
     const SdpMediaSection& answerMsection = answer.GetMediaSection(i);
 
-    if (offerMsection.GetMediaType() != answerMsection.GetMediaType()) {
+    if (!offerMsection.GetMediaTypeInfo().MatchesTypeOf(
+            answerMsection.GetMediaTypeInfo())) {
       JSEP_SET_ERROR("Answer and offer have different media types at m-line "
                      << i);
       return Result(dom::PCError::InvalidAccessError);
