@@ -547,6 +547,8 @@ macosx64-devedition/opt:
               dest: x64/updater-dep
             - artifact: target.crashreporter-symbols.zip
               dest: x64/crashreporter-symbols
+            - artifact: target.crashreporter-symbols-gtest.zip
+              dest: x64/crashreporter-symbols-gtest
             - artifact: target.jsshell.zip
               dest: x64/jsshell
             - artifact: target.update_framework_artifacts.zip
@@ -603,6 +605,8 @@ macosx64-devedition/opt:
               dest: aarch64/updater-dep
             - artifact: target.crashreporter-symbols.zip
               dest: aarch64/crashreporter-symbols
+            - artifact: target.crashreporter-symbols-gtest.zip
+              dest: aarch64/crashreporter-symbols-gtest
             - artifact: target.jsshell.zip
               dest: aarch64/jsshell
             - artifact: target.update_framework_artifacts.zip
@@ -776,6 +780,8 @@ macosx64-add-on-devel/opt:
               dest: ../artifacts
             - artifact: target.crashreporter-symbols.zip
               dest: x64/crashreporter-symbols
+            - artifact: target.crashreporter-symbols-gtest.zip
+              dest: x64/crashreporter-symbols-gtest
             - artifact: target.jsshell.zip
               dest: x64/jsshell
             - artifact: target.generated-files.tar.gz
@@ -793,6 +799,8 @@ macosx64-add-on-devel/opt:
               dest: aarch64
             - artifact: target.crashreporter-symbols.zip
               dest: aarch64/crashreporter-symbols
+            - artifact: target.crashreporter-symbols-gtest.zip
+              dest: aarch64/crashreporter-symbols-gtest
             - artifact: target.jsshell.zip
               dest: aarch64/jsshell
         toolchain:
@@ -1011,6 +1019,8 @@ macosx64-shippable/opt:
               dest: x64/updater-dep
             - artifact: target.crashreporter-symbols.zip
               dest: x64/crashreporter-symbols
+            - artifact: target.crashreporter-symbols-gtest.zip
+              dest: x64/crashreporter-symbols-gtest
             - artifact: target.jsshell.zip
               dest: x64/jsshell
             - artifact: target.update_framework_artifacts.zip
@@ -1067,6 +1077,8 @@ macosx64-shippable/opt:
               dest: aarch64/updater-dep
             - artifact: target.crashreporter-symbols.zip
               dest: aarch64/crashreporter-symbols
+            - artifact: target.crashreporter-symbols-gtest.zip
+              dest: aarch64/crashreporter-symbols-gtest
             - artifact: target.jsshell.zip
               dest: aarch64/jsshell
             - artifact: target.update_framework_artifacts.zip
