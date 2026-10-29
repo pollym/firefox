@@ -9847,8 +9847,8 @@ nsresult nsDocShell::PerformTrustedTypesPreNavigationCheck(
   MOZ_ASSERT(aWindow);
   RefPtr<nsIContentSecurityPolicy> csp =
       PolicyContainer::GetCSP(aWindow->GetPolicyContainer());
-  if (csp->GetRequireTrustedTypesForDirectiveState() ==
-      RequireTrustedTypesForDirectiveState::NONE) {
+  if (!csp || csp->GetRequireTrustedTypesForDirectiveState() ==
+                  RequireTrustedTypesForDirectiveState::NONE) {
     return NS_OK;
   }
 
