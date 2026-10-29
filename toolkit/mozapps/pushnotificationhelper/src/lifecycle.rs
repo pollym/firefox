@@ -215,40 +215,56 @@ impl StopEvent {
     }
 }
 
+pub struct StopSignal {
+    handle: OwnedHandle,
+}
+
+impl StopSignal {
+    pub fn open(profile: Option<&Path>) -> Result<Option<Self>, String> {
+        let scope = match profile {
+            Some(profile) => Scope::InstallProfile(profile),
+            None => Scope::Install,
+        };
+        let name = wide(&object_name("stop", scope)?);
+
+        // SAFETY: `name` is NUL terminated by `wide` and outlives the call.
+        let handle = unsafe { OpenEventW(EVENT_MODIFY_STATE, 0, name.as_ptr()) };
+        if handle.is_null() {
+            // Read the error before wrapping: OwnedHandle::new on a null handle
+            // drops a temporary that calls CloseHandle, clobbering the last
+            // error. A missing event means no helper is listening.
+            return match last_error() {
+                ERROR_FILE_NOT_FOUND => Ok(None),
+                error => Err(format!("OpenEventW failed: {error}")),
+            };
+        }
+
+        // SAFETY: OpenEventW returned a non-null handle above.
+        let handle = OwnedHandle::new(handle)
+            .ok_or_else(|| format!("OpenEventW failed: {}", last_error()))?;
+
+        Ok(Some(StopSignal { handle }))
+    }
+
+    pub fn send(&self) -> Result<(), String> {
+        // SAFETY: `self` owns the handle, so it is still open, and OpenEventW
+        // requested the EVENT_MODIFY_STATE right that SetEvent requires.
+        if unsafe { SetEvent(self.handle.get()) } == 0 {
+            return Err(format!("SetEvent failed: {}", last_error()));
+        }
+
+        Ok(())
+    }
+}
+
 /// Asks the helper serving `profile` to exit, or every helper of this
 /// installation when `profile` is `None`. Succeeds when none is running, so
 /// callers may stop unconditionally without checking first.
 pub fn send_stop_signal(profile: Option<&Path>) -> Result<(), String> {
-    let scope = match profile {
-        Some(profile) => Scope::InstallProfile(profile),
-        None => Scope::Install,
-    };
-    let name = wide(&object_name("stop", scope)?);
-
-    // SAFETY: `name` is NUL terminated by `wide` and outlives the call.
-    let handle = unsafe { OpenEventW(EVENT_MODIFY_STATE, 0, name.as_ptr()) };
-    if handle.is_null() {
-        // Read the error before wrapping: OwnedHandle::new on a null handle
-        // drops a temporary that calls CloseHandle, clobbering the last error.
-        // A missing event means no helper is listening, so the stop holds.
-        return match last_error() {
-            ERROR_FILE_NOT_FOUND => Ok(()),
-            error => Err(format!("OpenEventW failed: {error}")),
-        };
+    match StopSignal::open(profile)? {
+        Some(signal) => signal.send(),
+        None => Ok(()),
     }
-
-    // SAFETY: OpenEventW returned a non-null handle above.
-    let handle =
-        OwnedHandle::new(handle).ok_or_else(|| format!("OpenEventW failed: {}", last_error()))?;
-
-    // SAFETY: `handle` is still open, nothing having closed it since
-    // OpenEventW, and that call requested the EVENT_MODIFY_STATE right that
-    // SetEvent requires.
-    if unsafe { SetEvent(handle.get()) } == 0 {
-        return Err(format!("SetEvent failed: {}", last_error()));
-    }
-
-    Ok(())
 }
 
 /// What a named object is shared by.
