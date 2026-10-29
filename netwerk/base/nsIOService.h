@@ -108,8 +108,6 @@ class nsIOService final : public nsIIOService,
   static void NotifySocketProcessPrefsChanged(const char* aName, void* aSelf);
   void NotifySocketProcessPrefsChanged(const char* aName);
 
-  bool IsSocketProcessLaunchComplete();
-
   // Call func immediately if socket process is launched completely. Otherwise,
   // |func| will be queued and then executed in the *main thread* once socket
   // process is launced.

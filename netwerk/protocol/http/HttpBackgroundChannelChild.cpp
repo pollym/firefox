@@ -65,12 +65,6 @@ void HttpBackgroundChannelChild::OnChannelClosed() {
   mQueuedRunnables.Clear();
 }
 
-bool HttpBackgroundChannelChild::ChannelClosed() {
-  MOZ_ASSERT(OnSocketThread());
-
-  return !mChannelChild;
-}
-
 void HttpBackgroundChannelChild::OnStartRequestReceived(
     Maybe<uint32_t> aMultiPartID) {
   LOG(("HttpBackgroundChannelChild::OnStartRequestReceived [this=%p]\n", this));

@@ -318,8 +318,6 @@ class nsHttpTransaction final : public nsAHttpTransaction,
   // WOULD_BLOCK.
   bool ShouldThrottle();
 
-  void NotifyTransactionObserver(nsresult reason);
-
   // When echConfig is enabled, this function put other available records
   // in mRecordsForRetry. Returns true when mRecordsForRetry is not empty,
   // otherwise returns false.
@@ -646,7 +644,6 @@ class nsHttpTransaction final : public nsAHttpTransaction,
   void MaybeStartHttp3BackupTimer();
 
  private:
-  TransactionObserverFunc mTransactionObserver;
   NetAddr mSelfAddr;
   NetAddr mPeerAddr;
   nsILoadInfo::IPAddressSpace mTargetIpAddressSpace{

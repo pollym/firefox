@@ -9,6 +9,7 @@
 #include "TRRService.h"
 #include "mozilla/Preferences.h"
 #include "mozilla/StaticPrefs_network.h"
+#include "nsCharSeparatedTokenizer.h"
 #include "nsHostResolver.h"
 #include "nsHttpConnectionInfo.h"
 #include "nsHttpHandler.h"

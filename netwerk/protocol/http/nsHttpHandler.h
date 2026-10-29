@@ -16,6 +16,7 @@
 #include "mozilla/StaticPtr.h"
 #include "mozilla/TimeStamp.h"
 #include "mozilla/net/Dictionary.h"
+#include "mozilla/net/HttpActivityArgs.h"
 #include "mozilla/net/HttpConnectionMgrShell.h"
 #include "nsCOMPtr.h"
 #include "nsHttp.h"
@@ -54,7 +55,6 @@ namespace mozilla::net {
 
 class ATokenBucketEvent;
 class EventTokenBucket;
-class HttpActivityArgs;
 class Tickler;
 class nsHttpConnection;
 class nsHttpConnectionInfo;

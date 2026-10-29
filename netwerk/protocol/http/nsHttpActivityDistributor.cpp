@@ -82,18 +82,18 @@ nsHttpActivityDistributor::ObserveActivityWithArgs(
                aTimestamp, aExtraSizeData,
                extraStringData{std::move(extraStringData)},
                self{std::move(self)}]() {
-    if (args.type() == HttpActivityArgs::Tuint64_t) {
-      nsWeakPtr weakPtr = gHttpHandler->GetWeakHttpChannel(args.get_uint64_t());
+    if (args.is<uint64_t>()) {
+      nsWeakPtr weakPtr = gHttpHandler->GetWeakHttpChannel(args.as<uint64_t>());
       if (nsCOMPtr<nsIHttpChannel> channel = do_QueryReferent(weakPtr)) {
         (void)self->ObserveActivity(channel, aActivityType, aActivitySubtype,
                                     aTimestamp, aExtraSizeData,
                                     extraStringData);
       }
-    } else if (args.type() == HttpActivityArgs::THttpActivity) {
+    } else if (args.is<HttpActivity>()) {
       nsCOMPtr<nsIURI> uri;
       nsAutoCString portStr(""_ns);
-      int32_t port = args.get_HttpActivity().port();
-      bool endToEndSSL = args.get_HttpActivity().endToEndSSL();
+      int32_t port = args.as<HttpActivity>().port;
+      bool endToEndSSL = args.as<HttpActivity>().endToEndSSL;
       if (port != -1 &&
           ((endToEndSSL && port != 443) || (!endToEndSSL && port != 80))) {
         portStr.AppendInt(port);
@@ -102,7 +102,7 @@ nsHttpActivityDistributor::ObserveActivityWithArgs(
       nsresult rv =
           NS_NewURI(getter_AddRefs(uri),
                     (endToEndSSL ? "https://"_ns : "http://"_ns) +
-                        args.get_HttpActivity().host() + ":"_ns + portStr);
+                        args.as<HttpActivity>().host + ":"_ns + portStr);
       if (NS_FAILED(rv)) {
         return;
       }
@@ -114,13 +114,13 @@ nsHttpActivityDistributor::ObserveActivityWithArgs(
       (void)self->ObserveActivity(static_cast<nsIChannel*>(channel),
                                   aActivityType, aActivitySubtype, aTimestamp,
                                   aExtraSizeData, extraStringData);
-    } else if (args.type() == HttpActivityArgs::THttpConnectionActivity) {
+    } else if (args.is<HttpConnectionActivity>()) {
       const HttpConnectionActivity& activity =
-          args.get_HttpConnectionActivity();
+          args.as<HttpConnectionActivity>();
       (void)self->ObserveConnectionActivity(
-          activity.host(), activity.port(), activity.ssl(), activity.hasECH(),
-          activity.isHttp3(), aActivityType, aActivitySubtype, aTimestamp,
-          activity.connInfoKey());
+          activity.host, activity.port, activity.ssl, activity.hasECH,
+          activity.isHttp3, aActivityType, aActivitySubtype, aTimestamp,
+          activity.connInfoKey);
     }
   };
 

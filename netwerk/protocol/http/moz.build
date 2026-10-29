@@ -53,6 +53,7 @@ EXPORTS.mozilla.net += [
     "EarlyHintPreloader.h",
     "EarlyHintRegistrar.h",
     "EarlyHintsService.h",
+    "HttpActivityArgs.h",
     "HttpAuthUtils.h",
     "HttpBackgroundChannelChild.h",
     "HttpBackgroundChannelParent.h",

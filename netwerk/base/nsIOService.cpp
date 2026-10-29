@@ -622,7 +622,7 @@ void nsIOService::OnProcessLaunchComplete(SocketProcessHost* aHost,
 void nsIOService::CallOrWaitForSocketProcess(
     const std::function<void()>& aFunc) {
   MOZ_ASSERT(NS_IsMainThread());
-  if (IsSocketProcessLaunchComplete() && SocketProcessReady()) {
+  if (mSocketProcessLaunchComplete && SocketProcessReady()) {
     aFunc();
   } else {
     mPendingEvents.AppendElement(aFunc);  // infallible
@@ -638,11 +638,6 @@ int32_t nsIOService::SocketProcessPid() {
     return (int32_t)actor->OtherPid();
   }
   return 0;
-}
-
-bool nsIOService::IsSocketProcessLaunchComplete() {
-  MOZ_ASSERT(NS_IsMainThread());
-  return mSocketProcessLaunchComplete;
 }
 
 void nsIOService::OnProcessUnexpectedShutdown(SocketProcessHost* aHost) {

@@ -2201,7 +2201,7 @@ nsresult nsHttpChannel::InitTransaction() {
                           mReqContentLength, GetCurrentSerialEventTarget(),
                           callbacks, this, mBrowserId, category,
                           mRequestContext, mClassOfService, mInitialRwin,
-                          LoadResponseTimeoutEnabled(), mChannelId, nullptr,
+                          LoadResponseTimeoutEnabled(), mChannelId,
                           parentAddressSpace, mLNAPermission);
   if (NS_FAILED(rv)) {
     mTransaction = nullptr;

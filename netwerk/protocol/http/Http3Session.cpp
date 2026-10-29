@@ -229,7 +229,7 @@ nsresult Http3Session::Init(nsHttpConnectionInfo* aConnInfo,
         mConnInfo->EndToEndSSL(), !mConnInfo->GetEchConfig().IsEmpty(),
         mConnInfo->IsHttp3());
     gHttpHandler->ObserveHttpActivityWithArgs(
-        activity, NS_ACTIVITY_TYPE_HTTP_CONNECTION,
+        HttpActivityArgs(activity), NS_ACTIVITY_TYPE_HTTP_CONNECTION,
         NS_HTTP_ACTIVITY_SUBTYPE_ECH_SET, PR_Now(), 0, ""_ns);
   } else {
     mEchExtensionStatus = EchExtensionStatus::kNotPresent;

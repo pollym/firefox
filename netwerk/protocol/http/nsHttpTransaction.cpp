@@ -193,7 +193,6 @@ nsresult nsHttpTransaction::Init(
     HttpTrafficCategory trafficCategory, nsIRequestContext* requestContext,
     ClassOfService classOfService, uint32_t initialRwin,
     bool responseTimeoutEnabled, uint64_t channelId,
-    TransactionObserverFunc&& transactionObserver,
     nsILoadInfo::IPAddressSpace aParentIpAddressSpace,
     const struct LNAPerms& aLnaPermissionStatus) {
   nsresult rv;
@@ -228,7 +227,6 @@ nsresult nsHttpTransaction::Init(
   MOZ_ASSERT(target->IsOnCurrentThread());
 
   mChannelId = channelId;
-  mTransactionObserver = std::move(transactionObserver);
   mBrowserId = browserId;
 
   mTrafficCategory = trafficCategory;
@@ -1520,8 +1518,6 @@ void nsHttpTransaction::Close(nsresult reason) {
     LOG(("  already closed\n"));
     return;
   }
-
-  NotifyTransactionObserver(reason);
 
   // report the reponse is complete if not already reported
   if (!mResponseIsComplete) {
@@ -3712,47 +3708,6 @@ void nsHttpTransaction::SetFlat407Headers(const nsACString& aHeaders) {
 
   LOG(("nsHttpTransaction::SetFlat407Headers %p", this));
   mFlat407Headers = aHeaders;
-}
-
-void nsHttpTransaction::NotifyTransactionObserver(nsresult reason) {
-  MOZ_ASSERT(OnSocketThread());
-
-  if (!mTransactionObserver) {
-    return;
-  }
-
-  bool versionOk = false;
-  bool authOk = false;
-
-  LOG(("nsHttpTransaction::NotifyTransactionObserver %p reason %" PRIx32
-       " conn %p\n",
-       this, static_cast<uint32_t>(reason), mConnection.get()));
-
-  if (mConnection) {
-    HttpVersion version = mConnection->Version();
-    versionOk = (((reason == NS_BASE_STREAM_CLOSED) || (reason == NS_OK)) &&
-                 ((mConnection->Version() == HttpVersion::v2_0) ||
-                  (mConnection->Version() == HttpVersion::v3_0)));
-
-    nsCOMPtr<nsITLSSocketControl> socketControl;
-    mConnection->GetTLSSocketControl(getter_AddRefs(socketControl));
-    LOG(
-        ("nsHttpTransaction::NotifyTransactionObserver"
-         " version %u socketControl %p\n",
-         static_cast<int32_t>(version), socketControl.get()));
-    if (socketControl) {
-      authOk = !socketControl->GetFailedVerification();
-    }
-  }
-
-  TransactionObserverResult result;
-  result.versionOk() = versionOk;
-  result.authOk() = authOk;
-  result.closeReason() = reason;
-
-  TransactionObserverFunc obs = nullptr;
-  std::swap(obs, mTransactionObserver);
-  obs(std::move(result));
 }
 
 void nsHttpTransaction::UpdateConnectionInfo(nsHttpConnectionInfo* aConnInfo) {

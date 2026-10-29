@@ -703,7 +703,7 @@ nsresult TRRServiceChannel::SetupTransaction() {
                           mReqContentLength, mCurrentEventTarget, callbacks,
                           this, mBrowserId, HttpTrafficCategory::eInvalid,
                           mRequestContext, mClassOfService, mInitialRwin,
-                          LoadResponseTimeoutEnabled(), mChannelId, nullptr,
+                          LoadResponseTimeoutEnabled(), mChannelId,
                           nsILoadInfo::IPAddressSpace::Unknown, perms);
 
   if (NS_FAILED(rv)) {

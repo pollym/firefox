@@ -5,11 +5,7 @@
 #include "nsISupports.idl"
 
 %{ C++
-namespace mozilla {
-namespace net {
-class HttpActivityArgs;
-} // namespace net
-} // namespace mozilla
+#include "mozilla/net/HttpActivityArgs.h"
 %}
 
 [ref] native HttpActivityArgs(const mozilla::net::HttpActivityArgs);
@@ -76,7 +72,7 @@ interface nsIHttpActivityObserver : nsISupports
      * create a |NullHttpChannel|.
      *
      * @param aArgs
-     *        See the definition of |HttpActivityArgs| in NeckoChannelParams.ipdlh.
+     *        See the definition of |HttpActivityArgs| in HttpActivityArgs.h.
      */
     [noscript, must_use]
     void observeActivityWithArgs(in HttpActivityArgs aArgs,

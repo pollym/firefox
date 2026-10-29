@@ -5,8 +5,6 @@
 #ifndef HttpTransactionShell_h_
 #define HttpTransactionShell_h_
 
-#include <functional>
-
 #include "TimingStruct.h"
 #include "mozilla/RefPtr.h"
 #include "mozilla/UniquePtr.h"
@@ -34,7 +32,6 @@ class nsHttpHeaderArray;
 class nsHttpRequestHead;
 class nsHttpTransaction;
 class ProxyConnectResponseHead;
-class TransactionObserverResult;
 union NetAddr;
 
 enum class LNAPermission {
@@ -59,9 +56,6 @@ struct LNAPerms {
 class HttpTransactionShell : public nsISupports {
  public:
   NS_INLINE_DECL_STATIC_IID(HTTPTRANSACTIONSHELL_IID)
-
-  using TransactionObserverFunc =
-      std::function<void(TransactionObserverResult&&)>;
 
   //
   // called to initialize the transaction
@@ -89,7 +83,6 @@ class HttpTransactionShell : public nsISupports {
       uint64_t browserId, HttpTrafficCategory trafficCategory,
       nsIRequestContext* requestContext, ClassOfService classOfService,
       uint32_t initialRwin, bool responseTimeoutEnabled, uint64_t channelId,
-      TransactionObserverFunc&& transactionObserver,
       nsILoadInfo::IPAddressSpace aParentIPAddressSpace,
       const LNAPerms& aLnaPermissionStatus) = 0;
 
@@ -193,7 +186,6 @@ class HttpTransactionShell : public nsISupports {
       uint64_t browserId, HttpTrafficCategory trafficCategory,                 \
       nsIRequestContext* requestContext, ClassOfService classOfService,        \
       uint32_t initialRwin, bool responseTimeoutEnabled, uint64_t channelId,   \
-      TransactionObserverFunc&& transactionObserver,                           \
       nsILoadInfo::IPAddressSpace aParentIPAddressSpace,                       \
       const LNAPerms& aLnaPermissionStatus) override;                          \
   virtual nsresult AsyncRead(nsIStreamListener* listener, nsIRequest** pump)   \
