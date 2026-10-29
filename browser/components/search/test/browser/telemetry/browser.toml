@@ -204,6 +204,7 @@ support-files = ["searchTelemetryAd.html", "serp.css"]
 ["browser_search_telemetry_searchbar.js"]
 https_first_disabled = true
 support-files = [
+  "searchTelemetry.html",
   "telemetrySearchSuggestions.sjs",
   "telemetrySearchSuggestions.xml",
 ]
