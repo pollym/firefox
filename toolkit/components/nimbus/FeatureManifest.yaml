@@ -148,6 +148,15 @@ search:
         Feature gate for highlight to search, the actions menu shown when text
         is selected on a page. Does not affect the user's own settings for the
         menu or its individual actions.
+    highlightToSearchIgnoredSites:
+      type: string
+      setPref:
+        branch: default
+        pref: browser.highlightToSearch.ignoredSites
+      description: >-
+        Comma-separated sites where the highlight to search actions menu is not
+        shown, because the page has its own menu for selected text. A site also
+        matches its subdomains.
 
 searchConfiguration:
   description: >-

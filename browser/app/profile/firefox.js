@@ -1017,6 +1017,13 @@ pref("browser.highlightToSearch.enabled", true);
 pref("browser.highlightToSearch.search.enabled", true);
 pref("browser.highlightToSearch.copy.enabled", true);
 
+// Comma-separated sites where the menu is not shown because the page has its
+// own menu for selected text. A site also matches its subdomains.
+pref(
+  "browser.highlightToSearch.ignoredSites",
+  "atlassian.net,docs.google.com,read.amazon.com,read.readwise.io,hypothes.is,chatgpt.com,github.com,notion.so,notion.site,office.com,sharepoint.com,canva.com,figma.com"
+);
+
 // Spin the cursor while the page is loading
 pref("browser.spin_cursor_while_busy", false);
 
