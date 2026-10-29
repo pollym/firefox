@@ -943,26 +943,94 @@ add_task(async function testCloseButtonCancels() {
 
 /**
  * The close button comes first in the document, but keyboard users should
- * start on the dialog's content rather than on it.
+ * start on the dialog's content rather than on it. That initial focus only
+ * shows a focus ring if the dialog was opened with the keyboard.
  */
 add_task(async function testCloseButtonNotInitiallyFocused() {
-  let dh = new ClearHistoryDialogHelper();
-  dh.onload = async function () {
-    let doc = this.win.document;
+  for (let [description, trigger, expectRing] of [
+    ["Opened with the mouse", () => openFromAppMenuWithInput(false), false],
+    [
+      "Opened from the app menu with the keyboard",
+      () => openFromAppMenuWithInput(true),
+      true,
+    ],
+    [
+      "Opened with the keyboard shortcut",
+      () =>
+        EventUtils.synthesizeKey("KEY_Delete", {
+          accelKey: true,
+          shiftKey: true,
+        }),
+      true,
+    ],
+  ]) {
+    let dialogPromise = BrowserTestUtils.promiseAlertDialogOpen(
+      null,
+      "chrome://browser/content/sanitize_v2.xhtml",
+      { isSubDialog: true }
+    );
+    await trigger();
+    let win = await dialogPromise;
+    let doc = win.document;
     await TestUtils.waitForCondition(
       () => doc.activeElement && doc.activeElement != doc.documentElement,
       "Wait for the dialog to set its initial focus"
     );
     is(
       doc.activeElement,
-      this.getDurationDropdown(),
-      "Initial focus is on the duration dropdown, not the close button"
+      doc.getElementById("sanitizeDurationChoice"),
+      `${description}: initial focus is on the duration dropdown, not the close button`
     );
-    this.cancelDialog();
-  };
-  dh.open();
-  await dh.promiseClosed;
+    is(
+      doc.activeElement.matches(":focus-visible"),
+      expectRing,
+      `${description}: the initial focus ${expectRing ? "shows" : "doesn't show"} a focus ring`
+    );
+    if (!expectRing) {
+      EventUtils.synthesizeKey("KEY_Tab", {}, win);
+      ok(
+        doc.activeElement.matches(":focus-visible"),
+        `${description}: moving focus with the keyboard shows the focus ring`
+      );
+    }
+    let unloaded = BrowserTestUtils.waitForEvent(win, "unload");
+    doc.querySelector("dialog").cancelDialog();
+    await unloaded;
+  }
 });
+
+/**
+ * Open the dialog from the History view of the app menu.
+ *
+ * @param {boolean} withKeyboard - Whether to get to the item and activate it
+ *        with the arrow keys and Enter, or click it with the mouse.
+ */
+async function openFromAppMenuWithInput(withKeyboard) {
+  const { CustomizableUITestUtils } = ChromeUtils.importESModule(
+    "resource://testing-common/CustomizableUITestUtils.sys.mjs"
+  );
+  await new CustomizableUITestUtils(window).openMainMenu();
+  let activate = id => {
+    let item = PanelMultiView.getViewNode(document, id);
+    if (!withKeyboard) {
+      EventUtils.synthesizeMouseAtCenter(item, {});
+      return;
+    }
+    let { length } = item
+      .closest("panelview")
+      .querySelectorAll("toolbarbutton");
+    for (let i = 0; i < length && document.activeElement != item; i++) {
+      EventUtils.synthesizeKey("KEY_ArrowDown");
+    }
+    is(document.activeElement, item, `${id} is focused with the arrow keys`);
+    EventUtils.synthesizeKey("KEY_Enter");
+  };
+  let historyView = PanelMultiView.getViewNode(document, "PanelUI-history");
+  let shown = BrowserTestUtils.waitForEvent(historyView, "ViewShown");
+  activate("appMenu-history-button");
+  await shown;
+  activate("appMenuClearRecentHistory");
+}
 
 /**
  * Clear on shutdown has no duration dropdown, so it keeps the default initial

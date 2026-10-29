@@ -791,6 +791,9 @@ const kFireButtonFlowVariable = "flow";
 const kFireButtonFlowPanel = "panel";
 // Go straight to the clear-data dialog, which does its own confirming.
 const kFireButtonFlowDirect = "direct";
+// The event that last activated the fire button in each window, for the
+// direct flow's dialog, since ViewShowing doesn't carry it.
+const gFireButtonTriggeringEvents = new WeakMap();
 
 if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
   CustomizableWidgets.push({
@@ -828,6 +831,11 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
      */
     _panelsAwaitingChoice: new WeakSet(),
 
+    // Called without this.
+    onBeforeCommand(aEvent, aNode) {
+      gFireButtonTriggeringEvents.set(aNode.documentGlobal, aEvent);
+    },
+
     onCreated(aNode) {
       let doc = aNode.ownerDocument;
       let box = doc.createXULElement("box");
@@ -848,7 +856,7 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
         if (aEvent.target.id == "fire-button-panel-choose-link") {
           this._panelsAwaitingChoice.delete(panelview);
           Glean.fireButton.chooseClicked.record();
-          this.onChoose(aEvent.target).catch(console.error);
+          this.onChoose(aEvent).catch(console.error);
         }
         return;
       }
@@ -883,6 +891,9 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
 
     onViewShowing(aEvent) {
       let panelview = aEvent.target;
+      let win = panelview.documentGlobal;
+      let triggeringEvent = gFireButtonTriggeringEvents.get(win);
+      gFireButtonTriggeringEvents.delete(win);
 
       let flow = this.flow;
       Glean.fireButton.activated.record({ flow });
@@ -891,7 +902,9 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
         // Stop the panel from opening; the dialog is the confirmation.
         aEvent.preventDefault();
         lazy.CustomizableUI.hidePanelForNode(panelview);
-        this.openClearDataDialog(panelview, flow).catch(console.error);
+        this.openClearDataDialog(panelview, flow, triggeringEvent).catch(
+          console.error
+        );
         return;
       }
 
@@ -943,11 +956,15 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
      * so all this adds is the same completion toast the panel's own confirm
      * button shows.
      *
-     * @param {Element} aLink - The "Choose…" link that was activated.
+     * @param {Event} aEvent - The command event of the "Choose…" link.
      */
-    onChoose(aLink) {
-      lazy.CustomizableUI.hidePanelForNode(aLink);
-      return this.openClearDataDialog(aLink, kFireButtonFlowPanel);
+    onChoose(aEvent) {
+      lazy.CustomizableUI.hidePanelForNode(aEvent.target);
+      return this.openClearDataDialog(
+        aEvent.target,
+        kFireButtonFlowPanel,
+        aEvent
+      );
     },
 
     /**
@@ -956,8 +973,9 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
      *
      * @param {Element} aNode - Node identifying the window to parent to.
      * @param {string} aFlow - The kFireButtonFlow* value of this activation.
+     * @param {Event} [aTriggeringEvent] - See Sanitizer.showUI().
      */
-    async openClearDataDialog(aNode, aFlow) {
+    async openClearDataDialog(aNode, aFlow, aTriggeringEvent) {
       let win = aNode.documentGlobal;
 
       // Armed before the dialog opens because the dialog reports "accept" from
@@ -974,6 +992,7 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
         let result = await lazy.Sanitizer.showUI(win, "clearSiteData", {
           closeWindowsWithHistory: true,
           entryPoint: lazy.Sanitizer.DIALOG_ENTRY_POINTS.FIRE_BUTTON,
+          triggeringEvent: aTriggeringEvent,
         });
         if (result != "accept") {
           this.recordFlowCompleted(aFlow, "cancelled", "dialog");

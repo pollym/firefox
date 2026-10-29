@@ -274,7 +274,10 @@ function findSettingsTab() {
  */
 async function withChooseFlow(taskFn) {
   await openPanel(window);
-  document.querySelector(SELECTOR_PANEL_CHOOSE_LINK).click();
+  EventUtils.synthesizeMouseAtCenter(
+    document.querySelector(SELECTOR_PANEL_CHOOSE_LINK),
+    {}
+  );
 
   await TestUtils.waitForCondition(
     () => gShowUICalls.length,
@@ -309,10 +312,16 @@ add_task(async function test_chooseOpensClearDataDialog() {
       "clearSiteData",
       "Opens the 'Delete browsing data' dialog."
     );
+    let { triggeringEvent, ...options } = gShowUICalls[0].options;
     Assert.deepEqual(
-      gShowUICalls[0].options,
+      options,
       { closeWindowsWithHistory: true, entryPoint: "fire_button" },
       "Clearing history from the dialog also replaces the windows."
+    );
+    Assert.equal(
+      triggeringEvent?.target.id,
+      "fire-button-panel-choose-link",
+      "Passes the event of the Choose… link, for the dialog's focus ring."
     );
     Assert.equal(
       gShowUICalls[0].parentWindow,
@@ -367,10 +376,16 @@ add_task(async function test_directFlowSkipsPanel() {
     "clearSiteData",
     "Goes straight to the clear-data dialog."
   );
+  let { triggeringEvent, ...options } = gShowUICalls[0].options;
   Assert.deepEqual(
-    gShowUICalls[0].options,
+    options,
     { closeWindowsWithHistory: true, entryPoint: "fire_button" },
     "Clearing history from the dialog also replaces the windows."
+  );
+  Assert.equal(
+    triggeringEvent?.target,
+    document.querySelector(SELECTOR_TOOLBAR_BUTTON),
+    "Passes the event that activated the button, for the dialog's focus ring."
   );
   Assert.equal(
     gSanitizeCalls.length,

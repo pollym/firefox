@@ -105,8 +105,10 @@ var gSanitizePromptDialog = {
       .addEventListener("click", () => this._dialog.cancelDialog());
     if (arg.inBrowserWindow && !this._inClearOnShutdownNewDialog) {
       // Start keyboard focus on the content rather than the close button.
-      document.subDialogSetDefaultFocus = () =>
-        document.getElementById("sanitizeDurationChoice").focus();
+      document.subDialogSetDefaultFocus = (isInitialFocus, { focusVisible }) =>
+        document
+          .getElementById("sanitizeDurationChoice")
+          .focus({ focusVisible });
     }
 
     if (arg.inBrowserWindow) {

@@ -150,6 +150,9 @@ export var Sanitizer = {
    *        one, as part of the same sanitization.
    * @param {string} [options.entryPoint] - What the user used to open the
    *        dialog, one of DIALOG_ENTRY_POINTS, recorded in its telemetry.
+   * @param {Event} [options.triggeringEvent] - The event that made the user
+   *        open the dialog. If it came from the keyboard, the dialog's initial
+   *        focus shows a focus ring.
    * @returns {"accept" | "cancel"} - The selected dialog box option.
    *
    * @throws if parentWindow is undefined or doesn't have a gDialogBox.
@@ -157,7 +160,7 @@ export var Sanitizer = {
   async showUI(
     parentWindow,
     mode,
-    { closeWindowsWithHistory = false, entryPoint } = {}
+    { closeWindowsWithHistory = false, entryPoint, triggeringEvent } = {}
   ) {
     // Treat the hidden window as not being a parent window:
     if (
@@ -171,14 +174,18 @@ export var Sanitizer = {
     let deferred = Promise.withResolvers();
 
     if (parentWindow?.gDialogBox) {
-      parentWindow.gDialogBox.open(`chrome://browser/content/${dialogFile}`, {
-        inBrowserWindow: true,
-        mode,
-        closeWindowsWithHistory,
-        entryPoint,
-        onAccept: () => deferred.resolve("accept"),
-        onCancel: () => deferred.resolve("cancel"),
-      });
+      parentWindow.gDialogBox.open(
+        `chrome://browser/content/${dialogFile}`,
+        {
+          inBrowserWindow: true,
+          mode,
+          closeWindowsWithHistory,
+          entryPoint,
+          onAccept: () => deferred.resolve("accept"),
+          onCancel: () => deferred.resolve("cancel"),
+        },
+        triggeringEvent
+      );
     } else {
       Services.ww.openWindow(
         parentWindow,
