@@ -33,7 +33,6 @@ class DNSRequestParent : public DNSRequestActor, public PDNSRequestParent {
       const int32_t& port, const uint16_t& type,
       const OriginAttributes& originAttributes,
       const nsIDNSService::DNSFlags& flags, const nsresult& reason);
-  mozilla::ipc::IPCResult RecvLookupCompleted(const DNSRequestResponse& reply);
   void ActorDestroy(ActorDestroyReason) override;
 };
 

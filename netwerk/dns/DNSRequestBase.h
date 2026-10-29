@@ -29,13 +29,6 @@ class DNSRequestBase : public nsISupports {
 
   void SetIPCActor(DNSRequestActor* aActor);
 
-  virtual void OnRecvCancelDNSRequest(const nsCString& hostName,
-                                      const nsCString& trrServer,
-                                      const int32_t& port, const uint16_t& type,
-                                      const OriginAttributes& originAttributes,
-                                      const nsIDNSService::DNSFlags& flags,
-                                      const nsresult& reason) = 0;
-  virtual bool OnRecvLookupCompleted(const DNSRequestResponse& reply) = 0;
   virtual void OnIPCActorDestroy() = 0;
 
   virtual DNSRequestSender* AsDNSRequestSender() = 0;
@@ -49,7 +42,7 @@ class DNSRequestBase : public nsISupports {
 
 // DNSRequestSender is used to send an IPC request to DNSRequestHandler and
 // deliver the result to nsIDNSListener.
-// Note this class could be used both in content process and parent process.
+// Note this class is used in the content process and the socket process.
 class DNSRequestSender final : public DNSRequestBase, public nsICancelable {
  public:
   NS_DECL_THREADSAFE_ISUPPORTS
@@ -61,13 +54,7 @@ class DNSRequestSender final : public DNSRequestBase, public nsICancelable {
                    const nsIDNSService::DNSFlags& aFlags,
                    nsIDNSListener* aListener, nsIEventTarget* target);
 
-  void OnRecvCancelDNSRequest(const nsCString& hostName,
-                              const nsCString& trrServer, const int32_t& port,
-                              const uint16_t& type,
-                              const OriginAttributes& originAttributes,
-                              const nsIDNSService::DNSFlags& flags,
-                              const nsresult& reason) override;
-  bool OnRecvLookupCompleted(const DNSRequestResponse& reply) override;
+  bool OnRecvLookupCompleted(const DNSRequestResponse& reply);
   void OnIPCActorDestroy() override;
 
   // Sends IPDL request to DNSRequestHandler
@@ -94,7 +81,7 @@ class DNSRequestSender final : public DNSRequestBase, public nsICancelable {
 };
 
 // DNSRequestHandler handles the dns request and sends the result back via IPC.
-// Note this class could be used both in parent process and socket process.
+// Note this class is only used in the parent process.
 class DNSRequestHandler final : public DNSRequestBase, public nsIDNSListener {
  public:
   NS_DECL_THREADSAFE_ISUPPORTS
@@ -112,8 +99,7 @@ class DNSRequestHandler final : public DNSRequestBase, public nsIDNSListener {
                               const uint16_t& type,
                               const OriginAttributes& originAttributes,
                               const nsIDNSService::DNSFlags& flags,
-                              const nsresult& reason) override;
-  bool OnRecvLookupCompleted(const DNSRequestResponse& reply) override;
+                              const nsresult& reason);
   void OnIPCActorDestroy() override;
 
   DNSRequestSender* AsDNSRequestSender() override { return nullptr; }

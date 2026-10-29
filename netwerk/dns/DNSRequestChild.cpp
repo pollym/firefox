@@ -8,14 +8,11 @@
 #include "mozilla/dom/ContentChild.h"
 #include "mozilla/net/ChildDNSService.h"
 #include "mozilla/net/DNSByTypeRecord.h"
-#include "mozilla/net/DNSRequestParent.h"
 #include "mozilla/net/NeckoChild.h"
 #include "mozilla/net/SocketProcessChild.h"
-#include "mozilla/net/SocketProcessParent.h"
 #include "nsHostResolver.h"
 #include "nsIDNSByTypeRecord.h"
 #include "nsIDNSRecord.h"
-#include "nsIOService.h"
 #include "nsNetAddr.h"
 #include "nsTArray.h"
 #include "nsThreadUtils.h"
@@ -69,9 +66,6 @@ ChildDNSRecord::ChildDNSRecord(const DNSRecord& reply,
   mTrrFetchDuration = reply.trrFetchDuration();
   mTrrFetchDurationNetworkOnly = reply.trrFetchDurationNetworkOnly();
   mIsTRR = reply.isTRR();
-  // When ChildDNSRecord is created in parent process, we know this is case that
-  // DNS resolution is done in socket process.
-  mResolvedInSocketProcess = XRE_IsParentProcess();
   mEffectiveTRRMode = reply.effectiveTRRMode();
 
   // A shame IPDL gives us no way to grab ownership of array: so copy it.
@@ -437,11 +431,6 @@ DNSRequestSender::DNSRequestSender(const nsACString& aHost,
       mOriginAttributes(aOriginAttributes),
       mFlags(aFlags) {}
 
-void DNSRequestSender::OnRecvCancelDNSRequest(
-    const nsCString& hostName, const nsCString& trrServer, const int32_t& port,
-    const uint16_t& type, const OriginAttributes& originAttributes,
-    const nsIDNSService::DNSFlags& flags, const nsresult& reason) {}
-
 NS_IMETHODIMP
 DNSRequestSender::Cancel(nsresult reason) {
   // we can only do IPC on the MainThread
@@ -460,9 +449,6 @@ DNSRequestSender::Cancel(nsresult reason) {
   if (DNSRequestChild* child = mIPCActor->AsDNSRequestChild()) {
     (void)child->SendCancelDNSRequest(mHost, mTrrServer, mPort, mType,
                                       mOriginAttributes, mFlags, reason);
-  } else if (DNSRequestParent* parent = mIPCActor->AsDNSRequestParent()) {
-    (void)parent->SendCancelDNSRequest(mHost, mTrrServer, mPort, mType,
-                                       mOriginAttributes, mFlags, reason);
   }
 
   return NS_OK;
@@ -492,8 +478,6 @@ void DNSRequestSender::StartRequest() {
     } else if (XRE_IsSocketProcess()) {
       // DNS resolution is done in the parent process. Send a DNS request to
       // parent process.
-      MOZ_ASSERT(!nsIOService::UseSocketProcess());
-
       SocketProcessChild* socketProcessChild =
           SocketProcessChild::GetSingleton();
       if (!socketProcessChild->CanSend()) {
@@ -506,26 +490,6 @@ void DNSRequestSender::StartRequest() {
       MOZ_ASSERT(false, "Wrong process");
       return;
     }
-  } else if (DNSRequestParent* parent = mIPCActor->AsDNSRequestParent()) {
-    // DNS resolution is done in the socket process. Send a DNS request to
-    // socket process.
-    MOZ_ASSERT(nsIOService::UseSocketProcess());
-
-    RefPtr<DNSRequestParent> requestParent = parent;
-    RefPtr<DNSRequestSender> self = this;
-    auto task = [requestParent, self]() {
-      RefPtr<SocketProcessParent> socketParent =
-          SocketProcessParent::GetSingleton();
-      (void)socketParent->SendPDNSRequestConstructor(
-          requestParent, self->mHost, self->mTrrServer, self->mPort,
-          self->mType, self->mOriginAttributes, self->mFlags);
-    };
-    if (!gIOService->SocketProcessReady()) {
-      gIOService->CallOrWaitForSocketProcess(std::move(task));
-      return;
-    }
-
-    task();
   }
 }
 
@@ -579,8 +543,6 @@ bool DNSRequestSender::OnRecvLookupCompleted(const DNSRequestResponse& reply) {
 
   if (DNSRequestChild* child = mIPCActor->AsDNSRequestChild()) {
     (void)mozilla::net::DNSRequestChild::Send__delete__(child);
-  } else if (DNSRequestParent* parent = mIPCActor->AsDNSRequestParent()) {
-    (void)mozilla::net::DNSRequestParent::Send__delete__(parent);
   }
 
   return true;
@@ -604,19 +566,11 @@ DNSRequestChild::DNSRequestChild(DNSRequestBase* aRequest)
   aRequest->SetIPCActor(this);
 }
 
-mozilla::ipc::IPCResult DNSRequestChild::RecvCancelDNSRequest(
-    const nsCString& hostName, const nsCString& trrServer, const int32_t& port,
-    const uint16_t& type, const OriginAttributes& originAttributes,
-    const nsIDNSService::DNSFlags& flags, const nsresult& reason) {
-  mDNSRequest->OnRecvCancelDNSRequest(hostName, trrServer, port, type,
-                                      originAttributes, flags, reason);
-  return IPC_OK();
-}
-
 mozilla::ipc::IPCResult DNSRequestChild::RecvLookupCompleted(
     const DNSRequestResponse& reply) {
-  return mDNSRequest->OnRecvLookupCompleted(reply) ? IPC_OK()
-                                                   : IPC_FAIL_NO_REASON(this);
+  return mDNSRequest->AsDNSRequestSender()->OnRecvLookupCompleted(reply)
+             ? IPC_OK()
+             : IPC_FAIL_NO_REASON(this);
 }
 
 void DNSRequestChild::ActorDestroy(ActorDestroyReason) {

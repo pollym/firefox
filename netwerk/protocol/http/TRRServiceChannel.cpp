@@ -271,7 +271,6 @@ nsresult TRRServiceChannel::ResolveProxy() {
 
   MOZ_ASSERT(NS_IsMainThread());
 
-  // TODO: bug 1625171. Consider moving proxy resolution to socket process.
   RefPtr<TRRServiceChannel> self = this;
   nsCOMPtr<nsICancelable> proxyRequest;
   nsresult rv = ProxyConfigLookup::Create(
@@ -406,8 +405,6 @@ nsresult TRRServiceChannel::BeginConnect() {
 
   RefPtr<nsHttpConnectionInfo> connInfo = new nsHttpConnectionInfo(
       host, port, ""_ns, mUsername, proxyInfo, OriginAttributes(), isHttps);
-  // TODO: Bug 1622778 for using AltService in socket process.
-  StoreAllowAltSvc(XRE_IsParentProcess() && LoadAllowAltSvc());
   bool http2Allowed = !gHttpHandler->IsHttp2Excluded(connInfo);
   bool http3Allowed = Http3Allowed();
   if (!http3Allowed) {

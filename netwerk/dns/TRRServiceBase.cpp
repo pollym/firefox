@@ -236,10 +236,6 @@ already_AddRefed<nsHttpConnectionInfo> TRRServiceBase::CreateConnInfoHelper(
 }
 
 void TRRServiceBase::InitTRRConnectionInfo(bool aForceReinit) {
-  if (!XRE_IsParentProcess()) {
-    return;
-  }
-
   if (mTRRConnectionInfoInited && !aForceReinit) {
     return;
   }
@@ -271,10 +267,6 @@ void TRRServiceBase::AsyncCreateTRRConnectionInfo(const nsACString& aURI) {
 
 void TRRServiceBase::AsyncCreateTRRConnectionInfoInternal(
     const nsACString& aURI) {
-  if (!XRE_IsParentProcess()) {
-    return;
-  }
-
   SetDefaultTRRConnectionInfo(nullptr);
 
   MOZ_ASSERT(NS_IsMainThread());
@@ -341,10 +333,6 @@ void TRRServiceBase::SetDefaultTRRConnectionInfo(
 }
 
 void TRRServiceBase::RegisterProxyChangeListener() {
-  if (!XRE_IsParentProcess()) {
-    return;
-  }
-
   nsCOMPtr<nsIProtocolProxyService> pps =
       do_GetService(NS_PROTOCOLPROXYSERVICE_CONTRACTID);
   if (!pps) {
@@ -355,10 +343,6 @@ void TRRServiceBase::RegisterProxyChangeListener() {
 }
 
 void TRRServiceBase::UnregisterProxyChangeListener() {
-  if (!XRE_IsParentProcess()) {
-    return;
-  }
-
   nsCOMPtr<nsIProtocolProxyService> pps =
       do_GetService(NS_PROTOCOLPROXYSERVICE_CONTRACTID);
   if (!pps) {

@@ -18,7 +18,6 @@
 #include "mozilla/dom/MemoryReportRequest.h"
 #include "mozilla/glean/NetwerkMetrics.h"
 #include "mozilla/net/DNSRequestParent.h"
-#include "mozilla/net/ProxyConfigLookupParent.h"
 #include "mozilla/net/SocketProcessBackgroundParent.h"
 #include "mozilla/net/neqo_glue_ffi_generated.h"
 #include "nsHttpConnectionInfo.h"
@@ -239,22 +238,6 @@ mozilla::ipc::IPCResult SocketProcessParent::RecvInitSocketBackground(
                                    new SocketProcessBackgroundParent();
                                endpoint.Bind(parent);
                              }));
-  return IPC_OK();
-}
-
-already_AddRefed<PProxyConfigLookupParent>
-SocketProcessParent::AllocPProxyConfigLookupParent(
-    nsIURI* aURI, const uint32_t& aProxyResolveFlags,
-    const bool& aIsTRRServiceChannel) {
-  RefPtr<ProxyConfigLookupParent> actor = new ProxyConfigLookupParent(
-      aURI, aProxyResolveFlags, aIsTRRServiceChannel);
-  return actor.forget();
-}
-
-mozilla::ipc::IPCResult SocketProcessParent::RecvPProxyConfigLookupConstructor(
-    PProxyConfigLookupParent* aActor, nsIURI* aURI,
-    const uint32_t& aProxyResolveFlags, const bool& aIsTRRServiceChannel) {
-  mozilla::ipc::ActorCast<ProxyConfigLookupParent>(aActor)->DoProxyLookup();
   return IPC_OK();
 }
 

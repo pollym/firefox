@@ -6,9 +6,6 @@ include protocol PDNSRequest;
 include protocol PSocketProcessBridge;
 include protocol PProfiler;
 include protocol PWebrtcTCPSocket;
-include protocol PTRRService;
-include protocol PProxyConfigLookup;
-include protocol PNativeDNSResolverOverride;
 include protocol PProxyAutoConfig;
 include protocol PSocketProcessBackground;
 
@@ -65,9 +62,6 @@ sync protocol PSocketProcess
 {
   manages PDNSRequest;
   manages PWebrtcTCPSocket;
-  manages PTRRService;
-  manages PProxyConfigLookup;
-  manages PNativeDNSResolverOverride;
 
 parent:
   async InitCrashReporter(CrashReporterInitArgs aInitArgs);
@@ -83,8 +77,9 @@ parent:
   /* tabId is only required for web-proxy support, which isn't always needed */
   async PWebrtcTCPSocket(TabId? tabId);
   async InitSocketBackground(Endpoint<PSocketProcessBackgroundParent> aEndpoint);
-  async PProxyConfigLookup(nullable nsIURI aUri, uint32_t aFlags,
-                           bool aIsTRRServiceChannel);
+  async PDNSRequest(nsCString hostName, nsCString trrServer, int32_t port,
+                    uint16_t type, OriginAttributes originAttributes,
+                    DNSFlags flags);
 
   async OnConsoleMessage(nsString aMessage);
 
@@ -126,11 +121,6 @@ child:
   // test-only
   async SocketProcessTelemetryPing();
 
-  async PTRRService(bool aCaptiveIsPassed,
-                    bool aParentalControlEnabled,
-                    nsCString[] aDNSSuffixList);
-  async PNativeDNSResolverOverride();
-
   async InitProxyAutoConfigChild(Endpoint<PProxyAutoConfigChild> endpoint);
 
   // Tells the Socket process to flush any pending telemetry.
@@ -157,11 +147,6 @@ child:
   */
   async UnblockUntrustedModulesThread();
 #endif  // defined(XP_WIN)
-
-both:
-  async PDNSRequest(nsCString hostName, nsCString trrServer, int32_t port,
-                    uint16_t type, OriginAttributes originAttributes,
-                    DNSFlags flags);
 };
 
 } // namespace net

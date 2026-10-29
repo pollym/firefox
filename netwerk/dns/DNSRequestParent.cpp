@@ -6,7 +6,6 @@
 
 #include "DNSAdditionalInfo.h"
 #include "mozilla/Components.h"
-#include "mozilla/net/DNSRequestChild.h"
 #include "nsHostResolver.h"
 #include "nsICancelable.h"
 #include "nsIDNSRecord.h"
@@ -30,8 +29,6 @@ static void SendLookupCompletedHelper(DNSRequestActor* aActor,
                                       const DNSRequestResponse& aReply) {
   if (DNSRequestParent* parent = aActor->AsDNSRequestParent()) {
     (void)parent->SendLookupCompleted(aReply);
-  } else if (DNSRequestChild* child = aActor->AsDNSRequestChild()) {
-    (void)child->SendLookupCompleted(aReply);
   }
 }
 
@@ -77,10 +74,6 @@ void DNSRequestHandler::OnRecvCancelDNSRequest(
         hostName, static_cast<nsIDNSService::ResolveType>(type), flags, info,
         this, reason, originAttributes);
   }
-}
-
-bool DNSRequestHandler::OnRecvLookupCompleted(const DNSRequestResponse& reply) {
-  return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -173,15 +166,9 @@ mozilla::ipc::IPCResult DNSRequestParent::RecvCancelDNSRequest(
     const nsCString& hostName, const nsCString& trrServer, const int32_t& port,
     const uint16_t& type, const OriginAttributes& originAttributes,
     const nsIDNSService::DNSFlags& flags, const nsresult& reason) {
-  mDNSRequest->OnRecvCancelDNSRequest(hostName, trrServer, port, type,
-                                      originAttributes, flags, reason);
+  mDNSRequest->AsDNSRequestHandler()->OnRecvCancelDNSRequest(
+      hostName, trrServer, port, type, originAttributes, flags, reason);
   return IPC_OK();
-}
-
-mozilla::ipc::IPCResult DNSRequestParent::RecvLookupCompleted(
-    const DNSRequestResponse& reply) {
-  return mDNSRequest->OnRecvLookupCompleted(reply) ? IPC_OK()
-                                                   : IPC_FAIL_NO_REASON(this);
 }
 
 void DNSRequestParent::ActorDestroy(ActorDestroyReason) {

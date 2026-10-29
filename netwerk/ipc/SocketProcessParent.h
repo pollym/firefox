@@ -73,14 +73,6 @@ class SocketProcessParent final
   mozilla::ipc::IPCResult RecvInitSocketBackground(
       Endpoint<PSocketProcessBackgroundParent>&& aEndpoint);
 
-  already_AddRefed<PProxyConfigLookupParent> AllocPProxyConfigLookupParent(
-      nsIURI* aURI, const uint32_t& aProxyResolveFlags,
-      const bool& aIsTRRServiceChannel);
-  mozilla::ipc::IPCResult RecvPProxyConfigLookupConstructor(
-      PProxyConfigLookupParent* aActor, nsIURI* aURI,
-      const uint32_t& aProxyResolveFlags,
-      const bool& aIsTRRServiceChannel) override;
-
   mozilla::ipc::IPCResult RecvOnConsoleMessage(const nsString& aMessage);
 
   mozilla::ipc::IPCResult RecvFOGData(ByteBuf&& aBuf);

@@ -28,12 +28,8 @@
 #include "mozilla/ipc/ProcessChild.h"
 #include "mozilla/ipc/ProcessUtils.h"
 #include "mozilla/net/AppleFastDatapathProbe.h"
-#include "mozilla/net/DNSRequestChild.h"
-#include "mozilla/net/DNSRequestParent.h"
-#include "mozilla/net/NativeDNSResolverOverrideChild.h"
 #include "mozilla/net/ProxyAutoConfigChild.h"
 #include "mozilla/net/SocketProcessBackgroundChild.h"
-#include "mozilla/net/TRRServiceChild.h"
 #include "nsDebugImpl.h"
 #include "nsIDNSService.h"
 #include "nsIXULRuntime.h"
@@ -392,57 +388,6 @@ void SocketProcessChild::DestroySocketProcessBridgeParent(ProcessId aId) {
   MOZ_ASSERT(NS_IsMainThread());
 
   mSocketProcessBridgeParentMap.Remove(aId);
-}
-
-already_AddRefed<PDNSRequestChild> SocketProcessChild::AllocPDNSRequestChild(
-    const nsACString& aHost, const nsACString& aTrrServer, const int32_t& aPort,
-    const uint16_t& aType, const OriginAttributes& aOriginAttributes,
-    const nsIDNSService::DNSFlags& aFlags) {
-  RefPtr<DNSRequestHandler> handler = new DNSRequestHandler();
-  RefPtr<DNSRequestChild> actor = new DNSRequestChild(handler);
-  return actor.forget();
-}
-
-mozilla::ipc::IPCResult SocketProcessChild::RecvPDNSRequestConstructor(
-    PDNSRequestChild* aActor, const nsACString& aHost,
-    const nsACString& aTrrServer, const int32_t& aPort, const uint16_t& aType,
-    const OriginAttributes& aOriginAttributes,
-    const nsIDNSService::DNSFlags& aFlags) {
-  RefPtr<DNSRequestChild> actor =
-      mozilla::ipc::ActorCast<DNSRequestChild>(aActor);
-  RefPtr<DNSRequestHandler> handler =
-      actor->GetDNSRequest()->AsDNSRequestHandler();
-  handler->DoAsyncResolve(aHost, aTrrServer, aPort, aType, aOriginAttributes,
-                          aFlags);
-  return IPC_OK();
-}
-
-already_AddRefed<PTRRServiceChild> SocketProcessChild::AllocPTRRServiceChild(
-    const bool& aCaptiveIsPassed, const bool& aParentalControlEnabled,
-    const nsTArray<nsCString>& aDNSSuffixList) {
-  RefPtr<TRRServiceChild> actor = new TRRServiceChild();
-  return actor.forget();
-}
-
-mozilla::ipc::IPCResult SocketProcessChild::RecvPTRRServiceConstructor(
-    PTRRServiceChild* aActor, const bool& aCaptiveIsPassed,
-    const bool& aParentalControlEnabled, nsTArray<nsCString>&& aDNSSuffixList) {
-  mozilla::ipc::ActorCast<TRRServiceChild>(aActor)->Init(
-      aCaptiveIsPassed, aParentalControlEnabled, std::move(aDNSSuffixList));
-  return IPC_OK();
-}
-
-already_AddRefed<PNativeDNSResolverOverrideChild>
-SocketProcessChild::AllocPNativeDNSResolverOverrideChild() {
-  RefPtr<NativeDNSResolverOverrideChild> actor =
-      new NativeDNSResolverOverrideChild();
-  return actor.forget();
-}
-
-mozilla::ipc::IPCResult
-SocketProcessChild::RecvPNativeDNSResolverOverrideConstructor(
-    PNativeDNSResolverOverrideChild* aActor) {
-  return IPC_OK();
 }
 
 mozilla::ipc::IPCResult SocketProcessChild::RecvInitProxyAutoConfigChild(

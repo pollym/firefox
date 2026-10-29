@@ -18,25 +18,6 @@
 #include "nsString.h"
 #include "nsTHashSet.h"
 
-class DNSServiceWrapper final : public nsPIDNSService {
- public:
-  NS_DECL_THREADSAFE_ISUPPORTS
-  NS_FORWARD_NSPIDNSSERVICE(PIDNSService()->)
-  NS_FORWARD_NSIDNSSERVICE(DNSService()->)
-
-  DNSServiceWrapper() = default;
-
-  static already_AddRefed<nsIDNSService> GetSingleton();
-
- private:
-  ~DNSServiceWrapper() = default;
-  nsIDNSService* DNSService();
-  nsPIDNSService* PIDNSService();
-
-  mozilla::Mutex mLock{"DNSServiceWrapper.mLock"};
-  nsCOMPtr<nsIDNSService> mDNSServiceInUse MOZ_GUARDED_BY(mLock);
-};
-
 class nsDNSService final : public mozilla::net::DNSServiceBase,
                            public nsPIDNSService,
                            public nsIMemoryReporter {
@@ -54,9 +35,6 @@ class nsDNSService final : public mozilla::net::DNSServiceBase,
   size_t SizeOfIncludingThis(mozilla::MallocSizeOf mallocSizeOf);
 
   bool GetOffline() const;
-
- protected:
-  friend class DNSServiceWrapper;
 
  private:
   ~nsDNSService() = default;
