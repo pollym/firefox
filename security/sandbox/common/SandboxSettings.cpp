@@ -164,24 +164,6 @@ bool IsContentSandboxEnabled() { return GetEffectiveContentSandboxLevel() > 0; }
 
 bool IsGPUSandboxEnabled() { return GetEffectiveGpuSandboxLevel() > 0; }
 
-int GetEffectiveSocketProcessSandboxLevel() {
-  if (PR_GetEnv("MOZ_DISABLE_SOCKET_PROCESS_SANDBOX")) {
-    return 0;
-  }
-
-  int level =
-      StaticPrefs::security_sandbox_socket_process_level_DoNotUseDirectly();
-
-#ifdef XP_LINUX
-  // Turn off ioctl lockdown in safe mode, until it's gotten more testing.
-  if (level > 1 && gSafeMode) {
-    level = 1;
-  }
-#endif
-
-  return level;
-}
-
 int GetEffectiveGpuSandboxLevel() {
   if (PR_GetEnv("MOZ_DISABLE_GPU_SANDBOX")) {
     return 0;

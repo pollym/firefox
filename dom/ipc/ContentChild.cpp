@@ -5217,11 +5217,6 @@ bool StartOpenBSDSandbox(GeckoProcessType type, ipc::SandboxingKind kind) {
       OpenBSDFindPledgeUnveilFilePath("unveil.gpu", unveilFile);
       break;
 
-    case GeckoProcessType_Socket:
-      OpenBSDFindPledgeUnveilFilePath("pledge.socket", pledgeFile);
-      OpenBSDFindPledgeUnveilFilePath("unveil.socket", unveilFile);
-      break;
-
     case GeckoProcessType_RDD:
       OpenBSDFindPledgeUnveilFilePath("pledge.rdd", pledgeFile);
       OpenBSDFindPledgeUnveilFilePath("unveil.rdd", unveilFile);

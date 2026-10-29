@@ -1817,15 +1817,6 @@ Result<Ok, LaunchError> WindowsProcessLauncher::DoSetup() {
         mUseSandbox = true;
       }
       break;
-    case GeckoProcessType_Socket:
-      if (!PR_GetEnv("MOZ_DISABLE_SOCKET_PROCESS_SANDBOX")) {
-        if (NS_WARN_IF(
-                !mResults.mSandboxBroker->SetSecurityLevelForSocketProcess())) {
-          return Err(LaunchError("SetSecurityLevelForSocketProcess"));
-        }
-        mUseSandbox = true;
-      }
-      break;
     case GeckoProcessType_Utility:
       if (IsUtilitySandboxEnabled(mUtilitySandbox)) {
         if (!mResults.mSandboxBroker->SetSecurityLevelForUtilityProcess(
