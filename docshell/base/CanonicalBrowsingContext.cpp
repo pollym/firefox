@@ -2082,10 +2082,10 @@ void CanonicalBrowsingContext::RecomputeAppWindowVisibility() {
   }
 
   (void)NS_WARN_IF(!widget);
-  const bool isNowActive = ForceAppWindowActive() ||
-                           mDocumentPiPWindowCount > 0 ||
-                           (widget && !widget->IsFullyOccluded() &&
-                            widget->SizeMode() != nsSizeMode_Minimized);
+  const bool isNowActive =
+      ForceAppWindowActive() || mDocumentPiPWindowCount > 0 ||
+      (widget && widget->IsVisible() && !widget->IsFullyOccluded() &&
+       widget->SizeMode() != nsSizeMode_Minimized);
 
   if (isNowActive == wasAlreadyActive) {
     return;

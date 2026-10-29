@@ -839,10 +839,7 @@ NS_IMETHODIMP AppWindow::GetNativeHandle(nsAString& aNativeHandle) {
 NS_IMETHODIMP AppWindow::GetVisibility(bool* aVisibility) {
   NS_ENSURE_ARG_POINTER(aVisibility);
 
-  // Always claim to be visible for now. See bug
-  // https://bugzilla.mozilla.org/show_bug.cgi?id=306245.
-
-  *aVisibility = true;
+  *aVisibility = mWindow && mWindow->IsVisible();
 
   return NS_OK;
 }
@@ -886,6 +883,8 @@ NS_IMETHODIMP AppWindow::SetVisibility(bool aVisibility) {
       doc->SynchronouslyUpdateRemoteBrowserDimensions();
     }
   }
+
+  RecomputeBrowsingContextVisibility();
 
   nsCOMPtr<nsIWindowMediator> windowMediator(
       do_GetService(NS_WINDOWMEDIATOR_CONTRACTID));
