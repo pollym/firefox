@@ -614,38 +614,10 @@ class SecretSettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFra
             onPreferenceChangeListener = SharedPreferenceUpdater()
         }
 
-        requirePreference<SwitchPreferenceCompat>(R.string.pref_key_enable_menu_customization).apply {
-            isVisible = Config.channel.isNightlyOrDebug
-            isChecked = context.components.settings.isMenuCustomizationEnabled
-            onPreferenceChangeListener =
-                object : SharedPreferenceUpdater() {
-                    override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-                        val enabled = newValue as? Boolean ?: false
-                        requirePreference<SwitchPreferenceCompat>(R.string.pref_key_enable_menu_customization_screen)
-                            .apply {
-                                if (!enabled) {
-                                    isChecked = false
-                                    context.components.settings.isMenuCustomizationScreenEnabled = false
-                                }
-                                isVisible = enabled
-                            }
-                        return super.onPreferenceChange(preference, newValue)
-                    }
-                }
-        }
-
         requirePreference<SwitchPreferenceCompat>(R.string.pref_key_enable_menu_customization_screen).apply {
-            isVisible = Config.channel.isDebug && context.components.settings.isMenuCustomizationEnabled
+            isVisible = Config.channel.isDebug
             isChecked = context.components.settings.isMenuCustomizationScreenEnabled
-            onPreferenceChangeListener =
-                object : SharedPreferenceUpdater() {
-                    override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
-                        if (!context.components.settings.isMenuCustomizationEnabled) {
-                            return false
-                        }
-                        return super.onPreferenceChange(preference, newValue)
-                    }
-                }
+            onPreferenceChangeListener = SharedPreferenceUpdater()
         }
     }
 

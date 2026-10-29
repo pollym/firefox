@@ -525,22 +525,6 @@ class BrowserToolbarMiddlewareTest {
     // Testing actions
 
     @Test
-    fun `WHEN clicking the menu button THEN open the menu`() {
-        val navController = navControllerShowingHome()
-        val (_, toolbarStore) = buildMiddlewareAndAddToStore(navController = navController)
-        val menuButton = toolbarStore.state.displayState.browserActionsEnd[1] as ActionButtonRes
-
-        toolbarStore.dispatch(menuButton.onClick as BrowserToolbarEvent)
-
-        verify {
-            navController.navigate(
-                HomeFragmentDirections.actionGlobalMenuDialogFragment(accesspoint = MenuAccessPoint.Home),
-                null,
-            )
-        }
-    }
-
-    @Test
     fun `GIVEN menu customization is enabled WHEN clicking the menu button THEN open the customizable menu`() {
         every { testContext.components.settings.isMenuCustomizationEnabled } returns true
         val navController = navControllerShowingHome()

@@ -3440,11 +3440,7 @@ class Settings(
         )
 
     /** Whether customizing the browser menu is allowed. */
-    var isMenuCustomizationEnabled by
-        booleanPreference(
-            key = appContext.getPreferenceKey(R.string.pref_key_enable_menu_customization),
-            default = { false },
-        )
+    val isMenuCustomizationEnabled = true
 
     /** Whether entering the browser menu customization screen is allowed. */
     var isMenuCustomizationScreenEnabled by
