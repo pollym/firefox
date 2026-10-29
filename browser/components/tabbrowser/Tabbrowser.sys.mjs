@@ -3538,9 +3538,27 @@ export class Tabbrowser {
     await lazy.TabStateFlusher.flush(browser);
   }
 
+  /**
+   * Discard (unload) the given tab, making it lazy again.
+   *
+   * @param {MozTabbrowserTab} aTab
+   * @param {object} [options]
+   * @param {boolean} [options.forceDiscard=false]
+   *   Force discarding the tab, even if it means dismissing dialogs.
+   * @param {boolean} [options.renderDiscarded=options.forceDiscard]
+   *   Style the tab differently to indicate that it was unloaded.
+   * @param {boolean} [options.skipOnClose=options.forceDiscard]
+   *   Skip the tab (if possible) when deciding which tab to switch to, when the
+   *   active tab is closed.
+   * @returns {boolean}
+   */
   discardBrowser(
     aTab,
-    { forceDiscard = false, renderDiscarded = forceDiscard } = {}
+    {
+      forceDiscard = false,
+      renderDiscarded = forceDiscard,
+      skipOnClose = forceDiscard,
+    } = {}
   ) {
     let browser = aTab.linkedBrowser;
 
@@ -3566,11 +3584,15 @@ export class Tabbrowser {
     });
 
     lazy.SessionStore.resetBrowserToLazyState(aTab);
-    // Indicate that this tab was explicitly unloaded (i.e. not
-    // from a session restore) in case we want to style that
-    // differently.
+
+    // If this tab was explicitly unloaded (i.e. not from a session restore). It
+    // might need styling differently, or to be skipped when switching from a
+    // closed tab.
     if (renderDiscarded) {
       aTab.toggleAttribute("discarded", true);
+    }
+    if (skipOnClose) {
+      aTab.toggleAttribute("discarded-skip-on-close", true);
     }
 
     // Remove the tab's filter and progress listener.
@@ -7256,7 +7278,7 @@ export class Tabbrowser {
     // tabs left
     const nonDiscardedTabs = Array.prototype.filter.call(
       remainingTabs,
-      tab => !tab.hasAttribute("discarded")
+      tab => !tab.hasAttribute("discarded-skip-on-close")
     );
     if (nonDiscardedTabs.length) {
       remainingTabs = nonDiscardedTabs;
@@ -7418,6 +7440,10 @@ export class Tabbrowser {
     if (aOtherTab.hasAttribute("discarded")) {
       aOurTab.toggleAttribute("discarded", true);
       modifiedAttrs.push("discarded");
+    }
+    if (aOtherTab.hasAttribute("discarded-skip-on-close")) {
+      aOurTab.toggleAttribute("discarded-skip-on-close", true);
+      modifiedAttrs.push("discarded-skip-on-close");
     }
     if (aOtherTab.hasAttribute("undiscardable")) {
       aOurTab.toggleAttribute("undiscardable", true);

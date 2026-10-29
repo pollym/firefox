@@ -7038,6 +7038,7 @@ class _SessionStore {
     TAB_STATE_FOR_BROWSER.set(browser, TAB_STATE_RESTORING);
     aTab.removeAttribute("pending");
     aTab.removeAttribute("discarded");
+    aTab.removeAttribute("discarded-skip-on-close");
   }
 
   /**
@@ -8495,6 +8496,7 @@ class _SessionStore {
 
     aTab.removeAttribute("pending");
     aTab.removeAttribute("discarded");
+    aTab.removeAttribute("discarded-skip-on-close");
 
     if (previousState == TAB_STATE_RESTORING) {
       if (this.#tabsRestoringCount) {
