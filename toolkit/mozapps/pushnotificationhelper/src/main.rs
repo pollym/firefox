@@ -265,6 +265,20 @@ fn run(profile: &Path, firefox_path: &Path) -> ExitCode {
         }
     };
 
+    // Get the handle for the stop event while the profile still exists because
+    // the event's name cannot be resolved once the profile is deleted
+    let stop_signal = match lifecycle::StopSignal::open(Some(profile)) {
+        Ok(Some(signal)) => signal,
+        Ok(None) => {
+            eprintln!("{PROGRAM}: the stop event is missing");
+            return ExitCode::FAILURE;
+        }
+        Err(message) => {
+            eprintln!("{PROGRAM}: {message}");
+            return ExitCode::FAILURE;
+        }
+    };
+
     println!("Starting to fetch notifications 🦀 🦊");
     println!("profile: {}", profile.display());
 
@@ -280,14 +294,32 @@ fn run(profile: &Path, firefox_path: &Path) -> ExitCode {
 
         println!("Starting check loop");
         loop {
+
+            // Check if the profile still exists
+            if let Err(message) = check_profile(&task_profile_path) {
+                eprintln!("{PROGRAM}: {message}");
+                let _ = stop_signal.send();
+                break;
+            }
+
             println!("Checking for Firefox");
             if !is_firefox_running(&task_profile_path) {
                 if let Ok(Some((uaid, server_url))) = load_prefs(&task_profile_path) {
                     println!("Starting push connection");
 
                     match handle_push_connection(&uaid, &server_url, &task_profile_path) {
-                        Ok(true) => { println!("Notification received - starting Firefox");
-                            launch_firefox(&task_profile_path, &task_firefox_path); },
+                        Ok(true) => {
+
+                            // Check if the profile still exists
+                            if let Err(message) = check_profile(&task_profile_path) {
+                                eprintln!("{PROGRAM}: {message}");
+                                let _ = stop_signal.send();
+                                break;
+                            }
+
+                            println!("Notification received - starting Firefox");
+                            launch_firefox(&task_profile_path, &task_firefox_path);
+                        },
                         Ok(false) => println!("No notification received"),
                         Err(e) => eprintln!("Push connection failed: {e}")
                     }
