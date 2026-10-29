@@ -2512,6 +2512,13 @@ class Document : public nsINode,
       mozilla::Maybe<RefPtr<mozilla::dom::CustomElementRegistry>>
           aCustomElementRegistry = mozilla::Nothing());
 
+  /**
+   * Returns the window's global registry, retained after disconnection.
+   */
+  CustomElementRegistry* GetGlobalCustomElementRegistry() const {
+    return mGlobalCustomElementRegistry;
+  }
+
   // https://dom.spec.whatwg.org/#effective-global-custom-element-registry
   mozilla::dom::CustomElementRegistry* GetEffectiveGlobalCustomElementRegistry()
       const;
@@ -5603,6 +5610,8 @@ class Document : public nsINode,
   // document can get its script context and scope. This is the
   // *inner* window object.
   nsCOMPtr<nsIScriptGlobalObject> mScriptGlobalObject;
+
+  RefPtr<CustomElementRegistry> mGlobalCustomElementRegistry;
 
   // If mIsStaticDocument is true, mOriginalDocument points to the original
   // document.

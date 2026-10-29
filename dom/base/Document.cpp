@@ -2765,6 +2765,7 @@ NS_IMPL_CYCLE_COLLECTION_TRAVERSE_BEGIN_INTERNAL(Document)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mPendingFullscreenEvents)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mParser)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mScriptGlobalObject)
+  NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mGlobalCustomElementRegistry)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mListenerManager)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mStyleSheetSetList)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mScriptLoader)
@@ -2929,6 +2930,7 @@ NS_IMPL_CYCLE_COLLECTION_UNLINK_BEGIN(Document)
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mHighlightRegistry)
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mPendingFullscreenEvents)
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mParser)
+  NS_IMPL_CYCLE_COLLECTION_UNLINK(mGlobalCustomElementRegistry)
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mOnloadBlocker)
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mDOMImplementation)
   NS_IMPL_CYCLE_COLLECTION_UNLINK(mImageMaps)
@@ -8705,6 +8707,9 @@ void Document::SetScriptGlobalObject(
   // having to QI every time it's asked for.
   nsCOMPtr<nsPIDOMWindowInner> window = do_QueryInterface(mScriptGlobalObject);
   mWindow = window;
+  if (mWindow) {
+    mGlobalCustomElementRegistry = mWindow->CustomElements();
+  }
 
   if (mReadyState != READYSTATE_COMPLETE) {
     if (auto* wgc = GetWindowGlobalChild()) {
