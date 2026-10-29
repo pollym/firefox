@@ -3816,7 +3816,6 @@ toolbar#nav-bar {
             "http2": options.useHttp2Server,
             "inc_origin_init": os.environ.get("MOZ_ENABLE_INC_ORIGIN_INIT") == "1",
             "sessionHistoryInParent": True,
-            "socketprocess_e10s": self.extraPrefs.get("network.process.enabled", False),
             "standalone": options.restartBetweenTests,
             "swgl": self.extraPrefs.get("gfx.webrender.software", False),
             "verify": options.verify,
@@ -4217,11 +4216,6 @@ toolbar#nav-bar {
                 self.log.info(
                     "runtests.py | Running with cross-origin iframes: {}".format(
                         mozinfo.info.get("xorigin", False)
-                    )
-                )
-                self.log.info(
-                    "runtests.py | Running with socketprocess_e10s: {}".format(
-                        mozinfo.info.get("socketprocess_e10s", False)
                     )
                 )
                 self.log.info(f"runtests.py | Running {scheme} tests: start.\n")

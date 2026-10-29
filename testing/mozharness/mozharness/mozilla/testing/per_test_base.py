@@ -368,10 +368,6 @@ class SingleTestMixin:
         mozinfo.update({"headless": self.config.get("headless", False)})
         mozinfo.update({"a11y_checks": self.config.get("a11y_checks", False)})
         mozinfo.update({
-            "socketprocess_e10s": "media.peerconnection.mtransport_process=true"
-            in self.config.get("extra_prefs", [])
-        })
-        mozinfo.update({
             "swgl": "gfx.webrender.software=true" in self.config.get("extra_prefs", [])
         })
         mozinfo.update({
