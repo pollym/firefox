@@ -2768,11 +2768,6 @@ nsresult NS_GetFilenameFromDisposition(nsAString& aFilename,
 }
 
 void net_EnsurePSMInit() {
-  if (XRE_IsSocketProcess()) {
-    EnsureNSSInitializedChromeOrContent();
-    return;
-  }
-
   MOZ_ASSERT(XRE_IsParentProcess());
   MOZ_ASSERT(NS_IsMainThread());
 
