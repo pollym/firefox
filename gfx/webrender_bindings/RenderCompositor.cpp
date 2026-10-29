@@ -357,11 +357,16 @@ bool RenderCompositor::CaptureScreenPixelsFromGL(
   const bool needsYFlip = aFramebufferOrigin != gl::OriginPos::TopLeft;
   gl::ScopedBindFramebuffer scopedBind(aGL);
 
-  if (!aGL->IsSupported(gl::GLFeature::framebuffer_blit)) {
-    // Fallback path for devices which do not support glBlitFramebuffer (i.e.
-    // GLES 2.0 without extensions). Use glReadPixels to read the source rect
-    // into a buffer, then draw into the CPU-mapped hardware buffer, flipping
-    // and scaling as required.
+  const bool canBlit =
+      aGL->IsSupported(gl::GLFeature::framebuffer_blit) &&
+      aGL->IsExtensionSupported(gl::GLContext::OES_EGL_image) &&
+      egl->IsExtensionSupported(gl::EGLExtension::KHR_fence_sync) &&
+      egl->IsExtensionSupported(gl::EGLExtension::ANDROID_native_fence_sync);
+
+  if (!canBlit) {
+    // Fallback path for devices which cannot blit directly to the hardware
+    // buffer. Use glReadPixels to read the source rect into a buffer, then draw
+    // into the CPU-mapped hardware buffer, flipping and scaling as required.
     const int bpp = gfx::BytesPerPixel(aHardwareBuffer->mFormat);
     const RefPtr<gfx::DataSourceSurface> surface =
         gfx::Factory::CreateDataSourceSurfaceWithStride(
