@@ -26,7 +26,6 @@ using mozilla::Telemetry::ChildEventData from "mozilla/TelemetryComms.h";
 using mozilla::Telemetry::DiscardedData from "mozilla/TelemetryComms.h";
 using base::ProcessId from "base/process.h";
 using mozilla::OriginAttributes from "mozilla/ipc/BackgroundUtils.h";
-using mozilla::net::SSLTokensCacheRecordInfo from "mozilla/net/DashboardTypes.h";
 using nsIDNSService::DNSFlags from "nsIDNSService.h";
 
 #if defined(XP_WIN)
@@ -81,10 +80,6 @@ parent:
 
   async GeckoTraceExport(ByteBuf aBuf);
 
-  // Socket process pushes its TLS session token cache to the parent for
-  // persistence to disk.
-  async SSLTokensCacheData(SSLTokensCacheRecordInfo[] aRecords);
-
 #if defined(XP_MACOSX) || defined(XP_IOS)
   async AppleFastDatapathProbeResult(bool aAvailable);
 #endif
@@ -116,10 +111,6 @@ child:
   // Used in tests and ping assembly. Buffer contains bincoded Rust structs.
   // https://firefox-source-docs.mozilla.org/toolkit/components/glean/dev/ipc.html
   async FlushFOGData() returns (ByteBuf buf);
-
-  // Parent requests a final TLS session token flush from the socket process
-  // before shutdown.
-  async FlushSSLTokensCache() returns (SSLTokensCacheRecordInfo[] records);
 
   // Test-only method.
   // Asks the Socket process to trigger test-only instrumentation.

@@ -1768,7 +1768,7 @@ nsNSSComponent::Observe(nsISupports* aSubject, const char* aTopic,
     // in this context.
     SSL_ClearSessionCache();
     // SSLTokensCache observes this notification itself and clears PBM
-    // token-cache entries and forwards a scoped clear to the socket process.
+    // token-cache entries.
     return NS_OK;
   }
 

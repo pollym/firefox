@@ -4,7 +4,6 @@
 
 #include "SocketProcessChild.h"
 
-#include "SSLTokensCache.h"
 #include "SocketProcessBridgeParent.h"
 #include "SocketProcessLogging.h"
 #include "mozilla/Assertions.h"
@@ -141,11 +140,6 @@ bool SocketProcessChild::Init(mozilla::ipc::UntypedEndpoint&& aEndpoint,
 
 void SocketProcessChild::ActorDestroy(ActorDestroyReason aWhy) {
   LOG(("SocketProcessChild::ActorDestroy\n"));
-
-  {
-    MutexAutoLock lock(mMutex);
-    mShuttingDown = true;
-  }
 
 #if defined(XP_LINUX) && defined(MOZ_SANDBOX)
   DestroySandboxProfiler();
@@ -328,12 +322,6 @@ mozilla::ipc::IPCResult SocketProcessChild::RecvFlushFOGData(
   return IPC_OK();
 }
 
-mozilla::ipc::IPCResult SocketProcessChild::RecvFlushSSLTokensCache(
-    FlushSSLTokensCacheResolver&& aResolver) {
-  aResolver(SSLTokensCache::SerializeForIPC());
-  return IPC_OK();
-}
-
 mozilla::ipc::IPCResult SocketProcessChild::RecvTestTriggerMetrics(
     TestTriggerMetricsResolver&& aResolve) {
   mozilla::glean::test_only_ipc::a_counter.Add(
@@ -364,11 +352,6 @@ SocketProcessChild::RecvUnblockUntrustedModulesThread() {
   return IPC_OK();
 }
 #endif  // defined(XP_WIN)
-
-bool SocketProcessChild::IsShuttingDown() {
-  MutexAutoLock lock(mMutex);
-  return mShuttingDown;
-}
 
 }  // namespace net
 }  // namespace mozilla

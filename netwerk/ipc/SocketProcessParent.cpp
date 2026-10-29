@@ -4,7 +4,6 @@
 
 #include "SocketProcessParent.h"
 
-#include "SSLTokensCache.h"
 #include "SocketProcessHost.h"
 #include "SocketProcessLogging.h"
 #include "mozilla/Atomics.h"
@@ -254,12 +253,6 @@ mozilla::ipc::IPCResult SocketProcessParent::RecvAppleFastDatapathProbeResult(
 mozilla::ipc::IPCResult SocketProcessParent::RecvGeckoTraceExport(
     ByteBuf&& aBuf) {
   recv_gecko_trace_export(aBuf.mData, aBuf.mLen);
-  return IPC_OK();
-}
-
-mozilla::ipc::IPCResult SocketProcessParent::RecvSSLTokensCacheData(
-    nsTArray<SSLTokensCacheRecordInfo>&& aRecords) {
-  SSLTokensCache::ReplaceAllRecords(std::move(aRecords));
   return IPC_OK();
 }
 

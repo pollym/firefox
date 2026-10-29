@@ -7,6 +7,7 @@
 #include "ErrorList.h"
 #include "MainThreadUtils.h"
 #include "chrome/common/ipc_message_utils.h"
+#include "ipc/IPCMessageUtilsSpecializations.h"
 #include "mozilla/Assertions.h"
 #include "nsDOMNavigationTiming.h"
 #include "nsSocketTransportService2.h"

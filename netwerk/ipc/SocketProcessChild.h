@@ -5,7 +5,6 @@
 #ifndef mozilla_net_SocketProcessChild_h
 #define mozilla_net_SocketProcessChild_h
 
-#include "mozilla/Mutex.h"
 #include "mozilla/net/PSocketProcessChild.h"
 #include "nsRefPtrHashtable.h"
 
@@ -63,12 +62,7 @@ class SocketProcessChild final : public PSocketProcessChild {
   void CleanUp();
   void DestroySocketProcessBridgeParent(ProcessId aId);
 
-  bool IsShuttingDown();
-
   mozilla::ipc::IPCResult RecvFlushFOGData(FlushFOGDataResolver&& aResolver);
-
-  mozilla::ipc::IPCResult RecvFlushSSLTokensCache(
-      FlushSSLTokensCacheResolver&& aResolver);
 
   mozilla::ipc::IPCResult RecvTestTriggerMetrics(
       TestTriggerMetricsResolver&& aResolve);
@@ -90,10 +84,6 @@ class SocketProcessChild final : public PSocketProcessChild {
       mSocketProcessBridgeParentMap;
 
   RefPtr<ChildProfilerController> mProfilerController;
-
-  Mutex mMutex{"SocketProcessChild::mMutex"};
-
-  bool mShuttingDown MOZ_GUARDED_BY(mMutex) = false;
 };
 
 }  // namespace net

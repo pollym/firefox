@@ -95,21 +95,8 @@ class SSLTokensCache : public nsIMemoryReporter,
       const nsACString& aSite, const mozilla::OriginAttributesPattern& aPattern)
       MOZ_EXCLUDES(sLock);
 
-  // Snapshot the cache as records for IPC transport.
-  static nsTArray<SSLTokensCacheRecordInfo> SerializeForIPC();
-
-  // Replace the cache with records from IPC; aRestored is their provenance.
-  static void DeserializeFromIPC(nsTArray<SSLTokensCacheRecordInfo>&& aRecords,
-                                 bool aRestored);
-
   // Non-consuming snapshot of all current records, for about:networking.
   static void GetAllRecords(nsTArray<SSLTokensCacheRecordInfo>& aOut);
-
-  // Replaces the cache with aRecords, received directly via IPC from the
-  // socket process. Each record's own restored field is preserved, unlike
-  // DeserializeFromIPC which always records the same provenance for the
-  // whole batch.
-  static void ReplaceAllRecords(nsTArray<SSLTokensCacheRecordInfo>&& aRecords);
 
   // aDecompressedLength, if non-null, receives the size of the decompressed
   // payload (token + serialized SessionCacheInfo combined), for reporting
