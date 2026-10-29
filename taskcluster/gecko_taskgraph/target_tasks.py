@@ -1892,7 +1892,9 @@ def target_tasks_snap_upstream_tasks(full_task_graph, parameters, graph_config):
 def target_tasks_nightly_android(full_task_graph, parameters, graph_config):
     def filter(task, parameters):
         # geckoview
-        if task.attributes.get("shipping_product") == "fennec" and task.kind in (
+        if task.attributes.get(
+            "shipping_product"
+        ) == "firefox-android" and task.kind in (
             "beetmover-geckoview",
             "upload-symbols",
         ):

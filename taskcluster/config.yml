@@ -481,7 +481,6 @@ try:
 release-promotion:
     products:
         - 'devedition'
-        - 'fennec'
         - 'firefox'
         - 'firefox-android'
     rebuild-kinds:
