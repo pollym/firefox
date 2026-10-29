@@ -9,6 +9,7 @@ import org.mozilla.fenix.components.menu.FenixMenuItem.AddToHomeScreen
 import org.mozilla.fenix.components.menu.FenixMenuItem.Back
 import org.mozilla.fenix.components.menu.FenixMenuItem.Bookmark
 import org.mozilla.fenix.components.menu.FenixMenuItem.Bookmarks
+import org.mozilla.fenix.components.menu.FenixMenuItem.CustomTabAppItems
 import org.mozilla.fenix.components.menu.FenixMenuItem.CustomizeHomepage
 import org.mozilla.fenix.components.menu.FenixMenuItem.CustomizeReaderView
 import org.mozilla.fenix.components.menu.FenixMenuItem.DefaultBrowserBanner
@@ -51,6 +52,7 @@ object MenuConfigurations {
     @VisibleForTesting internal val HOME_MENU_GROUP_1_ID = "home_group_1"
     @VisibleForTesting internal val CUSTOM_TAB_MENU_NAVIGATION_ID = "custom_tab_navigation"
     @VisibleForTesting internal val CUSTOM_TAB_MENU_GROUP_1_ID = "custom_tab_group_1"
+    @VisibleForTesting internal val CUSTOM_TAB_MENU_GROUP_2_ID = "custom_tab_group_2"
     @VisibleForTesting internal val HOME_MENU_GROUP_2_ID = "home_group_2"
     @VisibleForTesting internal val HOME_MENU_GROUP_3_ID = "home_group_3"
     @VisibleForTesting internal val HOME_MENU_GROUP_4_ID = "home_group_4"
@@ -238,7 +240,12 @@ object MenuConfigurations {
                             Translate,
                             SummarizePage,
                         ),
-                )
+                ),
+                MenuSectionConfiguration(
+                    id = CUSTOM_TAB_MENU_GROUP_2_ID,
+                    presentationMode = Row,
+                    items = listOf(CustomTabAppItems),
+                ),
             )
         return if (isToolbarAtBottom) rest + navSection else listOf(navSection) + rest
     }

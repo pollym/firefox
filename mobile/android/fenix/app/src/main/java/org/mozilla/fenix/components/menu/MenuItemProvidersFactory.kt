@@ -39,6 +39,7 @@ import org.mozilla.fenix.components.PermissionStorage
 import org.mozilla.fenix.components.TabCollectionStorage
 import org.mozilla.fenix.components.UseCases
 import org.mozilla.fenix.components.accounts.MozillaAccountMenuItemProvider
+import org.mozilla.fenix.customtabs.CustomTabAppMenuItemProvider
 import org.mozilla.fenix.downloads.DownloadsMenuItemProvider
 import org.mozilla.fenix.home.CustomizeHomepageMenuItemProvider
 import org.mozilla.fenix.home.topsites.ShortcutMenuItemProvider
@@ -280,6 +281,13 @@ class MenuItemProvidersFactory(
                     appName = context.getString(R.string.app_name),
                     appStore = appStore,
                     target = target,
+                )
+
+            FenixMenuItem.CustomTabAppItems ->
+                CustomTabAppMenuItemProvider(
+                    browserStore = browserStore,
+                    target = target,
+                    context = context,
                 )
 
             FenixMenuItem.SaveAsPdf ->
