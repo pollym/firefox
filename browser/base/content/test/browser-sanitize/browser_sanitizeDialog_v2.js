@@ -1079,15 +1079,19 @@ add_task(async function testNoCloseButtonInPreferences() {
 });
 
 /**
- * A caller can ask for the windows to be replaced when history is cleared.
- * The dialog then adds openWindows to the same sanitization, which closes the
- * windows before clearing anything else.
+ * Opened from the fire button, the dialog deletes only the selected data and
+ * keeps the windows open, even when everything is selected over all time.
  */
-add_task(async function testCloseWindowsWithHistory() {
+add_task(async function testFireButtonDialogKeepsWindowsOpen() {
+  // Accepting saves the selection, so restore it afterwards.
   await SpecialPowers.pushPrefEnv({
     set: [
-      ["privacy.clearHistory.browsingHistoryAndDownloads", true],
-      ["privacy.clearHistory.cookiesAndStorage", true],
+      ["privacy.sanitize.timeSpan", Sanitizer.TIMESPAN_HOUR],
+      ["privacy.clearSiteData.browsingHistoryAndDownloads", false],
+      ["privacy.clearSiteData.cookiesAndStorage", false],
+      ["privacy.clearSiteData.cache", false],
+      ["privacy.clearSiteData.formdata", false],
+      ["privacy.clearSiteData.siteSettings", false],
     ],
   });
   // Really closing every window would take the test harness with it.
@@ -1099,37 +1103,24 @@ add_task(async function testCloseWindowsWithHistory() {
   };
 
   try {
-    for (let [showUIOptions, clearHistory] of [
-      [{ closeWindowsWithHistory: true }, true],
-      [{ closeWindowsWithHistory: true }, false],
-      [undefined, true],
-    ]) {
-      let dh = new ClearHistoryDialogHelper({ showUIOptions });
-      dh.onload = function () {
-        this.checkPrefCheckbox("browsingHistoryAndDownloads", clearHistory);
-        this.checkPrefCheckbox("cookiesAndStorage", true);
-        this.acceptDialog();
-      };
-      dh.open();
-      await dh.promiseClosed;
-    }
+    let dh = new ClearHistoryDialogHelper({
+      mode: "clearSiteData",
+      showUIOptions: { entryPoint: Sanitizer.DIALOG_ENTRY_POINTS.FIRE_BUTTON },
+    });
+    dh.onload = function () {
+      this.selectDuration(Sanitizer.TIMESPAN_EVERYTHING);
+      this.checkAllCheckboxes();
+      this.acceptDialog();
+    };
+    dh.open();
+    await dh.promiseClosed;
   } finally {
     Sanitizer.sanitize = originalSanitize;
   }
 
-  Assert.equal(calls.length, 3, "Each dialog sanitized once");
-  ok(
-    calls[0].includes("openWindows"),
-    "Clearing history with the option also replaces the windows"
-  );
-  ok(
-    !calls[1].includes("openWindows"),
-    "Without history the windows stay open"
-  );
-  ok(
-    !calls[2].includes("openWindows"),
-    "Without the option the windows stay open"
-  );
+  Assert.equal(calls.length, 1, "The dialog sanitized once");
+  ok(calls[0].includes("browsingHistoryAndDownloads"), "History is deleted");
+  ok(!calls[0].includes("openWindows"), "The windows stay open");
   await SpecialPowers.popPrefEnv();
 });
 

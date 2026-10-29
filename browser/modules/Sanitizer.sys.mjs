@@ -145,9 +145,6 @@ export var Sanitizer = {
    *        using the clear on shutdown (clearOnShutdown) settings option
    *        in about:preferences or in a clear site data context (clearSiteData)
    * @param {object} [options]
-   * @param {boolean} [options.closeWindowsWithHistory] - If the user chooses
-   *        to clear history, also close every browser window and open a new
-   *        one, as part of the same sanitization.
    * @param {string} [options.entryPoint] - What the user used to open the
    *        dialog, one of DIALOG_ENTRY_POINTS, recorded in its telemetry.
    * @param {Event} [options.triggeringEvent] - The event that made the user
@@ -157,11 +154,7 @@ export var Sanitizer = {
    *
    * @throws if parentWindow is undefined or doesn't have a gDialogBox.
    */
-  async showUI(
-    parentWindow,
-    mode,
-    { closeWindowsWithHistory = false, entryPoint, triggeringEvent } = {}
-  ) {
+  async showUI(parentWindow, mode, { entryPoint, triggeringEvent } = {}) {
     // Treat the hidden window as not being a parent window:
     if (
       parentWindow?.document.documentURI ==
@@ -179,7 +172,6 @@ export var Sanitizer = {
         {
           inBrowserWindow: true,
           mode,
-          closeWindowsWithHistory,
           entryPoint,
           onAccept: () => deferred.resolve("accept"),
           onCancel: () => deferred.resolve("cancel"),
@@ -195,7 +187,6 @@ export var Sanitizer = {
         {
           needNativeUI: true,
           mode,
-          closeWindowsWithHistory,
           entryPoint,
           onAccept: () => deferred.resolve("accept"),
           onCancel: () => deferred.resolve("cancel"),
@@ -391,11 +382,7 @@ export var Sanitizer = {
     try {
       await promise;
     } finally {
-      Services.obs.notifyObservers(
-        null,
-        "sanitizer-sanitization-complete",
-        progress.openWindows == "aborted" ? "aborted" : null
-      );
+      Services.obs.notifyObservers(null, "sanitizer-sanitization-complete");
     }
     return progress;
   },

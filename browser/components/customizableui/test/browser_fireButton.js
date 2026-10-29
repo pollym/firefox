@@ -16,8 +16,7 @@ let gSanitizeCalls = [];
 let gSanitizeAborted = false;
 // Likewise, opening the real clear-data dialog would block the test on a modal.
 let gShowUICalls = [];
-// "accept", "cancel", or "abort" for a confirmed dialog whose clearing is then
-// aborted because a page refused to close.
+// "accept" or "cancel".
 let gShowUIResult = "accept";
 
 // The toast auto-hides after ~3s, so polling for visibility races with the
@@ -52,11 +51,7 @@ add_setup(function () {
     }
     // The real dialog clears via Sanitizer.sanitize, whose completion is
     // what the widget waits on before showing the toast.
-    Services.obs.notifyObservers(
-      null,
-      "sanitizer-sanitization-complete",
-      gShowUIResult == "abort" ? "aborted" : null
-    );
+    Services.obs.notifyObservers(null, "sanitizer-sanitization-complete");
     return "accept";
   };
   registerCleanupFunction(() => {
@@ -315,8 +310,8 @@ add_task(async function test_chooseOpensClearDataDialog() {
     let { triggeringEvent, ...options } = gShowUICalls[0].options;
     Assert.deepEqual(
       options,
-      { closeWindowsWithHistory: true, entryPoint: "fire_button" },
-      "Clearing history from the dialog also replaces the windows."
+      { entryPoint: "fire_button" },
+      "The dialog keeps the windows open, whatever it deletes."
     );
     Assert.equal(
       triggeringEvent?.target.id,
@@ -379,8 +374,8 @@ add_task(async function test_directFlowSkipsPanel() {
   let { triggeringEvent, ...options } = gShowUICalls[0].options;
   Assert.deepEqual(
     options,
-    { closeWindowsWithHistory: true, entryPoint: "fire_button" },
-    "Clearing history from the dialog also replaces the windows."
+    { entryPoint: "fire_button" },
+    "The dialog keeps the windows open, whatever it deletes."
   );
   Assert.equal(
     triggeringEvent?.target,
@@ -481,22 +476,6 @@ add_task(async function test_confirmAbortedRecordsAborted() {
   Assert.equal(gSanitizeCalls.length, 1, "Tried to clear once.");
   Assert.equal(gHintCalls.length, 0, "Nothing was deleted, so no toast.");
   gSanitizeAborted = false;
-});
-
-add_task(async function test_dialogAbortedRecordsAborted() {
-  gShowUICalls = [];
-  gHintCalls = [];
-  gShowUIResult = "abort";
-
-  await withChooseFlow(async () => {});
-  await assertFlowTelemetry({
-    flow: "panel",
-    outcome: "aborted",
-    surface: "dialog",
-    chooseClicked: true,
-  });
-  Assert.equal(gHintCalls.length, 0, "Nothing was deleted, so no toast.");
-  gShowUIResult = "accept";
 });
 
 /**

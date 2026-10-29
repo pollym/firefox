@@ -984,13 +984,12 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
       // from claiming the data is gone before it is.
       let observer;
       let cleared = new Promise(resolve => {
-        observer = (subject, topic, data) => resolve(data != "aborted");
+        observer = resolve;
         Services.obs.addObserver(observer, "sanitizer-sanitization-complete");
       });
 
       try {
         let result = await lazy.Sanitizer.showUI(win, "clearSiteData", {
-          closeWindowsWithHistory: true,
           entryPoint: lazy.Sanitizer.DIALOG_ENTRY_POINTS.FIRE_BUTTON,
           triggeringEvent: aTriggeringEvent,
         });
@@ -998,10 +997,7 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
           this.recordFlowCompleted(aFlow, "cancelled", "dialog");
           return;
         }
-        if (!(await cleared)) {
-          this.recordFlowCompleted(aFlow, "aborted", "dialog");
-          return;
-        }
+        await cleared;
         this.recordFlowCompleted(aFlow, "deleted", "dialog");
         this.notifyComplete();
       } finally {
@@ -1028,9 +1024,9 @@ if (Services.prefs.getBoolPref("browser.fireButton.enabled", false)) {
     },
 
     /**
-     * Show the completion toast. Clearing replaced every browser window, so
-     * this anchors in whichever window is current now rather than the one the
-     * action was triggered from. Sanitizer.sanitize only resolves once that
+     * Show the completion toast. Clearing from the panel replaces every browser
+     * window, so this anchors in whichever window is current now rather than
+     * the one the action was triggered from. Sanitizer.sanitize only resolves once that
      * window has finished its delayed startup.
      */
     notifyComplete() {
