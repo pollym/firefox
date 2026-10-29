@@ -1,6 +1,7 @@
 [DEFAULT]
 support-files = ["head.js"]
 prefs = [
+  "browser.highlightToSearch.callout.seen=true",
   "browser.ml.chat.enabled=true",
   "browser.ml.chat.openSidebarOnProviderChange=false",
   "browser.ml.linkPreview.collapsed=false",

@@ -1028,6 +1028,9 @@ pref(
 // floating menu next to the selected text.
 pref("browser.highlightToSearch.detectPageMenus", true);
 
+// Whether the user has seen the feature callout on the actions menu.
+pref("browser.highlightToSearch.callout.seen", false);
+
 // Spin the cursor while the page is loading
 pref("browser.spin_cursor_while_busy", false);
 
