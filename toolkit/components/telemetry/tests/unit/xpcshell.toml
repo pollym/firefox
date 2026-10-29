@@ -144,9 +144,6 @@ skip-if = [
 
 ["test_TelemetrySend.js"]
 requesttimeoutfactor = 3  # Slow on Windows
-skip-if = [
-  "os == 'linux' && os_version == '24.04' && arch == 'x86_64' && display == 'x11' && ccov", # Bug 1701874
-]
 
 ["test_TelemetrySendOldPings.js"]
 skip-if = [
