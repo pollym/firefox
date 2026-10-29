@@ -99,6 +99,10 @@ static mozilla::Atomic<int, mozilla::Relaxed> growthDirection(1);
 static mozilla::Atomic<int, mozilla::Relaxed> growthDirection(0);
 #endif
 
+#ifdef XP_LINUX
+static bool preciseCommitEnabled = true;
+#endif
+
 /*
  * Data from OOM crashes shows there may be up to 24 chunk-sized but unusable
  * chunks available in low memory situations. These chunks may all need to be
@@ -142,6 +146,14 @@ static size_t maxValidAddress = 0;
 
 /* The upper limit for smaller allocations and the lower limit for huge ones. */
 static size_t hugeSplit = 0;
+#endif
+
+/*
+ * madvise(2) flag added in Linux 5.14; used in MarkPagesInUseHard. Only used on
+ * Linux, and then only if preciseCommitEnabled is true.
+ */
+#if defined(XP_LINUX) && !defined(MADV_POPULATE_WRITE)
+#  define MADV_POPULATE_WRITE 23
 #endif
 
 /* Running totals to report to the profiler. */
@@ -440,6 +452,17 @@ void InitMemorySubsystem() {
     // Decommit is supported if the system page size is the size as the
     // compile time constant and has not been disabled.
     decommitEnabled = pageSize == PageSize && !disableDecommitRequested;
+
+#ifdef XP_LINUX
+    // Check if the kernel supports MADV_POPULATE_WRITE.  Use syscall directly
+    // to avoid the Android-specific _Nonnull annotation on madvise.
+    if (syscall(SYS_madvise, 0, 0, MADV_POPULATE_WRITE) == 0) {
+      // Note that this test spuriously succeeds for early-2024-vintage Oracle
+      // Linux kernels with a non-standard kernel extension:
+      // https://github.com/oracle/linux-uek/issues/23.
+      preciseCommitEnabled = true;
+    }
+#endif
 
 #ifdef JS_64BIT
 #  ifdef XP_WIN
@@ -1064,6 +1087,11 @@ bool MarkPagesInUseHard(void* region, size_t length) {
 #if defined(XP_WIN)
   return VirtualAlloc(region, length, MEM_COMMIT,
                       DWORD(PageAccess::ReadWrite)) == region;
+#elif defined(XP_LINUX)
+  if (!preciseCommitEnabled) {
+    return true;
+  }
+  return madvise(region, length, MADV_POPULATE_WRITE) == 0;
 #else
   return true;
 #endif
