@@ -96,7 +96,7 @@ StyleSheet* CSSImportRule::GetStyleSheetForBindings() {
     //
     // Perhaps instead we could create a clone of the stylesheet and keep it in
     // mChildSheet, without calling EnsureUniqueInner(), or something like that?
-    if (StyleSheet* parent = GetStyleSheet()) {
+    if (StyleSheet* parent = GetParentStyleSheet()) {
       parent->EnsureUniqueInner();
     }
   }
