@@ -23,7 +23,7 @@ import subprocess
 import sys
 
 from run_operations import run_git
-from show_branch_head_commits import default_repo_dir, get_branch_head_commits
+from show_branch_head_commits import get_branch_head_commits
 
 UPSTREAM_COMMIT_PREFIX = "Upstream commit: https://webrtc.googlesource.com/src/+/"
 CHERRY_PICK_RE = re.compile(r"\(cherry picked from commit ([0-9a-f]+)\)")
@@ -111,11 +111,6 @@ if __name__ == "__main__":
         help="integer chromium milestone (example: 106)",
     )
     parser.add_argument(
-        "--repo-path",
-        default=default_repo_dir,
-        help=f"path to moz-libwebrtc repo (defaults to {default_repo_dir})",
-    )
-    parser.add_argument(
         "--firefox-path",
         default=".",
         help="path to Firefox repo (defaults to .)",
@@ -134,7 +129,7 @@ if __name__ == "__main__":
 
     # grab the branch-head commit for the milestone
     branch_head, full_shas, oneline_commits, upstream_subjects = (
-        get_branch_head_commits(args.repo_path, args.milestone)
+        get_branch_head_commits(args.milestone)
     )
 
     firefox_version = get_firefox_version(args.firefox_path, args.firefox_branch)
