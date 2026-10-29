@@ -1780,9 +1780,11 @@ class MochitestDesktop:
             )
 
             if options.testingModulesDir is not None:
-                manifestFile.write(
-                    f"resource testing-common file:///{options.testingModulesDir}\n"
-                )
+                modulesDir = options.testingModulesDir
+                if not modulesDir.startswith("/"):
+                    modulesDir = "/" + modulesDir
+                manifestFile.write(f"resource testing-common file://{modulesDir}\n")
+
         if options.store_chrome_manifest:
             shutil.copyfile(manifest, options.store_chrome_manifest)
         return manifest
