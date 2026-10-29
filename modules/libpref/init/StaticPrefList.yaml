@@ -15837,10 +15837,8 @@
   mirror: always
 
 # Whether to use the network process or not
-# Start a separate socket process. Performing networking on the socket process
-# is control by a sepparate pref
-# ("network.http.network_access_on_socket_process.enabled").
-# Changing these prefs requires a restart.
+# Start a separate socket process.
+# Changing this pref requires a restart.
 - name: network.process.enabled
   type: RelaxedAtomicBool
   mirror: always
@@ -15895,14 +15893,6 @@
   type: RelaxedAtomicBool
   value: false
   mirror: always
-
-# Perform all network access on the socket process.
-# The pref requires "network.process.enabled" to be true.
-# Changing these prefs requires a restart.
-- name: network.http.network_access_on_socket_process.enabled
-  type: RelaxedAtomicBool
-  mirror: always
-  value: false
 
 # Telemetry of traffic categories. Whether or not to enable HttpTrafficAnalyzer.
 - name: network.traffic_analyzer.enabled

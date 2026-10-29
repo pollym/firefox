@@ -3817,9 +3817,6 @@ toolbar#nav-bar {
             "inc_origin_init": os.environ.get("MOZ_ENABLE_INC_ORIGIN_INIT") == "1",
             "sessionHistoryInParent": True,
             "socketprocess_e10s": self.extraPrefs.get("network.process.enabled", False),
-            "socketprocess_networking": self.extraPrefs.get(
-                "network.http.network_access_on_socket_process.enabled", False
-            ),
             "standalone": options.restartBetweenTests,
             "swgl": self.extraPrefs.get("gfx.webrender.software", False),
             "verify": options.verify,

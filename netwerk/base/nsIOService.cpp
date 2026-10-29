@@ -657,38 +657,8 @@ bool nsIOService::SocketProcessReady() {
   return mSocketProcess && mSocketProcess->IsConnected();
 }
 
-static bool sUseSocketProcess = false;
-static bool sUseSocketProcessChecked = false;
-
 // static
-bool nsIOService::UseSocketProcess(bool aCheckAgain) {
-  if (sUseSocketProcessChecked && !aCheckAgain) {
-    return sUseSocketProcess;
-  }
-
-  sUseSocketProcessChecked = true;
-  sUseSocketProcess = false;
-
-  if (PR_GetEnv("MOZ_DISABLE_SOCKET_PROCESS")) {
-    return sUseSocketProcess;
-  }
-
-  if (TooManySocketProcessCrash()) {
-    LOG(("TooManySocketProcessCrash"));
-    return sUseSocketProcess;
-  }
-
-  if (PR_GetEnv("MOZ_FORCE_USE_SOCKET_PROCESS")) {
-    sUseSocketProcess = true;
-    return sUseSocketProcess;
-  }
-
-  if (StaticPrefs::network_process_enabled()) {
-    sUseSocketProcess =
-        StaticPrefs::network_http_network_access_on_socket_process_enabled();
-  }
-  return sUseSocketProcess;
-}
+bool nsIOService::UseSocketProcess(bool /* aCheckAgain */) { return false; }
 
 // static
 void nsIOService::NotifySocketProcessPrefsChanged(const char* aName,
@@ -780,7 +750,6 @@ void nsIOService::OnProcessUnexpectedShutdown(SocketProcessHost* aHost) {
 
   sSocketProcessCrashedCount++;
   if (TooManySocketProcessCrash()) {
-    sUseSocketProcessChecked = false;
     DNSServiceWrapper::SwitchToBackupDNSService();
   }
 

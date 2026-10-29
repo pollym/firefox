@@ -372,10 +372,6 @@ class SingleTestMixin:
             in self.config.get("extra_prefs", [])
         })
         mozinfo.update({
-            "socketprocess_networking": "network.http.network_access_on_socket_process.enabled=true"
-            in self.config.get("extra_prefs", [])
-        })
-        mozinfo.update({
             "swgl": "gfx.webrender.software=true" in self.config.get("extra_prefs", [])
         })
         mozinfo.update({
