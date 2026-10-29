@@ -488,7 +488,7 @@ var SessionHistoryInternal = {
       shEntry.docshellID = Components.ID(entry.docshellUUID);
     }
 
-    if (entry.structuredCloneState && entry.structuredCloneVersion) {
+    if (entry.structuredCloneState) {
       var stateData = Cc[
         "@mozilla.org/docshell/structured-clone-container;1"
       ].createInstance(Ci.nsIStructuredCloneContainer);
