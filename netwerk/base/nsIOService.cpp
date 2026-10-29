@@ -247,7 +247,6 @@ static const char* gCallbackPrefsForSocketProcess[] = {
     "network.dns.disableIPv6",
     "network.offline-mirrors-connectivity",
     "network.disable-localhost-when-offline",
-    "network.proxy.parse_pac_on_socket_process",
     "network.proxy.allow_hijacking_localhost",
     "network.proxy.testing_localhost_is_secure_when_hijacked",
     "network.connectivity-service.",

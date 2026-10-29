@@ -20,7 +20,6 @@
 #include "mozilla/net/neqo_glue_ffi_generated.h"
 #include "nsHttpConnectionInfo.h"
 #include "nsHttpHandler.h"
-#include "nsIConsoleService.h"
 #include "nsIOService.h"
 #include "nsIObserverService.h"
 #include "nsNSSCertificate.h"
@@ -234,16 +233,6 @@ class DeferredDeleteSocketProcessParent : public Runnable {
 void SocketProcessParent::Destroy(RefPtr<SocketProcessParent>&& aParent) {
   NS_DispatchToMainThread(
       new DeferredDeleteSocketProcessParent(std::move(aParent)));
-}
-
-mozilla::ipc::IPCResult SocketProcessParent::RecvOnConsoleMessage(
-    const nsString& aMessage) {
-  nsCOMPtr<nsIConsoleService> consoleService =
-      do_GetService(NS_CONSOLESERVICE_CONTRACTID);
-  if (consoleService) {
-    consoleService->LogStringMessage(aMessage.get());
-  }
-  return IPC_OK();
 }
 
 mozilla::ipc::IPCResult SocketProcessParent::RecvFOGData(ByteBuf&& aBuf) {

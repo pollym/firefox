@@ -20,7 +20,6 @@ const { MockRegistrar } = ChromeUtils.importESModule(
 
 registerCleanupFunction(async () => {
   Services.prefs.clearUserPref("network.proxy.type");
-  Services.prefs.clearUserPref("network.proxy.parse_pac_on_socket_process");
   trr_clear_prefs();
 });
 
@@ -137,10 +136,5 @@ async function do_test_pac_dnsResolve() {
 }
 
 add_task(async function test_pac_dnsResolve() {
-  Services.prefs.setBoolPref(
-    "network.proxy.parse_pac_on_socket_process",
-    false
-  );
-
   await do_test_pac_dnsResolve();
 });

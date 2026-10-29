@@ -22,7 +22,6 @@ class ChildProfilerController;
 namespace mozilla {
 namespace net {
 
-class ProxyAutoConfigChild;
 class SocketProcessBridgeParent;
 
 // The IPC actor implements PSocketProcessChild in child process.
@@ -67,9 +66,6 @@ class SocketProcessChild final : public PSocketProcessChild {
   void DestroySocketProcessBridgeParent(ProcessId aId);
 
   bool IsShuttingDown();
-
-  mozilla::ipc::IPCResult RecvInitProxyAutoConfigChild(
-      Endpoint<PProxyAutoConfigChild>&& aEndpoint);
 
   mozilla::ipc::IPCResult RecvFlushFOGData(FlushFOGDataResolver&& aResolver);
 

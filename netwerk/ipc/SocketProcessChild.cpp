@@ -8,18 +8,13 @@
 #include "SSLTokensCache.h"
 #include "SocketProcessBridgeParent.h"
 #include "SocketProcessLogging.h"
-#include "XPCSelfHostedShmem.h"
 #include "base/task.h"
-#include "js/Initialization.h"
-#include "js/Prefs.h"
-#include "jsapi.h"
 #include "mozilla/Assertions.h"
 #include "mozilla/Atomics.h"
 #include "mozilla/Components.h"
 #include "mozilla/FOGIPC.h"
 #include "mozilla/Preferences.h"
 #include "mozilla/RemoteLazyInputStreamChild.h"
-#include "mozilla/StaticPrefs_javascript.h"
 #include "mozilla/StaticPrefs_network.h"
 #include "mozilla/Telemetry.h"
 #include "mozilla/dom/MemoryReportRequest.h"
@@ -28,7 +23,6 @@
 #include "mozilla/ipc/ProcessChild.h"
 #include "mozilla/ipc/ProcessUtils.h"
 #include "mozilla/net/AppleFastDatapathProbe.h"
-#include "mozilla/net/ProxyAutoConfigChild.h"
 #include "nsDebugImpl.h"
 #include "nsIDNSService.h"
 #include "nsIXULRuntime.h"
@@ -65,8 +59,6 @@ namespace mozilla {
 namespace net {
 
 using namespace ipc;
-
-static bool sInitializedJS = false;
 
 static Atomic<SocketProcessChild*> sSocketProcessChild;
 
@@ -198,10 +190,6 @@ void SocketProcessChild::CleanUp() {
   Close();
 
   NS_ShutdownXPCOM(nullptr);
-
-  if (sInitializedJS) {
-    JS_ShutDown();
-  }
 }
 
 mozilla::ipc::IPCResult SocketProcessChild::RecvInit(
@@ -338,28 +326,6 @@ void SocketProcessChild::DestroySocketProcessBridgeParent(ProcessId aId) {
   MOZ_ASSERT(NS_IsMainThread());
 
   mSocketProcessBridgeParentMap.Remove(aId);
-}
-
-mozilla::ipc::IPCResult SocketProcessChild::RecvInitProxyAutoConfigChild(
-    Endpoint<PProxyAutoConfigChild>&& aEndpoint) {
-  // For parsing PAC.
-  if (!sInitializedJS) {
-    JS::DisableJitBackend();
-
-    // Set all JS::Prefs.
-    SET_JS_PREFS_FROM_BROWSER_PREFS;
-
-    const char* jsInitFailureReason = JS_InitWithFailureDiagnostic();
-    if (jsInitFailureReason) {
-      MOZ_CRASH_UNSAFE(jsInitFailureReason);
-    }
-    sInitializedJS = true;
-
-    xpc::SelfHostedShmem::GetSingleton();
-  }
-
-  (void)ProxyAutoConfigChild::Create(std::move(aEndpoint));
-  return IPC_OK();
 }
 
 mozilla::ipc::IPCResult SocketProcessChild::RecvFlushFOGData(
