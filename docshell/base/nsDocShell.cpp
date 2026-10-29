@@ -6987,7 +6987,7 @@ nsDocShell::CreateAboutBlankDocumentViewer(
 
 /* static */
 void nsDocShell::ReportBFCacheComboTelemetry(uint32_t aCombo) {
-  // There are 11 possible reasons to make a request fails to use BFCache
+  // There are many possible reasons to make a request fails to use BFCache
   // (see BFCacheStatus in dom/base/Document.h), and we'd like to record
   // the common combinations for reasons which make requests fail to use
   // BFCache. These combinations are generated based on some local browsings,
@@ -7020,6 +7020,15 @@ void nsDocShell::ReportBFCacheComboTelemetry(uint32_t aCombo) {
     REMOTE_SUBFRAMES = mozilla::dom::BFCacheStatus::CONTAINS_REMOTE_SUBFRAMES,
     BEFOREUNLOAD = mozilla::dom::BFCacheStatus::BEFOREUNLOAD_LISTENER,
   };
+
+  // A document whose load event hasn't fired usually also has in-flight
+  // requests and other transient blockers, so record it as loading regardless
+  // of the other flags.
+  if (aCombo & mozilla::dom::BFCacheStatus::PAGE_LOADING) {
+    glean::bfcache::combo.EnumGet(glean::bfcache::ComboLabel::ePageLoading)
+        .Add();
+    return;
+  }
 
   // Beforeunload is recorded as a blocker only if it is the only one to block
   // bfcache.
