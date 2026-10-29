@@ -3474,9 +3474,9 @@ void PeerConnectionImpl::IceConnectionStateChange(
   } else if (oldPair && aSelectedPair.isSome()) {
     // Compare against the internal (un-redacted) candidate strings.
     noChange = oldPair->Local()->CandidateInternal().EqualsASCII(
-                   aSelectedPair->local().get()) &&
+                   aSelectedPair->local.get()) &&
                oldPair->Remote()->CandidateInternal().EqualsASCII(
-                   aSelectedPair->remote().get());
+                   aSelectedPair->remote.get());
   }
 
   if (!noChange) {
@@ -3488,10 +3488,10 @@ void PeerConnectionImpl::IceConnectionStateChange(
     if (aSelectedPair.isSome()) {
       nsCOMPtr<nsIGlobalObject> global = do_QueryInterface(mWindow);
       RefPtr<RTCIceCandidate> local = RTCIceCandidate::FromAttribute(
-          global, aSelectedPair->local(),
+          global, aSelectedPair->local,
           /*aHidePrflx=*/GetPrefObfuscateHostAddresses());
       RefPtr<RTCIceCandidate> remote = RTCIceCandidate::FromAttribute(
-          global, aSelectedPair->remote(), /*aHidePrflx=*/true);
+          global, aSelectedPair->remote, /*aHidePrflx=*/true);
       newCandidatePair = new RTCIceCandidatePair(global, local, remote);
     }
 

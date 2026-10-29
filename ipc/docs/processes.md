@@ -83,8 +83,6 @@ graph TD
     VR ==>|PVR| Main
     GPU ==>|PGPU| Main
 
-    Socket -->|PSocketProcessBridge| Content
-
     GPU -->|PCompositorManager| Main
     GPU -->|PCompositorManager| Content
 

@@ -20,7 +20,7 @@ class DNSRequestParent;
 
 // DNSRequestSender is used to send an IPC request to DNSRequestHandler and
 // deliver the result to nsIDNSListener.
-// Note this class is used in the content process and the socket process.
+// Note this class is used in the content process.
 class DNSRequestSender final : public nsICancelable {
  public:
   NS_DECL_THREADSAFE_ISUPPORTS

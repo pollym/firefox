@@ -2050,8 +2050,8 @@ void MediaTransportImplNicer::OnConnectionStateChange(
   // surfacing a separate pair for RTCP when rtcp-mux is not in use.
   if (NS_SUCCEEDED(
           aIceStream->GetActivePairAsAttributes(1, &localAttr, &remoteAttr))) {
-    selectedPair = Some(dom::IceCandidateAttributePair(nsCString(localAttr),
-                                                       nsCString(remoteAttr)));
+    selectedPair = Some(dom::IceCandidateAttributePair{nsCString(localAttr),
+                                                       nsCString(remoteAttr)});
   }
   if (auto it = mTransports.find(aIceStream->GetId());
       it != mTransports.end()) {
@@ -2146,7 +2146,8 @@ Maybe<dom::RTCErrorParams> GetErrorInfo(const TransportLayerDtls& aDtlsLayer) {
     return Nothing();
   }
 
-  return Some(dom::RTCErrorParams{error, aDtlsLayer.GetErrorDescription()});
+  return Some(
+      dom::RTCErrorParams{std::move(error), aDtlsLayer.GetErrorDescription()});
 }
 
 void MediaTransportImplNicer::OnStateChange(TransportLayer* aLayer,

@@ -58,6 +58,7 @@
 #include "mozilla/glean/DomMediaWebrtcMetrics.h"
 #include "mozilla/mozalloc_oom.h"
 #include "nsCOMPtr.h"
+#include "nsCharSeparatedTokenizer.h"
 #include "nsContentUtils.h"
 #include "nsCycleCollectionParticipant.h"
 #include "nsDebug.h"

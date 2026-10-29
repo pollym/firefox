@@ -12,13 +12,7 @@
 #include "mozilla/Telemetry.h"
 #include "mozilla/TelemetryIPC.h"
 #include "mozilla/dom/MemoryReportRequest.h"
-#include "mozilla/net/DNSRequestParent.h"
 #include "nsIOService.h"
-#ifdef MOZ_WEBRTC
-#  include "mozilla/dom/BrowserParent.h"
-#  include "mozilla/dom/ContentProcessManager.h"
-#  include "mozilla/net/WebrtcTCPSocketParent.h"
-#endif
 #if defined(MOZ_WIDGET_ANDROID)
 #  include "mozilla/java/GeckoProcessManagerWrappers.h"
 #  include "mozilla/java/GeckoProcessTypeWrappers.h"
@@ -168,37 +162,6 @@ mozilla::ipc::IPCResult SocketProcessParent::RecvRecordDiscardedData(
     const mozilla::Telemetry::DiscardedData& aDiscardedData) {
   TelemetryIPC::RecordDiscardedData(Telemetry::ProcessID::Socket,
                                     aDiscardedData);
-  return IPC_OK();
-}
-
-already_AddRefed<PWebrtcTCPSocketParent>
-SocketProcessParent::AllocPWebrtcTCPSocketParent(const Maybe<TabId>& aTabId) {
-#ifdef MOZ_WEBRTC
-  return do_AddRef(new WebrtcTCPSocketParent(aTabId));
-#else
-  return nullptr;
-#endif
-}
-
-already_AddRefed<PDNSRequestParent> SocketProcessParent::AllocPDNSRequestParent(
-    const nsACString& aHost, const nsACString& aTrrServer, const int32_t& port,
-    const uint16_t& aType, const OriginAttributes& aOriginAttributes,
-    const nsIDNSService::DNSFlags& aFlags) {
-  RefPtr<DNSRequestHandler> handler = new DNSRequestHandler();
-  RefPtr<DNSRequestParent> actor = new DNSRequestParent(handler);
-  return actor.forget();
-}
-
-mozilla::ipc::IPCResult SocketProcessParent::RecvPDNSRequestConstructor(
-    PDNSRequestParent* aActor, const nsACString& aHost,
-    const nsACString& aTrrServer, const int32_t& port, const uint16_t& aType,
-    const OriginAttributes& aOriginAttributes,
-    const nsIDNSService::DNSFlags& aFlags) {
-  RefPtr<DNSRequestParent> actor =
-      mozilla::ipc::ActorCast<DNSRequestParent>(aActor);
-  RefPtr<DNSRequestHandler> handler = actor->GetDNSRequest();
-  handler->DoAsyncResolve(aHost, aTrrServer, port, aType, aOriginAttributes,
-                          aFlags);
   return IPC_OK();
 }
 

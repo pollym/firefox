@@ -2,10 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-include protocol PDNSRequest;
-include protocol PSocketProcessBridge;
 include protocol PProfiler;
-include protocol PWebrtcTCPSocket;
 
 #if defined(MOZ_SANDBOX) && defined(MOZ_DEBUG) && defined(ENABLE_TESTS)
 include protocol PSandboxTesting;
@@ -17,16 +14,12 @@ include PrefsTypes;
 
 include "mozilla/ipc/ByteBufUtils.h";
 
-using mozilla::dom::TabId from "mozilla/dom/ipc/IdType.h";
 using mozilla::Telemetry::HistogramAccumulation from "mozilla/TelemetryComms.h";
 using mozilla::Telemetry::KeyedHistogramAccumulation from "mozilla/TelemetryComms.h";
 using mozilla::Telemetry::ScalarAction from "mozilla/TelemetryComms.h";
 using mozilla::Telemetry::KeyedScalarAction from "mozilla/TelemetryComms.h";
 using mozilla::Telemetry::ChildEventData from "mozilla/TelemetryComms.h";
 using mozilla::Telemetry::DiscardedData from "mozilla/TelemetryComms.h";
-using base::ProcessId from "base/process.h";
-using mozilla::OriginAttributes from "mozilla/ipc/BackgroundUtils.h";
-using nsIDNSService::DNSFlags from "nsIDNSService.h";
 
 #if defined(XP_WIN)
 [MoveOnly] using mozilla::UntrustedModulesData from "mozilla/UntrustedModulesData.h";
@@ -49,9 +42,6 @@ struct SocketProcessInitAttributes {
 [NeedsOtherPid, ChildProc=Socket]
 async protocol PSocketProcess
 {
-  manages PDNSRequest;
-  manages PWebrtcTCPSocket;
-
 parent:
   async InitCrashReporter(CrashReporterInitArgs aInitArgs);
   async AddMemoryReport(MemoryReport aReport);
@@ -62,12 +52,6 @@ parent:
   async UpdateChildKeyedScalars(KeyedScalarAction[] actions);
   async RecordChildEvents(ChildEventData[] events);
   async RecordDiscardedData(DiscardedData data);
-
-  /* tabId is only required for web-proxy support, which isn't always needed */
-  async PWebrtcTCPSocket(TabId? tabId);
-  async PDNSRequest(nsCString hostName, nsCString trrServer, int32_t port,
-                    uint16_t type, OriginAttributes originAttributes,
-                    DNSFlags flags);
 
   // Sent from time-to-time to limit the amount of telemetry vulnerable to loss
   // Buffer contains bincoded Rust structs.
@@ -91,7 +75,6 @@ child:
       returns (uint32_t aGeneration);
   async SetOffline(bool offline);
   async InitLinuxSandbox(FileDescriptor? sandboxBroker);
-  async InitSocketProcessBridgeParent(ProcessId processId, Endpoint<PSocketProcessBridgeParent> endpoint);
   async InitProfiler(Endpoint<PProfilerChild> aEndpoint);
 #if defined(MOZ_SANDBOX) && defined(MOZ_DEBUG) && defined(ENABLE_TESTS)
   async InitSandboxTesting(Endpoint<PSandboxTestingChild> aEndpoint);

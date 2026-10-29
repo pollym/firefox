@@ -4,9 +4,7 @@
 
 #include "SocketProcessChild.h"
 
-#include "SocketProcessBridgeParent.h"
 #include "SocketProcessLogging.h"
-#include "mozilla/Assertions.h"
 #include "mozilla/Atomics.h"
 #include "mozilla/Components.h"
 #include "mozilla/FOGIPC.h"
@@ -165,12 +163,6 @@ void SocketProcessChild::ActorDestroy(ActorDestroyReason aWhy) {
 void SocketProcessChild::CleanUp() {
   LOG(("SocketProcessChild::CleanUp\n"));
 
-  for (const auto& parent : mSocketProcessBridgeParentMap.Values()) {
-    if (parent->CanSend()) {
-      parent->Close();
-    }
-  }
-
   // Normally, the IPC channel should be already closed at this point, but
   // sometimes it's not (bug 1788860). When the channel is closed, calling
   // Close() again is harmless.
@@ -238,24 +230,6 @@ mozilla::ipc::IPCResult SocketProcessChild::RecvInitLinuxSandbox(
   return IPC_OK();
 }
 
-mozilla::ipc::IPCResult SocketProcessChild::RecvInitSocketProcessBridgeParent(
-    const ProcessId& aContentProcessId,
-    Endpoint<mozilla::net::PSocketProcessBridgeParent>&& aEndpoint) {
-  MOZ_ASSERT(NS_IsMainThread());
-  MOZ_ASSERT(!mSocketProcessBridgeParentMap.Contains(aContentProcessId));
-
-  if (NS_WARN_IF(!aEndpoint.IsValid())) {
-    return IPC_FAIL(this, "invalid endpoint");
-  }
-
-  auto bridge = MakeRefPtr<SocketProcessBridgeParent>(aContentProcessId);
-  MOZ_ALWAYS_TRUE(aEndpoint.Bind(bridge));
-
-  mSocketProcessBridgeParentMap.InsertOrUpdate(aContentProcessId,
-                                               std::move(bridge));
-  return IPC_OK();
-}
-
 mozilla::ipc::IPCResult SocketProcessChild::RecvInitProfiler(
     Endpoint<PProfilerChild>&& aEndpoint) {
   mProfilerController =
@@ -279,12 +253,6 @@ mozilla::ipc::IPCResult SocketProcessChild::RecvSocketProcessTelemetryPing() {
   TelemetryScalar::Set(Telemetry::ScalarID::TELEMETRY_TEST_SOCKET_ONLY_UINT,
                        kExpectedUintValue);
   return IPC_OK();
-}
-
-void SocketProcessChild::DestroySocketProcessBridgeParent(ProcessId aId) {
-  MOZ_ASSERT(NS_IsMainThread());
-
-  mSocketProcessBridgeParentMap.Remove(aId);
 }
 
 mozilla::ipc::IPCResult SocketProcessChild::RecvFlushFOGData(

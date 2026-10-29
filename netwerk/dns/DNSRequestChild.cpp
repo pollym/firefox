@@ -9,7 +9,6 @@
 #include "mozilla/net/ChildDNSService.h"
 #include "mozilla/net/DNSByTypeRecord.h"
 #include "mozilla/net/NeckoChild.h"
-#include "mozilla/net/SocketProcessChild.h"
 #include "nsHostResolver.h"
 #include "nsIDNSByTypeRecord.h"
 #include "nsIDNSRecord.h"
@@ -469,18 +468,6 @@ void DNSRequestSender::StartRequest() {
       gNeckoChild->SendPDNSRequestConstructor(mIPCActor, mHost, mTrrServer,
                                               mPort, mType, mOriginAttributes,
                                               mFlags);
-    } else if (XRE_IsSocketProcess()) {
-      // DNS resolution is done in the parent process. Send a DNS request to
-      // parent process.
-      SocketProcessChild* socketProcessChild =
-          SocketProcessChild::GetSingleton();
-      if (!socketProcessChild->CanSend()) {
-        return;
-      }
-
-      MOZ_ALWAYS_TRUE(socketProcessChild->SendPDNSRequestConstructor(
-          mIPCActor, mHost, mTrrServer, mPort, mType, mOriginAttributes,
-          mFlags));
     } else {
       MOZ_ASSERT(false, "Wrong process");
       return;

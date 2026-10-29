@@ -6,7 +6,6 @@
 #define mozilla_net_SocketProcessChild_h
 
 #include "mozilla/net/PSocketProcessChild.h"
-#include "nsRefPtrHashtable.h"
 
 #if defined(MOZ_SANDBOX) && defined(MOZ_DEBUG) && defined(ENABLE_TESTS)
 #  include "mozilla/PSandboxTestingChild.h"
@@ -18,8 +17,6 @@ class ChildProfilerController;
 
 namespace mozilla {
 namespace net {
-
-class SocketProcessBridgeParent;
 
 // The IPC actor implements PSocketProcessChild in child process.
 // This is allocated and kept alive by SocketProcessImpl.
@@ -47,9 +44,6 @@ class SocketProcessChild final : public PSocketProcessChild {
   mozilla::ipc::IPCResult RecvSetOffline(const bool& aOffline);
   mozilla::ipc::IPCResult RecvInitLinuxSandbox(
       const Maybe<ipc::FileDescriptor>& aBrokerFd);
-  mozilla::ipc::IPCResult RecvInitSocketProcessBridgeParent(
-      const ProcessId& aContentProcessId,
-      Endpoint<mozilla::net::PSocketProcessBridgeParent>&& aEndpoint);
   mozilla::ipc::IPCResult RecvInitProfiler(
       Endpoint<mozilla::PProfilerChild>&& aEndpoint);
 #if defined(MOZ_SANDBOX) && defined(MOZ_DEBUG) && defined(ENABLE_TESTS)
@@ -59,7 +53,6 @@ class SocketProcessChild final : public PSocketProcessChild {
   mozilla::ipc::IPCResult RecvSocketProcessTelemetryPing();
 
   void CleanUp();
-  void DestroySocketProcessBridgeParent(ProcessId aId);
 
   mozilla::ipc::IPCResult RecvFlushFOGData(FlushFOGDataResolver&& aResolver);
 
@@ -77,11 +70,6 @@ class SocketProcessChild final : public PSocketProcessChild {
   ~SocketProcessChild();
 
  private:
-  // Mapping of content process id and the SocketProcessBridgeParent.
-  // This table keeps SocketProcessBridgeParent alive in socket process.
-  nsRefPtrHashtable<nsUint32HashKey, SocketProcessBridgeParent>
-      mSocketProcessBridgeParentMap;
-
   RefPtr<ChildProfilerController> mProfilerController;
 };
 

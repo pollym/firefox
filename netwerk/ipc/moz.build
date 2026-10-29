@@ -16,8 +16,6 @@ EXPORTS.mozilla.net += [
     "ParentChannelWrapper.h",
     "ParentProcessDocumentChannel.h",
     "ProxyConfigLookup.h",
-    "SocketProcessBridgeChild.h",
-    "SocketProcessBridgeParent.h",
     "SocketProcessChild.h",
     "SocketProcessHost.h",
     "SocketProcessImpl.h",
@@ -37,8 +35,6 @@ UNIFIED_SOURCES += [
     "ParentChannelWrapper.cpp",
     "ParentProcessDocumentChannel.cpp",
     "ProxyConfigLookup.cpp",
-    "SocketProcessBridgeChild.cpp",
-    "SocketProcessBridgeParent.cpp",
     "SocketProcessChild.cpp",
     "SocketProcessHost.cpp",
     "SocketProcessImpl.cpp",
@@ -49,7 +45,6 @@ UNIFIED_SOURCES += [
 PREPROCESSED_IPDL_SOURCES += [
     "PNecko.ipdl",
     "PSocketProcess.ipdl",
-    "PSocketProcessBridge.ipdl",
 ]
 
 IPDL_SOURCES = [

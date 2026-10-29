@@ -51,19 +51,6 @@ class SocketProcessParent final
   mozilla::ipc::IPCResult RecvRecordDiscardedData(
       const DiscardedData& aDiscardedData);
 
-  already_AddRefed<PWebrtcTCPSocketParent> AllocPWebrtcTCPSocketParent(
-      const Maybe<TabId>& aTabId);
-  already_AddRefed<PDNSRequestParent> AllocPDNSRequestParent(
-      const nsACString& aHost, const nsACString& aTrrServer,
-      const int32_t& port, const uint16_t& aType,
-      const OriginAttributes& aOriginAttributes,
-      const nsIDNSService::DNSFlags& aFlags);
-  virtual mozilla::ipc::IPCResult RecvPDNSRequestConstructor(
-      PDNSRequestParent* actor, const nsACString& aHost,
-      const nsACString& trrServer, const int32_t& port, const uint16_t& type,
-      const OriginAttributes& aOriginAttributes,
-      const nsIDNSService::DNSFlags& flags) override;
-
   void ActorDestroy(ActorDestroyReason aWhy) override;
   bool SendRequestMemoryReport(const uint32_t& aGeneration,
                                const bool& aAnonymize,
