@@ -38,32 +38,6 @@ add_task(async function test_no_shortcuts() {
   });
 });
 
-async function selectAllAndMouseUp(
-  browser,
-  { win = window, releaseX = 60, releaseY = 10 } = {}
-) {
-  await SimpleTest.promiseFocus(browser);
-  await BrowserTestUtils.synthesizeMouse(
-    browser,
-    10,
-    10,
-    { type: "mousedown" },
-    browser
-  );
-  const selectPromise = SpecialPowers.spawn(browser, [], () =>
-    ContentTaskUtils.waitForCondition(() => content.getSelection().toString())
-  );
-  win.goDoCommand("cmd_selectAll");
-  await selectPromise;
-  await BrowserTestUtils.synthesizeMouse(
-    browser,
-    releaseX,
-    releaseY,
-    { type: "mouseup" },
-    browser
-  );
-}
-
 async function showSelectionMenu(browser) {
   const panel = document.getElementById("selection-shortcut-action-panel");
   Assert.ok(!panel.hasAttribute("panelopen"), "Menu starts closed");
@@ -2969,6 +2943,7 @@ add_task(async function test_ignored_sites_matching() {
 add_task(async function test_ignored_sites_menu() {
   const panel = document.getElementById("selection-shortcut-action-panel");
   const spy = sinon.spy(GenAI, "handleShortcutsMessage");
+  Services.fog.testResetFOG();
 
   await SpecialPowers.pushPrefEnv({
     set: [["browser.highlightToSearch.ignoredSites", "example.com"]],
@@ -3061,6 +3036,12 @@ add_task(async function test_ignored_sites_menu() {
 
     await SpecialPowers.popPrefEnv();
   }
+
+  Assert.deepEqual(
+    Glean.selectionMenu.suppressed.testGetValue().map(e => e.extra.reason),
+    ["site_list", "site_list", "site_list"],
+    "Each suppressed selection is recorded with its reason"
+  );
 
   spy.restore();
   await SpecialPowers.popPrefEnv();

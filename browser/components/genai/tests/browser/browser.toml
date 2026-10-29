@@ -22,6 +22,8 @@ skip-if = [
   "verify-standalone",
 ]
 
+["browser_chat_page_menus.js"]
+
 ["browser_chat_promo.js"]
 
 ["browser_chat_prompt.js"]

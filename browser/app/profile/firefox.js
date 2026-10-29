@@ -1024,6 +1024,10 @@ pref(
   "atlassian.net,docs.google.com,read.amazon.com,read.readwise.io,hypothes.is,chatgpt.com,github.com,notion.so,notion.site,office.com,sharepoint.com,canva.com,figma.com"
 );
 
+// Whether the menu is not shown, or is hidden, when the page shows its own
+// floating menu next to the selected text.
+pref("browser.highlightToSearch.detectPageMenus", true);
+
 // Spin the cursor while the page is loading
 pref("browser.spin_cursor_while_busy", false);
 

@@ -1177,13 +1177,21 @@ export const GenAI = {
       !this.isSupportedContext(browser) ||
       this.ignoredInputs.has(data.inputType) ||
       this.ignoredInputs.has(data.host) ||
-      (!isSmartWindow &&
-        lazy.highlightToSearchFeatureGate &&
-        this.isIgnoredSite(documentURI)) ||
       (isSmartWindow
         ? !lazy.chatShortcutsSmartWindow
         : !this.canShowSelectionMenu)
     ) {
+      return;
+    }
+
+    if (
+      !isSmartWindow &&
+      lazy.highlightToSearchFeatureGate &&
+      this.isIgnoredSite(documentURI)
+    ) {
+      if (name == "GenAI:ShowShortcuts") {
+        Glean.selectionMenu.suppressed.record({ reason: "site_list" });
+      }
       return;
     }
 
@@ -1215,6 +1223,13 @@ export const GenAI = {
         }
         break;
       }
+      case "GenAI:SuppressedShortcuts": {
+        if (!isSmartWindow && shortcutPanel.state != "closed") {
+          Glean.selectionMenu.suppressed.record({ reason: data.reason });
+          shortcutPanel.hide();
+        }
+        break;
+      }
       case "GenAI:ShowShortcuts": {
         // Save the latest selection so it can be used by popup
         shortcutPanel.selectionData = { ...data, browser };
@@ -1230,6 +1245,11 @@ export const GenAI = {
         if (!hasActions) {
           // Nothing to offer: don't open an empty menu or log an impression
           // of one, and close any menu left from the previous selection.
+          shortcutPanel.hide();
+          return;
+        }
+        if (!isSmartWindow && data.pageMenu) {
+          Glean.selectionMenu.suppressed.record({ reason: "page_menu" });
           shortcutPanel.hide();
           return;
         }
