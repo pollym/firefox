@@ -243,7 +243,6 @@ static const char* gCallbackPrefsForSocketProcess[] = {
     "network.sts.",
     "media.webrtc.enable_pq_hybrid_kex",
     "media.webrtc.send_mlkem_keyshare",
-    "network.offline-mirrors-connectivity",
     "security.tls.",
     "security.tls13.",
     "security.ssl.",
@@ -1352,9 +1351,6 @@ nsresult nsIOService::SetConnectivityInternal(bool aConnectivity) {
     observerService->NotifyObservers(nullptr,
                                      NS_IPC_IOSERVICE_SET_CONNECTIVITY_TOPIC,
                                      aConnectivity ? u"true" : u"false");
-    if (SocketProcessReady()) {
-      (void)mSocketProcess->GetActor()->SendSetConnectivity(aConnectivity);
-    }
   }
 
   if (mOffline) {

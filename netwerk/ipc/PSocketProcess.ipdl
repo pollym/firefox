@@ -39,7 +39,6 @@ namespace net {
 
 struct SocketProcessInitAttributes {
   bool mOffline;
-  bool mConnectivity;
   bool mInitSandbox;
 #if defined(XP_WIN)
   bool mIsReadyForBackgroundProcessing;
@@ -97,7 +96,6 @@ child:
                             FileDescriptor? DMDFile)
       returns (uint32_t aGeneration);
   async SetOffline(bool offline);
-  async SetConnectivity(bool connectivity);
   async InitLinuxSandbox(FileDescriptor? sandboxBroker);
   async InitSocketProcessBridgeParent(ProcessId processId, Endpoint<PSocketProcessBridgeParent> endpoint);
   async InitProfiler(Endpoint<PProfilerChild> aEndpoint);

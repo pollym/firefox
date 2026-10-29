@@ -45,7 +45,6 @@ class SocketProcessChild final : public PSocketProcessChild {
       const Maybe<mozilla::ipc::FileDescriptor>& DMDFile,
       const RequestMemoryReportResolver& aResolver);
   mozilla::ipc::IPCResult RecvSetOffline(const bool& aOffline);
-  mozilla::ipc::IPCResult RecvSetConnectivity(const bool& aConnectivity);
   mozilla::ipc::IPCResult RecvInitLinuxSandbox(
       const Maybe<ipc::FileDescriptor>& aBrokerFd);
   mozilla::ipc::IPCResult RecvInitSocketProcessBridgeParent(

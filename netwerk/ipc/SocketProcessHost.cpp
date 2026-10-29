@@ -127,8 +127,6 @@ void SocketProcessHost::InitAfterConnect(bool aSucceeded) {
   MOZ_ASSERT(ioService, "No IO service?");
   DebugOnly<nsresult> result = ioService->GetOffline(&attributes.mOffline());
   MOZ_ASSERT(NS_SUCCEEDED(result), "Failed getting offline?");
-  result = ioService->GetConnectivity(&attributes.mConnectivity());
-  MOZ_ASSERT(NS_SUCCEEDED(result), "Failed getting connectivity?");
 
   attributes.mInitSandbox() = false;
 
