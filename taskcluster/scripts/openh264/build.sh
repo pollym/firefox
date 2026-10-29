@@ -148,6 +148,7 @@ done
 : "${LIBRARY_FILE:?No library file found in build output}"
 
 python3 "$GECKO_PATH/python/mozbuild/mozbuild/action/packagesymbols.py" \
+    --no-binaries \
     --symbol-zip "$SYMBOL_ZIP" \
     "$DUMP_SYMS" \
     "$LIBRARY_FILE"
