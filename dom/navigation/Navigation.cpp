@@ -1872,8 +1872,9 @@ bool Navigation::InnerFireNavigateEvent(
     // Step 29.3
     RefPtr<Promise> committedPromise = Promise::CreateInfallible(globalObject);
     RefPtr<Promise> finishedPromise = Promise::CreateInfallible(globalObject);
+    const RefPtr<NavigationDestination> destination = event->Destination();
     mTransition = MakeAndAddRef<NavigationTransition>(
-        globalObject, aNavigationType, fromNHE, committedPromise,
+        globalObject, aNavigationType, fromNHE, destination, committedPromise,
         finishedPromise);
 
     // Step 29.4
