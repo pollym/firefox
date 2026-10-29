@@ -649,6 +649,7 @@ android-hw-aarch64:
 android-hw-browsertime:
     - browsertime-tp6m
     - browsertime-tp6m-essential
+    - browsertime-nav-bench-m
     - browsertime-tp6m-webextensions
     - browsertime-tp6m-live
     - browsertime-benchmark-speedometer2-mobile
@@ -680,6 +681,9 @@ android-em-arm64-benchmark-tests:
 
 android-hw-speedometer3-nightlyasrelease:
     - browsertime-benchmark-speedometer3-mobile
+
+android-hw-nav-bench-nightlyasrelease:
+    - browsertime-nav-bench-m
 
 android-hw-power-tests:
     - browsertime-youtube-playback-power-mobile

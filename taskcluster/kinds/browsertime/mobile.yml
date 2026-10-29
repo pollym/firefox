@@ -659,3 +659,22 @@ browsertime-hev3-connection-m:
             default: []
     tier: 3
     treeherder-symbol: Btime(hev3connm)
+
+browsertime-nav-bench-m:
+    raptor:
+        apps: [fenix]
+        subtests: [[nav-bench-m, navb-m]]
+        run-visual-metrics: true
+    description: Raptor (browsertime) mobile navigation benchmark
+    run-on-projects:
+        by-test-platform:
+            android-hw-a55.*shippable.*: [autoland]
+            android-hw-a55.*nightlyasrelease.*: [autoland]
+            default: []
+    tier: 3
+    treeherder-symbol: Btime(navb-m)
+    mozharness:
+        extra-options:
+            # Bug 2011884 - annotate the videos.
+            - --browsertime-arg=videoParams.convert=true
+            - --browsertime-arg=videoParams.addTimer=true

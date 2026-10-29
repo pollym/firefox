@@ -584,6 +584,7 @@ def select_tasks_to_lambda(config, tasks):
         "jetstream3",
         "browsertime-power",
         "browsertime-trr-performance",
+        "nav-bench-m",
     ]
 
     # Bug 2017151 - newly-migrated tests run at tier 2 while stabilizing on LT
