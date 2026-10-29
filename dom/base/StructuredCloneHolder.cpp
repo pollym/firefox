@@ -317,7 +317,6 @@ void StructuredCloneHolderBase::Write(
   aRv.MightThrowJSException();
 
   mData.emplace(mStructuredCloneScope);
-  mVersion = JS_STRUCTURED_CLONE_VERSION;
 
   if (!JS_WriteStructuredClone(
           aCx, aValue, mData.ptr(), mStructuredCloneScope, aCloneDataPolicy,
@@ -358,13 +357,11 @@ void StructuredCloneHolderBase::Read(
   }
 }
 
-void StructuredCloneHolderBase::Adopt(JSStructuredCloneData&& aData,
-                                      uint32_t aVersion) {
+void StructuredCloneHolderBase::Adopt(JSStructuredCloneData&& aData) {
   MOZ_ASSERT(!mData, "Double Adopt is not allowed");
   MOZ_ASSERT(!mClearCalled, "This method cannot be called after Clear.");
 
   mData.emplace(std::move(aData));
-  mVersion = aVersion;
   mData->setCallbacks(&StructuredCloneHolder::sCallbacks, this,
                       OwnTransferablePolicy::OwnsTransferablesIfAny);
 
@@ -471,9 +468,8 @@ void StructuredCloneHolder::MaybeClearTransferredState() {
 }
 
 void StructuredCloneHolder::Adopt(JSStructuredCloneData&& aData,
-                                  uint32_t aVersion,
                                   GeckoChildID aOriginChildID) {
-  StructuredCloneHolderBase::Adopt(std::move(aData), aVersion);
+  StructuredCloneHolderBase::Adopt(std::move(aData));
 
   mOriginChildID = aOriginChildID;
 

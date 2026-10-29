@@ -134,19 +134,13 @@ class StructuredCloneHolderBase {
   // Directly adopt a pre-existing data buffer which was previously serialized
   // elsewhere using this data structure.
   // The StructuredCloneScope of this holder must match the passed-in data.
-  void Adopt(JSStructuredCloneData&& aData,
-             uint32_t aVersion = JS_STRUCTURED_CLONE_VERSION);
+  void Adopt(JSStructuredCloneData&& aData);
 
   bool HasData() const { return mData.isSome(); }
 
   JSStructuredCloneData& BufferData() {
     MOZ_ASSERT(mData, "Write() has never been called.");
     return *mData;
-  }
-
-  uint32_t BufferVersion() const {
-    MOZ_ASSERT(mData, "Write() has never been called.");
-    return mVersion;
   }
 
   size_t SizeOfExcludingThis(mozilla::MallocSizeOf aMallocSizeOf) {
@@ -159,8 +153,6 @@ class StructuredCloneHolderBase {
 
  protected:
   Maybe<JSStructuredCloneData> mData;
-  uint32_t mVersion = 0;
-
   StructuredCloneScope mStructuredCloneScope;
 
 #ifdef DEBUG
@@ -218,7 +210,6 @@ class StructuredCloneHolder : public StructuredCloneHolderBase {
             const JS::CloneDataPolicy& aCloneDataPolicy, ErrorResult& aRv);
 
   void Adopt(JSStructuredCloneData&& aData,
-             uint32_t aVersion = JS_STRUCTURED_CLONE_VERSION,
              GeckoChildID aOriginChildID = kInvalidGeckoChildID);
 
   // Call this method to know if this object is keeping some DOM object alive.

@@ -373,6 +373,8 @@ bool ClonedErrorHolder::ToErrorValue(JSContext* aCx,
 bool ClonedErrorHolder::Holder::ReadStructuredCloneInternal(
     JSContext* aCx, JSStructuredCloneReader* aReader) {
   uint32_t length;
+  // The written version is no longer used, but is still read to preserve the
+  // on-wire format of already-persisted data.
   uint32_t version;
   if (!JS_ReadUint32Pair(aReader, &length, &version)) {
     return false;
@@ -392,7 +394,6 @@ bool ClonedErrorHolder::Holder::ReadStructuredCloneInternal(
   }
 
   mData.emplace(std::move(data));
-  mVersion = version;
   mData->setCallbacks(&StructuredCloneHolder::sCallbacks, nullptr,
                       OwnTransferablePolicy::OwnsTransferablesIfAny);
   return true;
