@@ -58,6 +58,12 @@ class WebTransportParent : public PWebTransportParent,
 
   IPCResult RecvCreateSendGroup(uint64_t aGroupId);
 
+  IPCResult RecvSetAnticipatedConcurrentIncomingUnidirectionalStreams(
+      const Maybe<uint16_t>& aValue);
+
+  IPCResult RecvSetAnticipatedConcurrentIncomingBidirectionalStreams(
+      const Maybe<uint16_t>& aValue);
+
   IPCResult RecvExportKeyingMaterial(nsTArray<uint8_t>&& aLabel,
                                      nsTArray<uint8_t>&& aContext,
                                      uint32_t aOutputLength,

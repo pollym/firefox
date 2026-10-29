@@ -492,6 +492,10 @@ void WebTransport::Init(const GlobalObject& aGlobal, const nsAString& aURL,
   // options's anticipatedConcurrentIncomingUnidirectionalStreams.
   // Step 15: Let anticipatedConcurrentIncomingBidirectionalStreams be
   // options's anticipatedConcurrentIncomingBidirectionalStreams.
+  mAnticipatedConcurrentIncomingUnidirectionalStreams =
+      aOptions.mAnticipatedConcurrentIncomingUnidirectionalStreams;
+  mAnticipatedConcurrentIncomingBidirectionalStreams =
+      aOptions.mAnticipatedConcurrentIncomingBidirectionalStreams;
 
   Maybe<uint16_t> anticipatedUni;
   if (!mAnticipatedConcurrentIncomingUnidirectionalStreams.IsNull()) {
@@ -989,6 +993,32 @@ bool WebTransport::SupportsReliableOnly(const GlobalObject& aGlobal) {
 }
 
 void WebTransport::GetProtocol(nsAString& aProtocol) { aProtocol = mProtocol; }
+
+Nullable<uint16_t>
+WebTransport::GetAnticipatedConcurrentIncomingUnidirectionalStreams() {
+  return mAnticipatedConcurrentIncomingUnidirectionalStreams;
+}
+
+void WebTransport::SetAnticipatedConcurrentIncomingUnidirectionalStreams(
+    const Nullable<uint16_t>& aValue) {
+  mAnticipatedConcurrentIncomingUnidirectionalStreams = aValue;
+  if (mChild) {
+    mChild->SetAnticipatedConcurrentIncomingUnidirectionalStreams(aValue);
+  }
+}
+
+Nullable<uint16_t>
+WebTransport::GetAnticipatedConcurrentIncomingBidirectionalStreams() {
+  return mAnticipatedConcurrentIncomingBidirectionalStreams;
+}
+
+void WebTransport::SetAnticipatedConcurrentIncomingBidirectionalStreams(
+    const Nullable<uint16_t>& aValue) {
+  mAnticipatedConcurrentIncomingBidirectionalStreams = aValue;
+  if (mChild) {
+    mChild->SetAnticipatedConcurrentIncomingBidirectionalStreams(aValue);
+  }
+}
 
 void WebTransport::ResolveDraining() {
   LOG(("ResolveDraining() called"));

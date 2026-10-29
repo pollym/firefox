@@ -129,6 +129,12 @@ class WebTransport final : public nsISupports, public nsWrapperCache {
   WebTransportCongestionControl CongestionControl();
   static bool SupportsReliableOnly(const GlobalObject& aGlobal);
   void GetProtocol(nsAString& aProtocol);
+  Nullable<uint16_t> GetAnticipatedConcurrentIncomingUnidirectionalStreams();
+  void SetAnticipatedConcurrentIncomingUnidirectionalStreams(
+      const Nullable<uint16_t>& aValue);
+  Nullable<uint16_t> GetAnticipatedConcurrentIncomingBidirectionalStreams();
+  void SetAnticipatedConcurrentIncomingBidirectionalStreams(
+      const Nullable<uint16_t>& aValue);
   already_AddRefed<Promise> Draining() { return do_AddRef(mDraining); }
   already_AddRefed<Promise> Closed() { return do_AddRef(mClosed); }
   MOZ_CAN_RUN_SCRIPT void Close(const WebTransportCloseInfo& aOptions,

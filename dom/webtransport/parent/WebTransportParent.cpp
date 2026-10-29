@@ -538,6 +538,30 @@ IPCResult WebTransportParent::RecvSetSendGroup(uint64_t aStreamId,
   return IPC_OK();
 }
 
+IPCResult
+WebTransportParent::RecvSetAnticipatedConcurrentIncomingUnidirectionalStreams(
+    const Maybe<uint16_t>& aValue) {
+  LOG(("Set anticipatedConcurrentIncomingUnidirectionalStreams=%s",
+       aValue.isSome() ? nsPrintfCString("%u", aValue.value()).get() : "null"));
+  if (mWebTransport) {
+    mWebTransport->SetAnticipatedConcurrentIncomingUnidirectionalStreams(
+        aValue.valueOr(0));
+  }
+  return IPC_OK();
+}
+
+IPCResult
+WebTransportParent::RecvSetAnticipatedConcurrentIncomingBidirectionalStreams(
+    const Maybe<uint16_t>& aValue) {
+  LOG(("Set anticipatedConcurrentIncomingBidirectionalStreams=%s",
+       aValue.isSome() ? nsPrintfCString("%u", aValue.value()).get() : "null"));
+  if (mWebTransport) {
+    mWebTransport->SetAnticipatedConcurrentIncomingBidirectionalStreams(
+        aValue.valueOr(0));
+  }
+  return IPC_OK();
+}
+
 IPCResult WebTransportParent::RecvExportKeyingMaterial(
     nsTArray<uint8_t>&& aLabel, nsTArray<uint8_t>&& aContext,
     uint32_t aOutputLength, ExportKeyingMaterialResolver&& aResolver) {
