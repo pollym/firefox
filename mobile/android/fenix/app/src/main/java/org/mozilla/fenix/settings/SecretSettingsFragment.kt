@@ -506,6 +506,12 @@ class SecretSettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFra
             onPreferenceChangeListener = SharedPreferenceUpdater()
         }
 
+        requirePreference<SwitchPreferenceCompat>(R.string.pref_key_enable_qwac_ui).apply {
+            isVisible = Config.channel.isNightlyOrDebug
+            isChecked = settings.isQwacUiEnabled
+            onPreferenceChangeListener = SharedPreferenceUpdater()
+        }
+
         // These two are mutually exclusive, which the Settings setters enforce, so they write through Settings
         // rather than SharedPreferenceUpdater and refresh each other to reflect the setter's side effect.
         val powerSavingModeAutoPreference =
