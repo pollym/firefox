@@ -1001,6 +1001,10 @@ class VectorObject : public NativeObject {
     return static_cast<VectorT*>(getFixedSlot(VectorSlot).toPrivate());
   }
 
+  size_t length() { return getVector()->length(); }
+
+  JSObject* get(size_t index) { return (*getVector())[index]; }
+
   void check(bool expectNurseryOwned) {
     MOZ_RELEASE_ASSERT(IsInsideNursery(this) == expectNurseryOwned);
 
@@ -1080,13 +1084,15 @@ bool testVector(bool allocInNursery, bool dieInNursery) {
     obj->check(nurseryOwned);
   }
 
-  auto& vector = *obj->getVector();
-  vector.shrinkTo(ElementCount / 2);
-  vector.shrinkStorageToFit();
-  CHECK(vector.length() == ElementCount / 2);
+  {
+    auto& vector = *obj->getVector();
+    vector.shrinkTo(ElementCount / 2);
+    vector.shrinkStorageToFit();
+    CHECK(vector.length() == ElementCount / 2);
+  }
 
-  for (size_t i = 0; i < vector.length(); i++) {
-    Rooted<PlainObject*> element(cx, &vector[i]->as<PlainObject>());
+  for (size_t i = 0; i < obj->length() / 2; i++) {
+    Rooted<PlainObject*> element(cx, &obj->get(i)->as<PlainObject>());
     RootedValue value(cx);
     CHECK(JS_GetProperty(cx, element, "i", &value));
     CHECK(value.toInt32() == int32_t(i));

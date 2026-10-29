@@ -183,7 +183,11 @@ class BufferHolder {
         zone(zone),
 #endif
         buffer(buffer) {
-    MOZ_ASSERT_IF(buffer, IsBufferAllocInZone(buffer, zone));
+    MOZ_ASSERT_IF(buffer, gc::IsBufferAllocInZone(buffer, zone));
+    // Nursery owned buffers are not allowed in roots because they might become
+    // tenured, and this state needs to be in sync with whatever GC thing will
+    // eventually own them.
+    MOZ_ASSERT_IF(buffer, !gc::IsNurseryOwned(zone, buffer));
   }
   inline BufferHolder(JSContext* cx, T* buffer);
 
@@ -195,7 +199,8 @@ class BufferHolder {
   T& operator*() const { return *get(); }
 
   void set(T* newBuffer) {
-    MOZ_ASSERT_IF(newBuffer, IsBufferAllocInZone(newBuffer, zone));
+    MOZ_ASSERT_IF(newBuffer, gc::IsBufferAllocInZone(newBuffer, zone));
+    MOZ_ASSERT_IF(newBuffer, !gc::IsNurseryOwned(zone, newBuffer));
     buffer = newBuffer;
   }
   BufferHolder& operator=(T* newBuffer) {
