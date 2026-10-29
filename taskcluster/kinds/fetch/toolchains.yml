@@ -290,12 +290,12 @@ rust-size:
         revision: ab659d93b1faba95307df952aefe3fbed3583669
 
 rust-analyzer-linux64:
-    description: rust-analyzer 2026-10-12
+    description: rust-analyzer 2026-10-26
     fetch:
         type: static-url
-        url: https://github.com/rust-lang/rust-analyzer/releases/download/2026-10-12/rust-analyzer-x86_64-unknown-linux-gnu.gz
-        sha256: 040cab4e2abc490fadd95c3f6cbc60b941a78761dbc3acf0ec66fd7a97f31db3
-        size: 14939384
+        url: https://github.com/rust-lang/rust-analyzer/releases/download/2026-10-26/rust-analyzer-x86_64-unknown-linux-gnu.gz
+        sha256: 4c83773525f93b636ed79761389568b4d2a89c05fa7ecc440245032d49ad80ce
+        size: 15084499
         artifact-name: rust-analyzer.gz
 
 gn:
