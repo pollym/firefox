@@ -2070,6 +2070,13 @@ class MacroAssembler : public MacroAssemblerSpecific {
   inline void branchTestNull(Condition cond, const ValueOperand& value,
                              Label* label) PER_SHARED_ARCH;
 
+  // Branch if the value is null or undefined (Equal) or neither (NotEqual).
+  inline void branchTestNullOrUndefined(Condition cond, Register tag,
+                                        Label* label) PER_SHARED_ARCH;
+  inline void branchTestNullOrUndefined(Condition cond,
+                                        const ValueOperand& value,
+                                        Label* label) PER_ARCH;
+
   // Clobbers the ScratchReg on x64.
   inline void branchTestObject(Condition cond, const Address& address,
                                Label* label) PER_SHARED_ARCH;
