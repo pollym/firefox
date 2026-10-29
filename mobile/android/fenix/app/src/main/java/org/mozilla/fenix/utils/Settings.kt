@@ -323,18 +323,6 @@ class Settings(
     private val homescreenSections: Map<HomeScreenSection, Boolean>
         get() = FxNimbus.features.homescreen.value().sectionsEnabled
 
-    /** Indicates if the recent tabs homepage section settings should be visible */
-    val showHomepageRecentTabsSectionToggle: Boolean
-        get() = !enableHomepageSearchBar
-
-    /** Indicates if the bookmarks homepage section settings should be visible */
-    val showHomepageBookmarksSectionToggle: Boolean
-        get() = !enableHomepageSearchBar
-
-    /** Indicates if the recently visited homepage section settings should be visible */
-    val showHomepageRecentlyVisitedSectionToggle: Boolean
-        get() = !enableHomepageSearchBar
-
     /** Indicates whether or not the homepage should use edge to edge background */
     val enableHomepageEdgeToEdgeBackgroundFeature: Boolean
         get() = FxNimbus.features.homescreenEdgeToEdgeBackground.value().enabled
