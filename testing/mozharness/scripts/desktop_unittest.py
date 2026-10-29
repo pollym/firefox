@@ -842,6 +842,9 @@ class DesktopUnittest(TestingMixin, MercurialScript, MozbaseMixin, CodeCoverageM
                         "gtest."
                     )
 
+            if suite_category == "gtest":
+                base_cmd.extend(self.query_gtest_symbols_options())
+
             if c["combine_suites"]:
                 if suite_category == "gtest":
                     base_cmd.append("--combine-suites")
