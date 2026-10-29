@@ -16,6 +16,9 @@ inputs your change modifies in a way that doesn't matter for what you're testing
 # reuse the tasks of the try push with head revision <revision>
 ./mach try fuzzy -E rev=<revision>
 
+# reuse the tasks of the latest push to <project>, e.g. mozilla-central
+./mach try fuzzy -E project=<project>
+
 # reuse the tasks of the push whose Decision task is <task id>, on any branch
 ./mach try fuzzy -E task-id=<task id>
 ```
@@ -61,7 +64,7 @@ As an example, a change to `resourcemonitor.py` rebuilds every docker image that
 in, reuse the other images along with the fetch and toolchain tasks:
 
 ```shell
-./mach try fuzzy -E task-id=<task id> \
+./mach try fuzzy -E project=mozilla-central \
     --existing-tasks-include '^(docker-image|fetch|toolchain)-' \
     --existing-tasks-exclude '^docker-image-ubuntu2404-'
 ```
