@@ -59,8 +59,6 @@ prefs = [
   "dom.script_loader.experimental.navigation_cache.check_memory_pressure=false",
 ]
 
-["app_window.js"]
-
 ["browser_aboutnewtab_process_selection.js"]
 
 ["browser_blocking_image.js"]
@@ -161,17 +159,25 @@ skip-if = [
   "!nightly_build", # Page load events are only consistently sent in nightly.
 ]
 
-["browser_pagehide_on_tab_close.js"]
-skip-if = [
-  "true", # this tests non-e10s behavior.
-]
-
 ["browser_prefetch_delivery_type.js"]
 # All channels: the test enables the prefs it needs.
 support-files = [
   "file_pageload_prefetch_plain.html",
   "file_pageload_prefetch_source.html",
   "file_pageload_prefetch_target.sjs",
+]
+
+["browser_sizeToContent_tab.js"]
+
+["browser_speculation_rules_hover_delays.js"]
+support-files = [
+  "file_pageload_prefetch_target.sjs",
+  "file_speculation_rules_hover_source.html",
+]
+
+["browser_pagehide_on_tab_close.js"]
+skip-if = [
+  "true", # this tests non-e10s behavior.
 ]
 
 ["browser_promiseDocumentFlushed.js"]
@@ -321,14 +327,6 @@ support-files = [
 ]
 
 ["browser_set_focus_after_reuse_bcg.js"]
-
-["browser_sizeToContent_tab.js"]
-
-["browser_speculation_rules_hover_delays.js"]
-support-files = [
-  "file_pageload_prefetch_target.sjs",
-  "file_speculation_rules_hover_source.html",
-]
 
 ["browser_state_notifications.js"]
 skip-if = [

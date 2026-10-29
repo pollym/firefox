@@ -229,25 +229,6 @@ int32_t nsWindowMediator::RemoveEnumerator(
 NS_IMETHODIMP
 nsWindowMediator::GetMostRecentWindow(const char16_t* inType,
                                       mozIDOMWindowProxy** outWindow) {
-  nsCOMPtr<nsIAppWindow> appWindow;
-  if (NS_SUCCEEDED(GetMostRecentAppWindow(inType, getter_AddRefs(appWindow))) &&
-      appWindow) {
-    nsCOMPtr<nsPIDOMWindowOuter> DOMWindow;
-    if (NS_SUCCEEDED(GetDOMWindow(appWindow, DOMWindow))) {
-      DOMWindow.forget(outWindow);
-      return NS_OK;
-    }
-    return NS_ERROR_FAILURE;
-  }
-
-  return NS_OK;
-}
-
-// Returns the window of type inType ( if null return any window type ) which
-// has the most recent time stamp
-NS_IMETHODIMP
-nsWindowMediator::GetMostRecentAppWindow(const char16_t* inType,
-                                         nsIAppWindow** outWindow) {
   MOZ_RELEASE_ASSERT(NS_IsMainThread());
   NS_ENSURE_ARG_POINTER(outWindow);
   *outWindow = nullptr;
@@ -257,8 +238,12 @@ nsWindowMediator::GetMostRecentAppWindow(const char16_t* inType,
   // the requested type
   nsWindowInfo* info = MostRecentWindowInfo(inType, WindowMediatorFilter::None);
   if (info && info->mWindow) {
-    nsCOMPtr<nsIAppWindow> appWindow = info->mWindow;
-    appWindow.forget(outWindow);
+    nsCOMPtr<nsPIDOMWindowOuter> DOMWindow;
+    if (NS_SUCCEEDED(GetDOMWindow(info->mWindow, DOMWindow))) {
+      DOMWindow.forget(outWindow);
+      return NS_OK;
+    }
+    return NS_ERROR_FAILURE;
   }
 
   return NS_OK;
@@ -266,40 +251,19 @@ nsWindowMediator::GetMostRecentAppWindow(const char16_t* inType,
 
 NS_IMETHODIMP
 nsWindowMediator::GetMostRecentBrowserWindow(mozIDOMWindowProxy** outWindow) {
-  nsCOMPtr<nsIAppWindow> appWindow;
-  MOZ_TRY(GetMostRecentBrowserAppWindow(getter_AddRefs(appWindow)));
-
-  // Case where GetMostRecentBrowserAppWindow returns NS_OK but appWindow
-  // is null; for instance when mReady is false.
-  if (!appWindow) {
-    *outWindow = nullptr;
-    return NS_OK;
-  }
-
-  nsCOMPtr<nsPIDOMWindowOuter> DOMWindow;
-  if (NS_SUCCEEDED(GetDOMWindow(appWindow, DOMWindow))) {
-    DOMWindow.forget(outWindow);
-    return NS_OK;
-  }
-
-  return NS_ERROR_FAILURE;
-}
-
-NS_IMETHODIMP
-nsWindowMediator::GetMostRecentBrowserAppWindow(nsIAppWindow** outWindow) {
-  nsresult rv = GetMostRecentAppWindow(u"navigator:browser", outWindow);
+  nsresult rv = GetMostRecentWindow(u"navigator:browser", outWindow);
   NS_ENSURE_SUCCESS(rv, rv);
 
 #ifdef MOZ_WIDGET_ANDROID
   if (!*outWindow) {
-    rv = GetMostRecentAppWindow(u"navigator:geckoview", outWindow);
+    rv = GetMostRecentWindow(u"navigator:geckoview", outWindow);
     NS_ENSURE_SUCCESS(rv, rv);
   }
 #endif
 
 #ifdef MOZ_THUNDERBIRD
   if (!*outWindow) {
-    rv = GetMostRecentAppWindow(u"mail:3pane", outWindow);
+    rv = GetMostRecentWindow(u"mail:3pane", outWindow);
     NS_ENSURE_SUCCESS(rv, rv);
   }
 #endif
