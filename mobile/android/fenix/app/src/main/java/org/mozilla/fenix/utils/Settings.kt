@@ -2674,6 +2674,13 @@ class Settings(
             default = false,
         )
 
+    /**
+     * Indicates if the homepage search bar should replace the address bar. The homepage search bar is only laid out in
+     * the middle of the homepage while the address bar is at the top.
+     */
+    val isHomepageMiddleSearchEnabled: Boolean
+        get() = enableHomepageSearchBar && toolbarPosition == ToolbarPosition.TOP
+
     /** Indicates if the Mozilla Ads Client for Sponsored Stories is enabled. */
     var enableAdsClientForStories by
         booleanPreference(
