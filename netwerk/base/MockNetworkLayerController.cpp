@@ -5,7 +5,6 @@
 #include "MockNetworkLayerController.h"
 
 #include "mozilla/ClearOnShutdown.h"
-#include "mozilla/net/SocketProcessParent.h"
 #include "nsIOService.h"
 #include "nsNetAddr.h"
 

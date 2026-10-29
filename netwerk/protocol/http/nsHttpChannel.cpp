@@ -69,7 +69,6 @@
 #include "mozilla/net/NoVarySearchUtils.h"
 #include "mozilla/net/OpaqueResponseUtils.h"
 #include "mozilla/net/SFVService.h"
-#include "mozilla/net/SocketProcessParent.h"
 #include "mozilla/net/TRRService.h"
 #include "mozilla/net/URLPatternGlue.h"
 #include "mozilla/net/urlpattern_glue.h"

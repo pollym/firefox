@@ -5,10 +5,6 @@
 namespace mozilla {
 namespace psm {
 
-struct ByteArray {
-  uint8_t[] data;
-};
-
 struct ECKey {
   uint8_t[] params; // the EC point representing this key
   uint8_t[] cert; // the encoded certificate containing this key

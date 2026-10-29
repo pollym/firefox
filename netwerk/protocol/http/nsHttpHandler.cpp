@@ -46,8 +46,6 @@
 #include "mozilla/net/NeckoChild.h"
 #include "mozilla/net/NeckoParent.h"
 #include "mozilla/net/RequestContextService.h"
-#include "mozilla/net/SocketProcessChild.h"
-#include "mozilla/net/SocketProcessParent.h"
 #include "mozilla/net/rust_helper.h"
 #include "nsAsyncRedirectVerifyHelper.h"
 #include "nsCOMPtr.h"

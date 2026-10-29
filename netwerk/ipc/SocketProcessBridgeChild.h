@@ -20,16 +20,12 @@ class SocketProcessBridgeChild final : public PSocketProcessBridgeChild,
   NS_DECL_THREADSAFE_ISUPPORTS
   NS_DECL_NSIOBSERVER
 
-  static already_AddRefed<SocketProcessBridgeChild> GetSingleton();
   using GetPromise =
       MozPromise<RefPtr<SocketProcessBridgeChild>, nsCString, false>;
   static RefPtr<GetPromise> GetSocketProcessBridge();
 
-  mozilla::ipc::IPCResult RecvTest();
   void ActorDestroy(ActorDestroyReason aWhy) override;
   void DeferredDestroy();
-  bool IsShuttingDown() const { return mShuttingDown; };
-  ProcessId SocketProcessPid() const { return mSocketProcessPid; };
 
  private:
   DISALLOW_COPY_AND_ASSIGN(SocketProcessBridgeChild);
@@ -38,8 +34,6 @@ class SocketProcessBridgeChild final : public PSocketProcessBridgeChild,
   virtual ~SocketProcessBridgeChild();
 
   static StaticRefPtr<SocketProcessBridgeChild> sSocketProcessBridgeChild;
-  bool mShuttingDown;
-  ProcessId mSocketProcessPid = 0;
 };
 
 }  // namespace net

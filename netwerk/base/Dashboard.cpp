@@ -19,7 +19,6 @@
 #include "mozilla/dom/TypedArray.h"
 #include "mozilla/net/HTTPSSVC.h"
 #include "mozilla/net/HttpInfo.h"
-#include "mozilla/net/SocketProcessParent.h"
 #include "nsHttp.h"
 #include "nsHttpHandler.h"
 #include "nsICancelable.h"

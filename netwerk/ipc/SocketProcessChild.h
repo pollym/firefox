@@ -6,10 +6,8 @@
 #define mozilla_net_SocketProcessChild_h
 
 #include "mozilla/Mutex.h"
-#include "mozilla/ipc/InputStreamUtils.h"
 #include "mozilla/net/PSocketProcessChild.h"
 #include "nsRefPtrHashtable.h"
-#include "nsTHashMap.h"
 
 #if defined(MOZ_SANDBOX) && defined(MOZ_DEBUG) && defined(ENABLE_TESTS)
 #  include "mozilla/PSandboxTestingChild.h"

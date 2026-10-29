@@ -10,7 +10,6 @@
 #  include "mozilla/dom/MediaTransportParent.h"
 #endif
 #include "SocketProcessChild.h"
-#include "mozilla/ipc/BackgroundParent.h"
 #include "mozilla/ipc/Endpoint.h"
 #include "nsThreadUtils.h"
 

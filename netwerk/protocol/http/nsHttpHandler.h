@@ -63,7 +63,6 @@ class HttpTransactionShell;
 class AltSvcMapping;
 class DNSUtils;
 class TRRServiceChannel;
-class SocketProcessChild;
 
 /*
  * FRAMECHECK_LAX - no check

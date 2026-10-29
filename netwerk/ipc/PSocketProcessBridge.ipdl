@@ -20,7 +20,7 @@ namespace net {
   * socket process.
   */
 [NeedsOtherPid, ParentProc=Socket, ChildProc=Content]
-sync protocol PSocketProcessBridge
+async protocol PSocketProcessBridge
 {
 #ifdef MOZ_WEBRTC
 parent:

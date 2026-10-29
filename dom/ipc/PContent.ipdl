@@ -70,7 +70,6 @@ include ClientIPCTypes;
 include HangTypes;
 include PrefsTypes;
 include NeckoChannelParams;
-include PSMIPCTypes;
 include LookAndFeelTypes;
 include ProfilerTypes;
 
