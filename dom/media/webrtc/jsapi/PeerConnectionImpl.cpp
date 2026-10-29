@@ -715,7 +715,7 @@ nsresult PeerConnectionImpl::GetDatachannelParameters(
 
   Maybe<const JsepTransceiver> datachannelTransceiver =
       mJsepSession->FindTransceiver([](const JsepTransceiver& aTransceiver) {
-        return aTransceiver.GetMediaTypeInfo().IsDataChannel();
+        return aTransceiver.GetMediaType() == SdpMediaSection::kApplication;
       });
 
   if (!datachannelTransceiver ||
@@ -965,7 +965,7 @@ bool PeerConnectionImpl::CheckNegotiationNeeded() {
   if (mDataConnection) {
     Maybe<const JsepTransceiver> dcTransceiver =
         mJsepSession->FindTransceiver([](const JsepTransceiver& aTransceiver) {
-          return aTransceiver.GetMediaTypeInfo().IsDataChannel();
+          return aTransceiver.GetMediaType() == SdpMediaSection::kApplication;
         });
     if (!dcTransceiver || !dcTransceiver->IsNegotiated()) {
       return true;
@@ -1080,7 +1080,7 @@ PeerConnectionImpl::CreateDataChannel(
 
   Maybe<JsepTransceiver> dcTransceiver =
       mJsepSession->FindTransceiver([](const JsepTransceiver& aTransceiver) {
-        return aTransceiver.GetMediaTypeInfo().IsDataChannel();
+        return aTransceiver.GetMediaType() == SdpMediaSection::kApplication;
       });
 
   if (dcTransceiver) {
@@ -1274,7 +1274,8 @@ void PeerConnectionImpl::SyncFromJsep() {
   mJsepSession->ForEachTransceiver(
       [this, self = RefPtr<PeerConnectionImpl>(this)](
           const JsepTransceiver& jsepTransceiver) {
-        if (!jsepTransceiver.GetMediaTypeInfo().IsRtp()) {
+        if (jsepTransceiver.GetMediaType() ==
+            SdpMediaSection::MediaType::kApplication) {
           return;
         }
 
@@ -4363,12 +4364,11 @@ void PeerConnectionImpl::UpdateRTCDtlsTransports() {
           mTransportIdToRTCDtlsTransport.GetOrInsertNew(key, GetParentObject());
     }
 
-    const auto mediaTypeInfo = jsepTransceiver.GetMediaTypeInfo();
-    if (mediaTypeInfo.IsDataChannel()) {
+    if (jsepTransceiver.GetMediaType() == SdpMediaSection::kApplication) {
       if (mSctpTransport) {
         mSctpTransport->SetTransport(dtlsTransport.get());
       }
-    } else if (mediaTypeInfo.IsRtp()) {
+    } else {
       RefPtr<dom::RTCRtpTransceiver> domTransceiver =
           GetTransceiver(jsepTransceiver.GetUuid());
       if (domTransceiver) {

@@ -128,10 +128,10 @@ void JsepSessionImpl::AddTransceiver(const JsepTransceiver& aTransceiver) {
   MOZ_MTLOG(ML_DEBUG,
             "[" << mName << "]: Adding transceiver " << aTransceiver.GetUuid());
 #ifdef DEBUG
-  if (aTransceiver.GetMediaTypeInfo().IsDataChannel()) {
+  if (aTransceiver.GetMediaType() == SdpMediaSection::kApplication) {
     // Make sure we don't add more than one DataChannel transceiver
     for (const auto& transceiver : mTransceivers) {
-      MOZ_ASSERT(!transceiver.GetMediaTypeInfo().IsDataChannel());
+      MOZ_ASSERT(transceiver.GetMediaType() != SdpMediaSection::kApplication);
     }
   }
 #endif
@@ -142,7 +142,7 @@ void JsepSessionImpl::AddTransceiver(const JsepTransceiver& aTransceiver) {
 void JsepSessionImpl::InitTransceiver(JsepTransceiver& aTransceiver) {
   mLastError.clear();
 
-  if (aTransceiver.GetMediaTypeInfo().IsRtp()) {
+  if (aTransceiver.GetMediaType() != SdpMediaSection::kApplication) {
     // Make sure we have an ssrc. Might already be set.
     aTransceiver.mSendTrack.EnsureSsrcs(mSsrcGenerator, 1U);
     aTransceiver.mSendTrack.SetCNAME(mCNAME);
@@ -287,12 +287,8 @@ nsresult JsepSessionImpl::CreateOfferMsection(const JsepOfferOptions& options,
 
   // Some of this stuff (eg; mid) sticks around even if disabled
   if (lastAnswerMsection) {
-    // An m= section being recycled is generated for a transceiver that can
-    // have a different media type ([RFC9429] section 5.2.2). Such a
-    // transceiver has not been associated with a mid yet.
-    MOZ_ASSERT(!transceiver.IsAssociated() ||
-               lastAnswerMsection->GetMediaTypeInfo().MatchesTypeOf(
-                   transceiver.GetMediaTypeInfo()));
+    MOZ_ASSERT(lastAnswerMsection->GetMediaType() ==
+               transceiver.GetMediaType());
     nsresult rv = mSdpHelper.CopyStickyParams(*lastAnswerMsection, msection);
     NS_ENSURE_SUCCESS(rv, rv);
   }
@@ -320,7 +316,7 @@ nsresult JsepSessionImpl::CreateOfferMsection(const JsepOfferOptions& options,
     }
   }
 
-  if (msection->GetMediaTypeInfo().IsRtp()) {
+  if (msection->GetMediaType() != SdpMediaSection::MediaType::kApplication) {
     // Ditto for extmap-allow-mixed Add to session level instead of media
     // level. Adding more than once is a no-op.
     local->GetAttributeList().SetAttribute(std::make_unique<SdpFlagAttribute>(
@@ -337,7 +333,7 @@ nsresult JsepSessionImpl::CreateOfferMsection(const JsepOfferOptions& options,
   // still be used if negotiated), and writes their fmtp/rtcp-fb. The recv
   // track, which determines the m= line formats, never adds them. Drop the
   // attributes of payload types that did not make it into the m= line.
-  if (msection->GetMediaTypeInfo().IsRtp()) {
+  if (msection->GetMediaType() != SdpMediaSection::kApplication) {
     msection->RemoveUnlistedPayloadTypeAttributes();
   }
 
@@ -430,7 +426,7 @@ JsepSession::Result JsepSessionImpl::CreateOffer(
   if (mAlwaysNegotiateDataChannels) {
     Maybe<JsepTransceiver> dcTransceiver =
         FindTransceiver([](const JsepTransceiver& aTransceiver) {
-          return aTransceiver.GetMediaTypeInfo().IsDataChannel();
+          return aTransceiver.GetMediaType() == SdpMediaSection::kApplication;
         });
 
     if (!dcTransceiver) {
@@ -679,8 +675,7 @@ JsepSession::Result JsepSessionImpl::CreateAnswer(
 nsresult JsepSessionImpl::CreateAnswerMsection(
     const JsepAnswerOptions& options, JsepTransceiver& transceiver,
     const SdpMediaSection& remoteMsection, Sdp* sdp) {
-  MOZ_ASSERT(transceiver.GetMediaTypeInfo().MatchesTypeOf(
-      remoteMsection.GetMediaTypeInfo()));
+  MOZ_ASSERT(transceiver.GetMediaType() == remoteMsection.GetMediaType());
   SdpDirectionAttribute::Direction direction =
       reverse(remoteMsection.GetDirection()) & transceiver.mJsDirection;
   SdpMediaSection& msection =
@@ -690,10 +685,7 @@ nsresult JsepSessionImpl::CreateAnswerMsection(
   nsresult rv = mSdpHelper.CopyStickyParams(remoteMsection, &msection);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  if (mSdpHelper.MsectionIsDisabled(remoteMsection) ||
-      remoteMsection.GetMediaTypeInfo().IsUnknown()) {
-    // When media type == unknown we have nothing to negotiate
-    // and so the port must be set to 0
+  if (mSdpHelper.MsectionIsDisabled(remoteMsection)) {
     SdpHelper::DisableMsection(sdp, &msection);
     return NS_OK;
   }
@@ -1376,7 +1368,7 @@ nsresult JsepSessionImpl::MakeNegotiatedTransceiver(
   }
 
   if (transceiver.HasBundleLevel() && recvTrack.GetSsrcs().empty() &&
-      recvTrack.GetMediaTypeInfo().IsRtp()) {
+      recvTrack.GetMediaType() != SdpMediaSection::kApplication) {
     // TODO(bug 1105005): Once we have urn:ietf:params:rtp-hdrext:sdes:mid
     // support, we should only fire this warning if that extension was not
     // negotiated.
@@ -1749,13 +1741,11 @@ Maybe<JsepTransceiver> JsepSessionImpl::GetTransceiverForMid(
 Maybe<JsepTransceiver> JsepSessionImpl::GetTransceiverForLocal(size_t level) {
   if (Maybe<JsepTransceiver> transceiver = GetTransceiverForLevel(level)) {
     if (transceiver->CanRecycleMyMsection() &&
-        !transceiver->GetMediaTypeInfo().IsDataChannel()) {
+        transceiver->GetMediaType() != SdpMediaSection::kApplication) {
       // Attempt to recycle. If this fails, the old transceiver stays put.
-      // [RFC9429] section 5.2.2 requires a zero port m= section to be recycled
-      // for an added transceiver, whatever media type that transceiver has.
       transceiver->Disassociate();
       Maybe<JsepTransceiver> newTransceiver =
-          FindUnassociatedNonAppTransceiver(Nothing(), false);
+          FindUnassociatedRtpTransceiver(transceiver->GetMediaType(), false);
       if (newTransceiver) {
         newTransceiver->SetLevel(level);
         transceiver->ClearLevel();
@@ -1776,7 +1766,7 @@ Maybe<JsepTransceiver> JsepSessionImpl::GetTransceiverForLocal(size_t level) {
   // negotiated yet when the alwaysNegotiateDataChannels flag is set.
   if (mAlwaysNegotiateDataChannels) {
     for (auto& transceiver : mTransceivers) {
-      if (transceiver.GetMediaTypeInfo().IsDataChannel() &&
+      if (transceiver.GetMediaType() == SdpMediaSection::kApplication &&
           transceiver.IsFreeToUse()) {
         transceiver.SetLevel(level);
         return Some(transceiver);
@@ -1787,7 +1777,8 @@ Maybe<JsepTransceiver> JsepSessionImpl::GetTransceiverForLocal(size_t level) {
   // Look for an RTP transceiver (spec requires us to give the lower levels to
   // new RTP transceivers)
   for (auto& transceiver : mTransceivers) {
-    if (transceiver.GetMediaTypeInfo().IsRtp() && transceiver.IsFreeToUse()) {
+    if (transceiver.GetMediaType() != SdpMediaSection::kApplication &&
+        transceiver.IsFreeToUse()) {
       transceiver.SetLevel(level);
       return Some(transceiver);
     }
@@ -1822,21 +1813,18 @@ Maybe<JsepTransceiver> JsepSessionImpl::GetTransceiverForRemote(
   }
 
   // No transceiver for |level|
-  if (!msection.GetMediaTypeInfo().IsUnknown()) {
-    if (msection.GetMediaTypeInfo().IsDataChannel()) {
-      // Other side has done something weird like rejecting the datachannel
-      // m-section. Try to recover.
-      for (auto& tx : mTransceivers) {
-        if (tx.GetMediaTypeInfo().IsDataChannel()) {
-          tx.RestartDatachannelTransceiver();
-          transceiver = Some(tx);
-          break;
-        }
+  if (msection.GetMediaType() == SdpMediaSection::kApplication) {
+    // Other side has done something weird like rejecting the datachannel
+    // m-section. Try to recover.
+    for (auto& tx : mTransceivers) {
+      if (tx.GetMediaType() == SdpMediaSection::kApplication) {
+        tx.RestartDatachannelTransceiver();
+        transceiver = Some(tx);
+        break;
       }
-    } else if (msection.IsReceiving()) {
-      transceiver = FindUnassociatedNonAppTransceiver(
-          Some(msection.GetMediaType()), true);
     }
+  } else if (msection.IsReceiving()) {
+    transceiver = FindUnassociatedRtpTransceiver(msection.GetMediaType(), true);
   }
 
   // We found a transceiver to associate
@@ -1875,21 +1863,12 @@ nsresult JsepSessionImpl::UpdateTransceiversFromRemoteDescription(
   for (size_t i = 0; i < remote.GetMediaSectionCount(); ++i) {
     const SdpMediaSection& msection = remote.GetMediaSection(i);
 
-    // A mid in the remote description is in use even when we do not associate
-    // a transceiver with the m= section, which is the case for m= sections
-    // that are disabled or have a media type we do not know. GetNewMid must
-    // not hand that value out to another m= section.
-    if (msection.GetAttributeList().HasAttribute(SdpAttribute::kMidAttribute)) {
-      mUsedMids.insert(msection.GetAttributeList().GetMid());
-    }
-
     Maybe<JsepTransceiver> transceiver(GetTransceiverForRemote(msection));
     if (!transceiver) {
       return NS_ERROR_FAILURE;
     }
 
-    if (!mSdpHelper.MsectionIsDisabled(msection) &&
-        !msection.GetMediaTypeInfo().IsUnknown()) {
+    if (!mSdpHelper.MsectionIsDisabled(msection)) {
       if (msection.GetAttributeList().HasAttribute(
               SdpAttribute::kMidAttribute)) {
         transceiver->Associate(msection.GetAttributeList().GetMid());
@@ -1900,9 +1879,6 @@ nsresult JsepSessionImpl::UpdateTransceiversFromRemoteDescription(
         mUsedMids.insert(transceiver->GetMid());
       }
     } else {
-      // Unknown media types get rejected in the answer. Let's treat them as
-      // disabled m-sections here.
-
       // We do not disassociate here, that happens when negotiation completes
       // These things cannot be rolled back.
       transceiver->mTransport.Close();
@@ -1935,21 +1911,18 @@ nsresult JsepSessionImpl::UpdateTransceiversFromRemoteDescription(
   return NS_OK;
 }
 
-Maybe<JsepTransceiver> JsepSessionImpl::FindUnassociatedNonAppTransceiver(
-    Maybe<SdpMediaSection::MediaType> type, bool magic) {
-  if (type.isSome() && *type == SdpMediaSection::kApplication) {
+Maybe<JsepTransceiver> JsepSessionImpl::FindUnassociatedRtpTransceiver(
+    SdpMediaSection::MediaType type, bool magic) {
+  if (type == SdpMediaSection::kApplication) {
     MOZ_ASSERT(false);
     return Nothing();
   }
 
   // Look through transceivers that are not mapped to an m-section
   for (auto& transceiver : mTransceivers) {
-    if (transceiver.GetMediaType() == SdpMediaSection::kApplication) {
-      continue;
-    }
     if (transceiver.IsFreeToUse() &&
         (!magic || transceiver.HasAddTrackMagic()) &&
-        (type.isNothing() || transceiver.GetMediaType() == *type)) {
+        (transceiver.GetMediaType() == type)) {
       return Some(transceiver);
     }
   }
@@ -2036,8 +2009,7 @@ JsepSession::Result JsepSessionImpl::ValidateLocalDescription(
   for (size_t i = 0; i < description.GetMediaSectionCount(); ++i) {
     auto& origMsection = generated->GetMediaSection(i);
     auto& finalMsection = description.GetMediaSection(i);
-    if (!origMsection.GetMediaTypeInfo().MatchesTypeOf(
-            finalMsection.GetMediaTypeInfo())) {
+    if (origMsection.GetMediaType() != finalMsection.GetMediaType()) {
       JSEP_SET_ERROR("Changing the media-type of m-sections is not allowed");
       return Result(dom::PCError::InvalidModificationError);
     }
@@ -2153,22 +2125,7 @@ JsepSession::Result JsepSessionImpl::ValidateRemoteDescription(
     const SdpMediaSection& oldMsection =
         mCurrentRemoteDescription->GetMediaSection(i);
 
-    // https://www.rfc-editor.org/rfc/rfc9429#section-5.2.2
-    //
-    // If any RtpTransceiver has been added and there exists an "m=" section
-    // with a zero port in the current local description or the current remote
-    // description, that "m=" section MUST be recycled by generating an "m="
-    // section for the added RtpTransceiver as if the "m=" section were being
-    // added to the session description (including a new MID value) and placing
-    // it at the same index as the "m=" section with a zero port.
-    //
-    // Note:
-    // An m= section whose media type we do not know is rejected in our own
-    // answer, so the zero port is in the local description rather than the
-    // remote one.
-    if (mSdpHelper.MsectionIsDisabled(oldMsection) ||
-        mSdpHelper.MsectionIsDisabled(
-            mCurrentLocalDescription->GetMediaSection(i))) {
+    if (mSdpHelper.MsectionIsDisabled(oldMsection)) {
       bool oldIsApp =
           oldMsection.GetMediaType() == SdpMediaSection::kApplication;
       bool newIsApp =
@@ -2183,8 +2140,7 @@ JsepSession::Result JsepSessionImpl::ValidateRemoteDescription(
       continue;
     }
 
-    if (!oldMsection.GetMediaTypeInfo().MatchesTypeOf(
-            newMsection.GetMediaTypeInfo())) {
+    if (oldMsection.GetMediaType() != newMsection.GetMediaType()) {
       JSEP_SET_ERROR("Remote description changes the media type of m-line "
                      << i
                      << "; media type changes are only permitted when the "
@@ -2305,8 +2261,7 @@ JsepSession::Result JsepSessionImpl::ValidateAnswer(const Sdp& offer,
     const SdpMediaSection& offerMsection = offer.GetMediaSection(i);
     const SdpMediaSection& answerMsection = answer.GetMediaSection(i);
 
-    if (!offerMsection.GetMediaTypeInfo().MatchesTypeOf(
-            answerMsection.GetMediaTypeInfo())) {
+    if (offerMsection.GetMediaType() != answerMsection.GetMediaType()) {
       JSEP_SET_ERROR("Answer and offer have different media types at m-line "
                      << i);
       return Result(dom::PCError::InvalidAccessError);
