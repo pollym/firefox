@@ -80,7 +80,7 @@ struct JSStructuredCloneWriter;
  * of the JS engine can already correctly throw errors when they encounter new,
  * unrecognized features. A version number bump does not actually help them.)
  */
-#define JS_STRUCTURED_CLONE_VERSION 8
+constexpr uint16_t JS_STRUCTURED_CLONE_VERSION = 9;
 
 namespace JS {
 
@@ -675,6 +675,7 @@ JS_PUBLIC_API bool JS_StructuredClone(
 #define JS_SCERR_NOT_CLONABLE 7
 #define JS_SCERR_NOT_CLONABLE_WITH_COOP_COEP 8
 #define JS_SCERR_TRANSFERABLE_TWICE 9
+#define JS_SCERR_BAD_CLONE_VERSION 10
 
 JS_PUBLIC_API bool JS_ReadUint32Pair(JSStructuredCloneReader* r, uint32_t* p1,
                                      uint32_t* p2);

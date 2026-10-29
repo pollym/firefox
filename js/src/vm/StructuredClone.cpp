@@ -101,6 +101,7 @@ using mozilla::NumbersAreIdentical;
 enum StructuredDataType : uint32_t {
   // Structured data types provided by the engine
   SCTAG_FLOAT_MAX = 0xFFF00000,
+  // The header data is a 32-bit value storing a <version,scope> pair.
   SCTAG_HEADER = 0xFFF10000,
   SCTAG_NULL = 0xFFFF0000,
   SCTAG_UNDEFINED,
@@ -200,6 +201,10 @@ enum TransferableMapHeader {
 
 static inline uint64_t PairToUInt64(uint32_t tag, uint32_t data) {
   return uint64_t(data) | (uint64_t(tag) << 32);
+}
+
+static inline uint32_t PairToUInt32(uint16_t hi, uint16_t lo) {
+  return uint32_t(lo) | (uint32_t(hi) << 16);
 }
 
 namespace js {
@@ -738,6 +743,10 @@ static void ReportDataCloneError(JSContext* cx,
 
     case JS_SCERR_NOT_CLONABLE_WITH_COOP_COEP:
       errorNumber = JSMSG_SC_NOT_CLONABLE_WITH_COOP_COEP;
+      break;
+
+    case JS_SCERR_BAD_CLONE_VERSION:
+      errorNumber = JSMSG_SC_BAD_CLONE_VERSION;
       break;
 
     default:
@@ -2269,7 +2278,10 @@ bool JSStructuredCloneWriter::startWrite(HandleValue v) {
 }
 
 bool JSStructuredCloneWriter::writeHeader() {
-  return out.writePair(SCTAG_HEADER, (uint32_t)output().scope());
+  uint16_t scope = uint16_t(output().scope());
+  uint16_t version = JS_STRUCTURED_CLONE_VERSION;
+  uint32_t data = PairToUInt32(version, scope);
+  return out.writePair(SCTAG_HEADER, data);
 }
 
 bool JSStructuredCloneWriter::writeTransferMap() {
@@ -3502,7 +3514,16 @@ bool JSStructuredCloneReader::readHeader() {
   JS::StructuredCloneScope storedScope;
   if (tag == SCTAG_HEADER) {
     MOZ_ALWAYS_TRUE(in.readPair(&tag, &data));
-    storedScope = JS::StructuredCloneScope(data);
+    uint16_t scope = uint16_t(data);  // Grab low 16 bits.
+    uint16_t version = data >> (sizeof(uint16_t) * 8);
+    storedScope = JS::StructuredCloneScope(scope);
+    if (version > JS_STRUCTURED_CLONE_VERSION) {
+      // Version is too new. It was either written by a newer binary, or it's
+      // invalid. (Note: clones stored with version < 9 will have version=0.)
+      ReportDataCloneError(context(), callbacks, JS_SCERR_BAD_CLONE_VERSION,
+                           closure);
+      return false;
+    }
   } else {
     // Old structured clone buffer. We must have read it from disk.
     storedScope = JS::StructuredCloneScope::DifferentProcessForIndexedDB;
