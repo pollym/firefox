@@ -33,6 +33,13 @@ don't pick up changes to the tests or their harnesses
 ([bug 1878157](https://bugzilla.mozilla.org/show_bug.cgi?id=1878157)). Only tasks that run from a
 source checkout see your changes.
 
+## Filtering Reused Tasks
+
+`--existing-tasks-include REGEX` only reuses the tasks from `-E` whose label matches `REGEX`, and
+`--existing-tasks-exclude REGEX` never reuses the tasks whose label matches `REGEX`. Both can be
+given several times, and labels excluded by one pattern aren't reused even if they match an
+included one.
+
 ## Using Indexed Tasks
 
 `--use-indexed-tasks LABEL=INDEX_PATH` replaces the task `LABEL` with the task at `INDEX_PATH` in
@@ -48,3 +55,13 @@ revision than its dependency.
 For example, toolchain tasks depend on the docker image they run in. If your change modifies
 that image, the image is rebuilt, and the toolchain tasks run again even if they are in
 `existing_tasks`.
+
+As an example, a change to `resourcemonitor.py` rebuilds every docker image that includes
+`run-task`, and so every fetch and toolchain task. To only rebuild the images the Linux tests run
+in, reuse the other images along with the fetch and toolchain tasks:
+
+```shell
+./mach try fuzzy -E task-id=<task id> \
+    --existing-tasks-include '^(docker-image|fetch|toolchain)-' \
+    --existing-tasks-exclude '^docker-image-ubuntu2404-'
+```

@@ -11,6 +11,7 @@ import calendar
 import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import time
@@ -566,6 +567,33 @@ class ExistingTasks(ParameterConfig):
                 """,
             },
         ],
+        [
+            ["--existing-tasks-include"],
+            {
+                "action": "append",
+                "dest": "existing_tasks_include",
+                "default": [],
+                "metavar": "REGEX",
+                "help": """
+                    Only reuse tasks from --use-existing-tasks whose label
+                matches REGEX, e.g. '^(docker-image|fetch|toolchain)-'. Can be
+                specified multiple times.
+                """,
+            },
+        ],
+        [
+            ["--existing-tasks-exclude"],
+            {
+                "action": "append",
+                "dest": "existing_tasks_exclude",
+                "default": [],
+                "metavar": "REGEX",
+                "help": """
+                    Don't reuse tasks from --use-existing-tasks whose label
+                matches REGEX. Can be specified multiple times.
+                """,
+            },
+        ],
     ]
 
     def find_decision_task(self, use_existing_tasks):
@@ -596,7 +624,24 @@ class ExistingTasks(ParameterConfig):
         index_path = f"gecko.v2.{branch}.revision.{revision}.taskgraph.decision"
         return taskcluster.find_task_id(index_path)
 
-    def get_parameters(self, use_existing_tasks, use_indexed_tasks, **kwargs):
+    def get_parameters(
+        self,
+        use_existing_tasks,
+        use_indexed_tasks,
+        existing_tasks_include=(),
+        existing_tasks_exclude=(),
+        **kwargs,
+    ):
+        if (existing_tasks_include or existing_tasks_exclude) and not (
+            use_existing_tasks
+        ):
+            print(
+                "error: --existing-tasks-include and --existing-tasks-exclude "
+                "require --use-existing-tasks",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
         if not use_existing_tasks and not use_indexed_tasks:
             return
 
@@ -614,6 +659,14 @@ class ExistingTasks(ParameterConfig):
             existing_tasks = taskcluster.get_artifact(
                 decision_task_id, "public/label-to-taskid.json"
             )
+            include = [re.compile(r) for r in existing_tasks_include]
+            exclude = [re.compile(r) for r in existing_tasks_exclude]
+            existing_tasks = {
+                label: task_id
+                for label, task_id in existing_tasks.items()
+                if (not include or any(r.search(label) for r in include))
+                and not any(r.search(label) for r in exclude)
+            }
 
         for label_and_index in use_indexed_tasks:
             label, sep, index_path = label_and_index.partition("=")
