@@ -1780,7 +1780,6 @@ nsIOService::Observe(nsISupports* subject, const char* topic,
     if (IsSocketProcessChild()) {
       Preferences::UnregisterCallbacks(nsIOService::OnTLSPrefChange,
                                        gCallbackSecurityPrefs, this);
-      PrepareForShutdownInSocketProcess();
     }
 
     // We're in XPCOM shutdown now. Unregister any dynamic protocol handlers

@@ -1773,6 +1773,9 @@ nsresult nsSSLIOLayerAddToSocket(int32_t family, const char* host, int32_t port,
                      originAttributes.IsPrivateBrowsing();
     sslIOLayerHelpers =
         isPrivate ? PrivateSSLIOLayerHelpers() : PublicSSLIOLayerHelpers();
+    if (!sslIOLayerHelpers) {
+      return NS_ERROR_NOT_AVAILABLE;
+    }
   }
 
   RefPtr<NSSSocketControl> infoObject(new NSSSocketControl(

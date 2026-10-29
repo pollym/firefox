@@ -50,7 +50,6 @@ CertVerifier::CertificateTransparencyMode GetCertificateTransparencyMode();
 bool EnsureNSSInitializedChromeOrContent();
 bool HandleTLSPrefChange(const nsCString& aPref);
 void SetValidationOptionsCommon();
-void PrepareForShutdownInSocketProcess();
 
 // RAII helper class to indicate that gecko is searching for certificates. Will
 // automatically stop indicating that a search is happening when it goes out of

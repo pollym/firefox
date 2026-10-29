@@ -878,14 +878,8 @@ nsresult CommonInit() {
   DisableMD5();
 
   mozilla::pkix::RegisterErrorTable();
-  nsSSLIOLayerHelpers::GlobalInit();
 
   return NS_OK;
-}
-
-void PrepareForShutdownInSocketProcess() {
-  MOZ_ASSERT(XRE_IsSocketProcess());
-  nsSSLIOLayerHelpers::GlobalCleanup();
 }
 
 bool HandleTLSPrefChange(const nsCString& prefName) {
@@ -1577,6 +1571,8 @@ nsresult nsNSSComponent::InitializeNSS() {
   if (NS_FAILED(rv)) {
     return NS_ERROR_UNEXPECTED;
   }
+
+  nsSSLIOLayerHelpers::GlobalInit();
 
   nsCOMPtr<nsICertOverrideService> certOverrideService(
       do_GetService(NS_CERTOVERRIDE_CONTRACTID));
