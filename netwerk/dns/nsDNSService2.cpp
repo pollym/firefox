@@ -722,7 +722,7 @@ already_AddRefed<nsIDNSService> nsDNSService::GetXPCOMSingleton() {
       return GetSingleton();
     }
 
-    if (XRE_IsContentProcess() || XRE_IsSocketProcess()) {
+    if (XRE_IsContentProcess()) {
       return ChildDNSService::GetSingleton();
     }
 

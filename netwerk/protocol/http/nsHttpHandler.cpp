@@ -364,8 +364,6 @@ nsresult nsHttpHandler::Init() {
   mIOService = new nsMainThreadPtrHolder<nsIIOService>(
       "nsHttpHandler::mIOService", service);
 
-  gIOService->LaunchSocketProcess();
-
 #if defined(XP_MACOSX) || defined(XP_IOS)
   if (XRE_IsParentProcess()) {
     (void)NS_DispatchToMainThreadQueue(

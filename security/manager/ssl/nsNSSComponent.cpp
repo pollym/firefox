@@ -171,14 +171,6 @@ bool EnsureNSSInitializedChromeOrContent() {
     return false;
   }
 
-  if (XRE_IsSocketProcess()) {
-    if (NS_FAILED(CommonInit())) {
-      return false;
-    }
-    initialized = true;
-    return true;
-  }
-
   if (NS_FAILED(mozilla::psm::InitializeCipherSuite())) {
     return false;
   }

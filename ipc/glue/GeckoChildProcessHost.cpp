@@ -55,7 +55,6 @@
 #include "mozilla/ipc/IOThread.h"
 #include "mozilla/ipc/EnvironmentMap.h"
 #include "mozilla/ipc/NodeController.h"
-#include "mozilla/net/SocketProcessHost.h"
 #include "nsCharSeparatedTokenizer.h"
 #include "nsDirectoryService.h"
 #include "nsDirectoryServiceDefs.h"
@@ -2041,9 +2040,6 @@ bool GeckoChildProcessHost::StartMacSandbox(int aArgc, char** aArgv,
       break;
     case GeckoProcessType_RDD:
       sandboxType = RDDProcessHost::GetMacSandboxType();
-      break;
-    case GeckoProcessType_Socket:
-      sandboxType = net::SocketProcessHost::GetMacSandboxType();
       break;
     case GeckoProcessType_GMPlugin:
       sandboxType = gmp::GMPProcessParent::GetMacSandboxType();

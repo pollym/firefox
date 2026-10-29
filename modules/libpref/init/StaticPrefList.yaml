@@ -15836,18 +15836,6 @@
   value: 10000
   mirror: always
 
-# Whether to use the network process or not
-# Start a separate socket process.
-# Changing this pref requires a restart.
-- name: network.process.enabled
-  type: RelaxedAtomicBool
-  mirror: always
-#if defined(ANDROID) || defined(MOZ_THUNDERBIRD) || defined(XP_IOS)
-  value: false # see bug 1641427
-#else
-  value: true
-#endif
-
 # When a protocol would be launched externally without a prompt (i.e. the
 # network.protocol-handler.external.<scheme> pref is set), require transient
 # user activation. Without activation we fall back to the external protocol

@@ -1667,8 +1667,6 @@ class XPCShellTests:
         if os.getenv("MOZ_FETCHES_DIR", None):
             self.env["MOZ_FETCHES_DIR"] = os.getenv("MOZ_FETCHES_DIR", None)
 
-        self.env["MOZ_DISABLE_SOCKET_PROCESS"] = "1"
-
         # Self-tests run many sub-processes whose tests fail on purpose, so
         # profiling them only wastes overhead and uploads useless artifacts.
         # Strip any startup-profiling request inherited from the environment

@@ -30,7 +30,7 @@ namespace net {
 static StaticRefPtr<ChildDNSService> gChildDNSService;
 
 already_AddRefed<ChildDNSService> ChildDNSService::GetSingleton() {
-  MOZ_ASSERT(XRE_IsContentProcess() || XRE_IsSocketProcess());
+  MOZ_ASSERT(XRE_IsContentProcess());
 
   if (!gChildDNSService) {
     if (NS_WARN_IF(!NS_IsMainThread())) {
@@ -47,9 +47,7 @@ already_AddRefed<ChildDNSService> ChildDNSService::GetSingleton() {
 NS_IMPL_ISUPPORTS_INHERITED(ChildDNSService, DNSServiceBase, nsIDNSService,
                             nsPIDNSService)
 
-ChildDNSService::ChildDNSService() {
-  MOZ_ASSERT(XRE_IsContentProcess() || XRE_IsSocketProcess());
-}
+ChildDNSService::ChildDNSService() { MOZ_ASSERT(XRE_IsContentProcess()); }
 
 void ChildDNSService::GetDNSRecordHashKey(
     const nsACString& aHost, const nsACString& aTrrServer, int32_t aPort,

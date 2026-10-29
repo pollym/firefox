@@ -623,7 +623,9 @@ class MochitestServer:
         # care about races in xpcshell. So disable TSan for the server.
         env["TSAN_OPTIONS"] = "report_bugs=0"
 
-        # Don't use socket process for the xpcshell server.
+        # Trainhop runs this xpcshell against a Beta/Release libxul that can
+        # still launch the socket process.
+        # TODO: remove once Release no longer has the socket process (bug 2077172).
         env["MOZ_DISABLE_SOCKET_PROCESS"] = "1"
 
         if mozinfo.isWin:
