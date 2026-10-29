@@ -14,7 +14,7 @@ task-defaults:
     treeherder:
         kind: test
         tier: 1
-    worker-type: t-linux-docker-amd
+    worker-type: b-linux-docker-large-amd
     worker:
         docker-image: {in-tree: android-build}
         env:
