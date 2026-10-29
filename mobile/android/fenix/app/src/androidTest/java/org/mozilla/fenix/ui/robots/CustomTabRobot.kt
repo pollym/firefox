@@ -44,6 +44,7 @@ import org.mozilla.fenix.helpers.TestHelper.mDevice
 import org.mozilla.fenix.helpers.TestHelper.packageName
 import org.mozilla.fenix.helpers.TestHelper.waitForAppWindowToBeUpdated
 import org.mozilla.fenix.helpers.TestHelper.waitForObjects
+import org.mozilla.fenix.pdf.PdfToolsTestTag
 
 /** Implementation of the robot pattern for Custom tabs */
 class CustomTabRobot(private val composeTestRule: ComposeTestRule) {
@@ -175,6 +176,25 @@ class CustomTabRobot(private val composeTestRule: ComposeTestRule) {
         Log.i(TAG, "verifyCustomTabActionButton: Trying to verify that the custom tab action button is displayed")
         composeTestRule.onNodeWithContentDescription(customTabActionButtonDescription).assertIsDisplayed()
         Log.i(TAG, "verifyCustomTabActionButton: Verified that the custom tab action button is displayed")
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    fun verifyPDFReaderToolbarItems() {
+        Log.i(TAG, "verifyPDFReaderToolbarItems: Waiting for $waitingTime until the PDF tools bar exists")
+        composeTestRule.waitUntilAtLeastOneExists(hasTestTag(PdfToolsTestTag.BAR), waitingTime)
+        Log.i(TAG, "verifyPDFReaderToolbarItems: Waited for $waitingTime until the PDF tools bar exists")
+        listOf(
+                R.string.pdf_tools_sign_content_description_2,
+                R.string.pdf_tools_download_content_description,
+                R.string.pdf_tools_print_content_description,
+                R.string.pdf_tools_share_content_description,
+            )
+            .forEach { resId ->
+                val description = getStringResource(resId)
+                Log.i(TAG, "verifyPDFReaderToolbarItems: Trying to verify that $description is displayed")
+                composeTestRule.onNodeWithContentDescription(description).assertIsDisplayed()
+                Log.i(TAG, "verifyPDFReaderToolbarItems: Verified that $description is displayed")
+            }
     }
 
     fun verifyCustomTabsMainMenuItems(
