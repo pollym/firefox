@@ -211,6 +211,8 @@
     <string name="pref_key_toolbar_has_shown_tab_swipe_cfr">pref_key_has_shown_tab_swipe_cfr</string>
     <string name="pref_key_toolbar_expanded" translatable="false">pref_key_toolbar_expanded</string>
     <string name="pref_key_toolbar_focus_mode" translatable="false">pref_key_toolbar_focus_mode</string>
+    <string name="pref_key_homepage_search_location_header" translatable="false">pref_key_homepage_search_location_header</string>
+    <string name="pref_key_homepage_search_location_top" translatable="false">pref_key_homepage_search_location_top</string>
 
     <!-- Tab bar Settings -->
     <string name="pref_key_tab_bar_top" translatable="false">pref_key_tab_bar_top</string>
