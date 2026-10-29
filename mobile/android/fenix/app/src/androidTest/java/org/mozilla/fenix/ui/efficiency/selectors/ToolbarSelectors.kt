@@ -6,6 +6,7 @@ package org.mozilla.fenix.ui.efficiency.selectors
 
 import mozilla.components.compose.browser.toolbar.concept.BrowserToolbarTestTags.ADDRESSBAR_URL_BOX
 import mozilla.components.compose.browser.toolbar.concept.BrowserToolbarTestTags.TABS_COUNTER
+import mozilla.components.feature.summarize.R as summarizeR
 import mozilla.components.ui.tabcounter.R as tabcounterR
 import org.mozilla.fenix.R
 import org.mozilla.fenix.components.toolbar.BrowserToolbarTestTags.SITE_INFO_INSECURE_CONNECTION
@@ -211,6 +212,13 @@ object ToolbarSelectors : SelectorContainer {
             strategy = SelectorStrategy.COMPOSE_BY_CONTENT_DESCRIPTION,
             value = "Back",
             description = "Simple toolbar back button",
+        )
+
+    val SIMPLE_TOOLBAR_SUMMARIZE_PAGES_BUTTON =
+        Selector(
+            strategy = SelectorStrategy.COMPOSE_BY_CONTENT_DESCRIPTION,
+            value = getStringResource(summarizeR.string.mozac_summarize_settings_summarize_pages),
+            description = "Simple toolbar summarize pages button",
         )
 
     val SITE_INFO_BUTTON =
