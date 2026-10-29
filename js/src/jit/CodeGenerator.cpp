@@ -3517,16 +3517,6 @@ void CodeGenerator::visitRegExpSearcher(LRegExpSearcher* lir) {
     Register input = ToRegister(lir->string());
     Register regexp = ToRegister(lir->regexp());
 
-    AllocatableGeneralRegisterSet regs(GeneralRegisterSet::All());
-    regs.take(lastIndex);
-    regs.take(input);
-    regs.take(regexp);
-    Register temp = regs.takeAny();
-
-    masm.computeEffectiveAddress(
-        Address(masm.getStackPointer(), InputOutputDataSize), temp);
-
-    pushArg(temp);
     pushArg(lastIndex);
     pushArg(input);
     pushArg(regexp);
@@ -3534,7 +3524,7 @@ void CodeGenerator::visitRegExpSearcher(LRegExpSearcher* lir) {
     // We are not using oolCallVM because we are in a Call, and that live
     // registers are already saved by the the register allocator.
     using Fn = bool (*)(JSContext* cx, HandleObject regexp, HandleString input,
-                        int32_t lastIndex, MatchPairs* pairs, int32_t* result);
+                        int32_t lastIndex, int32_t* result);
     callVM<Fn, RegExpSearcherRaw>(lir);
 
     masm.jump(ool.rejoin());

@@ -5248,7 +5248,7 @@ uint64_t ICInterpretOps(uint64_t arg0, uint64_t arg1, ICStub* stub,
           } else {
             int32_t result = 0;
             if (!RegExpSearcherRaw(cx, regexpRooted, inputRooted, lastIndex,
-                                   nullptr, &result)) {
+                                   &result)) {
               ctx.error = PBIResult::Error;
               return IC_ERROR_SENTINEL();
             }
