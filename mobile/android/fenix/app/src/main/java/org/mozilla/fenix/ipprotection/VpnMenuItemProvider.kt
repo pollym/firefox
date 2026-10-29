@@ -59,16 +59,16 @@ class VpnMenuItemProvider(
     private val target: MenuTarget,
     scope: CoroutineScope,
 ) : MenuItemProvider {
-    override val itemFlow: StateFlow<MenuItem?> =
+    override val itemsFlow: StateFlow<List<MenuItem>> =
         if (target == MenuTarget.CustomizeMenu) {
-            MutableStateFlow(DEFAULT_MENU_ITEM).asStateFlow()
+            MutableStateFlow(listOf(DEFAULT_MENU_ITEM)).asStateFlow()
         } else {
             ipProtectionStore.stateFlow
-                .map { it.ipProtectionMenuItem() }
+                .map { listOfNotNull(it.ipProtectionMenuItem()) }
                 .stateIn(
                     scope = scope,
                     started = SharingStarted.Eagerly,
-                    initialValue = ipProtectionStore.state.ipProtectionMenuItem(),
+                    initialValue = listOfNotNull(ipProtectionStore.state.ipProtectionMenuItem()),
                 )
         }
 

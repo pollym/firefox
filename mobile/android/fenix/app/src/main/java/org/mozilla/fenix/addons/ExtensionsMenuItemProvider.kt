@@ -96,10 +96,11 @@ class ExtensionsMenuItemProvider(
 
     private val isCustomTab = target is MenuTarget.CustomTab
 
-    override val itemFlow: StateFlow<MenuItem?> =
+    override val itemsFlow: StateFlow<List<MenuItem>> =
         when (target) {
-            MenuTarget.Home -> MutableStateFlow<MenuItem?>(extensions.value.toExtensionsManagerMenuItem(context))
-            MenuTarget.CustomizeMenu -> MutableStateFlow<MenuItem?>(DEFAULT_MENU_ITEM)
+            MenuTarget.Home ->
+                MutableStateFlow<List<MenuItem>>(listOf(extensions.value.toExtensionsManagerMenuItem(context)))
+            MenuTarget.CustomizeMenu -> MutableStateFlow<List<MenuItem>>(listOf(DEFAULT_MENU_ITEM))
             MenuTarget.BrowserTab -> extensions.mapToMenuItem(viewLifecycleScope) { it.toMenuItem(target, context) }
             is MenuTarget.CustomTab ->
                 extensions.mapToMenuItem(viewLifecycleScope) { it.toCustomTabMenuItem(target, context) }
@@ -441,13 +442,14 @@ private data class MenuAddon(
 private fun StateFlow<ExtensionsStatus>.mapToMenuItem(
     scope: CoroutineScope,
     toMenuItem: (ExtensionsStatus) -> MenuItem,
-): StateFlow<MenuItem?> =
-    map(toMenuItem)
-        .stateIn(
-            scope = scope,
-            started = SharingStarted.Eagerly,
-            initialValue = toMenuItem(value),
-        )
+): StateFlow<List<MenuItem>> = map {
+    listOf(toMenuItem(it))
+}
+    .stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = listOf(toMenuItem(value)),
+    )
 
 /**
  * Whether the user's extensions offer nothing for this page and there is nothing to recommend them either.

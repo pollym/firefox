@@ -66,14 +66,14 @@ class VpnMenuItemProviderTest {
     fun `GIVEN the user is not eligible WHEN building the menu item THEN don't show it`() = runTest {
         val provider = provider(IPProtectionStore(IPProtectionState()))
 
-        assertNull(provider.itemFlow.value)
+        assertTrue(provider.itemsFlow.value.isEmpty())
     }
 
     @Test
     fun `GIVEN IP protection is off WHEN building the menu item THEN show it as a switch that is off`() = runTest {
         val provider = provider(eligibleStore(Uninitialized))
 
-        assertEquals(expectedItem(), provider.itemFlow.value)
+        assertEquals(expectedItem(), provider.itemsFlow.value.single())
     }
 
     @Test
@@ -85,7 +85,7 @@ class VpnMenuItemProviderTest {
                 badgeTextRes = R.string.preferences_ip_protection_on,
                 badgeState = MenuItemState.ACTIVE,
             ),
-            provider.itemFlow.value,
+            provider.itemsFlow.value.single(),
         )
     }
 
@@ -104,7 +104,7 @@ class VpnMenuItemProviderTest {
 
             assertEquals(
                 expectedItem(badgeTextRes = R.string.ip_protection_menu_try_vpn_cta, role = Button),
-                provider.itemFlow.value,
+                provider.itemsFlow.value.single(),
             )
         }
 
@@ -130,7 +130,7 @@ class VpnMenuItemProviderTest {
                 text = Text.Resource(R.string.ip_protection_menu_limit_reached, listOf(5L)),
                 state = MenuItemState.WARNING,
             ),
-            (provider.itemFlow.value as StandardMenuItem).summary,
+            (provider.itemsFlow.value.single() as StandardMenuItem).summary,
         )
     }
 
@@ -138,7 +138,7 @@ class VpnMenuItemProviderTest {
     fun `GIVEN the data limit is unknown WHEN building the menu item THEN don't show a summary`() = runTest {
         val provider = provider(eligibleStore(Uninitialized))
 
-        assertNull((provider.itemFlow.value as StandardMenuItem).summary)
+        assertNull((provider.itemsFlow.value.single() as StandardMenuItem).summary)
     }
 
     @Test
@@ -157,7 +157,7 @@ class VpnMenuItemProviderTest {
                 onClickEvent = null,
                 state = MenuItemState.DEFAULT,
             ),
-            provider.itemFlow.value,
+            provider.itemsFlow.value.single(),
         )
     }
 
@@ -167,12 +167,12 @@ class VpnMenuItemProviderTest {
         val store = eligibleStore(Uninitialized)
         val provider = provider(store)
 
-        assertEquals(expectedItem(), provider.itemFlow.value)
+        assertEquals(expectedItem(), provider.itemsFlow.value.single())
 
         store.dispatch(IPProtectionAction.EligibilityAction.EligibilityChanged(EligibilityStatus.Ineligible))
         runCurrent()
 
-        assertNull(provider.itemFlow.value)
+        assertTrue(provider.itemsFlow.value.isEmpty())
     }
 
     @Test
@@ -256,7 +256,7 @@ class VpnMenuItemProviderTest {
         listOf(Authorized.Idle, Authorized.Active).forEach { status ->
             val provider = provider(eligibleStore(status))
 
-            val events = requireNotNull(provider.itemFlow.value).reachableEvents()
+            val events = provider.itemsFlow.value.single().reachableEvents()
 
             assertTrue(events.all { provider.handles(it) }, "Not all of $events are handled")
             assertFalse(provider.handles(MenuAction.Navigate.Settings))

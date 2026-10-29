@@ -96,7 +96,7 @@ class MenuItemProvidersFactoryTest {
         val registry =
             MenuItemsRegistry(configuration = MenuConfigurations.home(), resolver = factory::buildProviderFor)
 
-        val shown = registry.providers.filterValues { it.itemFlow.value != null }.keys
+        val shown = registry.providers.filterValues { it.itemsFlow.value.isNotEmpty() }.keys
         assertEquals(
             listOf(
                 FenixMenuItem.DefaultBrowserBanner,
@@ -114,7 +114,7 @@ class MenuItemProvidersFactoryTest {
             shown.toList(),
         )
         registry.providers.values
-            .mapNotNull { it.itemFlow.value }
+            .flatMap { it.itemsFlow.value }
             .flatMap { it.reachableEvents() }
             .forEach { event ->
                 assertEquals(1, registry.providers.values.count { it.handles(event) }, "Handlers of $event")

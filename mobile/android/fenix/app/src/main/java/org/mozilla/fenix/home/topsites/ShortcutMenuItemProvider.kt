@@ -65,21 +65,23 @@ class ShortcutMenuItemProvider(
 ) : MenuItemProvider {
     // Without a page shown there is nothing to add to shortcuts. Knowing whether the shown page already is one means
     // reading from disk, which the menu should not wait for, so it starts out offered as not being a shortcut.
-    private val mutableItem =
-        MutableStateFlow<MenuItem?>(
-            if (target == MenuTarget.CustomizeMenu) {
-                DEFAULT_MENU_ITEM
-            } else {
-                DEFAULT_MENU_ITEM.copy(onClickEvent = MenuAction.AddShortcut).takeIf {
-                    areShortcutsEnabled && target.browserSessionFrom(browserStore.state) != null
+    private val mutableItems =
+        MutableStateFlow<List<MenuItem>>(
+            listOfNotNull(
+                if (target == MenuTarget.CustomizeMenu) {
+                    DEFAULT_MENU_ITEM
+                } else {
+                    DEFAULT_MENU_ITEM.copy(onClickEvent = MenuAction.AddShortcut).takeIf {
+                        areShortcutsEnabled && target.browserSessionFrom(browserStore.state) != null
+                    }
                 }
-            }
+            )
         )
 
-    override val itemFlow: StateFlow<MenuItem?> = mutableItem.asStateFlow()
+    override val itemsFlow: StateFlow<List<MenuItem>> = mutableItems.asStateFlow()
 
     init {
-        if (target != MenuTarget.CustomizeMenu && mutableItem.value != null) {
+        if (target != MenuTarget.CustomizeMenu && mutableItems.value.isNotEmpty()) {
             scope.launch { resolveShortcut() }
         }
     }
@@ -88,7 +90,7 @@ class ShortcutMenuItemProvider(
         val url = target.browserSessionFrom(browserStore.state)?.getTabUrl() ?: return
         pinnedSiteStorage.getPinnedSites().firstOrNull { it.url == url } ?: return
 
-        mutableItem.value = REMOVE_SHORTCUT_ITEM
+        mutableItems.value = listOf(REMOVE_SHORTCUT_ITEM)
     }
 
     override fun handles(event: MenuEvent) = event == MenuAction.AddShortcut || event == MenuAction.RemoveShortcut

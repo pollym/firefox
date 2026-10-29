@@ -44,16 +44,18 @@ class QuitMenuItemProvider(
     private val applicationScope: CoroutineScope,
     private val target: MenuTarget,
 ) : MenuItemProvider {
-    override val itemFlow: StateFlow<MenuItem?> =
+    override val itemsFlow: StateFlow<List<MenuItem>> =
         if (target == MenuTarget.CustomizeMenu) {
-            MutableStateFlow(defaultMenuItem(appName))
+            MutableStateFlow(listOf(defaultMenuItem(appName)))
         } else {
             MutableStateFlow(
-                when (deletesBrowsingDataOnQuit) {
-                    true -> defaultMenuItem(appName).copy(onClickEvent = MenuAction.DeleteBrowsingDataAndQuit)
+                listOfNotNull(
+                    when (deletesBrowsingDataOnQuit) {
+                        true -> defaultMenuItem(appName).copy(onClickEvent = MenuAction.DeleteBrowsingDataAndQuit)
 
-                    else -> null
-                }
+                        else -> null
+                    }
+                )
             )
         }
 
