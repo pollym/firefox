@@ -8,4 +8,5 @@ review/index
 AudioStream
 AudioSinkWrapper
 SpeechRecognition
+Diagnostics
 ```

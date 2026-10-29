@@ -10,6 +10,8 @@ These rules do not apply to vendored code, for example
 Before you change media code, look for a design doc of that area in
 `dom/media/docs/` and read it. `dom/media/docs/index.md` lists the docs.
 
+Read `dom/media/docs/Diagnostics.md` when you read a media bug report.
+
 ## Review checklists
 
 - Read the checklists in `dom/media/docs/review/` (memory safety, threading,
