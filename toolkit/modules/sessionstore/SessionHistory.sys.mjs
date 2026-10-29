@@ -264,7 +264,6 @@ var SessionHistoryInternal = {
     if (shEntry.stateData != null) {
       let stateData = shEntry.stateData;
       entry.structuredCloneState = stateData.getDataAsBase64();
-      entry.structuredCloneVersion = stateData.formatVersion;
     }
 
     if (shEntry.wireframe != null) {
@@ -493,10 +492,7 @@ var SessionHistoryInternal = {
         "@mozilla.org/docshell/structured-clone-container;1"
       ].createInstance(Ci.nsIStructuredCloneContainer);
 
-      stateData.initFromBase64(
-        entry.structuredCloneState,
-        entry.structuredCloneVersion
-      );
+      stateData.initFromBase64(entry.structuredCloneState);
       shEntry.stateData = stateData;
     }
 
