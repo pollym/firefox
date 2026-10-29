@@ -1286,6 +1286,7 @@ class DesktopUnittest(TestingMixin, MercurialScript, MozbaseMixin, CodeCoverageM
 
     def run_tests(self):
         self._remove_xen_clipboard()
+        self.mkdir_p(self.query_abs_dirs()["abs_blob_upload_dir"])
         self._report_system_info()
         self.start_time = datetime.now()
         for category in SUITE_CATEGORIES:
@@ -1382,8 +1383,6 @@ class DesktopUnittest(TestingMixin, MercurialScript, MozbaseMixin, CodeCoverageM
                 env["MOZ_UPLOAD_DIR"] = self.query_abs_dirs()["abs_blob_upload_dir"]
                 env["MINIDUMP_SAVE_PATH"] = self.query_abs_dirs()["abs_blob_upload_dir"]
                 env["RUST_BACKTRACE"] = "full"
-                if not os.path.isdir(env["MOZ_UPLOAD_DIR"]):
-                    self.mkdir_p(env["MOZ_UPLOAD_DIR"])
 
                 if self.config["allow_software_gl_layers"]:
                     env["MOZ_LAYERS_ALLOW_SOFTWARE_GL"] = "1"

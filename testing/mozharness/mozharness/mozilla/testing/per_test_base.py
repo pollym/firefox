@@ -622,5 +622,6 @@ class SingleTestMixin:
         path = os.path.join(dir, TEST_SUMMARY_FILENAME)
         if not self.test_summary_started:
             self.test_summary_started = True
+            os.makedirs(dir, exist_ok=True)
             open(path, "w", encoding="utf-8").close()
         return path
