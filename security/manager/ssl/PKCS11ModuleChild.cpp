@@ -386,7 +386,7 @@ ipc::IPCResult PKCS11ModuleChild::RecvFindObjects(
   mAuthTaskQueue->Dispatch(NS_NewRunnableFunction(
       __func__, [searchingFor(aSearchingFor), self = RefPtr{this},
                  resolver(std::move(aResolver))] {
-        nsTArray<IPCClientCertObject> objects;
+        nsTArray<CryptokiObject> objects;
         PK11CertListType certListType;
         switch (searchingFor) {
           case SearchingFor::ClientCertificates:

@@ -1895,11 +1895,11 @@ extern "C" {
 
 #if defined(MOZ_WIDGET_ANDROID) || \
     (defined(NIGHTLY_BUILD) && !defined(MOZ_NO_SMART_CARDS))
-const uint8_t kIPCClientCertsObjectTypeCert = 1;
+const uint8_t kCryptokiObjectTypeCert = 1;
 #endif
 #if defined(NIGHTLY_BUILD) && !defined(MOZ_NO_SMART_CARDS)
-const uint8_t kIPCClientCertsObjectTypeRSAKey = 2;
-const uint8_t kIPCClientCertsObjectTypeECKey = 3;
+const uint8_t kCryptokiObjectTypeRSAKey = 2;
+const uint8_t kCryptokiObjectTypeECKey = 3;
 #endif  // NIGHTLY_BUILD && !MOZ_NO_SMART_CARDS
 
 using FindObjectsCallback = void (*)(uint8_t type, size_t id_len,
@@ -1931,7 +1931,7 @@ void AndroidDoFindObjects(FindObjectsCallback cb, void* ctx) {
     jni::ByteArray::LocalRef der = clientAuthCertificate->GetCertificateBytes();
     jni::ByteArray::LocalRef keyParameters =
         clientAuthCertificate->GetKeyParameters();
-    cb(kIPCClientCertsObjectTypeCert, der->Length(),
+    cb(kCryptokiObjectTypeCert, der->Length(),
        reinterpret_cast<uint8_t*>(der->GetElements().Elements()), 0, nullptr,
        ctx);
     cb(clientAuthCertificate->GetType(), keyParameters->Length(),
@@ -1943,7 +1943,7 @@ void AndroidDoFindObjects(FindObjectsCallback cb, void* ctx) {
     if (issuersBytes) {
       for (size_t i = 0; i < issuersBytes->Length(); i++) {
         jni::ByteArray::LocalRef issuer = issuersBytes->GetElement(i);
-        cb(kIPCClientCertsObjectTypeCert, issuer->Length(),
+        cb(kCryptokiObjectTypeCert, issuer->Length(),
            reinterpret_cast<uint8_t*>(issuer->GetElements().Elements()), 0,
            nullptr, ctx);
       }
@@ -1989,7 +1989,7 @@ void RemoteCertsDoFindObjects(SearchingFor searchingFor, FindObjectsCallback cb,
 
   Monitor monitor{__func__};
   bool done = false;
-  nsTArray<IPCClientCertObject> objects;
+  nsTArray<CryptokiObject> objects;
   nsresult rv = NS_DispatchToMainThread(NS_NewRunnableFunction(
       __func__, [searchingFor, &monitor, &done, &objects] {
         RefPtr<PKCS11ModuleDB> pkcs11ModuleDB(PKCS11ModuleDB::GetSingleton());
@@ -2022,30 +2022,28 @@ void RemoteCertsDoFindObjects(SearchingFor searchingFor, FindObjectsCallback cb,
   }
   for (const auto& object : objects) {
     switch (object.type()) {
-      case IPCClientCertObject::TECKey:
-        cb(kIPCClientCertsObjectTypeECKey, object.get_ECKey().params().Length(),
+      case CryptokiObject::TECKey:
+        cb(kCryptokiObjectTypeECKey, object.get_ECKey().params().Length(),
            object.get_ECKey().params().Elements(),
            object.get_ECKey().cert().Length(),
            object.get_ECKey().cert().Elements(), ctx);
         break;
-      case IPCClientCertObject::TRSAKey:
-        cb(kIPCClientCertsObjectTypeRSAKey,
-           object.get_RSAKey().modulus().Length(),
+      case CryptokiObject::TRSAKey:
+        cb(kCryptokiObjectTypeRSAKey, object.get_RSAKey().modulus().Length(),
            object.get_RSAKey().modulus().Elements(),
            object.get_RSAKey().cert().Length(),
            object.get_RSAKey().cert().Elements(), ctx);
         break;
-      case IPCClientCertObject::TCertificate: {
+      case CryptokiObject::TCertificate: {
         uint8_t serverAuthTrustAnchor =
             object.get_Certificate().serverAuthTrustAnchor() ? 1 : 0;
-        cb(kIPCClientCertsObjectTypeCert,
-           object.get_Certificate().der().Length(),
+        cb(kCryptokiObjectTypeCert, object.get_Certificate().der().Length(),
            object.get_Certificate().der().Elements(), 1, &serverAuthTrustAnchor,
            ctx);
         break;
       }
       default:
-        MOZ_ASSERT_UNREACHABLE("unhandled IPCClientCertObject type");
+        MOZ_ASSERT_UNREACHABLE("unhandled CryptokiObject type");
         break;
     }
   }

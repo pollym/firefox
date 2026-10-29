@@ -77,7 +77,7 @@ class PKCS11ModuleDB : public nsIPKCS11ModuleDB {
                                                const nsCString& oldPassword,
                                                const nsCString& newPassword);
 
-  typedef MozPromise<nsTArray<IPCClientCertObject>, nsresult, true>
+  typedef MozPromise<nsTArray<CryptokiObject>, nsresult, true>
       FindObjectsPromise;
   RefPtr<FindObjectsPromise> FindObjects(SearchingFor searchingFor);
 

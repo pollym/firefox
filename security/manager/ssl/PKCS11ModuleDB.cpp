@@ -805,7 +805,7 @@ PKCS11ModuleDB::FindObjectsGivenParent(
   return parent->SendFindObjects(searchingFor)
       ->Then(
           GetCurrentSerialEventTarget(), __func__,
-          [](nsTArray<IPCClientCertObject>&& objects) {
+          [](nsTArray<CryptokiObject>&& objects) {
             return FindObjectsPromise::CreateAndResolve(std::move(objects),
                                                         __func__);
           },

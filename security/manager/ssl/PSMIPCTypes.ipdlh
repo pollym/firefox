@@ -20,9 +20,9 @@ struct Certificate {
   bool serverAuthTrustAnchor; // true if this is a TLS server auth trust anchor
 };
 
-// Helper type for sending keys and certificates over IPC for use by IPC client
-// certs.
-union IPCClientCertObject {
+// Helper type for sending keys and certificates over IPC for use by remote
+// PKCS#11 modules.
+union CryptokiObject {
   ECKey;
   RSAKey;
   Certificate;
