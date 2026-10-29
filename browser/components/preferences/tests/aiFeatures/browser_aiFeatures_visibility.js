@@ -46,12 +46,9 @@ describe("settings ai features", () => {
       let generalWin = generalDoc.documentGlobal;
       await maybeNavigateToPane("tabsBrowsing", generalWin);
 
-      let linkPreviewSetting = generalWin.Preferences.getSetting(
-        "linkPreviewKeyPoints"
-      );
-      let linkPreviewControl = generalDoc.getElementById(
-        "linkPreviewKeyPoints"
-      );
+      let linkPreviewSetting =
+        generalWin.Preferences.getSetting("linkPreviewEnabled");
+      let linkPreviewControl = generalDoc.getElementById("linkPreviewEnabled");
       Assert.ok(
         BrowserTestUtils.isVisible(linkPreviewControl),
         "Link Preview control is visible"
@@ -267,12 +264,9 @@ describe("settings ai features", () => {
       let generalWin = generalDoc.documentGlobal;
       await maybeNavigateToPane("tabsBrowsing", generalWin);
 
-      let linkPreviewSetting = generalWin.Preferences.getSetting(
-        "linkPreviewKeyPoints"
-      );
-      let linkPreviewControl = generalDoc.getElementById(
-        "linkPreviewKeyPoints"
-      );
+      let linkPreviewSetting =
+        generalWin.Preferences.getSetting("linkPreviewEnabled");
+      let linkPreviewControl = generalDoc.getElementById("linkPreviewEnabled");
       Assert.ok(
         !BrowserTestUtils.isVisible(linkPreviewControl),
         "Link Preview control is hidden when blocked"

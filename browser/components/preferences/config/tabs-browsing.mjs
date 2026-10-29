@@ -447,19 +447,21 @@ Preferences.addSetting({
 Preferences.addSetting({
   id: "linkPreviewEnabled",
   pref: "browser.ml.linkPreview.enabled",
-});
-Preferences.addSetting({
-  id: "linkPreviewKeyPoints",
-  pref: "browser.ml.linkPreview.optin",
   deps: ["aiControlDefault", "aiControlLinkPreviews"],
   visible: ({ aiControlDefault, aiControlLinkPreviews }) => {
     return (
       window.canShowAiFeature(aiControlLinkPreviews, aiControlDefault) &&
-      // LinkPreview.canShowKeyPoints depends on the global genai pref.
       // @ts-ignore bug 1996860
-      lazy.LinkPreview.canShowKeyPoints
+      lazy.LinkPreview.canShowPreferences
     );
   },
+});
+Preferences.addSetting({
+  id: "linkPreviewKeyPoints",
+  pref: "browser.ml.linkPreview.optin",
+  // LinkPreview.canShowKeyPoints depends on the global genai pref.
+  // @ts-ignore bug 1996860
+  visible: () => lazy.LinkPreview.canShowKeyPoints,
 });
 Preferences.addSetting({
   id: "linkPreviewLongPress",
