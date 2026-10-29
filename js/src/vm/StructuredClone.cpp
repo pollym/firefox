@@ -1915,7 +1915,7 @@ bool JSStructuredCloneWriter::traverseSavedFrame(HandleObject obj) {
     return false;
   }
 
-  val = Int32Value(*savedFrame->getColumn().addressOfValueForTranscode());
+  val = Int32Value(savedFrame->getColumn().rawValue());
   if (!writePrimitive(val)) {
     return false;
   }
@@ -3792,11 +3792,18 @@ JSObject* JSStructuredCloneReader::readSavedFrameHeader(
   }
   savedFrame->initLine(line);
 
-  JS::TaggedColumnNumberOneOrigin column;
-  if (!readUint32(column.addressOfValueForTranscode())) {
+  uint32_t rawColumn;
+  if (!readUint32(&rawColumn)) {
     return nullptr;
   }
-  savedFrame->initColumn(column);
+  auto column = JS::TaggedColumnNumberOneOrigin::fromRawChecked(rawColumn);
+  if (column.isNothing()) {
+    JS_ReportErrorNumberASCII(context(), GetErrorMessage, nullptr,
+                              JSMSG_SC_BAD_SERIALIZED_DATA,
+                              "invalid saved frame column");
+    return nullptr;
+  }
+  savedFrame->initColumn(*column);
 
   // Don't specify a source ID when reading a cloned saved frame, as these IDs
   // are only valid within a specific process.
