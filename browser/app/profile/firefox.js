@@ -2899,9 +2899,6 @@ pref("extensions.webcompat.smartblockEmbeds.enabled", true);
 pref("privacy.exposeContentTitleInWindow", true);
 pref("privacy.exposeContentTitleInWindow.pbm", true);
 
-// Run media transport in a separate process?
-pref("media.peerconnection.mtransport_process", true);
-
 // For speculatively warming up tabs to improve perceived
 // performance while using the async tab switcher.
 pref("browser.tabs.remote.warmup.enabled", true);

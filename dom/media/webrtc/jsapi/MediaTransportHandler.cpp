@@ -4,7 +4,6 @@
 
 #include "MediaTransportHandler.h"
 
-#include "MediaTransportHandlerIPC.h"
 #include "nsITimer.h"
 #include "transport/dtlsidentity.h"
 #include "transport/nricemediastream.h"
@@ -18,7 +17,6 @@
 // Config stuff
 #include "mozilla/IceServerParser.h"
 #include "mozilla/Preferences.h"
-#include "mozilla/StaticPrefs_network.h"
 #include "mozilla/dom/RTCConfigurationBinding.h"
 
 // Logging stuff
@@ -539,14 +537,8 @@ class MediaTransportHandlerLocal final : public MediaTransportHandler {
 
 /* static */
 already_AddRefed<MediaTransportHandler> MediaTransportHandler::Create() {
-  RefPtr<MediaTransportHandler> result;
-  if (XRE_IsContentProcess() &&
-      Preferences::GetBool("media.peerconnection.mtransport_process") &&
-      StaticPrefs::network_process_enabled()) {
-    result = MakeRefPtr<MediaTransportHandlerIPC>();
-  } else {
-    result = MakeRefPtr<MediaTransportHandlerLocal>();
-  }
+  RefPtr<MediaTransportHandler> result =
+      MakeRefPtr<MediaTransportHandlerLocal>();
   result->Initialize();
   return result.forget();
 }
