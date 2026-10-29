@@ -204,6 +204,8 @@ class WebTransport final : public nsISupports, public nsWrapperCache {
   WebTransportReliabilityMode mReliability;
   nsString mProtocol;
   RefPtr<Headers> mResponseHeaders;
+  Nullable<uint16_t> mAnticipatedConcurrentIncomingUnidirectionalStreams;
+  Nullable<uint16_t> mAnticipatedConcurrentIncomingBidirectionalStreams;
   // Incoming streams get queued here.  Use a TArray though it's working as
   // a FIFO - rarely will there be more than one entry in these arrays, so
   // the overhead of mozilla::Queue is unneeded

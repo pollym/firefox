@@ -41,6 +41,10 @@ class WebTransportParent : public PWebTransportParent,
               nsTArray<nsString>&& aProtocols,
               nsTArray<WebTransportHeader>&& aHeaders,
               nsTArray<WebTransportHash>&& aServerCertHashes,
+              const mozilla::Maybe<uint16_t>&
+                  aAnticipatedConcurrentIncomingUnidirectionalStreams,
+              const mozilla::Maybe<uint16_t>&
+                  aAnticipatedConcurrentIncomingBidirectionalStreams,
               Endpoint<PWebTransportParent>&& aParentEndpoint,
               std::function<void(std::tuple<const nsresult&, const uint8_t&,
                                             const uint64_t&>)>&& aResolver);

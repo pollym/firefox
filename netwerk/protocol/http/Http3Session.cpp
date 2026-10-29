@@ -3277,6 +3277,39 @@ nsresult Http3Session::GetWebTransportSessionProtocol(uint64_t aSessionId,
   return mHttp3Connection->GetWebTransportSessionProtocol(aSessionId,
                                                           aProtocol);
 }
+
+void Http3Session::
+    SetWebTransportAnticipatedConcurrentIncomingUnidirectionalStreams(
+        uint64_t aSessionId, uint16_t aValue) {
+  LOG(
+      ("Http3Session::SetWebTransportAnticipatedConcurrentIncoming"
+       "UnidirectionalStreams %p sessionId=0x%" PRIx64 " value=%u",
+       this, aSessionId, aValue));
+  nsresult rv =
+      mHttp3Connection
+          ->SetWebTransportAnticipatedConcurrentIncomingUnidirectionalStreams(
+              aSessionId, aValue);
+  if (NS_FAILED(rv)) {
+    LOG(("  failed, no live WebTransport session for that id"));
+  }
+}
+
+void Http3Session::
+    SetWebTransportAnticipatedConcurrentIncomingBidirectionalStreams(
+        uint64_t aSessionId, uint16_t aValue) {
+  LOG(
+      ("Http3Session::SetWebTransportAnticipatedConcurrentIncoming"
+       "BidirectionalStreams %p sessionId=0x%" PRIx64 " value=%u",
+       this, aSessionId, aValue));
+  nsresult rv =
+      mHttp3Connection
+          ->SetWebTransportAnticipatedConcurrentIncomingBidirectionalStreams(
+              aSessionId, aValue);
+  if (NS_FAILED(rv)) {
+    LOG(("  failed, no live WebTransport session for that id"));
+  }
+}
+
 void Http3Session::SendHTTPDatagram(uint64_t aStreamId,
                                     nsTArray<uint8_t>& aData,
                                     uint64_t aTrackingId) {

@@ -184,6 +184,8 @@ parent:
       nsString[] aProtocols,
       WebTransportHeader[] aHeaders,
       WebTransportHash[] aServerCertHashes,
+      uint16_t? aAnticipatedConcurrentIncomingUnidirectionalStreams,
+      uint16_t? aAnticipatedConcurrentIncomingBidirectionalStreams,
       Endpoint<PWebTransportParent> aParentEndpoint)
       returns(nsresult rv, uint8_t aReliability, uint64_t aMaxDatagramSize); // WebTransportReliabityMode enum
 

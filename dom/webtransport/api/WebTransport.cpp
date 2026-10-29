@@ -493,12 +493,23 @@ void WebTransport::Init(const GlobalObject& aGlobal, const nsAString& aURL,
   // Step 15: Let anticipatedConcurrentIncomingBidirectionalStreams be
   // options's anticipatedConcurrentIncomingBidirectionalStreams.
 
+  Maybe<uint16_t> anticipatedUni;
+  if (!mAnticipatedConcurrentIncomingUnidirectionalStreams.IsNull()) {
+    anticipatedUni =
+        Some(mAnticipatedConcurrentIncomingUnidirectionalStreams.Value());
+  }
+  Maybe<uint16_t> anticipatedBidi;
+  if (!mAnticipatedConcurrentIncomingBidirectionalStreams.IsNull()) {
+    anticipatedBidi =
+        Some(mAnticipatedConcurrentIncomingBidirectionalStreams.Value());
+  }
+
   backgroundChild
       ->SendCreateWebTransportParent(
           aURL, principal, mBrowsingContextID, ipcClientInfo, dedicated,
           requireUnreliable, (uint32_t)congestionControl, protocols,
-          requestHeaderList, std::move(aServerCertHashes),
-          std::move(parentEndpoint))
+          requestHeaderList, std::move(aServerCertHashes), anticipatedUni,
+          anticipatedBidi, std::move(parentEndpoint))
       ->Then(GetCurrentSerialEventTarget(), __func__,
              [self = RefPtr{this}](
                  PBackgroundChild::CreateWebTransportParentPromise::

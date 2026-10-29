@@ -71,7 +71,9 @@ interface nsIWebTransport : nsISupports {
                     in Array<AString> aProtocols,
                     in Array<ACString> aHeaderNames,
                     in Array<ACString> aHeaderValues,
-                    in nsIWebTransport_HTTPVersion aVersion);
+                    in nsIWebTransport_HTTPVersion aVersion,
+                    in unsigned short aAnticipatedConcurrentIncomingUnidirectionalStreams,
+                    in unsigned short aAnticipatedConcurrentIncomingBidirectionalStreams);
 
   // Asynchronously get stats. On success (NS_OK), results in exactly one
   // call to onStatsAvailable(), even if stats could not be gathered (in
@@ -131,6 +133,13 @@ interface nsIWebTransport : nsISupports {
 
   // Register a send group with a caller-provided ID.
   void registerSendGroup(in uint64_t groupId);
+
+  // Set anticipated concurrent incoming stream limits. These raise the peer's
+  // stream limit via MAX_STREAMS frames; they cannot lower it. Callable from
+  // any thread, and before the session is ready, in which case the value is
+  // applied once it comes up.
+  void setAnticipatedConcurrentIncomingUnidirectionalStreams(in unsigned short aValue);
+  void setAnticipatedConcurrentIncomingBidirectionalStreams(in unsigned short aValue);
 
   // This can be only called after onSessionReady().
   // After this point, we can retarget the underlying WebTransportSessionProxy
