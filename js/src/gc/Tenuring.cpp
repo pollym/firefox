@@ -259,7 +259,8 @@ bool TenuringTracer::onScopeEdge(Scope** scopep, const char* name) {
   return true;
 }
 
-bool TenuringTracer::onBufferEdge(void** bufferp, const char* name) {
+JSTracer::TraceBufferResult TenuringTracer::onBufferEdge(void** bufferp,
+                                                         const char* name) {
   return BufferAllocator::PromoteBuffer(this, bufferp, name, sourceIsInNursery);
 }
 
