@@ -33,6 +33,7 @@ use crate::pushconnection::{Event, PushConnection};
 const PROGRAM: &str = env!("CARGO_BIN_NAME");
 
 const COMPATIBILITY_FILENAME: &str = "compatibility.ini";
+
 /// File that every Firefox profile directory carries, used to tell a profile
 /// apart from an arbitrary directory. Currently this is compatibility.ini
 const PROFILE_MARKER: &str = COMPATIBILITY_FILENAME;
