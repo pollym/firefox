@@ -123,12 +123,19 @@ void* ReallocBuffer(JS::Zone* zone, void* alloc, size_t bytes,
 void FreeBuffer(JS::Zone* zone, void* alloc);
 
 // Indicate whether |alloc| is a buffer allocation as opposed to a fixed size GC
-// cell. Does not work for malloced memory.
-bool IsBufferAlloc(void* alloc);
+// cell or direct nursery allocation. Not guaranteed to be correct for malloced
+// memory.
+bool IsGCPointerBufferAlloc(void* alloc);
 
 #ifdef DEBUG
+
+inline void AssertIsBufferAlloc(void* alloc) {
+  MOZ_ASSERT(IsGCPointerBufferAlloc(alloc));  // Safe if true.
+}
+
 // Check whether a buffer allocation is part of the specified zone.
 bool IsBufferAllocInZone(void* alloc, JS::Zone* zone);
+
 #endif
 
 bool IsNurseryOwned(JS::Zone* zone, void* alloc);

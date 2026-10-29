@@ -550,7 +550,7 @@ BEGIN_TEST(testBufferAllocator_API) {
       void* alloc = AllocBuffer(zone, requestSize, nurseryOwned);
       CHECK(alloc);
 
-      CHECK(IsBufferAlloc(alloc));
+      CHECK(IsGCPointerBufferAlloc(alloc));
       size_t actualSize = GetAllocSize(zone, alloc);
       CHECK(actualSize == GetGoodAllocSize(requestSize));
 
@@ -638,7 +638,7 @@ BEGIN_TEST(testBufferAllocator_realloc) {
       // Realloc nullptr.
       void* alloc = ReallocBuffer(zone, nullptr, requestSize, nurseryOwned);
       CHECK(alloc);
-      CHECK(IsBufferAlloc(alloc));
+      CHECK(IsGCPointerBufferAlloc(alloc));
       CHECK(IsNurseryOwned(zone, alloc) == nurseryOwned);
       size_t actualSize = GetAllocSize(zone, alloc);
       WriteAllocData(alloc, actualSize);
@@ -771,7 +771,7 @@ BEGIN_TEST(testBufferAllocator_alignedAlloc) {
     CHECK(alloc);
     CHECK((uintptr_t(alloc) % requestSize) == 0);
 
-    CHECK(IsBufferAlloc(alloc));
+    CHECK(IsGCPointerBufferAlloc(alloc));
     size_t actualSize = GetAllocSize(zone, alloc);
     CHECK(actualSize == requestSize);
 
@@ -840,16 +840,18 @@ BEGIN_TEST(testBufferAllocator_predicatesOnOtherAllocs) {
   CHECK(buffer);
   CHECK(!isMalloced);
   CHECK(cx->nursery().isInside(buffer));
-  CHECK(!IsBufferAlloc(buffer));
+  CHECK(!IsGCPointerBufferAlloc(buffer));
 
   RootedObject obj(cx, NewPlainObject(cx));
   CHECK(obj);
   CHECK(IsInsideNursery(obj));
-  CHECK(!IsBufferAlloc(obj));
+  CHECK(!IsGCPointerBufferAlloc(obj));
 
   JS_GC(cx);
   CHECK(!IsInsideNursery(obj));
-  CHECK(!IsBufferAlloc(obj));
+  CHECK(!IsGCPointerBufferAlloc(obj));
+
+  // IsGCPointerBufferAlloc is not guaranteed to be correct for malloced memory.
 
   return true;
 }
@@ -1002,12 +1004,12 @@ class VectorObject : public NativeObject {
     MOZ_RELEASE_ASSERT(IsInsideNursery(this) == expectNurseryOwned);
 
     VectorT* vector = getVector();
-    MOZ_RELEASE_ASSERT(IsBufferAlloc(vector));
+    MOZ_RELEASE_ASSERT(IsGCPointerBufferAlloc(vector));
     MOZ_RELEASE_ASSERT(IsNurseryOwned(zone(), vector) == expectNurseryOwned);
 
     if (!vector->empty()) {
       void* ptr = vector->begin();
-      MOZ_RELEASE_ASSERT(IsBufferAlloc(ptr));
+      MOZ_RELEASE_ASSERT(IsGCPointerBufferAlloc(ptr));
       MOZ_RELEASE_ASSERT(IsNurseryOwned(zone(), ptr) == expectNurseryOwned);
     }
   }
@@ -1153,7 +1155,7 @@ class HashSetObject : public NativeObject {
     MOZ_RELEASE_ASSERT(IsInsideNursery(this) == expectNurseryOwned);
 
     HashSetT* set = getSet();
-    MOZ_RELEASE_ASSERT(IsBufferAlloc(set));
+    MOZ_RELEASE_ASSERT(IsGCPointerBufferAlloc(set));
     MOZ_RELEASE_ASSERT(IsNurseryOwned(zone(), set) == expectNurseryOwned);
   }
 

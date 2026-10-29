@@ -463,7 +463,7 @@ class BufferAllocator : public SlimLinkedListElement<BufferAllocator> {
   static inline size_t GetGoodPower2AllocSize(size_t requiredBytes);
   static inline size_t GetGoodPower2ElementCount(size_t requiredElements,
                                                  size_t elementSize);
-  static bool IsBufferAlloc(void* alloc);
+  static bool IsGCPointerBufferAlloc(void* alloc);
 
   static bool MarkBuffer(JSTracer* trc, void** bufferp, const char* name);
   static bool PromoteBuffer(JSTracer* trc, void** bufferp, const char* name,
