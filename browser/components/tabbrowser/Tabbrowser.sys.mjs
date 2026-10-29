@@ -6006,12 +6006,12 @@ export class Tabbrowser {
       selectedTabs = this.selectedTabs.filter(tab => !tab.pinned);
       this.removeTabs(selectedTabs, { metricsContext });
       this.clearMultiSelectedTabs();
-      if (
-        this.selectedTab.pinned &&
-        this.visibleTabs.length > this.pinnedTabCount
-      ) {
+      if (this.selectedTab.pinned) {
         // Select first unpinned tab if the selected tab is pinned.
-        this.tabContainer.selectedIndex = this.pinnedTabCount;
+        let firstVisibleUnpinnedTab = this.visibleTabs.find(tab => !tab.pinned);
+        if (firstVisibleUnpinnedTab) {
+          this.selectedTab = firstVisibleUnpinnedTab;
+        }
       }
     } else {
       this.removeTabs(selectedTabs, { metricsContext });
