@@ -582,35 +582,13 @@ export class UrlbarParentController {
   /**
    * Records that a search is being loaded: bumps the search-count prefs,
    * informs ASRouter, records search telemetry and adds the search query
-   * to form history. The parent-side counterpart to the content-side
-   * `_recordSearch()`.
+   * to form history.
    *
-   * @param {object} searchData
-   * @param {string} searchData.engineId
-   *   The id of the engine handling the search.
-   * @param {string} searchData.query
-   * @param {keyof typeof lazy.BrowserSearchTelemetry.KNOWN_SEARCH_SOURCES} searchData.searchSource
-   *   Where the search originated from.
-   * @param {Parameters<typeof lazy.BrowserSearchTelemetry.recordSearch>[3]} searchData.details
-   *   The search action details, per `BrowserSearchTelemetry.recordSearch()`.
-   * @param {boolean} [searchData.opensInPrivateWindow]
-   *   Whether the search opens in a new private window, in which case it's
-   *   not added to form history. If this is false but the current window
-   *   is private, it's not added either.
+   * @param {UrlbarSearchData & {browser: MozBrowser, submission?: SearchSubmissionData}} searchData
+   *   The search data, the browser where the search is loading and, if known,
+   *   the submission that is being loaded.
    */
-  recordSearch(searchData) {
-    let browser = this.browserWindow.gBrowser.selectedBrowser;
-    this.#recordSearchForBrowser({ ...searchData, browser });
-  }
-
-  /**
-   * See this.recordSearch().
-   *
-   * @param {Parameters<typeof this.recordSearch>[0] & {browser: MozBrowser, submission?: SearchSubmissionData}} searchData
-   *   The data for `recordSearch`, the browser where the search is loading
-   *   and, if known, the submission that is being loaded.
-   */
-  #recordSearchForBrowser({
+  #recordSearch({
     browser,
     engineId,
     query,
@@ -678,15 +656,15 @@ export class UrlbarParentController {
    * load opens the tab right after this call; TabOpen fires synchronously, so
    * the next-opened tab is the search tab. Reaching its browser is parent-only.
    *
-   * @param {Parameters<typeof this.recordSearch>[0] & {submission?: SearchSubmissionData}} searchData
-   *   The data for `recordSearch` and, if known, the submission being loaded.
+   * @param {UrlbarSearchData & {submission?: SearchSubmissionData}} searchData
+   *   The search data and, if known, the submission being loaded.
    * @returns {() => void}
    *   Removes the listener, for when the load fails before opening the tab.
    */
-  recordSearchInOpenedTab(searchData) {
+  #recordSearchInOpenedTab(searchData) {
     let { tabContainer } = this.browserWindow.gBrowser;
     let listener = tabEvent => {
-      this.#recordSearchForBrowser({
+      this.#recordSearch({
         ...searchData,
         browser: tabEvent.target.linkedBrowser,
       });
@@ -706,8 +684,8 @@ export class UrlbarParentController {
    * @param {object} search
    * @param {MozBrowser} search.browser
    *   The browser the search is recorded against, unless it opens in a new tab.
-   * @param {?Parameters<typeof this.recordSearch>[0]} [search.searchData]
-   *   The data for `recordSearch`, or null if this isn't a search to record.
+   * @param {?UrlbarSearchData} [search.searchData]
+   *   The search data, or null if this isn't a search to record.
    * @param {?SearchSubmissionData} [search.submission]
    *   The submission being loaded.
    */
@@ -719,7 +697,7 @@ export class UrlbarParentController {
   ) {
     let removeTabOpenListener;
     if (searchData && where.startsWith("tab")) {
-      removeTabOpenListener = this.recordSearchInOpenedTab({
+      removeTabOpenListener = this.#recordSearchInOpenedTab({
         ...searchData,
         submission,
       });
@@ -736,7 +714,7 @@ export class UrlbarParentController {
       throw ex;
     }
     if (searchData && !removeTabOpenListener) {
-      this.#recordSearchForBrowser({ ...searchData, browser, submission });
+      this.#recordSearch({ ...searchData, browser, submission });
     }
   }
 
@@ -869,8 +847,8 @@ export class UrlbarParentController {
    *   The target browser's id. Only used if `where == current` and the call
    *   isn't coming from a content process. If it's not specified and
    *   `where == current`, the currently selected tab is used.
-   * @param {?Parameters<typeof this.recordSearch>[0]} [searchData]
-   *   The data for `recordSearch`, recorded with the submission's partner
+   * @param {?UrlbarSearchData} [searchData]
+   *   The search data, recorded with the submission's partner
    *   code once the SERP is loading.
    */
   openSERP(
@@ -1083,8 +1061,8 @@ export class UrlbarParentController {
    *   target browser has gone away.
    * @param {string} [loadData.userTypedValue]
    *   The value to record as the browser's typed value, for a `current` load.
-   * @param {?Parameters<typeof this.recordSearch>[0]} [loadData.searchData]
-   *   For an engine search, the data for `recordSearch`. It is recorded with
+   * @param {?UrlbarSearchData} [loadData.searchData]
+   *   For an engine search, the search data. It is recorded with
    *   the submission's partner code once the load has gone ahead.
    * @returns {{reverted: boolean, browserId: number}}
    *   Whether the load threw without showing an error page, so the input should
@@ -1565,6 +1543,25 @@ export class UrlbarParentController {
     }
   }
 }
+
+/**
+ * The data for recording a search, which the parent records once the search's
+ * URL is being loaded.
+ *
+ * @typedef {object} UrlbarSearchData
+ * @property {string} engineId
+ *   The id of the engine handling the search.
+ * @property {string} query
+ *   The search query, which is added to form history.
+ * @property {keyof typeof lazy.BrowserSearchTelemetry.KNOWN_SEARCH_SOURCES} searchSource
+ *   Where the search originated from.
+ * @property {Parameters<typeof lazy.BrowserSearchTelemetry.recordSearch>[3]} details
+ *   The search action details, per `BrowserSearchTelemetry.recordSearch()`.
+ * @property {boolean} [opensInPrivateWindow]
+ *   Whether the search opens in a new private window, in which case it's
+ *   not added to form history. If this is false but the current window
+ *   is private, it's not added either.
+ */
 
 /**
  * A bounce a message-path child collector built at engagement time.

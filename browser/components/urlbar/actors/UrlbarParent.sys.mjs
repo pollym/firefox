@@ -132,12 +132,6 @@ export class UrlbarParent extends JSWindowActorParent {
       case "RecordSearchForm":
         controller.recordSearchForm(message.data.engineName);
         break;
-      case "RecordSearch":
-        controller.recordSearch(message.data);
-        break;
-      case "RecordSearchInOpenedTab":
-        controller.recordSearchInOpenedTab(message.data.searchData);
-        break;
       case "RecordZeroPrefix":
         controller.recordZeroPrefix(message.data.kind);
         break;

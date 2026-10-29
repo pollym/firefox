@@ -19,6 +19,7 @@ import { UrlbarShared } from "chrome://browser/content/urlbar/UrlbarShared.mjs";
  * @import { BrowserSearchTelemetry } from "moz-src:///browser/components/search/BrowserSearchTelemetry.sys.mjs"
  * @import { UrlbarLoadRequest, LoadURLParams } from "chrome://browser/content/urlbar/UrlbarShared.mjs"
  * @import { UrlbarAutofillData } from "chrome://browser/content/urlbar/UrlbarResult.mjs"
+ * @import { UrlbarSearchData } from "moz-src:///browser/components/urlbar/UrlbarParentController.sys.mjs"
  */
 
 /**
@@ -4015,7 +4016,7 @@ ${
    *   The details associated with this search query.
    * @param {boolean} [options.opensInPrivateWindow]
    *   Whether the search opens in a new private window.
-   * @returns {Parameters<UrlbarParentController["recordSearch"]>[0]}
+   * @returns {UrlbarSearchData}
    */
   #getSearchData({
     engine,
@@ -4237,7 +4238,7 @@ ${
    *   The id of the browser to load into. Defaults to the parent resolving the
    *   selected browser at load time; pass it to pin an asynchronously-resolved
    *   load to the tab selected when it was committed.
-   * @param {?Parameters<UrlbarParentController["recordSearch"]>[0]} [options.searchData]
+   * @param {?UrlbarSearchData} [options.searchData]
    *   For a search, the data the parent records once the load has gone ahead.
    */
   async #loadURL({
