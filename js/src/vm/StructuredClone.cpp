@@ -4289,9 +4289,10 @@ JS_PUBLIC_API bool JS_StructuredClone(
   }
 
   const JSStructuredCloneCallbacks* callbacks = optionalCallbacks;
+  const JS::CloneDataPolicy policy;
+  const auto scope = JS::StructuredCloneScope::SameProcess;
 
-  JSAutoStructuredCloneBuffer buf(JS::StructuredCloneScope::SameProcess,
-                                  callbacks, closure);
+  JSStructuredCloneData data(scope);
   {
     if (value.isObject()) {
       RootedObject obj(cx, &value.toObject());
@@ -4302,93 +4303,20 @@ JS_PUBLIC_API bool JS_StructuredClone(
       }
       AutoRealm ar(cx, obj);
       RootedValue unwrappedVal(cx, ObjectValue(*obj));
-      if (!buf.write(cx, unwrappedVal, callbacks, closure)) {
+      if (!JS_WriteStructuredClone(cx, unwrappedVal, &data, scope, policy,
+                                   callbacks, closure, UndefinedHandleValue)) {
         return false;
       }
     } else {
-      if (!buf.write(cx, value, callbacks, closure)) {
+      if (!JS_WriteStructuredClone(cx, value, &data, scope, policy, callbacks,
+                                   closure, UndefinedHandleValue)) {
         return false;
       }
     }
   }
 
-  return buf.read(cx, vp, JS::CloneDataPolicy(), callbacks, closure);
-}
-
-JSAutoStructuredCloneBuffer::JSAutoStructuredCloneBuffer(
-    JSAutoStructuredCloneBuffer&& other)
-    : data_(other.scope()) {
-  version_ = other.version_;
-  other.giveTo(&data_);
-}
-
-JSAutoStructuredCloneBuffer& JSAutoStructuredCloneBuffer::operator=(
-    JSAutoStructuredCloneBuffer&& other) {
-  MOZ_ASSERT(&other != this);
-  MOZ_ASSERT(scope() == other.scope());
-  clear();
-  version_ = other.version_;
-  other.giveTo(&data_);
-  return *this;
-}
-
-void JSAutoStructuredCloneBuffer::clear() {
-  data_.discardTransferables();
-  data_.ownTransferables_ = OwnTransferablePolicy::NoTransferables;
-  data_.refsHeld_.releaseAll();
-  MOZ_ASSERT(data_.stringBufferRefsHeld_.isStorageConsistent());
-  data_.stringBufferRefsHeld_.clear();
-  data_.Clear();
-  version_ = 0;
-}
-
-void JSAutoStructuredCloneBuffer::adopt(
-    JSStructuredCloneData&& data, uint32_t version,
-    const JSStructuredCloneCallbacks* callbacks, void* closure) {
-  clear();
-  data_ = std::move(data);
-  version_ = version;
-  data_.setCallbacks(callbacks, closure,
-                     OwnTransferablePolicy::OwnsTransferablesIfAny);
-}
-
-void JSAutoStructuredCloneBuffer::giveTo(JSStructuredCloneData* data) {
-  *data = std::move(data_);
-  version_ = 0;
-  data_.setCallbacks(nullptr, nullptr, OwnTransferablePolicy::NoTransferables);
-  data_.Clear();
-}
-
-bool JSAutoStructuredCloneBuffer::read(
-    JSContext* cx, MutableHandleValue vp,
-    const JS::CloneDataPolicy& cloneDataPolicy,
-    const JSStructuredCloneCallbacks* optionalCallbacks, void* closure) {
-  MOZ_ASSERT(cx);
-  return !!JS_ReadStructuredClone(
-      cx, data_, version_, data_.scope(), vp, cloneDataPolicy,
-      optionalCallbacks ? optionalCallbacks : data_.callbacks_,
-      optionalCallbacks ? closure : data_.closure_);
-}
-
-bool JSAutoStructuredCloneBuffer::write(
-    JSContext* cx, HandleValue value,
-    const JSStructuredCloneCallbacks* optionalCallbacks, void* closure) {
-  HandleValue transferable = UndefinedHandleValue;
-  return write(cx, value, transferable, JS::CloneDataPolicy(),
-               optionalCallbacks ? optionalCallbacks : data_.callbacks_,
-               optionalCallbacks ? closure : data_.closure_);
-}
-
-bool JSAutoStructuredCloneBuffer::write(
-    JSContext* cx, HandleValue value, HandleValue transferable,
-    const JS::CloneDataPolicy& cloneDataPolicy,
-    const JSStructuredCloneCallbacks* optionalCallbacks, void* closure) {
-  clear();
-  version_ = JS_STRUCTURED_CLONE_VERSION;
-  return JS_WriteStructuredClone(
-      cx, value, &data_, data_.scopeForInternalWriting(), cloneDataPolicy,
-      optionalCallbacks ? optionalCallbacks : data_.callbacks_,
-      optionalCallbacks ? closure : data_.closure_, transferable);
+  return JS_ReadStructuredClone(cx, data, JS_STRUCTURED_CLONE_VERSION, scope,
+                                vp, policy, callbacks, closure);
 }
 
 JS_PUBLIC_API bool JS_ReadUint32Pair(JSStructuredCloneReader* r, uint32_t* p1,

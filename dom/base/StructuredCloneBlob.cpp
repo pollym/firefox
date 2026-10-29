@@ -6,7 +6,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 #include <new>
 #include <utility>
 
@@ -186,9 +185,10 @@ bool StructuredCloneBlob::Holder::ReadStructuredCloneInternal(
     length -= size;
   }
 
-  mBuffer = std::make_unique<JSAutoStructuredCloneBuffer>(
-      mStructuredCloneScope, &StructuredCloneHolder::sCallbacks, this);
-  mBuffer->adopt(std::move(data), version, &StructuredCloneHolder::sCallbacks);
+  mData.emplace(std::move(data));
+  mVersion = version;
+  mData->setCallbacks(&StructuredCloneHolder::sCallbacks, nullptr,
+                      OwnTransferablePolicy::OwnsTransferablesIfAny);
 
   return true;
 }
@@ -212,8 +212,8 @@ bool StructuredCloneBlob::WriteStructuredClone(JSContext* aCx,
 bool StructuredCloneBlob::Holder::WriteStructuredClone(
     JSContext* aCx, JSStructuredCloneWriter* aWriter,
     StructuredCloneHolder* aHolder) {
-  auto& data = mBuffer->data();
-  if (!JS_WriteUint32Pair(aWriter, data.Size(), JS_STRUCTURED_CLONE_VERSION) ||
+  if (!JS_WriteUint32Pair(aWriter, mData->Size(),
+                          JS_STRUCTURED_CLONE_VERSION) ||
       !JS_WriteUint32Pair(aWriter, aHolder->BlobImpls().Length(),
                           BlobImpls().Length())) {
     return false;
@@ -221,7 +221,7 @@ bool StructuredCloneBlob::Holder::WriteStructuredClone(
 
   aHolder->BlobImpls().AppendElements(BlobImpls());
 
-  return data.ForEachDataChunk([&](const char* aData, size_t aSize) {
+  return mData->ForEachDataChunk([&](const char* aData, size_t aSize) {
     return JS_WriteBytes(aWriter, aData, aSize);
   });
 }

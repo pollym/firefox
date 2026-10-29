@@ -488,7 +488,6 @@ class MOZ_NON_MEMMOVABLE JS_PUBLIC_API JSStructuredCloneData {
   StringBuffers stringBufferRefsHeld_;
 
   friend struct JSStructuredCloneWriter;
-  friend class JS_PUBLIC_API JSAutoStructuredCloneBuffer;
   template <typename T, typename AllocPolicy>
   friend struct js::BufferIterator;
 
@@ -627,11 +626,6 @@ class MOZ_NON_MEMMOVABLE JS_PUBLIC_API JSStructuredCloneData {
   }
 
   void discardTransferables();
-
- private:
-  // This internal method exposes the real value of scope_. It's meant to be
-  // used only when starting the writing.
-  JS::StructuredCloneScope scopeForInternalWriting() const { return scope_; }
 };
 
 /**
@@ -665,91 +659,6 @@ JS_PUBLIC_API bool JS_StructuredCloneHasTransferables(
 JS_PUBLIC_API bool JS_StructuredClone(
     JSContext* cx, JS::HandleValue v, JS::MutableHandleValue vp,
     const JSStructuredCloneCallbacks* optionalCallbacks, void* closure);
-
-/**
- * The C-style API calls to read and write structured clones are fragile --
- * they rely on the caller to properly handle ownership of the clone data, and
- * the handling of the input data as well as the interpretation of the contents
- * of the clone buffer are dependent on the callbacks passed in. If you
- * serialize and deserialize with different callbacks, the results are
- * questionable.
- *
- * JSAutoStructuredCloneBuffer wraps things up in an RAII class for data
- * management, and uses the same callbacks for both writing and reading
- * (serializing and deserializing).
- */
-class JS_PUBLIC_API JSAutoStructuredCloneBuffer {
-  JSStructuredCloneData data_;
-  uint32_t version_;
-
- public:
-  JSAutoStructuredCloneBuffer(JS::StructuredCloneScope scope,
-                              const JSStructuredCloneCallbacks* callbacks,
-                              void* closure)
-      : data_(scope), version_(JS_STRUCTURED_CLONE_VERSION) {
-    data_.setCallbacks(callbacks, closure,
-                       OwnTransferablePolicy::NoTransferables);
-  }
-
-  JSAutoStructuredCloneBuffer(JSAutoStructuredCloneBuffer&& other);
-  JSAutoStructuredCloneBuffer& operator=(JSAutoStructuredCloneBuffer&& other);
-
-  ~JSAutoStructuredCloneBuffer() { clear(); }
-
-  JSStructuredCloneData& data() { return data_; }
-
-  // Copy and assignment are not supported.
-  JSAutoStructuredCloneBuffer(const JSAutoStructuredCloneBuffer& other) =
-      delete;
-  JSAutoStructuredCloneBuffer& operator=(
-      const JSAutoStructuredCloneBuffer& other) = delete;
-
-  bool empty() const { return !data_.Size(); }
-
-  void clear();
-
-  JS::StructuredCloneScope scope() const { return data_.scope(); }
-
-  uint32_t version() const { return version_; }
-
-  /**
-   * Adopt some memory. It will be automatically freed by the destructor.
-   * data must have been allocated by the JS engine (e.g., extracted via
-   * JSAutoStructuredCloneBuffer::steal).
-   */
-  void adopt(JSStructuredCloneData&& data,
-             uint32_t version = JS_STRUCTURED_CLONE_VERSION,
-             const JSStructuredCloneCallbacks* callbacks = nullptr,
-             void* closure = nullptr);
-
-  /**
-   * Release ownership of the buffer and assign it and ownership of it to
-   * `data`.
-   */
-  void giveTo(JSStructuredCloneData* data);
-
-  bool read(JSContext* cx, JS::MutableHandleValue vp,
-            const JS::CloneDataPolicy& cloneDataPolicy = JS::CloneDataPolicy(),
-            const JSStructuredCloneCallbacks* optionalCallbacks = nullptr,
-            void* closure = nullptr);
-
-  bool write(JSContext* cx, JS::HandleValue v,
-             const JSStructuredCloneCallbacks* optionalCallbacks = nullptr,
-             void* closure = nullptr);
-
-  bool write(JSContext* cx, JS::HandleValue v, JS::HandleValue transferable,
-             const JS::CloneDataPolicy& cloneDataPolicy,
-             const JSStructuredCloneCallbacks* optionalCallbacks = nullptr,
-             void* closure = nullptr);
-
-  size_t sizeOfExcludingThis(mozilla::MallocSizeOf mallocSizeOf) {
-    return data_.SizeOfExcludingThis(mallocSizeOf);
-  }
-
-  size_t sizeOfIncludingThis(mozilla::MallocSizeOf mallocSizeOf) {
-    return mallocSizeOf(this) + sizeOfExcludingThis(mallocSizeOf);
-  }
-};
 
 // The range of tag values the application may use for its own custom object
 // types.

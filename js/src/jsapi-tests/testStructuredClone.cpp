@@ -202,9 +202,11 @@ bool testStructuredCloneCopy(JS::StructuredCloneScope scope) {
 
 bool clone(JS::StructuredCloneScope scope, JS::HandleValue v1,
            JS::MutableHandleValue v2) {
-  JSAutoStructuredCloneBuffer clonedBuffer(scope, nullptr, nullptr);
-  CHECK(clonedBuffer.write(cx, v1));
-  CHECK(clonedBuffer.read(cx, v2));
+  JSStructuredCloneData data(scope);
+  CHECK(JS_WriteStructuredClone(cx, v1, &data, scope, JS::CloneDataPolicy(),
+                                nullptr, nullptr, JS::UndefinedHandleValue));
+  CHECK(JS_ReadStructuredClone(cx, data, JS_STRUCTURED_CLONE_VERSION, scope, v2,
+                               JS::CloneDataPolicy(), nullptr, nullptr));
   return true;
 }
 END_TEST(testStructuredClone_externalArrayBufferDifferentThreadOrProcess)

@@ -5878,8 +5878,7 @@ static bool SetIonCheckGraphCoherency(JSContext* cx, unsigned argc, Value* vp) {
   return true;
 }
 
-// A JSObject that holds structured clone data, similar to the C++ class
-// JSAutoStructuredCloneBuffer.
+// A JSObject that holds structured clone data.
 class CloneBufferObject : public NativeObject {
   static const JSPropertySpec props_[3];
 
@@ -5908,7 +5907,7 @@ class CloneBufferObject : public NativeObject {
   }
 
   static CloneBufferObject* Create(JSContext* cx,
-                                   JSAutoStructuredCloneBuffer* buffer) {
+                                   JSStructuredCloneData* buffer) {
     Rooted<CloneBufferObject*> obj(cx, Create(cx));
     if (!obj) {
       return nullptr;
@@ -5918,7 +5917,7 @@ class CloneBufferObject : public NativeObject {
       ReportOutOfMemory(cx);
       return nullptr;
     }
-    buffer->giveTo(data.get());
+    *data = std::move(*buffer);
     obj->setData(data.release(), false);
     return obj;
   }
@@ -6445,7 +6444,7 @@ bool js::testingFunc_serialize(JSContext* cx, unsigned argc, Value* vp) {
     return false;
   }
 
-  mozilla::Maybe<JSAutoStructuredCloneBuffer> clonebuf;
+  mozilla::Maybe<JS::StructuredCloneScope> scope;
   JS::CloneDataPolicy policy;
 
   if (!args.get(2).isUndefined()) {
@@ -6489,25 +6488,25 @@ bool js::testingFunc_serialize(JSContext* cx, unsigned argc, Value* vp) {
       if (!str) {
         return false;
       }
-      auto scope = ParseCloneScope(cx, str);
+      scope = ParseCloneScope(cx, str);
       if (!scope) {
         JS_ReportErrorASCII(cx, "Invalid structured clone scope");
         return false;
       }
-      clonebuf.emplace(*scope, &gCloneCallbacks, nullptr);
     }
   }
 
-  if (!clonebuf) {
-    clonebuf.emplace(JS::StructuredCloneScope::SameProcess, &gCloneCallbacks,
-                     nullptr);
+  if (!scope) {
+    scope.emplace(JS::StructuredCloneScope::SameProcess);
   }
 
-  if (!clonebuf->write(cx, args.get(0), args.get(1), policy)) {
+  JSStructuredCloneData data(*scope);
+  if (!JS_WriteStructuredClone(cx, args.get(0), &data, *scope, policy,
+                               &gCloneCallbacks, nullptr, args.get(1))) {
     return false;
   }
 
-  RootedObject obj(cx, CloneBufferObject::Create(cx, clonebuf.ptr()));
+  RootedObject obj(cx, CloneBufferObject::Create(cx, &data));
   if (!obj) {
     return false;
   }
@@ -11940,10 +11939,10 @@ void js::FuzzilliHashObjectInl(JSContext* cx, JSObject* obj, uint32_t* out) {
   RootedValue v(cx);
   v.setObject(*obj);
 
-  JSAutoStructuredCloneBuffer JSCloner(
-      JS::StructuredCloneScope::DifferentProcess, nullptr, nullptr);
-  if (JSCloner.write(cx, v)) {
-    JSStructuredCloneData& data = JSCloner.data();
+  JSStructuredCloneData data(JS::StructuredCloneScope::DifferentProcess);
+  if (JS_WriteStructuredClone(
+          cx, v, &data, JS::StructuredCloneScope::DifferentProcess,
+          JS::CloneDataPolicy(), nullptr, nullptr, JS::UndefinedHandleValue)) {
     data.ForEachDataChunk([&](const char* aData, size_t aSize) {
       uint32_t h = mozilla::HashBytes(aData, aSize);
       h = (h << 1) | 1;

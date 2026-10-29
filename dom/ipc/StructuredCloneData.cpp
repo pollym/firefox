@@ -54,7 +54,7 @@ void StructuredCloneData::WriteIPCParams(IPC::MessageWriter* aWriter) {
 }
 
 bool StructuredCloneData::ReadIPCParams(IPC::MessageReader* aReader) {
-  MOZ_ASSERT(!mBuffer, "StructuredCloneData was previously initialized");
+  MOZ_ASSERT(!mData, "StructuredCloneData was previously initialized");
 
   GeckoChildID originChildID =
       aReader->GetActor()
@@ -90,7 +90,7 @@ bool StructuredCloneData::ReadIPCParams(IPC::MessageReader* aReader) {
 bool StructuredCloneData::CopyExternalData(const char* aData,
                                            size_t aDataLength,
                                            uint32_t aVersion) {
-  MOZ_ASSERT(!mBuffer, "StructuredCloneData was previously initialized");
+  MOZ_ASSERT(!mData, "StructuredCloneData was previously initialized");
 
   JSStructuredCloneData data(JS::StructuredCloneScope::DifferentProcess);
   if (!data.AppendBytes(aData, aDataLength)) {

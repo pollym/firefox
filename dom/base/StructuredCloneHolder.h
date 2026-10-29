@@ -12,10 +12,10 @@
 #include "js/StructuredClone.h"
 #include "js/TypeDecls.h"
 #include "mozilla/Assertions.h"
+#include "mozilla/Maybe.h"
 #include "mozilla/MemoryReporting.h"
 #include "mozilla/ProcessType.h"
 #include "mozilla/RefPtr.h"
-#include "mozilla/UniquePtr.h"
 #include "mozilla/ipc/EagerIPCStream.h"
 #include "nsCOMPtr.h"
 #include "nsString.h"
@@ -62,7 +62,7 @@ class StructuredCloneHolderBase {
   virtual ~StructuredCloneHolderBase();
 
   // Note, it is unsafe to std::move() a StructuredCloneHolderBase since a raw
-  // this pointer is passed to mBuffer as a callback closure.  That must
+  // this pointer is passed to mData as a callback closure.  That must
   // be fixed if you want to implement a move constructor here.
   StructuredCloneHolderBase(StructuredCloneHolderBase&& aOther) = delete;
 
@@ -137,28 +137,29 @@ class StructuredCloneHolderBase {
   void Adopt(JSStructuredCloneData&& aData,
              uint32_t aVersion = JS_STRUCTURED_CLONE_VERSION);
 
-  bool HasData() const { return !!mBuffer; }
+  bool HasData() const { return mData.isSome(); }
 
-  JSStructuredCloneData& BufferData() const {
-    MOZ_ASSERT(mBuffer, "Write() has never been called.");
-    return mBuffer->data();
+  JSStructuredCloneData& BufferData() {
+    MOZ_ASSERT(mData, "Write() has never been called.");
+    return *mData;
   }
 
   uint32_t BufferVersion() const {
-    MOZ_ASSERT(mBuffer, "Write() has never been called.");
-    return mBuffer->version();
+    MOZ_ASSERT(mData, "Write() has never been called.");
+    return mVersion;
   }
 
   size_t SizeOfExcludingThis(mozilla::MallocSizeOf aMallocSizeOf) {
     size_t size = 0;
     if (HasData()) {
-      size += mBuffer->sizeOfIncludingThis(aMallocSizeOf);
+      size += mData->SizeOfExcludingThis(aMallocSizeOf);
     }
     return size;
   }
 
  protected:
-  UniquePtr<JSAutoStructuredCloneBuffer> mBuffer;
+  Maybe<JSStructuredCloneData> mData;
+  uint32_t mVersion = 0;
 
   StructuredCloneScope mStructuredCloneScope;
 
