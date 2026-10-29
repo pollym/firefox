@@ -808,6 +808,11 @@
   value: true
   mirror: always
 
+- name: apz.pan_gesture.buffer_max_age
+  type: uint32_t
+  value: 200  # milliseconds
+  mirror: once
+
 # Fetch displayport updates early from the message queue.
 - name: apz.pinch_lock.mode
   type: RelaxedAtomicInt32
