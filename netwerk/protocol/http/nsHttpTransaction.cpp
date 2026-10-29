@@ -4194,6 +4194,21 @@ void nsHttpTransaction::SetIsForWebTransport(bool aIsForWebTransport) {
   mIsForWebTransport = aIsForWebTransport;
 }
 
+void nsHttpTransaction::GetWebTransportAnticipatedStreams(uint16_t* aUni,
+                                                          uint16_t* aBidi) {
+  *aUni = 0;
+  *aBidi = 0;
+  nsCOMPtr<WebTransportSessionEventListener> listener;
+  {
+    MutexAutoLock lock(mLock);
+    listener = mWebTransportSessionEventListener;
+  }
+  if (nsCOMPtr<WebTransportSessionEventListenerInternal> internal =
+          do_QueryInterface(listener)) {
+    internal->GetAnticipatedConcurrentIncomingStreams(aUni, aBidi);
+  }
+}
+
 void nsHttpTransaction::RemoveConnection() {
   MutexAutoLock lock(mLock);
   mConnection = nullptr;

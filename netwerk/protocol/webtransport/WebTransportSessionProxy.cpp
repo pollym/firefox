@@ -1809,6 +1809,15 @@ void WebTransportSessionProxy::OnMaxDatagramSizeInternal(uint64_t aSize) {
   listener->OnMaxDatagramSize(aSize);
 }
 
+NS_IMETHODIMP
+WebTransportSessionProxy::GetAnticipatedConcurrentIncomingStreams(
+    uint16_t* aUni, uint16_t* aBidi) {
+  MutexAutoLock lock(mMutex);
+  *aUni = mAnticipatedConcurrentIncomingUnidirectionalStreams;
+  *aBidi = mAnticipatedConcurrentIncomingBidirectionalStreams;
+  return NS_OK;
+}
+
 NS_IMETHODIMP WebTransportSessionProxy::OnMaxDatagramSize(uint64_t aSize) {
   MOZ_ASSERT(OnSocketThread());
 

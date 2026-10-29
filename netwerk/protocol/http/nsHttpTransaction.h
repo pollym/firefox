@@ -237,6 +237,7 @@ class nsHttpTransaction final : public nsAHttpTransaction,
   void GetHashKeyOfConnectionEntry(nsACString& aResult);
 
   bool IsForWebTransport() override { return mIsForWebTransport; }
+  void GetWebTransportAnticipatedStreams(uint16_t* aUni, uint16_t* aBidi);
   bool IsResettingForTunnelConn() override { return mIsResettingForTunnelConn; }
   void SetResettingForTunnelConn(bool aValue) override {
     mIsResettingForTunnelConn = aValue;

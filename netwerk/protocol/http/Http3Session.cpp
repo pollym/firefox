@@ -1706,6 +1706,9 @@ nsresult Http3Session::TryActivating(
     }
     rv = mHttp3Connection->CreateWebTransport(aAuthorityHeader, aPathQuery,
                                               aHeaders, aStreamId);
+    if (NS_SUCCEEDED(rv)) {
+      ApplyAnticipatedWebTransportStreams(aStream, *aStreamId);
+    }
   }
 
   if (NS_FAILED(rv)) {
@@ -1752,6 +1755,25 @@ nsresult Http3Session::TryActivating(
   mTransactionCount++;
 
   return NS_OK;
+}
+
+void Http3Session::ApplyAnticipatedWebTransportStreams(Http3StreamBase* aStream,
+                                                       uint64_t aSessionId) {
+  nsHttpTransaction* trans = aStream->Transaction()->QueryHttpTransaction();
+  if (!trans) {
+    return;
+  }
+  uint16_t uni = 0;
+  uint16_t bidi = 0;
+  trans->GetWebTransportAnticipatedStreams(&uni, &bidi);
+  if (uni > 0) {
+    SetWebTransportAnticipatedConcurrentIncomingUnidirectionalStreams(
+        aSessionId, uni);
+  }
+  if (bidi > 0) {
+    SetWebTransportAnticipatedConcurrentIncomingBidirectionalStreams(aSessionId,
+                                                                     bidi);
+  }
 }
 
 // This is called by Http3WebTransportStream::OnReadSegment.
