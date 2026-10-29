@@ -216,6 +216,8 @@ export class GroupsPanel {
 
     if (group.name) {
       setName(group.name);
+    } else if (isOpen) {
+      setName(/** @type {MozTabbrowserTabGroup} */ (group).defaultGroupName);
     } else {
       doc.l10n
         .formatValues([{ id: "tab-group-name-default" }])
