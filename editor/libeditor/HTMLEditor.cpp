@@ -7315,7 +7315,7 @@ Element* HTMLEditor::ComputeEditingHostInternal(
     return body && body->IsEditable() ? body : nullptr;
   }
 
-  if (NS_WARN_IF(!content)) {
+  if (!content) {
     return nullptr;
   }
 
