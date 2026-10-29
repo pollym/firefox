@@ -29,9 +29,26 @@ function launch(args) {
   const exe = Services.dirsvc.get("GreBinD", Ci.nsIFile);
   exe.append(BINARY_NAME);
 
-  if (!exe.exists()) {
-    lazy.log.error(`${BINARY_NAME} is not installed`);
+  const process = createProcess(exe);
+  if (!process) {
     return false;
+  }
+
+  process.runw(false, args, args.length);
+
+  return true;
+}
+
+/**
+ * Prepares to run the helper at `exe`.
+ *
+ * @param {nsIFile} exe - Helper executable.
+ * @returns {nsIProcess|null} The process, or null when the helper is missing.
+ */
+function createProcess(exe) {
+  if (!exe.exists()) {
+    lazy.log.error(`${exe.path} is not installed`);
+    return null;
   }
 
   const process = Cc["@mozilla.org/process/util;1"].createInstance(
@@ -41,9 +58,34 @@ function launch(args) {
   process.init(exe);
   process.startHidden = true;
   process.noShell = true;
-  process.runw(false, args, args.length);
 
-  return true;
+  return process;
+}
+
+/**
+ * Runs the helper of the install at `installDir` and waits for it to exit.
+ *
+ * @param {string} installDir - Install directory holding the helper.
+ * @param {string[]} args - Full argument list for the helper.
+ * @returns {Promise<boolean>} Whether the helper ran and exited.
+ */
+function launchAndWait(installDir, args) {
+  const exe = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
+  exe.initWithPath(installDir);
+  exe.append(BINARY_NAME);
+
+  const process = createProcess(exe);
+  if (!process) {
+    return Promise.resolve(false);
+  }
+
+  return new Promise(resolve => {
+    process.runwAsync(args, args.length, {
+      observe(subject, topic) {
+        resolve(topic == "process-finished");
+      },
+    });
+  });
 }
 
 /**
@@ -98,5 +140,31 @@ export const WindowsPushNotificationHelper = {
       );
     }
     lazy.PushNotificationHelperRegistry.prune(this.installDir);
+  },
+
+  /**
+   * Stops all helpers for a profile, from any installation, and removes them
+   * from the registry.
+   *
+   * Intended for a profile that is about to be removed, so this must run before
+   * any of its files are deleted.
+   *
+   * A helper is found using the profile's path, which can no longer be resolved
+   * once the directory is deleted.
+   *
+   * @param {string} profileDir - Profile directory.
+   */
+  async stopForProfile(profileDir) {
+    const installDirs =
+      lazy.PushNotificationHelperRegistry.getInstallDirsForProfile(profileDir);
+
+    for (const installDir of installDirs) {
+      try {
+        await launchAndWait(installDir, ["--stop", "--profile", profileDir]);
+      } catch (e) {
+        lazy.log.error("Failed to stop the helper", e);
+      }
+      lazy.PushNotificationHelperRegistry.remove(installDir, profileDir);
+    }
   },
 };

@@ -14,6 +14,9 @@ const {
 const { updateAppInfo } = ChromeUtils.importESModule(
   "resource://testing-common/AppInfo.sys.mjs"
 );
+const { WindowsPushNotificationHelper } = ChromeUtils.importESModule(
+  "resource://gre/modules/WindowsPushNotificationHelper.sys.mjs"
+);
 
 function valueNames(key) {
   const names = [];
@@ -210,5 +213,27 @@ add_task(function test_entries_for_profile() {
     for (const name of [theirs, otherProfile, unrelatedValue]) {
       key.removeValue(name);
     }
+  });
+});
+
+add_task(async function test_stop_for_profile_removes_the_entries() {
+  const profile = "C:\\Profiles\\Removed";
+  // A directory without a helper in it, so nothing is launched
+  const noHelperInstall = do_get_tempdir().path;
+  const mine = buildRegistryValueName(noHelperInstall, profile);
+  const other = buildRegistryValueName(noHelperInstall, "C:\\Profiles\\Kept");
+
+  withRegistryKey(key => {
+    key.writeIntValue(mine, 1);
+    key.writeIntValue(other, 1);
+  });
+
+  await WindowsPushNotificationHelper.stopForProfile(profile);
+
+  withRegistryKey(key => {
+    const names = valueNames(key);
+    Assert.ok(!names.includes(mine), "the profile's entry is removed");
+    Assert.ok(names.includes(other), "another profile's entry is kept");
+    key.removeValue(other);
   });
 });
