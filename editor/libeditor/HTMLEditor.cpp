@@ -4447,7 +4447,11 @@ nsresult HTMLEditor::EnsureNoFollowingUnnecessaryLineBreak(
 
   const WSScanResult nextThing =
       HTMLEditUtils::ScanInclusiveNextThingWithIgnoringUnnecessaryLineBreak(
-          aNextOrAfterModifiedPoint, aPaddingForEmptyBlock, aEditingHost);
+          aNextOrAfterModifiedPoint,
+          aPaddingForEmptyBlock == PaddingForEmptyBlock::Unnecessary
+              ? TreatAsUnnecessaryLineBreak{LineBreakFor::PaddingForEmptyBlock}
+              : TreatAsUnnecessaryLineBreak{},
+          aEditingHost);
   const Maybe<EditorLineBreak>& unnecessaryLineBreak =
       nextThing.MaybeIgnoredLineBreak();
   if (unnecessaryLineBreak.isNothing() ||

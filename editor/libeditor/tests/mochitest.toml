@@ -511,6 +511,8 @@ skip-if = [
 
 ["test_inline_style_cache.html"]
 
+["test_insert_composition_before_unnecessary_linebreak.html"]
+
 ["test_insertHTML_caret_position_after_replaced_element.html"]
 
 ["test_insertHTML_starting_with_multiple_comment_nodes.html"]
