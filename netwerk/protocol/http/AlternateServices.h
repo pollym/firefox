@@ -237,8 +237,6 @@ class AltSvcMappingValidator final {
 
 // This is the asynchronous null transaction used to validate
 // an alt-svc advertisement only for https://
-// When http over socket process is enabled, this class should live only in
-// socket process.
 template <class Validator>
 class AltSvcTransaction final : public SpeculativeTransaction {
  public:

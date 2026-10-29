@@ -26,7 +26,6 @@ namespace net {
 class ProxyAutoConfigChild;
 class SocketProcessBackgroundChild;
 class SocketProcessBridgeParent;
-class BackgroundDataBridgeParent;
 
 // The IPC actor implements PSocketProcessChild in child process.
 // This is allocated and kept alive by SocketProcessImpl.
@@ -66,27 +65,8 @@ class SocketProcessChild final : public PSocketProcessChild {
 #endif
   mozilla::ipc::IPCResult RecvSocketProcessTelemetryPing();
 
-  already_AddRefed<PHttpTransactionChild> AllocPHttpTransactionChild();
-
   void CleanUp();
   void DestroySocketProcessBridgeParent(ProcessId aId);
-
-  already_AddRefed<PHttpConnectionMgrChild> AllocPHttpConnectionMgrChild(
-      const HttpHandlerInitArgs& aArgs);
-  mozilla::ipc::IPCResult RecvUpdateDeviceModelId(const nsACString& aModelId);
-  mozilla::ipc::IPCResult RecvOnHttpActivityDistributorActivated(
-      const bool& aIsActivated);
-  mozilla::ipc::IPCResult RecvOnHttpActivityDistributorObserveProxyResponse(
-      const bool& aIsEnabled);
-  mozilla::ipc::IPCResult RecvOnHttpActivityDistributorObserveConnection(
-      const bool& aIsEnabled);
-
-  already_AddRefed<PInputChannelThrottleQueueChild>
-  AllocPInputChannelThrottleQueueChild(const uint32_t& aMeanBytesPerSecond,
-                                       const uint32_t& aMaxBytesPerSecond);
-
-  already_AddRefed<PAltSvcTransactionChild> AllocPAltSvcTransactionChild(
-      const HttpConnectionInfoCloneArgs& aConnInfo, const uint32_t& aCaps);
 
   bool IsShuttingDown();
 
@@ -100,12 +80,6 @@ class SocketProcessChild final : public PSocketProcessChild {
       const nsACString& aTrrServer, const int32_t& aPort, const uint16_t& aType,
       const OriginAttributes& aOriginAttributes,
       const nsIDNSService::DNSFlags& aFlags) override;
-
-  void AddDataBridgeToMap(uint64_t aChannelId,
-                          BackgroundDataBridgeParent* aActor);
-  void RemoveDataBridgeFromMap(uint64_t aChannelId);
-  Maybe<RefPtr<BackgroundDataBridgeParent>> GetAndRemoveDataBridge(
-      uint64_t aChannelId);
 
   already_AddRefed<PTRRServiceChild> AllocPTRRServiceChild(
       const bool& aCaptiveIsPassed, const bool& aParentalControlEnabled,
@@ -154,10 +128,7 @@ class SocketProcessChild final : public PSocketProcessChild {
 
   RefPtr<ChildProfilerController> mProfilerController;
 
-  // Protect the table below.
   Mutex mMutex{"SocketProcessChild::mMutex"};
-  nsTHashMap<uint64_t, RefPtr<BackgroundDataBridgeParent>>
-      mBackgroundDataBridgeMap MOZ_GUARDED_BY(mMutex);
 
   bool mShuttingDown MOZ_GUARDED_BY(mMutex) = false;
 

@@ -4,12 +4,7 @@
 
 #include "SocketProcessChild.h"
 
-#include "HttpConnectionMgrChild.h"
-#include "HttpInfo.h"
-#include "HttpTransactionChild.h"
-#include "InputChannelThrottleQueueChild.h"
 #include "MockNetworkLayerController.h"
-#include "NetworkConnectivityService.h"
 #include "SSLTokensCache.h"
 #include "SocketProcessBridgeParent.h"
 #include "SocketProcessLogging.h"
@@ -32,9 +27,7 @@
 #include "mozilla/ipc/CrashReporterClient.h"
 #include "mozilla/ipc/ProcessChild.h"
 #include "mozilla/ipc/ProcessUtils.h"
-#include "mozilla/net/AltSvcTransactionChild.h"
 #include "mozilla/net/AppleFastDatapathProbe.h"
-#include "mozilla/net/BackgroundDataBridgeParent.h"
 #include "mozilla/net/DNSRequestChild.h"
 #include "mozilla/net/DNSRequestParent.h"
 #include "mozilla/net/NativeDNSResolverOverrideChild.h"
@@ -42,10 +35,7 @@
 #include "mozilla/net/SocketProcessBackgroundChild.h"
 #include "mozilla/net/TRRServiceChild.h"
 #include "nsDebugImpl.h"
-#include "nsHttpConnectionInfo.h"
-#include "nsHttpHandler.h"
 #include "nsIDNSService.h"
-#include "nsIHttpActivityObserver.h"
 #include "nsIXULRuntime.h"
 #include "nsNSSComponent.h"
 #include "nsNetAddr.h"
@@ -191,12 +181,6 @@ bool SocketProcessChild::Init(mozilla::ipc::UntypedEndpoint&& aEndpoint,
     return false;
   }
 
-  nsCOMPtr<nsIProtocolHandler> handler;
-  rv = ios->GetProtocolHandler("http", getter_AddRefs(handler));
-  if (NS_FAILED(rv)) {
-    return false;
-  }
-
   // Initialize DNS Service here, since it needs to be done in main thread.
   mozilla::components::DNS::Service(&rv);
   if (NS_FAILED(rv)) {
@@ -260,11 +244,6 @@ void SocketProcessChild::CleanUp() {
     if (parent->CanSend()) {
       parent->Close();
     }
-  }
-
-  {
-    MutexAutoLock lock(mMutex);
-    mBackgroundDataBridgeMap.Clear();
   }
 
   // Normally, the IPC channel should be already closed at this point, but
@@ -415,82 +394,6 @@ void SocketProcessChild::DestroySocketProcessBridgeParent(ProcessId aId) {
   mSocketProcessBridgeParentMap.Remove(aId);
 }
 
-already_AddRefed<PHttpTransactionChild>
-SocketProcessChild::AllocPHttpTransactionChild() {
-  RefPtr<HttpTransactionChild> actor = new HttpTransactionChild();
-  return actor.forget();
-}
-
-already_AddRefed<PHttpConnectionMgrChild>
-SocketProcessChild::AllocPHttpConnectionMgrChild(
-    const HttpHandlerInitArgs& aArgs) {
-  LOG(("SocketProcessChild::AllocPHttpConnectionMgrChild \n"));
-  MOZ_ASSERT(gHttpHandler);
-  gHttpHandler->SetHttpHandlerInitArgs(aArgs);
-
-  RefPtr<HttpConnectionMgrChild> actor = new HttpConnectionMgrChild();
-  return actor.forget();
-}
-
-mozilla::ipc::IPCResult SocketProcessChild::RecvUpdateDeviceModelId(
-    const nsACString& aModelId) {
-  MOZ_ASSERT(gHttpHandler);
-  gHttpHandler->SetDeviceModelId(aModelId);
-  return IPC_OK();
-}
-
-mozilla::ipc::IPCResult
-SocketProcessChild::RecvOnHttpActivityDistributorActivated(
-    const bool& aIsActivated) {
-  nsCOMPtr<nsIHttpActivityObserver> distributor;
-  distributor = mozilla::components::HttpActivityDistributor::Service();
-  if (distributor) {
-    distributor->SetIsActive(aIsActivated);
-  }
-  return IPC_OK();
-}
-
-mozilla::ipc::IPCResult
-SocketProcessChild::RecvOnHttpActivityDistributorObserveProxyResponse(
-    const bool& aIsEnabled) {
-  nsCOMPtr<nsIHttpActivityDistributor> distributor;
-  distributor = mozilla::components::HttpActivityDistributor::Service();
-  if (distributor) {
-    (void)distributor->SetObserveProxyResponse(aIsEnabled);
-  }
-  return IPC_OK();
-}
-
-mozilla::ipc::IPCResult
-SocketProcessChild::RecvOnHttpActivityDistributorObserveConnection(
-    const bool& aIsEnabled) {
-  nsCOMPtr<nsIHttpActivityDistributor> distributor;
-  distributor = mozilla::components::HttpActivityDistributor::Service();
-  if (distributor) {
-    (void)distributor->SetObserveConnection(aIsEnabled);
-  }
-  return IPC_OK();
-}
-
-already_AddRefed<PInputChannelThrottleQueueChild>
-SocketProcessChild::AllocPInputChannelThrottleQueueChild(
-    const uint32_t& aMeanBytesPerSecond, const uint32_t& aMaxBytesPerSecond) {
-  RefPtr<InputChannelThrottleQueueChild> p =
-      new InputChannelThrottleQueueChild();
-  p->Init(aMeanBytesPerSecond, aMaxBytesPerSecond);
-  return p.forget();
-}
-
-already_AddRefed<PAltSvcTransactionChild>
-SocketProcessChild::AllocPAltSvcTransactionChild(
-    const HttpConnectionInfoCloneArgs& aConnInfo, const uint32_t& aCaps) {
-  RefPtr<nsHttpConnectionInfo> cinfo =
-      nsHttpConnectionInfo::DeserializeHttpConnectionInfoCloneArgs(aConnInfo);
-  RefPtr<AltSvcTransactionChild> child =
-      new AltSvcTransactionChild(cinfo, aCaps);
-  return child.forget();
-}
-
 already_AddRefed<PDNSRequestChild> SocketProcessChild::AllocPDNSRequestChild(
     const nsACString& aHost, const nsACString& aTrrServer, const int32_t& aPort,
     const uint16_t& aType, const OriginAttributes& aOriginAttributes,
@@ -512,23 +415,6 @@ mozilla::ipc::IPCResult SocketProcessChild::RecvPDNSRequestConstructor(
   handler->DoAsyncResolve(aHost, aTrrServer, aPort, aType, aOriginAttributes,
                           aFlags);
   return IPC_OK();
-}
-
-void SocketProcessChild::AddDataBridgeToMap(
-    uint64_t aChannelId, BackgroundDataBridgeParent* aActor) {
-  MutexAutoLock lock(mMutex);
-  mBackgroundDataBridgeMap.InsertOrUpdate(aChannelId, RefPtr{aActor});
-}
-
-void SocketProcessChild::RemoveDataBridgeFromMap(uint64_t aChannelId) {
-  MutexAutoLock lock(mMutex);
-  mBackgroundDataBridgeMap.Remove(aChannelId);
-}
-
-Maybe<RefPtr<BackgroundDataBridgeParent>>
-SocketProcessChild::GetAndRemoveDataBridge(uint64_t aChannelId) {
-  MutexAutoLock lock(mMutex);
-  return mBackgroundDataBridgeMap.Extract(aChannelId);
 }
 
 already_AddRefed<PTRRServiceChild> SocketProcessChild::AllocPTRRServiceChild(

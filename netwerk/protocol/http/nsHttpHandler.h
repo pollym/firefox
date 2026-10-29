@@ -59,7 +59,6 @@ class Tickler;
 class nsHttpConnection;
 class nsHttpConnectionInfo;
 class HttpBaseChannel;
-class HttpHandlerInitArgs;
 class HttpTransactionShell;
 class AltSvcMapping;
 class DNSUtils;
@@ -543,10 +542,6 @@ class nsHttpHandler final : public nsIHttpProtocolHandler,
   [[nodiscard]] nsresult InitConnectionMgr();
 
   void NotifyObservers(nsIChannel* chan, const char* event);
-
-  friend class SocketProcessChild;
-  void SetHttpHandlerInitArgs(const HttpHandlerInitArgs& aArgs);
-  void SetDeviceModelId(const nsACString& aModelId);
 
   // We only allow DNSUtils and TRRServiceChannel itself to create
   // TRRServiceChannel.

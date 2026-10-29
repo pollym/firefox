@@ -70,15 +70,8 @@ class SocketProcessParent final
                                const bool& aMinimizeMemoryUsage,
                                const Maybe<ipc::FileDescriptor>& aDMDFile);
 
-  mozilla::ipc::IPCResult RecvObserveHttpActivity(
-      const HttpActivityArgs& aArgs, const uint32_t& aActivityType,
-      const uint32_t& aActivitySubtype, const PRTime& aTimestamp,
-      const uint64_t& aExtraSizeData, const nsACString& aExtraStringData);
-
   mozilla::ipc::IPCResult RecvInitSocketBackground(
       Endpoint<PSocketProcessBackgroundParent>&& aEndpoint);
-
-  already_AddRefed<PAltServiceParent> AllocPAltServiceParent();
 
   already_AddRefed<PProxyConfigLookupParent> AllocPProxyConfigLookupParent(
       nsIURI* aURI, const uint32_t& aProxyResolveFlags,
@@ -88,8 +81,6 @@ class SocketProcessParent final
       const uint32_t& aProxyResolveFlags,
       const bool& aIsTRRServiceChannel) override;
 
-  mozilla::ipc::IPCResult RecvExcludeHttp2OrHttp3(
-      const HttpConnectionInfoCloneArgs& aArgs);
   mozilla::ipc::IPCResult RecvOnConsoleMessage(const nsString& aMessage);
 
   mozilla::ipc::IPCResult RecvFOGData(ByteBuf&& aBuf);

@@ -4,7 +4,6 @@
 
 #include "TRRServiceChannel.h"
 
-#include "AltServiceChild.h"
 #include "HttpLog.h"
 #include "ProxyConfigLookup.h"
 #include "ReferrerInfo.h"
@@ -944,14 +943,6 @@ void TRRServiceChannel::ProcessAltService(
        privateBrowsing(mPrivateBrowsing), callbacks = std::move(callbacks),
        proxyInfo = std::move(proxyInfo), caps(mCaps),
        connectionInfo = std::move(connectionInfo)]() {
-        if (XRE_IsSocketProcess()) {
-          AltServiceChild::ProcessHeader(
-              altSvc, scheme, originHost, originPort, userName, privateBrowsing,
-              callbacks, proxyInfo, caps & NS_HTTP_DISALLOW_SPDY,
-              OriginAttributes(), connectionInfo);
-          return;
-        }
-
         AltSvcMapping::ProcessHeader(altSvc, scheme, originHost, originPort,
                                      userName, privateBrowsing, callbacks,
                                      proxyInfo, caps & NS_HTTP_DISALLOW_SPDY,

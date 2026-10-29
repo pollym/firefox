@@ -13,13 +13,10 @@
 #include "mozilla/TimeStamp.h"
 #include "mozilla/dom/PContent.h"
 #include "mozilla/glean/NetwerkProtocolHttpMetrics.h"
-#include "mozilla/net/AltSvcTransactionChild.h"
-#include "mozilla/net/AltSvcTransactionParent.h"
 #include "nsEscape.h"
 #include "nsHttpConnectionInfo.h"
 #include "nsHttpHandler.h"
 #include "nsHttpTransaction.h"
-#include "nsIOService.h"
 #include "nsITLSSocketControl.h"
 #include "nsThreadUtils.h"
 #include "xpcpublic.h"
@@ -609,8 +606,7 @@ AltSvcTransaction<Validator>::AltSvcTransaction(
       mTriedToValidate(false),
       mTriedToWrite(false),
       mValidatedResult(false) {
-  MOZ_ASSERT_IF(nsIOService::UseSocketProcess(), XRE_IsSocketProcess());
-  MOZ_ASSERT_IF(!nsIOService::UseSocketProcess(), XRE_IsParentProcess());
+  MOZ_ASSERT(XRE_IsParentProcess());
   // We don't want to let this transaction use consistent connection.
   mCaps &= ~NS_HTTP_ALLOW_KEEPALIVE;
 }
@@ -951,18 +947,9 @@ void AltSvcCache::UpdateAltServiceMapping(
        this, map->IsHttp3()));
   nsCOMPtr<nsIInterfaceRequestor> callbacks = new AltSvcOverride(aCallbacks);
   RefPtr<AltSvcMappingValidator> validator = new AltSvcMappingValidator(map);
-  RefPtr<SpeculativeTransaction> transaction;
-  if (nsIOService::UseSocketProcess()) {
-    RefPtr<AltSvcTransactionParent> parent =
-        new AltSvcTransactionParent(ci, aCallbacks, caps, validator);
-    if (!parent->Init()) {
-      return;
-    }
-    transaction = parent;
-  } else {
-    transaction = new AltSvcTransaction<AltSvcMappingValidator>(
-        ci, aCallbacks, caps, validator, map->IsHttp3());
-  }
+  RefPtr<SpeculativeTransaction> transaction =
+      new AltSvcTransaction<AltSvcMappingValidator>(ci, aCallbacks, caps,
+                                                    validator, map->IsHttp3());
 
   nsresult rv =
       gHttpHandler->SpeculativeConnect(ci, callbacks, caps, transaction);
@@ -1185,8 +1172,6 @@ AltSvcOverride::GetAllow1918(bool* allow) {
   *allow = true;
   return NS_OK;
 }
-
-template class AltSvcTransaction<AltSvcTransactionChild>;
 
 NS_IMPL_ISUPPORTS(AltSvcOverride, nsIInterfaceRequestor,
                   nsISpeculativeConnectionOverrider)

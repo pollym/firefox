@@ -15,6 +15,7 @@
 #include "mozilla/PRemoteLazyInputStream.h"
 #include "mozilla/SlicedInputStream.h"
 #include "mozilla/ipc/Endpoint.h"
+#include "mozilla/ipc/IPCStreamUtils.h"
 #include "mozilla/ipc/InputStreamParams.h"
 #include "mozilla/ipc/MessageChannel.h"
 #include "mozilla/ipc/ProtocolMessageUtils.h"

@@ -4,8 +4,6 @@
 
 #include "SocketProcessParent.h"
 
-#include "AltServiceParent.h"
-#include "HttpTransactionParent.h"
 #include "SSLTokensCache.h"
 #include "SocketProcessHost.h"
 #include "SocketProcessLogging.h"
@@ -222,20 +220,6 @@ mozilla::ipc::IPCResult SocketProcessParent::RecvPDNSRequestConstructor(
   return IPC_OK();
 }
 
-mozilla::ipc::IPCResult SocketProcessParent::RecvObserveHttpActivity(
-    const HttpActivityArgs& aArgs, const uint32_t& aActivityType,
-    const uint32_t& aActivitySubtype, const PRTime& aTimestamp,
-    const uint64_t& aExtraSizeData, const nsACString& aExtraStringData) {
-  nsCOMPtr<nsIHttpActivityDistributor> activityDistributor =
-      components::HttpActivityDistributor::Service();
-  MOZ_ASSERT(activityDistributor);
-
-  (void)activityDistributor->ObserveActivityWithArgs(
-      aArgs, aActivityType, aActivitySubtype, aTimestamp, aExtraSizeData,
-      aExtraStringData);
-  return IPC_OK();
-}
-
 mozilla::ipc::IPCResult SocketProcessParent::RecvInitSocketBackground(
     Endpoint<PSocketProcessBackgroundParent>&& aEndpoint) {
   if (!aEndpoint.IsValid()) {
@@ -256,12 +240,6 @@ mozilla::ipc::IPCResult SocketProcessParent::RecvInitSocketBackground(
                                endpoint.Bind(parent);
                              }));
   return IPC_OK();
-}
-
-already_AddRefed<PAltServiceParent>
-SocketProcessParent::AllocPAltServiceParent() {
-  RefPtr<AltServiceParent> actor = new AltServiceParent();
-  return actor.forget();
 }
 
 already_AddRefed<PProxyConfigLookupParent>
@@ -298,23 +276,6 @@ class DeferredDeleteSocketProcessParent : public Runnable {
 void SocketProcessParent::Destroy(RefPtr<SocketProcessParent>&& aParent) {
   NS_DispatchToMainThread(
       new DeferredDeleteSocketProcessParent(std::move(aParent)));
-}
-
-mozilla::ipc::IPCResult SocketProcessParent::RecvExcludeHttp2OrHttp3(
-    const HttpConnectionInfoCloneArgs& aArgs) {
-  RefPtr<nsHttpConnectionInfo> cinfo =
-      nsHttpConnectionInfo::DeserializeHttpConnectionInfoCloneArgs(aArgs);
-  if (!cinfo) {
-    MOZ_ASSERT(false, "failed to deserizlize http connection info");
-    return IPC_OK();
-  }
-
-  if (cinfo->IsHttp3()) {
-    gHttpHandler->ExcludeHttp3(cinfo);
-  } else {
-    gHttpHandler->ExcludeHttp2(cinfo);
-  }
-  return IPC_OK();
 }
 
 mozilla::ipc::IPCResult SocketProcessParent::RecvOnConsoleMessage(

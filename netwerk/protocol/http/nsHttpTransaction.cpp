@@ -1123,8 +1123,6 @@ nsresult nsHttpTransaction::WriteSegments(nsAHttpSegmentWriter* writer,
 
 bool nsHttpTransaction::ProxyConnectFailed() { return mProxyConnectFailed; }
 
-bool nsHttpTransaction::DataSentToChildProcess() { return false; }
-
 already_AddRefed<nsITransportSecurityInfo> nsHttpTransaction::SecurityInfo() {
   MutexAutoLock lock(mLock);
   return do_AddRef(mSecurityInfo);
@@ -1160,10 +1158,6 @@ already_AddRefed<nsHttpConnectionInfo> nsHttpTransaction::GetConnInfo() const {
 }
 
 nsHttpTransaction* nsHttpTransaction::AsHttpTransaction() { return this; }
-
-HttpTransactionParent* nsHttpTransaction::AsHttpTransactionParent() {
-  return nullptr;
-}
 
 nsHttpTransaction::HTTPSSVC_CONNECTION_FAILED_REASON
 nsHttpTransaction::ErrorCodeToFailedReason(nsresult aErrorCode) {

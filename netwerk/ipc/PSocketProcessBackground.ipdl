@@ -5,7 +5,6 @@
 include protocol PVerifySSLServerCert;
 include protocol PSelectTLSClientAuthCert;
 include protocol PIPCClientCerts;
-include protocol PWebSocketConnection;
 
 include PSMIPCTypes;
 
@@ -48,9 +47,6 @@ parent:
     uint64_t aBrowserId);
 
   async InitIPCClientCerts(Endpoint<PIPCClientCertsParent> aEndpoint);
-
-  async InitWebSocketConnection(Endpoint<PWebSocketConnectionParent> aEndpoint,
-                                uint32_t aListenerId);
 };
 
 } // namespace net

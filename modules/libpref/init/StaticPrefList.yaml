@@ -15857,12 +15857,6 @@
   value: true
   mirror: always
 
-# Whether we can send OnDataAvailable to content process directly.
-- name: network.send_ODA_to_content_directly
-  type: RelaxedAtomicBool
-  value: true
-  mirror: always
-
 # Whether we can send OnDataFinished to html5parser in content process directly
 - name: network.send_OnDataFinished.html5parser
   type: RelaxedAtomicBool

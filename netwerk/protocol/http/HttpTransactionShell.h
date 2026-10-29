@@ -29,7 +29,6 @@ class nsITransportEventSink;
 namespace mozilla::net {
 
 enum HttpTrafficCategory : uint8_t;
-class HttpTransactionParent;
 class nsHttpConnectionInfo;
 class nsHttpHeaderArray;
 class nsHttpRequestHead;
@@ -164,10 +163,7 @@ class HttpTransactionShell : public nsISupports {
   virtual int32_t GetProxyConnectResponseCode() = 0;
   virtual RefPtr<ProxyConnectResponseHead> GetProxyConnectResponseHead() = 0;
 
-  virtual bool DataSentToChildProcess() = 0;
-
   virtual nsHttpTransaction* AsHttpTransaction() = 0;
-  virtual HttpTransactionParent* AsHttpTransactionParent() = 0;
 
   virtual bool TakeRestartedState() = 0;
   virtual uint32_t HTTPSSVCReceivedStage() = 0;
@@ -184,10 +180,6 @@ class HttpTransactionShell : public nsISupports {
   // (e.g. a JS ReadableStream). Such a body has no length known up front,
   // and retry or restart logic must not attempt to re-send it.
   virtual void SetRequestBodyIsStreaming(bool aIsStreaming) = 0;
-
-  virtual TimeStamp GetOnStartRequestStartTime() const { return TimeStamp(); }
-  virtual TimeStamp GetDataAvailableStartTime() const { return TimeStamp(); }
-  virtual TimeStamp GetOnStopRequestStartTime() const { return TimeStamp(); }
 
   virtual void SetIsTRRTransaction() {}
 };
@@ -244,9 +236,7 @@ class HttpTransactionShell : public nsISupports {
   virtual int32_t GetProxyConnectResponseCode() override;                      \
   virtual RefPtr<ProxyConnectResponseHead> GetProxyConnectResponseHead()       \
       override;                                                                \
-  virtual bool DataSentToChildProcess() override;                              \
   virtual nsHttpTransaction* AsHttpTransaction() override;                     \
-  virtual HttpTransactionParent* AsHttpTransactionParent() override;           \
   virtual bool TakeRestartedState() override;                                  \
   virtual uint32_t HTTPSSVCReceivedStage() override;                           \
   virtual bool Http2Disabled() const override;                                 \

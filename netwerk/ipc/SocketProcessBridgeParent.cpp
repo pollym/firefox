@@ -12,7 +12,6 @@
 #include "SocketProcessChild.h"
 #include "mozilla/ipc/BackgroundParent.h"
 #include "mozilla/ipc/Endpoint.h"
-#include "mozilla/net/BackgroundDataBridgeParent.h"
 #include "nsThreadUtils.h"
 
 namespace mozilla {
@@ -27,31 +26,6 @@ SocketProcessBridgeParent::SocketProcessBridgeParent(ProcessId aId) : mId(aId) {
 
 SocketProcessBridgeParent::~SocketProcessBridgeParent() {
   LOG(("DESTRUCT SocketProcessBridgeParent::SocketProcessBridgeParent\n"));
-}
-
-mozilla::ipc::IPCResult SocketProcessBridgeParent::RecvInitBackgroundDataBridge(
-    mozilla::ipc::Endpoint<PBackgroundDataBridgeParent>&& aEndpoint,
-    uint64_t aChannelID) {
-  LOG(("SocketProcessBridgeParent::RecvInitBackgroundDataBridge\n"));
-
-  nsCOMPtr<nsISerialEventTarget> transportQueue;
-  if (NS_FAILED(NS_CreateBackgroundTaskQueue("BackgroundDataBridge",
-                                             getter_AddRefs(transportQueue)))) {
-    return IPC_FAIL(this, "NS_CreateBackgroundTaskQueue failed");
-  }
-
-  if (!aEndpoint.IsValid()) {
-    return IPC_FAIL(this, "Invalid endpoint");
-  }
-
-  transportQueue->Dispatch(NS_NewRunnableFunction(
-      "BackgroundDataBridgeParent::Bind",
-      [endpoint = std::move(aEndpoint), aChannelID]() mutable {
-        RefPtr<BackgroundDataBridgeParent> actor =
-            BackgroundDataBridgeParent::Create(aChannelID);
-        endpoint.Bind(actor);
-      }));
-  return IPC_OK();
 }
 
 #ifdef MOZ_WEBRTC
@@ -74,7 +48,7 @@ mozilla::ipc::IPCResult SocketProcessBridgeParent::RecvInitMediaTransport(
   }
 
   mMediaTransportTaskQueue->Dispatch(NS_NewRunnableFunction(
-      "BackgroundDataBridgeParent::Bind",
+      "MediaTransportParent::Bind",
       [endpoint = std::move(aEndpoint)]() mutable {
         RefPtr<MediaTransportParent> actor = new MediaTransportParent();
         endpoint.Bind(actor);
