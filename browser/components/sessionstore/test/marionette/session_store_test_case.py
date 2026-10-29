@@ -77,6 +77,9 @@ class SessionStoreTestCase(WindowManagerMixin, MarionetteTestCase):
             "toolkit.winRegisterApplicationRestart": win_register_restart,
             # Whether to enable taskbar tabs for this test
             "browser.taskbarTabs.enabled": taskbartabs_enable,
+            # Prevent early "events" pings from clearing recorded Glean
+            # events before tests can read them.
+            "telemetry.fog.test.decelerate_early_events": True,
         })
 
         self.all_windows = self.test_windows.copy()
