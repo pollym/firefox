@@ -238,6 +238,11 @@ devtools-settings-advanced-disable-cache =
     .label = Disable HTTP Cache (when toolbox is open)
     .title = Turning this option on will disable the HTTP cache for all tabs that have the toolbox open. Service Workers are not affected by this option.
 
+devtools-settings-advanced-disable-javascript =
+    .label = Disable JavaScript
+    .title = Turning this option on will disable JavaScript for the current tab. If the tab or the toolbox is closed then this setting will be forgotten.
+    .description = Current session only, reloads the page
+
 devtools-settings-advanced-service-workers-http =
     .label = Enable Service Workers over HTTP (when toolbox is open)
     .title = Turning this option on will enable the service workers over HTTP for all tabs that have the toolbox open.
