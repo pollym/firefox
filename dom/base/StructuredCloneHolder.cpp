@@ -477,20 +477,22 @@ void StructuredCloneHolder::Adopt(JSStructuredCloneData&& aData,
 }
 
 static bool CheckExposedGlobals(JSContext* aCx, JS::Handle<JSObject*> aGlobal,
-                                uint16_t aExposedGlobals) {
+                                uint16_t aExposedGlobals,
+                                bool aRequireSecureContext = false) {
   // Sandboxes aren't really DOM globals (though they do set the
   // JSCLASS_DOM_GLOBAL flag), and so we can't simply do the exposure check.
   // Some sandboxes do have a DOM global as their prototype, so using the
   // prototype to check for exposure will at least make it work for those
   // specific cases.
-  bool inExposureSet;
-  if (JSObject* proto = xpc::SandboxPrototypeOrNull(aCx, aGlobal)) {
-    inExposureSet = IsGlobalInExposureSet(aCx, proto, aExposedGlobals);
-  } else {
-    inExposureSet = IsGlobalInExposureSet(aCx, aGlobal, aExposedGlobals);
+  JS::Rooted<JSObject*> target(aCx, xpc::SandboxPrototypeOrNull(aCx, aGlobal));
+  if (!target) {
+    target = aGlobal;
   }
+  bool inExposureSet = IsGlobalInExposureSet(aCx, target, aExposedGlobals);
 
-  if (!inExposureSet) {
+  if (!inExposureSet ||
+      (aRequireSecureContext &&
+       !JS::GetIsSecureContext(js::GetNonCCWObjectRealm(target)))) {
     ErrorResult error;
     error.ThrowDataCloneError("Interface is not exposed.");
     MOZ_ALWAYS_TRUE(error.MaybeSetPendingException(aCx));
@@ -510,12 +512,10 @@ JSObject* StructuredCloneHolder::ReadFullySerializableObjects(
     return nullptr;
   }
 
-  Maybe<std::pair<uint16_t, WebIDLDeserializer>> deserializer =
+  Maybe<std::tuple<uint16_t, bool, WebIDLDeserializer>> deserializer =
       LookupDeserializer(StructuredCloneTags(aTag));
   if (deserializer.isSome()) {
-    uint16_t exposedGlobals;
-    WebIDLDeserializer deserialize;
-    std::tie(exposedGlobals, deserialize) = deserializer.ref();
+    const auto& [exposedGlobals, secureContext, deserialize] = *deserializer;
 
     // https://html.spec.whatwg.org/multipage/structured-data.html#structureddeserialize
     //
@@ -528,7 +528,8 @@ JSObject* StructuredCloneHolder::ReadFullySerializableObjects(
     // The special-casing for IndexedDB is because it uses a sandbox to
     // deserialize, which means we don't actually have access to exposure
     // information.
-    if (!aIsForIndexedDB && !CheckExposedGlobals(aCx, global, exposedGlobals)) {
+    if (!aIsForIndexedDB &&
+        !CheckExposedGlobals(aCx, global, exposedGlobals, secureContext)) {
       return nullptr;
     }
 
