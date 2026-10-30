@@ -108,13 +108,6 @@ export class TabNotesStorage {
    */
   #shutdownBlocker;
 
-  /**
-   * Close of the previous connection, which a new `init()` waits for.
-   *
-   * @type {Promise<void>|undefined}
-   */
-  #closePromise;
-
   /** @type {Promise<OpenedConnection>} */
   get #connection() {
     return this.init().then(() => this.#databaseConnection);
@@ -135,10 +128,9 @@ export class TabNotesStorage {
 
     const basePath = options?.basePath ?? PathUtils.profileDir;
     this.dbPath = PathUtils.join(basePath, this.DATABASE_FILE_NAME);
-    const opened = Promise.resolve(this.#closePromise)
-      .catch(() => {})
-      .then(() => Sqlite.openConnection({ path: this.dbPath }));
-    this.#initPromise = opened.then(async connection => {
+    this.#initPromise = Sqlite.openConnection({
+      path: this.dbPath,
+    }).then(async connection => {
       this.#databaseConnection = connection;
       this.#shutdownBlocker = () => this.deinit();
       Sqlite.shutdown.addBlocker(
@@ -178,31 +170,17 @@ export class TabNotesStorage {
    * @returns {Promise<void>}
    */
   deinit() {
-    if (!this.#initPromise) {
-      return this.#closePromise ?? Promise.resolve();
+    if (this.#shutdownBlocker) {
+      Sqlite.shutdown.removeBlocker(this.#shutdownBlocker);
+      this.#shutdownBlocker = null;
     }
-    // Close whatever the current init opens, even if it is still in flight,
-    // and let a later init() start a new connection once that is done.
-    const pendingInit = this.#initPromise;
-    this.#initPromise = undefined;
-    const closePromise = pendingInit
-      .catch(() => {})
-      .then(() => {
-        if (this.#shutdownBlocker) {
-          Sqlite.shutdown.removeBlocker(this.#shutdownBlocker);
-          this.#shutdownBlocker = null;
-        }
-        const connection = this.#databaseConnection;
+    if (this.#databaseConnection) {
+      return this.#databaseConnection.close().then(() => {
         this.#databaseConnection = null;
-        return connection?.close();
-      })
-      .finally(() => {
-        if (this.#closePromise == closePromise) {
-          this.#closePromise = undefined;
-        }
+        this.#initPromise = undefined;
       });
-    this.#closePromise = closePromise;
-    return closePromise;
+    }
+    return Promise.resolve();
   }
 
   /**
