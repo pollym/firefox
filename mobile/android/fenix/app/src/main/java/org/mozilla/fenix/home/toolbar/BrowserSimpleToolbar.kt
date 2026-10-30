@@ -131,7 +131,7 @@ private fun initialActions(): List<Action> {
             onClick = object : BrowserToolbarEvent {},
         ),
         ActionButtonRes(
-            drawableResId = iconsR.drawable.mozac_ic_ellipsis_vertical_24,
+            drawableResId = iconsR.drawable.mozac_ic_more_vertical_round_24,
             contentDescription = android.R.string.untitled,
             onClick =
                 BrowserToolbarMenu {

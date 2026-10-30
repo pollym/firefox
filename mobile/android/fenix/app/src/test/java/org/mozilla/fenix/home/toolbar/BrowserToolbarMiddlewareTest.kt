@@ -896,7 +896,7 @@ class BrowserToolbarMiddlewareTest {
 
         val action = middleware.buildHomeAction(action = HomeToolbarAction.Menu) as ActionButtonRes
 
-        assertEquals(iconsR.drawable.mozac_ic_ellipsis_vertical_24, action.drawableResId)
+        assertEquals(iconsR.drawable.mozac_ic_more_vertical_round_24, action.drawableResId)
         assertEquals(R.string.content_description_menu, action.contentDescription)
         assertEquals(ActionButton.State.DEFAULT, action.state)
         assertEquals(MenuClicked(source = Source.Unknown), action.onClick)
@@ -1759,7 +1759,7 @@ class BrowserToolbarMiddlewareTest {
         source: Source = Source.AddressBar.BrowserEnd,
     ) =
         ActionButtonRes(
-            drawableResId = iconsR.drawable.mozac_ic_ellipsis_vertical_24,
+            drawableResId = iconsR.drawable.mozac_ic_more_vertical_round_24,
             contentDescription = R.string.content_description_menu,
             highlighted = highlighted,
             onClick = MenuClicked(source),
