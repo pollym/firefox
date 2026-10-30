@@ -6,6 +6,7 @@ LABEL maintainer="Richard Pappalardo <rpappalax@gmail.com>"
 
 VOLUME /builds/worker/checkouts
 VOLUME /builds/worker/workspace
+VOLUME /builds/worker/gradle-user-home
 
 ENV CURL='curl --location --retry 5' \
     GRADLE_OPTS='-Xmx4096m -Dorg.gradle.daemon=false -Dorg.gradle.parallel=false' \

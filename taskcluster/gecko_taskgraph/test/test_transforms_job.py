@@ -101,6 +101,31 @@ def test_group_name(config, groupSymbol, description):
     assert description == generated_description
 
 
+def test_use_gradle(transform):
+    taskdesc = transform({
+        "worker-type": "b-linux-docker-amd",
+        "use-gradle": "offline",
+        "use-gradle-cache": True,
+    })[2]
+
+    assert taskdesc["worker"] == {
+        "implementation": "docker-worker",
+        "os": "linux",
+        "env": {
+            "GRADLE_FLAGS": "--offline --no-daemon",
+            "GRADLE_USER_HOME": "/builds/worker/gradle-user-home",
+        },
+        "caches": [
+            {
+                "type": "persistent",
+                "name": "gradle-user-home",
+                "mount-point": "/builds/worker/gradle-user-home",
+                "skip-untrusted": False,
+            }
+        ],
+    }
+
+
 @pytest.mark.parametrize(
     "worker_os,worker_type,expected",
     [

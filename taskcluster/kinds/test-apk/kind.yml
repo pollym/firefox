@@ -16,6 +16,7 @@ kind-dependencies:
     - build
 
 task-defaults:
+    use-gradle-cache: true
     attributes:
         build_platform: android
         retrigger: true

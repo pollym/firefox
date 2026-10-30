@@ -11,11 +11,11 @@ task-defaults:
     index:
         product: mobile
     worker-type: b-linux-docker-amd
+    use-gradle: offline
+    use-gradle-cache: true
     worker:
         docker-image: {in-tree: android-build}
         max-run-time: 7200
-        env:
-            GRADLE_USER_HOME: "/builds/worker/checkouts/gecko/mobile/android/gradle/dotgradle-offline"
         artifacts:
             - name: public/build/maven
               path: /builds/worker/workspace/obj-build/gradle/maven/
@@ -182,6 +182,7 @@ android-arm-shippable/opt:
         enable-full-crashsymbols: true
         shippable: true
     shipping-phase: build
+    use-gradle-cache: false
     shipping-product: firefox-android
     index:
         job-name: android-arm-opt
@@ -214,6 +215,7 @@ android-arm-shippable-lite/opt:
         enable-full-crashsymbols: true
         shippable: true
     shipping-phase: build
+    use-gradle-cache: false
     shipping-product: firefox-android
     index:
         job-name: android-arm-lite-opt
@@ -387,6 +389,7 @@ android-aarch64-shippable/opt:
         enable-full-crashsymbols: true
         shippable: true
     shipping-phase: build
+    use-gradle-cache: false
     shipping-product: firefox-android
     index:
         job-name: android-aarch64-opt
@@ -419,6 +422,7 @@ android-aarch64-shippable-lite/opt:
         enable-full-crashsymbols: true
         shippable: true
     shipping-phase: build
+    use-gradle-cache: false
     shipping-product: firefox-android
     index:
         job-name: android-aarch64-lite-opt
@@ -621,6 +625,7 @@ android-x86_64-shippable/opt:
         enable-full-crashsymbols: true
         shippable: true
     shipping-phase: build
+    use-gradle-cache: false
     shipping-product: firefox-android
     index:
         job-name: android-x86_64-opt
@@ -653,6 +658,7 @@ android-x86_64-shippable-lite/opt:
         enable-full-crashsymbols: true
         shippable: true
     shipping-phase: build
+    use-gradle-cache: false
     shipping-product: firefox-android
     index:
         job-name: android-x86_64-lite-opt

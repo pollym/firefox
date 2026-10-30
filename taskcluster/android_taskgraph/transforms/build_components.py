@@ -48,6 +48,7 @@ def resolve_keys(config, tasks):
             "include-coverage",
             "run-on-projects",
             "shipping-phase",
+            "use-gradle-cache",
             "run.gradlew",
             "treeherder.symbol",
             "dependencies.geckoview",
