@@ -51,7 +51,6 @@ internal fun ExtensionsMenuItem(
     isAllWebExtensionsDisabled: Boolean,
     webExtensionMenuCount: Int,
     extensionsMenuItemDescription: String?,
-    pendingExtensionUpdatesDescription: String? = null,
     onExtensionsMenuClick: () -> Unit,
     extensionSubmenu: @Composable () -> Unit,
 ) {
@@ -63,12 +62,7 @@ internal fun ExtensionsMenuItem(
 
     val beforeIconPainter = beforeIconPainterForExtensions(isExtensionsProcessDisabled = isExtensionsProcessDisabled)
 
-    val descriptionState =
-        if (pendingExtensionUpdatesDescription != null) {
-            MenuItemState.WARNING
-        } else {
-            descriptionStateForExtensions(isExtensionsProcessDisabled = isExtensionsProcessDisabled)
-        }
+    val descriptionState = descriptionStateForExtensions(isExtensionsProcessDisabled = isExtensionsProcessDisabled)
 
     val state =
         menuItemStateForExtensions(
@@ -80,7 +74,7 @@ internal fun ExtensionsMenuItem(
     Column {
         MenuItem(
             label = stringResource(id = R.string.browser_menu_extensions),
-            description = pendingExtensionUpdatesDescription ?: extensionsMenuItemDescription,
+            description = extensionsMenuItemDescription,
             maxDescriptionLines = 1,
             stateDescription = stateDescription,
             beforeIconPainter = beforeIconPainter,
@@ -228,7 +222,6 @@ internal fun WebExtensionMenuItems(
     webExtensionMenuItems: Map<WebExtensionMenuItem, Addon?>,
     onWebExtensionMenuItemClick: () -> Unit,
     onWebExtensionMenuItemSettingsClick: (Addon) -> Unit,
-    pendingExtensionUpdateIds: Set<String> = emptySet(),
 ) {
     Column(
         modifier =
@@ -258,10 +251,6 @@ internal fun WebExtensionMenuItems(
                     },
                 enabled = extension.enabled,
                 badgeText = extension.badgeText,
-                description =
-                    stringResource(R.string.browser_menu_extension_review_update_description).takeIf {
-                        extension.id in pendingExtensionUpdateIds
-                    },
                 onClick = {
                     if (accessPoint != MenuAccessPoint.External) {
                         onWebExtensionMenuItemClick()

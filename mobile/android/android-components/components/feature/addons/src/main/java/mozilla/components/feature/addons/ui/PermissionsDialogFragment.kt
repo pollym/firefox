@@ -51,26 +51,13 @@ private const val KEY_POSITIVE_BUTTON_DISABLED_BACKGROUND_COLOR = "KEY_POSITIVE_
 private const val KEY_POSITIVE_BUTTON_DISABLED_TEXT_COLOR = "KEY_POSITIVE_BUTTON_DISABLED_TEXT_COLOR"
 private const val KEY_POSITIVE_BUTTON_RADIUS = "KEY_POSITIVE_BUTTON_RADIUS"
 private const val KEY_LEARN_MORE_LINK_TEXT_COLOR = "KEY_LEARN_MORE_LINK_TEXT_COLOR"
-private const val KEY_PERMISSIONS_DIALOG_MODE = "KEY_PERMISSIONS_DIALOG_MODE"
-private const val KEY_PROMPT_INSTANCE_ID = "KEY_PROMPT_INSTANCE_ID"
+private const val KEY_FOR_OPTIONAL_PERMISSIONS = "KEY_FOR_OPTIONAL_PERMISSIONS"
 internal const val KEY_PERMISSIONS = "KEY_PERMISSIONS"
 internal const val KEY_ORIGINS = "KEY_ORIGINS"
 internal const val KEY_DATA_COLLECTION_PERMISSIONS = "KEY_DATA_COLLECTION_PERMISSIONS"
 private const val DEFAULT_VALUE = Int.MAX_VALUE
 private const val TECHNICAL_AND_INTERACTION_PERM = "technicalAndInteraction"
 private val POSITIVE_BUTTON_ENABLE_DELAY = 1.seconds
-
-/** The kind of permission request a [PermissionsDialogFragment] presents. */
-enum class PermissionsDialogMode {
-    /** The permissions an extension requires to be installed. */
-    INSTALL,
-
-    /** The optional permissions an installed extension asks for while running. */
-    OPTIONAL,
-
-    /** New permissions required by an extension update. */
-    UPDATE,
-}
 
 /** A dialog that shows a set of permission required by an [Addon]. */
 class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: CoroutineDispatcher? = null) :
@@ -147,18 +134,12 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
                 DEFAULT_VALUE,
             )
 
-    /** The kind of permission request this dialog presents. See [PermissionsDialogMode] for more details. */
-    internal val mode: PermissionsDialogMode
-        get() =
-            safeArguments.getString(KEY_PERMISSIONS_DIALOG_MODE)?.let { PermissionsDialogMode.valueOf(it) }
-                ?: PermissionsDialogMode.INSTALL
-
     /**
-     * The id of the request this dialog answers, if any. Check it before answering: a recreated dialog can outlive its
-     * request.
+     * This flag is used to adjust the permissions prompt for optional permissions (instead of asking users to grant the
+     * required permissions at install time, which is the default).
      */
-    val promptInstanceId: String?
-        get() = safeArguments.getString(KEY_PROMPT_INSTANCE_ID)
+    internal val forOptionalPermissions: Boolean
+        get() = safeArguments.getBoolean(KEY_FOR_OPTIONAL_PERMISSIONS)
 
     internal val permissions
         get() = requireNotNull(safeArguments.getStringArray(KEY_PERMISSIONS))
@@ -233,7 +214,11 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
 
         loadIcon(addon = addon, iconView = rootView.findViewById(R.id.icon))
 
-        rootView.findViewById<TextView>(R.id.title).text = buildTitleText(hasDataCollectionOnly)
+        rootView.findViewById<TextView>(R.id.title).text =
+            buildTitleText(
+                forOptionalPermissions = forOptionalPermissions,
+                hasDataCollectionOnly = hasDataCollectionOnly,
+            )
 
         val classifyOriginPermissionsResult = Addon.classifyOriginPermissions(origins = origins.toList())
         val hostPermissions = classifyOriginPermissionsResult.getOrNull()
@@ -255,7 +240,7 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
             }
 
         // "userScripts" can only be requested without other permissions, and
-        // only in PermissionsDialogMode.OPTIONAL. This is enforced at the Gecko
+        // only with forOptionalPermissions=true. This is enforced at the Gecko
         // layer, in ext-permissions.js (via OptionalOnlyPermission).
         val isUserScriptsPermission = permissions.size == 1 && permissions[0] == "userScripts"
 
@@ -307,28 +292,17 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
             )
         permissionsRecyclerView.layoutManager = LinearLayoutManager(context)
 
-        if (mode == PermissionsDialogMode.OPTIONAL) {
+        if (forOptionalPermissions) {
             positiveButton.text = requireContext().getString(R.string.mozac_feature_addons_permissions_dialog_allow)
             negativeButton.text = requireContext().getString(R.string.mozac_feature_addons_permissions_dialog_deny)
-        } else if (mode == PermissionsDialogMode.UPDATE) {
-            val introText = rootView.findViewById<TextView>(R.id.intro_text)
-            introText.text =
-                requireContext().getString(R.string.mozac_feature_addons_updater_permissions_dialog_description)
-            introText.isVisible = true
-            positiveButton.text =
-                requireContext().getString(R.string.mozac_feature_addons_updater_permissions_dialog_update_button)
-            negativeButton.text =
-                requireContext().getString(R.string.mozac_feature_addons_updater_permissions_dialog_cancel_button)
         }
 
-        if (addon.incognito == Addon.Incognito.NOT_ALLOWED || mode != PermissionsDialogMode.INSTALL) {
+        if (addon.incognito == Addon.Incognito.NOT_ALLOWED || forOptionalPermissions) {
             optionalsSettingsTitle.isVisible = false
             allowedInPrivateBrowsing.isVisible = false
         }
 
-        if (
-            dataCollectionPermissions.contains(TECHNICAL_AND_INTERACTION_PERM) && mode == PermissionsDialogMode.INSTALL
-        ) {
+        if (dataCollectionPermissions.contains(TECHNICAL_AND_INTERACTION_PERM) && !forOptionalPermissions) {
             optionalsSettingsTitle.isVisible = true
             technicalAndInteraction.isVisible = true
             // This is an opt-out setting.
@@ -386,7 +360,7 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
             dataCollectionTitle.text = buildOptionalOrRequiredDataCollectionTitleText()
 
             val dataCollectionPermissionsView = rootView.findViewById<TextView>(R.id.data_collection_permissions)
-            val text = buildDataCollectionPermissionsText(dataCollectionPermissions.toList())
+            val text = buildDataCollectionPermissionsText(dataCollectionPermissions.toList(), forOptionalPermissions)
             dataCollectionPermissionsView.text = text
 
             // In case we don't have any text to display, let's hide the whole item.
@@ -439,14 +413,17 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
         return Addon.localizePermissions(result, requireContext())
     }
 
-    private fun buildDataCollectionPermissionsText(permissions: List<String>): String? {
+    private fun buildDataCollectionPermissionsText(
+        permissions: List<String>,
+        forOptionalPermissions: Boolean,
+    ): String? {
         // We shouldn't list the `technicalAndInteraction` permission in the sentence that indicates which (required)
         // data collection permissions are used in the extension during the installation flow. That's why we filter it
         // out.
         // That being said, we are using a variant of the same dialog for optional permission requests. In this case,
         // we want the `technicalAndInteraction` permission to be listed, hence the condition below.
         val filteredPermissions =
-            if (mode != PermissionsDialogMode.INSTALL) {
+            if (forOptionalPermissions) {
                 permissions
             } else {
                 permissions.filter { it != "technicalAndInteraction" }
@@ -466,7 +443,7 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
 
         return requireContext()
             .getString(
-                if (mode != PermissionsDialogMode.INSTALL) {
+                if (forOptionalPermissions) {
                     R.string.mozac_feature_addons_permissions_data_collection_optional_description
                 } else {
                     R.string.mozac_feature_addons_permissions_required_data_collection_description_2
@@ -475,25 +452,25 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
             )
     }
 
-    private fun buildTitleText(hasDataCollectionOnly: Boolean): String {
-        val titleRes =
-            when (mode) {
-                PermissionsDialogMode.INSTALL -> R.string.mozac_feature_addons_permissions_dialog_title_2
-                PermissionsDialogMode.UPDATE -> R.string.mozac_feature_addons_updater_permissions_dialog_title
-                PermissionsDialogMode.OPTIONAL ->
+    private fun buildTitleText(forOptionalPermissions: Boolean, hasDataCollectionOnly: Boolean): String {
+        return requireContext()
+            .getString(
+                if (forOptionalPermissions) {
                     if (hasDataCollectionOnly) {
                         R.string.mozac_feature_addons_optional_permissions_with_data_collection_only_dialog_title
                     } else {
                         R.string.mozac_feature_addons_optional_permissions_with_data_collection_dialog_title
                     }
-            }
-
-        return requireContext().getString(titleRes, addon.translateName(requireContext()))
+                } else {
+                    R.string.mozac_feature_addons_permissions_dialog_title_2
+                },
+                addon.translateName(requireContext()),
+            )
     }
 
     private fun buildOptionalOrRequiredText(): String {
         val optionalOrRequiredText =
-            if (mode != PermissionsDialogMode.INSTALL) {
+            if (forOptionalPermissions) {
                 getString(R.string.mozac_feature_addons_permissions_dialog_heading_optional_permissions)
             } else {
                 getString(R.string.mozac_feature_addons_permissions_dialog_heading_required_permissions)
@@ -504,7 +481,7 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
 
     private fun buildOptionalOrRequiredDataCollectionTitleText(): String {
         val optionalOrRequiredText =
-            if (mode != PermissionsDialogMode.INSTALL) {
+            if (forOptionalPermissions) {
                 getString(R.string.mozac_feature_addons_permissions_dialog_heading_optional_data_collection)
             } else {
                 getString(R.string.mozac_feature_addons_permissions_dialog_heading_required_data_collection)
@@ -556,12 +533,10 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
          * Returns a new instance of [PermissionsDialogFragment].
          *
          * @param addon The addon to show in the dialog.
+         * @param forOptionalPermissions Whether to show a permission dialog for optional permissions requested by the
+         *   extension.
          * @param permissions The permissions requested by the extension.
          * @param origins The host permissions requested by the extension.
-         * @param dataCollectionPermissions The data collection permissions requested by the extension.
-         * @param mode The kind of request shown: install, optional permissions or update.
-         * @param promptInstanceId The id of the request the dialog answers, see
-         *   [PermissionsDialogFragment.promptInstanceId].
          * @param promptsStyling Styling properties for the dialog.
          * @param onPositiveButtonClicked A lambda called when the allow button is clicked.
          * @param onNegativeButtonClicked A lambda called when the deny button is clicked.
@@ -572,8 +547,7 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
             permissions: List<String>,
             origins: List<String>,
             dataCollectionPermissions: List<String>,
-            mode: PermissionsDialogMode = PermissionsDialogMode.INSTALL,
-            promptInstanceId: String? = null,
+            forOptionalPermissions: Boolean = false,
             promptsStyling: PromptsStyling? =
                 PromptsStyling(
                     gravity = Gravity.BOTTOM,
@@ -589,8 +563,7 @@ class PermissionsDialogFragment @JvmOverloads constructor(mainDispatcher: Corout
 
             arguments.apply {
                 putParcelable(KEY_ADDON, addon)
-                putString(KEY_PERMISSIONS_DIALOG_MODE, mode.name)
-                putString(KEY_PROMPT_INSTANCE_ID, promptInstanceId)
+                putBoolean(KEY_FOR_OPTIONAL_PERMISSIONS, forOptionalPermissions)
                 putStringArray(KEY_PERMISSIONS, permissions.toTypedArray())
                 putStringArray(KEY_ORIGINS, origins.toTypedArray())
                 putStringArray(KEY_DATA_COLLECTION_PERMISSIONS, dataCollectionPermissions.toTypedArray())

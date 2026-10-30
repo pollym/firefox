@@ -107,7 +107,6 @@ import org.mozilla.fenix.addons.ExtensionsProcessDisabledForegroundController
 import org.mozilla.fenix.automation.AutomatedLaunch
 import org.mozilla.fenix.bindings.ExternalAppLinkStatusBinding
 import org.mozilla.fenix.bindings.HomepageTabBinding
-import org.mozilla.fenix.bindings.PendingExtensionUpdateBinding
 import org.mozilla.fenix.bindings.SummarizeToolbarHighlightBinding
 import org.mozilla.fenix.bookmarks.DesktopFolders
 import org.mozilla.fenix.browser.BrowserFragment
@@ -336,13 +335,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity, Crash
             appLinksUseCases = components.useCases.appLinksUseCases,
             browserStore = components.core.store,
             appStore = components.appStore,
-        )
-    }
-
-    private val pendingExtensionUpdateBinding by lazy {
-        PendingExtensionUpdateBinding(
-            appStore = components.appStore,
-            browserStore = components.core.store,
         )
     }
 
@@ -660,7 +652,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity, Crash
             downloadSnackbar,
             privateBrowsingLockFeature,
             externalAppLinkStatusBinding,
-            pendingExtensionUpdateBinding,
             summarizeToolbarHighlightBinding,
             components.core.summarizationSettingsBinding,
             translationsAIControllableFeatureRegistrar,

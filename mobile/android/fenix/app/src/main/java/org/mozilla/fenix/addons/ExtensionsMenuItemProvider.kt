@@ -15,8 +15,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.action.WebExtensionAction
-import mozilla.components.browser.state.selector.pendingExtensionUpdatesNeedingAttention
-import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.extension.WebExtensionPromptRequest
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.compose.base.text.Text
@@ -93,13 +91,6 @@ class ExtensionsMenuItemProvider(
                 isProcessDisabled = browserStore.state.extensionsProcessDisabled,
                 hasInstalledExtensions = browserStore.state.extensions.values.any { !it.isBuiltIn },
                 actions = browserStore.state.webExtensionMenuActionsWithoutIcons { target.browserSessionFrom(this) },
-                pendingUpdates =
-                    if (target is MenuTarget.CustomTab) {
-                        // A custom tab offers no way to act on an update.
-                        emptyMap()
-                    } else {
-                        browserStore.state.pendingExtensionUpdateNames()
-                    },
             )
         )
 
@@ -250,7 +241,6 @@ class ExtensionsMenuItemProvider(
     private fun ExtensionsStatus.toExtensionsManagerMenuItem(context: Context) =
         DEFAULT_MENU_ITEM.copy(
             icon = icon(context),
-            summary = if (isProcessDisabled) null else pendingUpdateSummary,
             onClickEvent = MenuAction.Navigate.ManageExtensions,
         )
 
@@ -333,7 +323,6 @@ class ExtensionsMenuItemProvider(
                     action.toMenuItem(
                         menuTarget = menuTarget,
                         ownedBy = installed.firstOrNull { it.id == action.extensionId },
-                        hasPendingUpdate = action.extensionId in pendingUpdates,
                     )
                 }
             else -> recommended.map { it.toRecommendedItem() }
@@ -361,26 +350,13 @@ class ExtensionsMenuItemProvider(
      * @param menuTarget [MenuTarget] for which this menu item would be shown for.
      * @param ownedBy The [Addon] this action belongs to, if it is one the user can configure. Extensions installed by
      *   the application itself are not listed as the user's own and so cannot be configured by them.
-     * @param hasPendingUpdate Whether an update of the extension waits for review.
      */
-    private fun WebExtensionMenuAction.toMenuItem(
-        menuTarget: MenuTarget,
-        ownedBy: Addon?,
-        hasPendingUpdate: Boolean = false,
-    ) =
+    private fun WebExtensionMenuAction.toMenuItem(menuTarget: MenuTarget, ownedBy: Addon?) =
         StandardMenuItem(
             title = MenuItemTitle(Text.String(label)),
             // Extensions the user already has installed are listed by what they offer for the current page, with a
             // summary for what the extension does being shown only for recommended extensions.
-            summary =
-                if (hasPendingUpdate) {
-                    MenuItemSummary(
-                        text = Text.Resource(R.string.browser_menu_extension_review_update_description),
-                        state = MenuItemState.WARNING,
-                    )
-                } else {
-                    null
-                },
+            summary = null,
             icon = menuIcon,
             badge = badgeText?.takeUnless { it.isBlank() }?.let { MenuItemBadge(text = Text.String(it)) },
             onClickEvent =
@@ -440,7 +416,6 @@ class ExtensionsMenuItemProvider(
  * @property actions What the user's extensions offer for the current page, to list when the item is expanded.
  * @property installed The installed and enabled extensions, each the owner of one or more of [actions].
  * @property recommended Extensions to suggest when the user has none installed.
- * @property pendingUpdates Names of the extensions with an update waiting for review, by extension id.
  */
 private data class ExtensionsStatus(
     val isProcessDisabled: Boolean = false,
@@ -449,14 +424,7 @@ private data class ExtensionsStatus(
     val actions: List<WebExtensionMenuAction> = emptyList(),
     val installed: List<Addon> = emptyList(),
     val recommended: List<MenuAddon> = emptyList(),
-    val pendingUpdates: Map<String, String> = emptyMap(),
 )
-
-/** Names of the extensions with an update needing attention, by extension ID. Both app menus use it. */
-internal fun BrowserState.pendingExtensionUpdateNames(): Map<String, String> =
-    pendingExtensionUpdatesNeedingAttention.keys.associateWith { extensionId ->
-        extensions[extensionId]?.name ?: extensionId
-    }
 
 /**
  * An [Addon] with its user facing details already resolved, so that building the menu needs no `Context`.
@@ -503,22 +471,6 @@ private fun ExtensionsStatus.icon(context: Context): MenuItemIcon =
         else -> MenuItemIconRes(iconsR.drawable.mozac_ic_extension_24)
     }
 
-/** The summary for pending updates, or null if there are none. */
-private val ExtensionsStatus.pendingUpdateSummary: MenuItemSummary?
-    get() =
-        when {
-            pendingUpdates.isEmpty() -> null
-            else ->
-                MenuItemSummary(
-                    text =
-                        Text.Resource(
-                            R.string.browser_menu_extensions_review_update_description,
-                            listOf(pendingUpdates.values.joinToString()),
-                        ),
-                    state = MenuItemState.WARNING,
-                )
-        }
-
 private val ExtensionsStatus.summary: MenuItemSummary?
     get() =
         when {
@@ -527,7 +479,6 @@ private val ExtensionsStatus.summary: MenuItemSummary?
                     text = Text.Resource(R.string.browser_menu_extensions_disabled_description),
                     state = MenuItemState.DISABLED,
                 )
-            pendingUpdates.isNotEmpty() -> pendingUpdateSummary
             hasNothingToShow ->
                 MenuItemSummary(text = Text.Resource(R.string.browser_menu_no_extensions_installed_description))
             actions.isNotEmpty() -> MenuItemSummary(text = Text.String(actions.joinToString { it.label }))

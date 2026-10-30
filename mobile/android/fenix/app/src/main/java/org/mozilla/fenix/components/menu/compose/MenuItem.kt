@@ -230,12 +230,10 @@ internal fun MenuTextItem(
  * @param iconTint Tint color to be applied on the [Icon].
  * @param enabled Controls the enabled state of the list item. When `false`, the list item will not be clickable.
  * @param badgeText WebExtension badge text.
- * @param description Second line under the label, shown in the error color.
  * @param index The index of the item within the column.
  * @param onClick Called when the user clicks on the item.
  * @param onSettingsClick Called when the user clicks on the settings icon.
  */
-@Suppress("LongParameterList")
 @Composable
 internal fun WebExtensionMenuItem(
     label: String,
@@ -243,15 +241,12 @@ internal fun WebExtensionMenuItem(
     iconTint: Color = Color.Unspecified,
     enabled: Boolean?,
     badgeText: String?,
-    description: String? = null,
     index: Int = 0,
     onClick: (() -> Unit)? = null,
     onSettingsClick: (() -> Unit)? = null,
 ) {
     IconListItem(
         label = label,
-        colors = ListItemDefaults.colors(supportingColor = MaterialTheme.colorScheme.error),
-        description = description,
         enabled = enabled == true,
         beforeIconTint = iconTint,
         beforeIconPainter = iconPainter,
@@ -260,7 +255,7 @@ internal fun WebExtensionMenuItem(
             Modifier.testTag(WEB_EXTENSION_ITEM)
                 .clearAndSetSemantics {
                     onClick?.let { role = Role.Button }
-                    contentDescription = listOfNotNull(label, description).joinToString(separator = ", ")
+                    contentDescription = label
                     collectionItemInfo =
                         CollectionItemInfo(
                             rowIndex = index,

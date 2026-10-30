@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
@@ -25,7 +24,6 @@ import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.Addon.Companion.isAllURLsPermission
 import mozilla.components.feature.addons.Addon.Permission
 import mozilla.components.feature.addons.R as addonsR
-import mozilla.components.feature.addons.ui.PendingExtensionUpdateBanner
 import org.mozilla.fenix.R
 import org.mozilla.fenix.addons.AddonPermissionsUpdateRequest
 import org.mozilla.fenix.compose.list.SwitchListItem
@@ -52,9 +50,6 @@ fun AddonPermissionsScreen(
     requiredDataCollectionPermissions: List<String> = emptyList(),
     hasNoneDataCollection: Boolean = false,
     optionalDataCollectionPermissions: List<Addon.LocalizedPermission> = emptyList(),
-    hasPendingUpdate: Boolean = false,
-    onReviewUpdateClick: () -> Unit = {},
-    onCancelUpdateClick: () -> Unit = {},
 ) {
     Surface {
         val hasNoPermission =
@@ -69,8 +64,6 @@ fun AddonPermissionsScreen(
         // list in this screen.
         if (hasNoPermission) {
             return@Surface LazyColumn(modifier = Modifier.padding(vertical = 8.dp)) {
-                pendingUpdateItem(hasPendingUpdate, onReviewUpdateClick, onCancelUpdateClick)
-
                 item {
                     TextListItem(
                         label = stringResource(R.string.addons_does_not_require_permissions),
@@ -89,8 +82,6 @@ fun AddonPermissionsScreen(
         }
 
         LazyColumn(modifier = modifier.padding(vertical = 8.dp)) {
-            pendingUpdateItem(hasPendingUpdate, onReviewUpdateClick, onCancelUpdateClick)
-
             if (permissions.isNotEmpty()) {
                 // Required Permissions Header
                 item {
@@ -222,24 +213,6 @@ fun AddonPermissionsScreen(
             item {
                 LearnMoreItem(learnMoreUrl, onLearnMoreClick)
             }
-        }
-    }
-}
-
-private fun LazyListScope.pendingUpdateItem(
-    hasPendingUpdate: Boolean,
-    onReviewUpdateClick: () -> Unit,
-    onCancelUpdateClick: () -> Unit,
-) {
-    if (hasPendingUpdate) {
-        item {
-            PendingExtensionUpdateBanner(
-                message =
-                    stringResource(addonsR.string.mozac_feature_addons_update_requires_new_settings_this_extension),
-                onReviewClick = onReviewUpdateClick,
-                onCancelClick = onCancelUpdateClick,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            )
         }
     }
 }

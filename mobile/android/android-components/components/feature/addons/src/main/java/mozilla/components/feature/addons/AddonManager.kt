@@ -18,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -447,8 +446,7 @@ class AddonManager(
      * Updates the addon with the provided [id] if an update is available.
      *
      * @param id the ID of the addon
-     * @param onFinish callback invoked with the [Status] of the update once complete. An update that requires new
-     *   permissions only completes once the user decides (see [AddonUpdater.onUpdatePermissionRequest]), if ever.
+     * @param onFinish callback invoked with the [Status] of the update once complete.
      */
     fun updateAddon(id: String, onFinish: ((Status) -> Unit)) {
         val extension = installedExtensions[id]
@@ -474,15 +472,6 @@ class AddonManager(
         }
 
         runtime.updateWebExtension(extension, onSuccess, onError)
-    }
-
-    /**
-     * Returns once the extension has an update waiting for the user to grant new permissions, which may never happen.
-     *
-     * @see AddonUpdater.onUpdatePermissionRequest
-     */
-    internal suspend fun awaitPendingUpdateForExtension(extensionId: String) {
-        store.stateFlow.first { extensionId in it.pendingExtensionUpdates }
     }
 
     private fun addPendingAddonAction() =

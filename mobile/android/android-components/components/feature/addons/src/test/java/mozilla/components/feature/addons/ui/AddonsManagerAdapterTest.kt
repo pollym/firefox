@@ -9,7 +9,6 @@ import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -17,8 +16,6 @@ import java.util.Locale
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.test.runTest
 import mozilla.components.browser.state.state.BrowserState
-import mozilla.components.browser.state.state.WebExtensionState
-import mozilla.components.browser.state.state.extension.PendingExtensionUpdate
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.R
@@ -147,7 +144,6 @@ class AddonsManagerAdapterTest {
                 allowedInPrivateBrowsingLabel = allowedInPrivateBrowsingLabel,
                 messageBarWarningView = mock(),
                 messageBarErrorView = messageBarErrorView,
-                messageBarUpdateView = mock(),
             )
         val addon =
             Addon(
@@ -354,7 +350,6 @@ class AddonsManagerAdapterTest {
                 allowedInPrivateBrowsingLabel = allowedInPrivateBrowsingLabel,
                 messageBarWarningView = mock(),
                 messageBarErrorView = messageBarErrorView,
-                messageBarUpdateView = mock(),
             )
         val addon =
             Addon(
@@ -645,7 +640,6 @@ class AddonsManagerAdapterTest {
                 allowedInPrivateBrowsingLabel = mock(),
                 messageBarWarningView = messageBarWarningView,
                 messageBarErrorView = messageBarErrorView,
-                messageBarUpdateView = mock(),
             )
         val addonName = "some addon name"
         val addon = makeDisabledAddon(Addon.DisabledReason.BLOCKLISTED, addonName)
@@ -703,7 +697,6 @@ class AddonsManagerAdapterTest {
                 allowedInPrivateBrowsingLabel = mock(),
                 messageBarWarningView = messageBarWarningView,
                 messageBarErrorView = messageBarErrorView,
-                messageBarUpdateView = mock(),
             )
         val addonName = "some addon name"
         val addon = makeDisabledAddon(Addon.DisabledReason.NOT_CORRECTLY_SIGNED, addonName)
@@ -758,7 +751,6 @@ class AddonsManagerAdapterTest {
                 allowedInPrivateBrowsingLabel = mock(),
                 messageBarWarningView = messageBarWarningView,
                 messageBarErrorView = messageBarErrorView,
-                messageBarUpdateView = mock(),
             )
         val addon = makeDisabledAddon(Addon.DisabledReason.NOT_CORRECTLY_SIGNED)
         val adapter =
@@ -804,7 +796,6 @@ class AddonsManagerAdapterTest {
                 allowedInPrivateBrowsingLabel = mock(),
                 messageBarWarningView = messageBarWarningView,
                 messageBarErrorView = messageBarErrorView,
-                messageBarUpdateView = mock(),
             )
         val addonName = "some addon name"
         val addon = makeDisabledAddon(Addon.DisabledReason.INCOMPATIBLE, addonName)
@@ -852,7 +843,6 @@ class AddonsManagerAdapterTest {
                 allowedInPrivateBrowsingLabel = mock(),
                 messageBarWarningView = messageBarWarningView,
                 messageBarErrorView = messageBarErrorView,
-                messageBarUpdateView = mock(),
             )
         val addon = makeDisabledAddon(Addon.DisabledReason.INCOMPATIBLE)
         val adapter =
@@ -919,7 +909,6 @@ class AddonsManagerAdapterTest {
                 allowedInPrivateBrowsingLabel = mock(),
                 messageBarWarningView = messageBarWarningView,
                 messageBarErrorView = messageBarErrorView,
-                messageBarUpdateView = mock(),
             )
         val adapter =
             AddonsManagerAdapter(addonsManagerAdapterDelegate, emptyList(), mock(), emptyList(), BrowserStore())
@@ -939,100 +928,6 @@ class AddonsManagerAdapterTest {
                 AddonsManagerAdapterDelegate.LearnMoreLinks.BLOCKLISTED_ADDON,
                 addon,
             )
-    }
-
-    @Test
-    fun `bindMessageBars shows the update banner only when there is a pending update message`() {
-        val messageBarErrorView: View = mock()
-        whenever(messageBarErrorView.findViewById<TextView>(R.id.add_on_messagebar_error_text)).thenReturn(mock())
-        whenever(messageBarErrorView.findViewById<TextView>(R.id.add_on_messagebar_error_learn_more_link))
-            .thenReturn(mock())
-        val messageBarUpdateView = ComposeView(testContext)
-        val addon = Addon(id = "some-id")
-
-        AddonsManagerAdapter.bindMessageBars(
-            testContext,
-            messageBarWarningView = mock(),
-            messageBarErrorView = messageBarErrorView,
-            messageBarUpdateView = messageBarUpdateView,
-            onLearnMoreLinkClicked = {},
-            addon = addon,
-            addonName = "name",
-            appName = appName,
-            appVersion = appVersion,
-            pendingUpdateMessage = "name requires new settings to update.",
-        )
-        assertTrue(messageBarUpdateView.isVisible)
-
-        AddonsManagerAdapter.bindMessageBars(
-            testContext,
-            messageBarWarningView = mock(),
-            messageBarErrorView = messageBarErrorView,
-            messageBarUpdateView = messageBarUpdateView,
-            onLearnMoreLinkClicked = {},
-            addon = addon,
-            addonName = "name",
-            appName = appName,
-            appVersion = appVersion,
-        )
-        assertFalse(messageBarUpdateView.isVisible)
-    }
-
-    @Test
-    fun `bind add-on shows the update banner only for an enabled extension with a pending update`() {
-        val store =
-            BrowserStore(
-                BrowserState(
-                    extensions =
-                        mapOf(
-                            "enabled" to WebExtensionState("enabled", enabled = true),
-                            "disabled" to WebExtensionState("disabled", enabled = false),
-                        ),
-                    pendingExtensionUpdates =
-                        listOf("enabled", "disabled").associateWith {
-                            PendingExtensionUpdate(
-                                extensionId = it,
-                                permissions = listOf("privacy"),
-                                origins = emptyList(),
-                                dataCollectionPermissions = emptyList(),
-                                onPermissionsGranted = {},
-                            )
-                        },
-                )
-            )
-        val adapter = AddonsManagerAdapter(mock(), emptyList(), mock(), emptyList(), store)
-
-        fun bannerVisibleFor(addonId: String): Boolean {
-            val messageBarErrorView: View = mock()
-            whenever(messageBarErrorView.findViewById<TextView>(R.id.add_on_messagebar_error_text)).thenReturn(mock())
-            whenever(messageBarErrorView.findViewById<TextView>(R.id.add_on_messagebar_error_learn_more_link))
-                .thenReturn(mock())
-            val iconView = mock<ImageView>()
-            whenever(iconView.context).thenReturn(testContext)
-            val messageBarUpdateView = ComposeView(testContext)
-            val holder =
-                CustomViewHolder.AddonViewHolder(
-                    view = View(testContext),
-                    contentWrapperView = mock(),
-                    iconView = iconView,
-                    titleView = TextView(testContext),
-                    summaryView = TextView(testContext),
-                    ratingView = mock(),
-                    ratingAccessibleView = mock(),
-                    reviewCountView = mock(),
-                    addButton = mock(),
-                    allowedInPrivateBrowsingLabel = mock(),
-                    messageBarWarningView = mock(),
-                    messageBarErrorView = messageBarErrorView,
-                    messageBarUpdateView = messageBarUpdateView,
-                )
-            adapter.bindAddon(holder, Addon(id = addonId), appName, appVersion)
-            return messageBarUpdateView.isVisible
-        }
-
-        assertTrue(bannerVisibleFor("enabled"))
-        assertFalse(bannerVisibleFor("disabled"))
-        assertFalse(bannerVisibleFor("no-update"))
     }
 
     private fun makeDisabledAddon(disabledReason: Addon.DisabledReason, name: String? = null): Addon {

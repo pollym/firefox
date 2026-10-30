@@ -119,8 +119,6 @@ import org.mozilla.fenix.theme.FirefoxTheme
  * @param onIPProtectionNavigate Invoked when the user taps the chevron to open IP Protection settings.
  * @param onShareButtonClick Invoked when the user clicks on the share button.
  * @param extensionsMenuItemDescription The label of extensions menu item description.
- * @param pendingExtensionUpdatesDescription Shown instead of [extensionsMenuItemDescription] while an extension update
- *   waits for review.
  * @param moreSettingsSubmenu The content of more menu item.
  * @param extensionSubmenu The content of extensions menu item to avoid configuration during animation.
  */
@@ -177,7 +175,6 @@ fun MainMenu(
     onIPProtectionNavigate: () -> Unit,
     onShareButtonClick: () -> Unit,
     extensionsMenuItemDescription: String?,
-    pendingExtensionUpdatesDescription: String? = null,
     moreSettingsSubmenu: @Composable () -> Unit,
     extensionSubmenu: @Composable () -> Unit,
 ) {
@@ -281,7 +278,6 @@ fun MainMenu(
                     isAllWebExtensionsDisabled = isAllWebExtensionsDisabled,
                     webExtensionMenuCount = webExtensionMenuCount,
                     extensionsMenuItemDescription = extensionsMenuItemDescription,
-                    pendingExtensionUpdatesDescription = pendingExtensionUpdatesDescription,
                     onExtensionsMenuClick = onExtensionsMenuClick,
                     extensionSubmenu = extensionSubmenu,
                 )
@@ -306,7 +302,6 @@ fun MainMenu(
                 onFindInPageMenuClick = onFindInPageMenuClick,
                 onMoreMenuClick = onMoreMenuClick,
                 extensionsMenuItemDescription = extensionsMenuItemDescription,
-                pendingExtensionUpdatesDescription = pendingExtensionUpdatesDescription,
                 moreSettingsSubmenu = moreSettingsSubmenu,
                 extensionSubmenu = extensionSubmenu,
             )
@@ -384,7 +379,6 @@ private fun ToolsAndActionsMenuGroup(
     onFindInPageMenuClick: () -> Unit,
     onMoreMenuClick: () -> Unit,
     extensionsMenuItemDescription: String?,
-    pendingExtensionUpdatesDescription: String?,
     moreSettingsSubmenu: @Composable () -> Unit,
     extensionSubmenu: @Composable () -> Unit,
 ) {
@@ -455,7 +449,6 @@ private fun ToolsAndActionsMenuGroup(
             isAllWebExtensionsDisabled = isAllWebExtensionsDisabled,
             webExtensionMenuCount = webExtensionMenuCount,
             extensionsMenuItemDescription = extensionsMenuItemDescription,
-            pendingExtensionUpdatesDescription = pendingExtensionUpdatesDescription,
             onExtensionsMenuClick = onExtensionsMenuClick,
             extensionSubmenu = extensionSubmenu,
         )
@@ -606,7 +599,6 @@ internal fun Addons(
     onManageExtensionsMenuClick: () -> Unit,
     onDiscoverMoreExtensionsMenuClick: () -> Unit,
     onWebExtensionMenuItemClick: () -> Unit,
-    pendingExtensionUpdateIds: Set<String> = emptySet(),
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         if (accessPoint == MenuAccessPoint.Home && availableAddons.isNotEmpty()) {
@@ -625,7 +617,6 @@ internal fun Addons(
                 webExtensionMenuItems = webExtensionMenuItems,
                 onWebExtensionMenuItemClick = onWebExtensionMenuItemClick,
                 onWebExtensionMenuItemSettingsClick = onAddonSettingsClick,
-                pendingExtensionUpdateIds = pendingExtensionUpdateIds,
             )
         } else if (recommendedAddons.isNotEmpty()) {
             AddonsMenuItems(
