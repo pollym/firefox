@@ -4231,7 +4231,9 @@ bool PresShell::ScrollFrameIntoView(
         int32_t parentAPD = parent->PresContext()->AppUnitsPerDevPixel();
         rect = rect.ScaleToOtherAppUnitsRoundOut(APD, parentAPD);
         rect += extraOffset;
-      } else {
+      } else if (!container->PresContext()
+                      ->Document()
+                      ->IsTopLevelContentDocument()) {
         nsCOMPtr<nsIDocShell> docShell =
             container->PresContext()->GetDocShell();
         if (BrowserChild* browserChild = BrowserChild::GetFrom(docShell)) {
