@@ -112,7 +112,7 @@ def test_use_gradle(transform):
         "implementation": "docker-worker",
         "os": "linux",
         "env": {
-            "GRADLE_FLAGS": "--offline --no-daemon",
+            "GRADLE_FLAGS": "--offline --daemon",
             "GRADLE_USER_HOME": "/builds/worker/gradle-user-home",
         },
         "caches": [

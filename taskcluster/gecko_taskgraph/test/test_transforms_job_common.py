@@ -123,11 +123,11 @@ def test_rewrite_repo_configs_for_git_mirror():
 @pytest.mark.parametrize(
     "mode,use_cache,flags,cached",
     (
-        pytest.param("offline", True, "--offline --no-daemon", True, id="offline"),
+        pytest.param("offline", True, "--offline --daemon", True, id="offline"),
         pytest.param(
-            "offline", False, "--offline --no-daemon", False, id="offline-uncached"
+            "offline", False, "--offline --daemon", False, id="offline-uncached"
         ),
-        pytest.param("online", False, "--no-daemon", False, id="online"),
+        pytest.param("online", False, "--daemon", False, id="online"),
     ),
 )
 def test_add_gradle(mode, use_cache, flags, cached):

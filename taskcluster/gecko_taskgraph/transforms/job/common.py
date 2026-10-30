@@ -247,7 +247,7 @@ def add_tooltool(config, job, taskdesc, internal=False):
 
 def add_gradle(config, job, taskdesc, mode):
     gradle_user_home = "{workdir}/gradle-user-home".format(**job["run"])
-    flags = ["--no-daemon"]
+    flags = ["--daemon"]
     if mode == "offline":
         flags.insert(0, "--offline")
     taskdesc["worker"].setdefault("env", {}).update({

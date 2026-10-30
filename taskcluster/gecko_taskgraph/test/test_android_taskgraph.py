@@ -56,7 +56,7 @@ def test_gradlew_uploads_build_metrics(config, monkeypatch):
     worker = taskdesc["worker"]
     assert worker["env"]["GRADLEW_ARGS"] == "clean assembleDebug"
     assert worker["env"]["BUILD_METRICS_DIR"] == job.BUILD_METRICS_DIR
-    assert worker["env"]["GRADLE_FLAGS"] == "--offline --no-daemon"
+    assert worker["env"]["GRADLE_FLAGS"] == "--offline --daemon"
     assert worker["env"]["GRADLE_USER_HOME"] == "/builds/worker/gradle-user-home"
     assert {
         "type": "directory",
