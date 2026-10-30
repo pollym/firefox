@@ -252,6 +252,8 @@
     <string name="pref_key_customization_category_toolbar_layout" translatable="false">pref_key_customization_category_toolbar_layout</string>
     <string name="pref_key_customization_category_app_icon" translatable="false">pref_key_customization_category_app_icon</string>
     <string name="pref_key_customization_category_toolbar_shortcut" translatable="false">pref_key_customization_category_toolbar_shortcut</string>
+    <string name="pref_key_customization_category_menu" translatable="false">pref_key_customization_category_menu</string>
+    <string name="pref_key_customize_menu" translatable="false">pref_key_customize_menu</string>
     <string name="pref_key_toolbar_simple_shortcut" translatable="false">pref_key_toolbar_simple_shortcut</string>
     <string name="pref_key_toolbar_simple_no_shortcut" translatable="false">pref_key_toolbar_simple_no_shortcut</string>
     <string name="pref_key_toolbar_expanded_shortcut" translatable="false">pref_key_toolbar_expanded_shortcut</string>

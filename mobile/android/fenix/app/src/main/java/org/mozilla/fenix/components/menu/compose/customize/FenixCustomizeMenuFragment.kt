@@ -8,9 +8,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
 import androidx.fragment.compose.content
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
@@ -19,8 +16,8 @@ import mozilla.components.compose.menu.CustomizeMenuFragment
 import mozilla.components.compose.menu.store.MenuState
 import mozilla.components.compose.menu.store.MenuStore
 import mozilla.components.compose.menu.ui.customize.CustomizeMenuContent
-import mozilla.components.compose.menu.ui.customize.CustomizeMenuTopAppBar
 import mozilla.components.feature.automotive.isAndroidAutomotiveAvailable
+import org.mozilla.fenix.R
 import org.mozilla.fenix.components.menu.DefaultMenuHost
 import org.mozilla.fenix.components.menu.MenuAccessPoint
 import org.mozilla.fenix.components.menu.MenuBuilder
@@ -31,14 +28,21 @@ import org.mozilla.fenix.components.menu.MenuItemsRegistry
 import org.mozilla.fenix.components.menu.MenuTarget
 import org.mozilla.fenix.components.menu.middleware.MenuMiddleware
 import org.mozilla.fenix.components.menu.middleware.MenuTelemetryMiddleware
+import org.mozilla.fenix.e2e.SystemInsetsPaddedFragment
 import org.mozilla.fenix.ext.openSetDefaultBrowserOption
 import org.mozilla.fenix.ext.requireComponents
+import org.mozilla.fenix.ext.showToolbar
 import org.mozilla.fenix.theme.FirefoxTheme
 import org.mozilla.fenix.translations.TranslationsEnabledSettings
 
 /** Fenix implementation of [CustomizeMenuFragment]. */
-class FenixCustomizeMenuFragment : CustomizeMenuFragment() {
+class FenixCustomizeMenuFragment : CustomizeMenuFragment(), SystemInsetsPaddedFragment {
     override val menuStore: MenuStore by lazy { buildMenuStore() }
+
+    override fun onResume() {
+        super.onResume()
+        showToolbar(getString(R.string.customize_menu))
+    }
 
     private fun buildMenuStore(): MenuStore {
         val menuItemsRegistry = buildMenuItemsRegistry()
@@ -108,16 +112,7 @@ class FenixCustomizeMenuFragment : CustomizeMenuFragment() {
         savedInstanceState: Bundle?,
     ): View = content {
         FirefoxTheme {
-            Scaffold(
-                topBar = {
-                    CustomizeMenuTopAppBar(onNavigateBack = { findNavController().popBackStack() })
-                }
-            ) { paddingValues ->
-                CustomizeMenuContent(
-                    menuStore = menuStore,
-                    modifier = Modifier.padding(paddingValues),
-                )
-            }
+            CustomizeMenuContent(menuStore = menuStore)
         }
     }
 }
