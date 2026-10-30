@@ -1362,19 +1362,8 @@ void BrowsingContext::DeactivateDocuments(
   });
 }
 
-static void GetSubframeReactivationData(
-    BrowsingContext* /*aBrowsingContext*/,
-    Maybe<SessionHistoryInfo>& /*aReactivatedEntry*/,
-    nsTArray<SessionHistoryInfo>& /*aNewSHEs*/,
-    const Maybe<PreviousSessionHistoryInfo>& /*aPreviousEntryForActivation*/) {
-  // See bug 1991680
-  MOZ_LOG_FMT(gNavigationAPILog, LogLevel::Debug,
-              "We currently don't know how to reactivate subframes");
-}
-
 void BrowsingContext::ReactivateDocuments(
-    const Maybe<SessionHistoryInfo>& aReactivatedEntry,
-    const nsTArray<SessionHistoryInfo>& aNewSHEs,
+    const nsTArray<NavigationReactivationData>& aReactivationData,
     const Maybe<PreviousSessionHistoryInfo>& aPreviousEntryForActivation) {
   UpdateCurrentTopByBrowserId(this);
   PreOrderWalk(
@@ -1392,16 +1381,14 @@ void BrowsingContext::ReactivateDocuments(
         // We need to restore our navigation object state before calling
         // pageshow. This is ok, since we will fire any
         // NavigationHistoryEntry.dispose events async.
-        if (aContext->IsTop()) {
-          aContext->UpdateForReactivation(aReactivatedEntry, aNewSHEs,
-                                          aPreviousEntryForActivation);
-        } else {
-          Maybe<SessionHistoryInfo> reactivatedEntry;
-          nsTArray<SessionHistoryInfo> newSHEs;
-          GetSubframeReactivationData(aContext, reactivatedEntry, newSHEs,
-                                      aPreviousEntryForActivation);
-          aContext->UpdateForReactivation(reactivatedEntry, newSHEs,
-                                          aPreviousEntryForActivation);
+        for (auto& data : aReactivationData) {
+          if (data.context().ContextId() == aContext->Id()) {
+            aContext->UpdateForReactivation(
+                Some(data.reactivatedEntry()), data.newSHEs(),
+                aContext->IsTop() ? aPreviousEntryForActivation
+                                  : Maybe<PreviousSessionHistoryInfo>());
+            break;
+          }
         }
       });
 

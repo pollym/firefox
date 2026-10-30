@@ -800,8 +800,7 @@ class ContentChild final : public PContentChild,
   MOZ_CAN_RUN_SCRIPT_BOUNDARY
   mozilla::ipc::IPCResult RecvReactivateDocuments(
       const MaybeDiscarded<BrowsingContext>& aContext,
-      const Maybe<SessionHistoryInfo>& aReactivatedEntry,
-      const nsTArray<SessionHistoryInfo>& aNewSHEs,
+      nsTArray<NavigationReactivationData>&& aReactivationData,
       const Maybe<PreviousSessionHistoryInfo>& aPreviousEntryForActivation);
   MOZ_CAN_RUN_SCRIPT_BOUNDARY
   mozilla::ipc::IPCResult RecvFirePageSwap(

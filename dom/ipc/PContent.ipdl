@@ -1094,8 +1094,7 @@ child:
         NavigationType aNavigationType,
         TabId aSnapshotTargetTab) returns (bool captured);
     async ReactivateDocuments(MaybeDiscardedBrowsingContext aContext,
-                              SessionHistoryInfo? aReactivatedEntry,
-                              SessionHistoryInfo[] aNewSHEs,
+                              NavigationReactivationData[] aReactivationData,
                               PreviousSessionHistoryInfo? aPreviousEntryForActivation);
     // Fires pageswap without a view transition, for a navigation that does not
     // use BeginOutboundCrossDocumentViewTransition.

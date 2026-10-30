@@ -4753,8 +4753,7 @@ mozilla::ipc::IPCResult ContentChild::RecvFirePageSwap(
 // Perform steps 7 and 9 for the BFCache case.
 mozilla::ipc::IPCResult ContentChild::RecvReactivateDocuments(
     const MaybeDiscarded<BrowsingContext>& aContext,
-    const Maybe<SessionHistoryInfo>& aReactivatedEntry,
-    const nsTArray<SessionHistoryInfo>& aNewSHEs,
+    nsTArray<NavigationReactivationData>&& aReactivationData,
     const Maybe<PreviousSessionHistoryInfo>& aPreviousEntryForActivation) {
   if (aContext.IsNullOrDiscarded()) {
     return IPC_OK();
@@ -4764,7 +4763,7 @@ mozilla::ipc::IPCResult ContentChild::RecvReactivateDocuments(
   MOZ_DIAGNOSTIC_ASSERT(browsingContext->IsInProcess() ||
                         !aPreviousEntryForActivation);
 
-  browsingContext->ReactivateDocuments(aReactivatedEntry, aNewSHEs,
+  browsingContext->ReactivateDocuments(aReactivationData,
                                        aPreviousEntryForActivation);
 
   return IPC_OK();

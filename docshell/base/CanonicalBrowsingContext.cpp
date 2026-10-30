@@ -3174,14 +3174,28 @@ void CanonicalBrowsingContext::DeactivateDocuments(
 void CanonicalBrowsingContext::ReactivateDocuments(
     SessionHistoryEntry* aEntry,
     SessionHistoryEntry* aPreviousEntryForActivation) {
-  nsTArray<SessionHistoryInfo> topNewSHIs;
+  nsTArray<NavigationReactivationData> reactivationData;
 
   if (Navigation::IsAPIEnabled()) {
-    nsSHistory::WalkContiguousEntriesInOrder(
-        aEntry, [&topNewSHIs](auto* aContiguousEntry) {
-          topNewSHIs.AppendElement(aContiguousEntry->Info());
-          return true;
-        });
+    PreOrderWalk([&](BrowsingContext* aContext) {
+      RefPtr<SessionHistoryEntry> activeEntry =
+          aContext == this
+              ? aEntry
+              : aContext->Canonical()->GetActiveSessionHistoryEntry();
+      if (!activeEntry) {
+        return;
+      }
+      nsTArray<SessionHistoryInfo> newSHIs;
+      nsSHistory::WalkContiguousEntriesInOrder(
+          activeEntry, [&newSHIs](auto* aContiguousEntry) {
+            newSHIs.AppendElement(aContiguousEntry->Info());
+            return true;
+          });
+      reactivationData.AppendElement(NavigationReactivationData(
+          aContext,
+          aContext == this ? mActiveEntry->Info() : activeEntry->Info(),
+          std::move(newSHIs)));
+    });
   }
 
   Maybe previousEntryForActivation =
@@ -3192,21 +3206,24 @@ void CanonicalBrowsingContext::ReactivateDocuments(
           }),
           Some(NavigationType::Traverse));
   if (IsInProcess()) {
-    BrowsingContext::ReactivateDocuments(Some(mActiveEntry->Info()), topNewSHIs,
+    BrowsingContext::ReactivateDocuments(reactivationData,
                                          previousEntryForActivation);
 
   } else {
     Group()->EachParent([&](ContentParent* aContentParent) {
-      nsTArray<SessionHistoryInfo> newSHIs;
-      Maybe<SessionHistoryInfo> reactivatedEntry;
+      nsTArray<NavigationReactivationData> processData;
+      for (const auto& data : reactivationData) {
+        if (data.context().get_canonical()->GetContentParent() ==
+            aContentParent) {
+          processData.AppendElement(data);
+        }
+      }
       Maybe<PreviousSessionHistoryInfo> previousEntry;
       if (GetContentParent() == aContentParent && Navigation::IsAPIEnabled()) {
-        newSHIs.AppendElements(std::move(topNewSHIs));
-        reactivatedEntry.emplace(mActiveEntry->Info());
         previousEntry = previousEntryForActivation;
       }
-      (void)aContentParent->SendReactivateDocuments(this, reactivatedEntry,
-                                                    newSHIs, previousEntry);
+      (void)aContentParent->SendReactivateDocuments(this, processData,
+                                                    previousEntry);
     });
 
     UpdateCurrentTopByBrowserId(this);
