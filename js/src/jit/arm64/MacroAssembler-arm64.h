@@ -392,6 +392,10 @@ class MacroAssemblerCompat : public vixl::MacroAssembler {
   }
   template <typename T>
   void storeValue(const Value& val, const T& dest) {
+    if (!val.isGCThing() && val.asRawBits() == 0) {
+      storePtr(ImmWord(0), dest);
+      return;
+    }
     vixl::UseScratchRegisterScope temps(this);
     const Register scratch = temps.AcquireX().asUnsized();
     moveValue(val, ValueOperand(scratch));
