@@ -248,6 +248,9 @@ stylelint:
 
 typescript:
     description: TypeScript checker
+    # This check parallelizes well, so a 30 core worker more than halves its run
+    # time for little extra cost.
+    worker-type: b-linux-docker-large-amd
     treeherder:
         symbol: js(TSC)
         tier: 2
