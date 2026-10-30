@@ -687,6 +687,9 @@ rustfmt:
 
 clippy:
     description: clippy on the Rust code
+    # Review bot waits for every lint, and this one is in the long tail of the
+    # slowest. A 30 core worker shortens it, which shortens the end to end time.
+    worker-type: b-linux-docker-large-amd
     treeherder:
         symbol: rust(clippy)
     run:
