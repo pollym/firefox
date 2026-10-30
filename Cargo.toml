@@ -278,6 +278,7 @@ backtrace = { path = "build/rust/backtrace" }
 
 # Patch bindgen 0.72 to 0.73
 bindgen = { package = "bindgen", path = "build/rust/bindgen" }
+bindgen_0_73 = { package = "bindgen", path = "third_party/rust/bindgen" }
 
 # Locally patch icu_normalizer to take fixes from the 2.3 track
 icu_collator = { path = "third_party/rust/icu_collator" }
