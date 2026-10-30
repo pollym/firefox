@@ -328,7 +328,7 @@ export class AITabPage extends MozLitElement {
       return nothing;
     }
 
-    return html`<aitab-error></aitab-error>`;
+    return html`<aitab-error .status=${this.status}></aitab-error>`;
   }
 
   render() {
