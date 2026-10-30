@@ -128,10 +128,10 @@ void JsepSessionImpl::AddTransceiver(const JsepTransceiver& aTransceiver) {
   MOZ_MTLOG(ML_DEBUG,
             "[" << mName << "]: Adding transceiver " << aTransceiver.GetUuid());
 #ifdef DEBUG
-  if (aTransceiver.GetMediaType() == SdpMediaSection::kApplication) {
+  if (aTransceiver.GetMediaTypeInfo().IsDataChannel()) {
     // Make sure we don't add more than one DataChannel transceiver
     for (const auto& transceiver : mTransceivers) {
-      MOZ_ASSERT(transceiver.GetMediaType() != SdpMediaSection::kApplication);
+      MOZ_ASSERT(!transceiver.GetMediaTypeInfo().IsDataChannel());
     }
   }
 #endif
@@ -142,7 +142,7 @@ void JsepSessionImpl::AddTransceiver(const JsepTransceiver& aTransceiver) {
 void JsepSessionImpl::InitTransceiver(JsepTransceiver& aTransceiver) {
   mLastError.clear();
 
-  if (aTransceiver.GetMediaType() != SdpMediaSection::kApplication) {
+  if (aTransceiver.GetMediaTypeInfo().IsRtp()) {
     // Make sure we have an ssrc. Might already be set.
     aTransceiver.mSendTrack.EnsureSsrcs(mSsrcGenerator, 1U);
     aTransceiver.mSendTrack.SetCNAME(mCNAME);
@@ -316,7 +316,7 @@ nsresult JsepSessionImpl::CreateOfferMsection(const JsepOfferOptions& options,
     }
   }
 
-  if (msection->GetMediaType() != SdpMediaSection::MediaType::kApplication) {
+  if (msection->GetMediaTypeInfo().IsRtp()) {
     // Ditto for extmap-allow-mixed Add to session level instead of media
     // level. Adding more than once is a no-op.
     local->GetAttributeList().SetAttribute(std::make_unique<SdpFlagAttribute>(
@@ -333,7 +333,7 @@ nsresult JsepSessionImpl::CreateOfferMsection(const JsepOfferOptions& options,
   // still be used if negotiated), and writes their fmtp/rtcp-fb. The recv
   // track, which determines the m= line formats, never adds them. Drop the
   // attributes of payload types that did not make it into the m= line.
-  if (msection->GetMediaType() != SdpMediaSection::kApplication) {
+  if (msection->GetMediaTypeInfo().IsRtp()) {
     msection->RemoveUnlistedPayloadTypeAttributes();
   }
 
@@ -426,7 +426,7 @@ JsepSession::Result JsepSessionImpl::CreateOffer(
   if (mAlwaysNegotiateDataChannels) {
     Maybe<JsepTransceiver> dcTransceiver =
         FindTransceiver([](const JsepTransceiver& aTransceiver) {
-          return aTransceiver.GetMediaType() == SdpMediaSection::kApplication;
+          return aTransceiver.GetMediaTypeInfo().IsDataChannel();
         });
 
     if (!dcTransceiver) {
@@ -685,7 +685,10 @@ nsresult JsepSessionImpl::CreateAnswerMsection(
   nsresult rv = mSdpHelper.CopyStickyParams(remoteMsection, &msection);
   NS_ENSURE_SUCCESS(rv, rv);
 
-  if (mSdpHelper.MsectionIsDisabled(remoteMsection)) {
+  if (mSdpHelper.MsectionIsDisabled(remoteMsection) ||
+      remoteMsection.GetMediaTypeInfo().IsUnknown()) {
+    // When media type == unknown we have nothing to negotiate
+    // and so the port must be set to 0
     SdpHelper::DisableMsection(sdp, &msection);
     return NS_OK;
   }
@@ -1368,7 +1371,7 @@ nsresult JsepSessionImpl::MakeNegotiatedTransceiver(
   }
 
   if (transceiver.HasBundleLevel() && recvTrack.GetSsrcs().empty() &&
-      recvTrack.GetMediaType() != SdpMediaSection::kApplication) {
+      recvTrack.GetMediaTypeInfo().IsRtp()) {
     // TODO(bug 1105005): Once we have urn:ietf:params:rtp-hdrext:sdes:mid
     // support, we should only fire this warning if that extension was not
     // negotiated.
@@ -1766,7 +1769,7 @@ Maybe<JsepTransceiver> JsepSessionImpl::GetTransceiverForLocal(size_t level) {
   // negotiated yet when the alwaysNegotiateDataChannels flag is set.
   if (mAlwaysNegotiateDataChannels) {
     for (auto& transceiver : mTransceivers) {
-      if (transceiver.GetMediaType() == SdpMediaSection::kApplication &&
+      if (transceiver.GetMediaTypeInfo().IsDataChannel() &&
           transceiver.IsFreeToUse()) {
         transceiver.SetLevel(level);
         return Some(transceiver);
@@ -1777,8 +1780,7 @@ Maybe<JsepTransceiver> JsepSessionImpl::GetTransceiverForLocal(size_t level) {
   // Look for an RTP transceiver (spec requires us to give the lower levels to
   // new RTP transceivers)
   for (auto& transceiver : mTransceivers) {
-    if (transceiver.GetMediaType() != SdpMediaSection::kApplication &&
-        transceiver.IsFreeToUse()) {
+    if (transceiver.GetMediaTypeInfo().IsRtp() && transceiver.IsFreeToUse()) {
       transceiver.SetLevel(level);
       return Some(transceiver);
     }
@@ -1868,7 +1870,8 @@ nsresult JsepSessionImpl::UpdateTransceiversFromRemoteDescription(
       return NS_ERROR_FAILURE;
     }
 
-    if (!mSdpHelper.MsectionIsDisabled(msection)) {
+    if (!mSdpHelper.MsectionIsDisabled(msection) &&
+        !msection.GetMediaTypeInfo().IsUnknown()) {
       if (msection.GetAttributeList().HasAttribute(
               SdpAttribute::kMidAttribute)) {
         transceiver->Associate(msection.GetAttributeList().GetMid());
@@ -1879,6 +1882,9 @@ nsresult JsepSessionImpl::UpdateTransceiversFromRemoteDescription(
         mUsedMids.insert(transceiver->GetMid());
       }
     } else {
+      // Unknown media types get rejected in the answer. Let's treat them as
+      // disabled m-sections here.
+
       // We do not disassociate here, that happens when negotiation completes
       // These things cannot be rolled back.
       transceiver->mTransport.Close();
