@@ -19,6 +19,8 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
   CreditCard: "resource://gre/modules/CreditCard.sys.mjs",
   formAutofillStorage: "resource://autofill/FormAutofillStorage.sys.mjs",
+  FormAutofillPreferences:
+    "resource://autofill/FormAutofillPreferences.sys.mjs",
   OSKeyStore: "resource://gre/modules/OSKeyStore.sys.mjs",
 });
 
@@ -891,6 +893,7 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
 
   static dataType = AutofillDataTypes.CREDIT_CARD;
   static telemetryObject = "capture_doorhanger";
+  static securityCodeToggleSource = "save_prompt";
 
   static spotlightURL = "about:preferences#privacy-credit-card-autofill";
 
@@ -1090,6 +1093,10 @@ export class CreditCardSaveDoorhanger extends AutofillDoorhanger {
       );
       updateLabel();
       this.onSecurityCodeToggled();
+      lazy.FormAutofillPreferences.recordCvvSavingToggled(
+        toggle.pressed,
+        this.constructor.securityCodeToggleSource
+      );
     });
     this.content.appendChild(toggle);
   }
@@ -1207,6 +1214,8 @@ export class CreditCardUpdateDoorhanger extends CreditCardSaveDoorhanger {
  * update content, and updating then keeps the stored security code.
  */
 export class CreditCardSecurityCodeUpdateDoorhanger extends CreditCardUpdateDoorhanger {
+  static securityCodeToggleSource = "update_prompt";
+
   static isNeeded(oldRecord, newRecord) {
     return (
       FormAutofill.isAutofillCreditCardCVVSupported &&

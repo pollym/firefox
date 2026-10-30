@@ -238,11 +238,17 @@ export let FormAutofillStatus = {
   },
 
   /**
-   * Loads the store after startup so the saved card counts reach every
-   * metrics ping. Run from the browser-idle-startup category.
+   * Loads the store after startup so the saved card counts, and whether saving
+   * security codes is on, reach every metrics ping. Run from the
+   * browser-idle-startup category.
    */
   loadStorageOnIdle() {
     if (FormAutofill.isAutofillTypeAvailable(AutofillDataTypes.CREDIT_CARD)) {
+      if (FormAutofill.isAutofillCreditCardCVVSupported) {
+        Glean.formautofillCreditcards.cvvSavingEnabled.set(
+          FormAutofill.isAutofillCreditCardCVVEnabled
+        );
+      }
       return lazy.gFormAutofillStorage.initialize();
     }
     return undefined;
