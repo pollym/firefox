@@ -278,6 +278,7 @@ linux64-android-gradle-dependencies:
             - 'third_party/application-services/**/*.gradle'
             - 'third_party/application-services/.buildconfig-android.yml'
             - 'toolkit/moz.configure'
+            - 'widget/android/moz.build'
         toolchain-artifact: public/build/android-gradle-dependencies.tar.zst
         toolchain-alias: android-gradle-dependencies
     fetches:
@@ -325,6 +326,7 @@ linux64-android-gradle-dependencies-appservices:
             - 'third_party/application-services/**/*.gradle'
             - 'third_party/application-services/.buildconfig-android.yml'
             - 'toolkit/moz.configure'
+            - 'widget/android/moz.build'
         toolchain-artifact: public/build/android-gradle-dependencies.tar.zst
         toolchain-alias: android-gradle-dependencies-appservices
     fetches:
