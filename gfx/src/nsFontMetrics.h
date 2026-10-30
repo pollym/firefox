@@ -238,7 +238,7 @@ class nsFontMetrics final {
   /**
    * Returns the inter-script spacing width for this font, in app units.
    */
-  nscoord InterScriptSpacingWidth(float aAutospaceSize) const;
+  nscoord InterScriptSpacingWidth() const;
 
   /**
    * Returns the font associated with these metrics. The return value
