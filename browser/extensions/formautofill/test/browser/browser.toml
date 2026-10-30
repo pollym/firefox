@@ -107,6 +107,8 @@ skip-if = [
 
 ["browser_form_changes.js"]
 
+["browser_iframe_autofill_cc_csc.js"]
+
 ["browser_iframe_autofill_cc_number.js"]
 
 ["browser_iframe_autofill_sandbox.js"]
