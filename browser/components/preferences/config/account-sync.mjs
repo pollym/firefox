@@ -18,7 +18,6 @@
 
 import { Preferences } from "chrome://global/content/preferences/Preferences.mjs";
 import { SettingGroupManager } from "chrome://browser/content/preferences/config/SettingGroupManager.mjs";
-import { createDefaultBrowserConfig } from "chrome://browser/content/preferences/config/default-browser.mjs";
 
 const { SCOPE_APP_SYNC } = ChromeUtils.importESModule(
   "resource://gre/modules/FxAccountsCommon.sys.mjs"
@@ -841,7 +840,7 @@ let perDeviceSyncEnabled = Services.prefs.getBoolPref(
 );
 
 SettingGroupManager.registerGroups({
-  defaultBrowserSync: createDefaultBrowserConfig({
+  defaultBrowserSync: window.createDefaultBrowserConfig({
     includeIsDefaultPane: false,
     inProgress: true,
     hiddenFromSearch: true,

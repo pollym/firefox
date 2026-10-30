@@ -11,7 +11,6 @@
 
 import { SettingGroupManager } from "chrome://browser/content/preferences/config/SettingGroupManager.mjs";
 import { Preferences } from "chrome://global/content/preferences/Preferences.mjs";
-import { createDefaultBrowserConfig } from "chrome://browser/content/preferences/config/default-browser.mjs";
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
@@ -840,7 +839,7 @@ function setupCustomHomepageGroup(prefWindow) {
 }
 
 SettingGroupManager.registerGroups({
-  defaultBrowserHome: createDefaultBrowserConfig(),
+  defaultBrowserHome: window.createDefaultBrowserConfig(),
   startupHome: window.createStartupConfig(),
   homepage: setupHomepageGroup(window),
   customHomepage: setupCustomHomepageGroup(window),
