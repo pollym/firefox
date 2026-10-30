@@ -614,10 +614,10 @@ add_task(async function test_device_appearance_changes_theme_swatch_colors() {
           "moz-visual-picker-item[value='nova-sun@mozilla.org']"
         );
         let themePreview = sunThemeItem.querySelector(".theme-preview");
-        let initialImage =
-          content.getComputedStyle(themePreview).backgroundImage;
+        let initialColor =
+          content.getComputedStyle(themePreview).backgroundColor;
 
-        Assert.ok(initialImage, "Theme preview should have initial color");
+        Assert.ok(initialColor, "Theme preview should have initial color");
 
         await SpecialPowers.pushPrefEnv({
           set: [["ui.systemUsesDarkTheme", 1]],
@@ -631,14 +631,14 @@ add_task(async function test_device_appearance_changes_theme_swatch_colors() {
         // Wait for the theme preview style to actually update
         await ContentTaskUtils.waitForCondition(
           () =>
-            content.getComputedStyle(themePreview).backgroundImage !==
-            initialImage
+            content.getComputedStyle(themePreview).backgroundColor !==
+            initialColor
         );
 
-        let darkImage = content.getComputedStyle(themePreview).backgroundImage;
+        let darkColor = content.getComputedStyle(themePreview).backgroundColor;
         Assert.notEqual(
-          darkImage,
-          initialImage,
+          darkColor,
+          initialColor,
           "Theme swatch color should change in dark mode"
         );
 
@@ -653,10 +653,10 @@ add_task(async function test_device_appearance_changes_theme_swatch_colors() {
           "Waiting for device appearance to update to light"
         );
 
-        let lightImage = content.getComputedStyle(themePreview).backgroundImage;
+        let lightColor = content.getComputedStyle(themePreview).backgroundColor;
         Assert.equal(
-          lightImage,
-          initialImage,
+          lightColor,
+          initialColor,
           "Theme swatch color should return to original in light mode"
         );
 

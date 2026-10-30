@@ -18,7 +18,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
 
 /**
  * @typedef {object} ThemeColorVariant
- * @property {"gradient"} type - The type of color (only gradient is supported).
+ * @property {"color" | "gradient"} type - Whether the value is a plain CSS color or a gradient.
  * @property {string} value - The CSS string for this variant.
  */
 
@@ -82,10 +82,7 @@ const FIREFOX_THEMES_LIST = [
         type: "gradient",
         value: "linear-gradient(90deg, #F9F5E6 0%, #FDE8B5 60%, #FBCC77 100%)",
       },
-      dark: {
-        type: "gradient",
-        value: "linear-gradient(90deg, #5F3100 0%, #3E1D00 60%, #270F00 100%)",
-      },
+      dark: { type: "color", value: "#270F00" },
     },
     themePreviewColors: {
       light: { text: "#270F00", icons: "#5F3100", activeTabStroke: "#F3A81E" },
@@ -281,6 +278,15 @@ const NOVA_THEMES_PREVIEW_SURFACES = {
 };
 
 /**
+ * @param {ThemeColorVariant} variant
+ * @returns {string} The variant as a CSS <image>, so that it can be used in
+ *   a light-dark() together with a gradient variant.
+ */
+function themeColorVariantAsImage({ type, value }) {
+  return type == "gradient" ? value : `linear-gradient(${value}, ${value})`;
+}
+
+/**
  * Manages the set of Firefox built-in and AMO-hosted themes exposed in the
  * Firefox Themes Picker UI.
  */
@@ -346,10 +352,9 @@ class ThemesList {
     const lightDark = key =>
       `light-dark(${themePreviewColors.light[key]}, ${themePreviewColors.dark[key]})`;
     const params = {
-      "--tabbar-background": `light-dark(
-        ${themePickerColors.light.value},
-        ${themePickerColors.dark.value}
-      )`,
+      "--tabbar-background": `light-dark(${themeColorVariantAsImage(
+        themePickerColors.light
+      )}, ${themeColorVariantAsImage(themePickerColors.dark)})`,
       "--text-color": lightDark("text"),
       "--icon-color": lightDark("icons"),
       "--active-tab-stroke": lightDark("activeTabStroke"),
