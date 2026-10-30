@@ -1865,6 +1865,14 @@ nsresult JsepSessionImpl::UpdateTransceiversFromRemoteDescription(
   for (size_t i = 0; i < remote.GetMediaSectionCount(); ++i) {
     const SdpMediaSection& msection = remote.GetMediaSection(i);
 
+    // A mid in the remote description is in use even when we do not associate
+    // a transceiver with the m= section, which is the case for m= sections
+    // that are disabled or have a media type we do not know. GetNewMid must
+    // not hand that value out to another m= section.
+    if (msection.GetAttributeList().HasAttribute(SdpAttribute::kMidAttribute)) {
+      mUsedMids.insert(msection.GetAttributeList().GetMid());
+    }
+
     Maybe<JsepTransceiver> transceiver(GetTransceiverForRemote(msection));
     if (!transceiver) {
       return NS_ERROR_FAILURE;
