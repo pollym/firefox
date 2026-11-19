@@ -97,6 +97,7 @@ class ProjectPlugin : Plugin<Project> {
         configureUnitTests(project)
         configurePackagingResourcesExcludes(project)
         configureBuildMetadata(project)
+        configureProtobufFieldsKeptCheck(project)
         registerPrintVariantsTask(project)
         configureNativeLibsForTests(project, substs)
     }
@@ -706,6 +707,29 @@ class ProjectPlugin : Plugin<Project> {
                     mappingFile.set(variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE))
                 }
                 variant.sources.assets?.addGeneratedSourceDirectory(task, WriteBuildMetadata::outputDir)
+            }
+        }
+    }
+
+    /**
+     * Checks that R8 leaves the fields of protobuf-lite messages alone in minified application variants.
+     * See [CheckProtobufFieldsKept].
+     */
+    private fun configureProtobufFieldsKeptCheck(project: Project) {
+        project.pluginManager.withPlugin("com.android.application") {
+            val androidComponents = project.extensions.getByType<ApplicationAndroidComponentsExtension>()
+            androidComponents.onVariants(androidComponents.selector().all()) { variant ->
+                if (!variant.isMinifyEnabled) return@onVariants
+                val variantName = variant.name.replaceFirstChar { it.uppercase() }
+                val mapping = variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE)
+                val task = project.tasks.register<CheckProtobufFieldsKept>("check${variantName}ProtobufFieldsKept") {
+                    mappingFile.set(mapping)
+                    // AGP writes R8's usage.txt next to the mapping, but does not publish it as an artifact.
+                    usageFile.set(project.layout.file(mapping.map { it.asFile.resolveSibling("usage.txt") }))
+                }
+                project.tasks.configureEach {
+                    if (name == "assemble$variantName" || name == "bundle$variantName") dependsOn(task)
+                }
             }
         }
     }
